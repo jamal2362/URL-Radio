@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+    <!-- App Name -->
+    <string name="app_name">URL Radio</string>
+
+    <!-- Descriptions -->
+    <string name="descr_app_icon">Appicoon in de vorm van een oude radio</string>
+    <string name="descr_card_settings_button">Instellingen</string>
+    <string name="descr_card_small_edit_button">Bewerken</string>
+    <string name="descr_card_small_play_button">Start/Stop</string>
+    <string name="descr_card_starred_station">Stations met ster</string>
+    <string name="descr_card_station_image">Stationslogo</string>
+    <string name="descr_dialog_edit_place_on_home_screen_icon">Op Home scherm plaatsen</string>
+    <string name="descr_dialog_edit_station_image">Stationslogo</string>
+    <string name="descr_dialog_edit_update_icon">Bijwerken</string>
+    <string name="descr_expanded_player_sleep_timer_cancel_button">Slaapstand annuleren</string>
+    <string name="descr_expanded_player_sleep_timer_remaining_time">Resterende slaapstandtijd</string>
+    <string name="descr_expanded_player_sleep_timer_start_button">Slaapstand starten</string>
+    <string name="descr_player_playback_button">Start/Stop</string>
+    <string name="descr_player_station_image">Stationslogo</string>
+    <string name="descr_station_name_example">Voorbeeld FM</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_button_rename">Hernoemen</string>
+    <string name="dialog_button_save">Sla wijzigingen op</string>
+    <string name="dialog_edit_choose_station_image">Kies</string>
+    <string name="dialog_edit_place_on_home_screen">Plaats op homescherm</string>
+    <string name="dialog_edit_title">Bewerk station</string>
+    <string name="dialog_edit_update_station">Station updaten</string>
+    <string name="dialog_error_message_default">Er is een fout opgetreden</string>
+    <string name="dialog_error_message_no_network">Verbind met internet.</string>
+    <string name="dialog_error_title_no_network">Offline</string>
+    <string name="dialog_find_station_button_add">Voeg toe</string>
+    <string name="dialog_find_station_hint">Naam of streamadres</string>
+    <string name="dialog_find_station_no_results">Geen resultaten gevonden.</string>
+    <string name="dialog_find_station_title">Zoek station</string>
+    <string name="dialog_generic_button_cancel">Annuleer</string>
+    <string name="dialog_generic_button_okay">Oké</string>
+    <string name="dialog_generic_details_button">Toon details</string>
+    <string name="dialog_opml_import_details_default">Er zijn geen details beschikbaar</string>
+    <string name="dialog_rename_station_input_hint">Voer de nieuwe naam in</string>
+    <string name="dialog_yes_no_message_remove_station">Verwijder dit station\?</string>
+    <string name="dialog_yes_no_message_update_collection">Zoek naar veranderingen\?</string>
+    <string name="dialog_yes_no_message_update_station_images">Download meest recente versie van alle stationlogo\'s\?</string>
+    <string name="dialog_yes_no_positive_button_default">Ja</string>
+    <string name="dialog_yes_no_positive_button_remove_station">Verwijder</string>
+    <string name="dialog_yes_no_positive_button_update_collection">Update</string>
+    <string name="dialog_yes_no_positive_button_update_covers">Update</string>
+
+    <!-- Fragment -->
+    <string name="fragment_settings_title">Instellingen</string>
+
+    <!-- Menu Entries -->
+    <string name="menu_icon">Verander icoon</string>
+    <string name="menu_rename">Hernoemen</string>
+    <string name="menu_shortcut">Op Home-scherm plaatsen</string>
+    <string name="menu_update">Station bijwerken</string>
+
+    <!-- Notification -->
+    <string name="notification_now_playing_channel_description">Afspeelknoppen, naam en logo van zender.</string>
+    <string name="notification_now_playing_channel_name">Afspeelbediening</string>
+    <string name="notification_play">Speel af</string>
+    <string name="notification_skip_to_next">Volgende</string>
+    <string name="notification_skip_to_previous">Vorige</string>
+    <string name="notification_stop">Stoppen</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_app_description">Radio-app</string>
+    <string name="onboarding_app_get_started">Begin nu</string>
+    <string name="onboarding_app_import_running">Stations invoeren. Wacht.</string>
+
+    <!-- Player -->
+    <string name="player_sheet_h2_station_metadata">Nu aan het afspelen</string>
+    <string name="player_sheet_h2_stream_url">Streamadres</string>
+
+    <!-- Settings -->
+    <string name="pref_about_title">Over</string>
+    <string name="pref_app_version_summary">Versie</string>
+    <string name="pref_app_version_title">Appversie</string>
+    <string name="pref_general_title">Algemeen</string>
+    <string name="pref_m3u_export_summary">Sla de radiostations op in een M3U-afspeellijstbestand om in andere spelers te importeren.</string>
+    <string name="pref_m3u_export_title">Exporteer M3U</string>
+    <string name="pref_maintenance_title">Onderhoud</string>
+    <string name="pref_report_issue_summary">Meld bugs en stel verbeteringen voor op GitHub.</string>
+    <string name="pref_report_issue_title">Meld probleem</string>
+    <string name="pref_theme_selection_mode_dark">Donkere modus</string>
+    <string name="pref_theme_selection_mode_device_default">Zelfde als apparaat</string>
+    <string name="pref_theme_selection_mode_light">Lichte modus</string>
+    <string name="pref_theme_selection_summary">Huidige thema:</string>
+    <string name="pref_theme_selection_title">Appthema</string>
+    <string name="pref_update_collection_summary">Zoek bijgewerkte audiostreams en nieuwe station logo\'s.</string>
+    <string name="pref_update_collection_title">Update stations</string>
+    <string name="pref_update_station_images_summary">Update de logo\'s van alle stations.</string>
+    <string name="pref_update_station_images_title">Update stationlogo\'s</string>
+
+    <!-- App Shortcuts -->
+    <string name="shortcut_last_station_disabled_message">Snelkoppeling afspelen van laatste station is uitgeschakeld.</string>
+    <string name="shortcut_last_station_long_label">Speel laatste station</string>
+    <string name="shortcut_last_station_short_label">Laatste station</string>
+
+    <!-- Station List -->
+    <string name="station_list_button_add_new_station">Voeg nieuw station toe</string>
+
+    <!-- Toastalert -->
+    <string name="toastalert_no_image_picker">Kan geen afbeelding kiezen. Installeer een galerij applicatie.</string>
+
+    <!-- Toasts -->
+    <string name="toastmessage_copied_to_clipboard">Gekopieerd naar het klembord.</string>
+    <string name="toastmessage_error_download_error">Downloadfout</string>
+    <string name="toastmessage_error_no_station_found">Kan afspelen niet starten. Voeg eerst een radiostation toe.</string>
+    <string name="toastmessage_error_no_station_matches_search">Geen station gevonden dat aan de zoekopdracht voldoet.</string>
+    <string name="toastmessage_error_restart_playback_failed">Kan afspelen niet opnieuw starten.</string>
+    <string name="toastmessage_install_file_helper">Installeer een bestandsbeheerder.</string>
+    <string name="toastmessage_save_m3u">Radiostations opslaan als M3U.</string>
+    <string name="toastmessage_shortcut_not_created">Snelkoppeling niet aangemaakt. Dit apparaat ondersteunt het niet.</string>
+    <string name="toastmessage_sleep_timer_unable_to_start">Eerst afspelen starten.</string>
+    <string name="toastmessage_station_not_valid">Station is ongeldig.</string>
+    <string name="toastmessage_updating_collection">Verzameling van stations updaten.</string>
+    <string name="toastmessage_updating_station_images">Stationlogo\'s aan het updaten.</string>
+    <string name="toastmessage_updating_station">Station aan het updaten.</string>
+</resources>
