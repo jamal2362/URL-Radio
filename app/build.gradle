@@ -47,18 +47,18 @@ dependencies {
     implementation 'com.google.android.material:material:1.3.0'
 
     // Exoplayer //
-    implementation 'com.google.android.exoplayer:exoplayer:2.13.2'
-    implementation 'com.google.android.exoplayer:extension-mediasession:2.13.2'
+    implementation 'com.google.android.exoplayer:exoplayer:2.14.0'
+    implementation 'com.google.android.exoplayer:extension-mediasession:2.14.0'
 
     // Google Stuff //
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'android.arch.work:work-runtime-ktx:2.5.0'
 
     // AndroidX Stuff //
-    implementation 'androidx.activity:activity-ktx:1.2.2'
-    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'androidx.activity:activity-ktx:1.2.3'
+    implementation 'androidx.appcompat:appcompat:1.3.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-    implementation 'androidx.core:core-ktx:1.3.2'
+    implementation 'androidx.core:core-ktx:1.5.0'
     implementation 'androidx.palette:palette-ktx:1.0.0'
     implementation 'androidx.preference:preference-ktx:1.1.1'
     implementation 'androidx.navigation:navigation-fragment-ktx:2.3.5'
