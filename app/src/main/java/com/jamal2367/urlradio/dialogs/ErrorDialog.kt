@@ -22,21 +22,17 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jamal2367.urlradio.R
-import com.jamal2367.urlradio.helpers.LogHelper
 
 /*
  * ErrorDialog class
  */
 class ErrorDialog {
 
-    /* Define log tag */
-    private val TAG: String = LogHelper.makeLogTag(ErrorDialog::class.java)
-
 
     /* Construct and show dialog */
     fun show(context: Context, errorTitle: Int, errorMessage: Int, errorDetails: String = String()) {
         // prepare dialog builder
-        val builder: MaterialAlertDialogBuilder = MaterialAlertDialogBuilder(context, R.style.AlertDialogTheme)
+        val builder = MaterialAlertDialogBuilder(context, R.style.AlertDialogTheme)
 
         // set title
         builder.setTitle(context.getString(errorTitle))
@@ -65,6 +61,9 @@ class ErrorDialog {
                 when (errorDetailsView.visibility) {
                     View.GONE -> errorDetailsView.isVisible = true
                     View.VISIBLE -> errorDetailsView.isGone = true
+                    View.INVISIBLE -> {
+                        TODO()
+                    }
                 }
             }
             // set details text view
@@ -78,10 +77,10 @@ class ErrorDialog {
         errorMessageView.text = context.getString(errorMessage)
 
         // add okay button
-        builder.setPositiveButton(R.string.dialog_generic_button_okay, { _, _ ->
+        builder.setPositiveButton(R.string.dialog_generic_button_okay) { _, _ ->
             // listen for click on okay button
             // do nothing
-        })
+        }
 
         // display error dialog
         builder.show()

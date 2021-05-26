@@ -20,7 +20,6 @@ import android.widget.EditText
 import android.widget.TextView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jamal2367.urlradio.R
-import com.jamal2367.urlradio.helpers.LogHelper
 
 /*
  * RenameStationDialog class
@@ -33,14 +32,11 @@ interface RenameStationListener {
     }
 }
 
-    /* Define log tag */
-    private val TAG = LogHelper.makeLogTag(RenameStationDialog::class.java.simpleName)
-
 
     /* Construct and show dialog */
     fun show(context: Context, stationName: String, stationUuid: String, position: Int) {
         // prepare dialog builder
-        val builder: MaterialAlertDialogBuilder = MaterialAlertDialogBuilder(context, R.style.AlertDialogTheme)
+        val builder = MaterialAlertDialogBuilder(context, R.style.AlertDialogTheme)
 
         // get input field
         val inflater = LayoutInflater.from(context)

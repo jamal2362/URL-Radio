@@ -24,7 +24,6 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.snackbar.Snackbar
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
 
@@ -32,9 +31,6 @@ import com.jamal2367.urlradio.R
  * UiHelper object
  */
 object UiHelper {
-
-    /* Define log tag */
-    private val TAG: String = LogHelper.makeLogTag(UiHelper::class.java)
 
 
     /* Sets layout margins for given view in DP */
@@ -47,32 +43,6 @@ object UiHelper {
             val p = view.layoutParams as ViewGroup.MarginLayoutParams
             p.setMargins(l, t, r, b)
             view.requestLayout()
-        }
-    }
-
-
-    /* Sets layout margins for given view in percent */
-    fun setViewMarginsPercentage(context: Context, view: View, height: Int, width: Int, left: Int = 0, right: Int = 0, top: Int= 0, bottom: Int = 0) {
-        val l: Int = ((width / 100.0f) * left).toInt()
-        val r: Int = ((width / 100.0f) * right).toInt()
-        val t: Int = ((height / 100.0f) * top).toInt()
-        val b: Int = ((height / 100.0f) * bottom).toInt()
-        setViewMargins(context, view, l, r, t, b)
-    }
-
-    /* Displays a simple Snackbar message and anchors it to given view */
-    fun displaySnackbar(contextView: View, anchorView: View, text: Int, requireConfirmation: Boolean) {
-        if (requireConfirmation) {
-            Snackbar.make(contextView, text, Snackbar.LENGTH_INDEFINITE)
-                    .setAnchorView(anchorView)
-                    .setAction(R.string.dialog_generic_button_okay) {
-                        // snackbar ok button has clicked - just dismiss / do nothing
-                    }
-                    .show()
-        } else {
-            Snackbar.make(contextView, text, Snackbar.LENGTH_SHORT)
-                    .setAnchorView(anchorView)
-                    .show()
         }
     }
 

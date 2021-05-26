@@ -38,7 +38,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -85,7 +84,7 @@ class PlayerFragment: Fragment(), CoroutineScope,
     private var playerState: PlayerState = PlayerState()
     private var listLayoutState: Parcelable? = null
     private var tempStationUuid: String = String()
-    private val handler: Handler = Handler()
+    private val handler: Handler = Handler(Looper.getMainLooper())
 
 
     /* Overrides coroutineContext variable */
@@ -112,7 +111,7 @@ class PlayerFragment: Fragment(), CoroutineScope,
 
 
     /* Overrides onCreate from Fragment*/
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
 
         // find views and set them up
         val rootView: View = inflater.inflate(R.layout.fragment_player, container, false)
@@ -258,25 +257,27 @@ class PlayerFragment: Fragment(), CoroutineScope,
             launch {
                 val deferred: Deferred<NetworkHelper.ContentType> = async(Dispatchers.Default) { NetworkHelper.detectContentTypeSuspended(remoteStationLocation) }
                 // wait for result
-                val contentType: String = deferred.await().type.toLowerCase(Locale.getDefault())
+                val contentType: String = deferred.await().type.lowercase(Locale.getDefault())
                 // CASE: playlist detected
-                if (Keys.MIME_TYPES_M3U.contains(contentType) or
-                    Keys.MIME_TYPES_PLS.contains(contentType)) {
-                    // download playlist
-                    DownloadHelper.downloadPlaylists(activity as Context, arrayOf(remoteStationLocation))
-                }
-                // CASE: stream address detected
-                else if (Keys.MIME_TYPES_MPEG.contains(contentType) or
-                         Keys.MIME_TYPES_OGG.contains(contentType) or
-                         Keys.MIME_TYPES_AAC.contains(contentType) or
-                         Keys.MIME_TYPES_HLS.contains(contentType)) {
-                    // create station and add to collection
-                    val newStation: Station = Station(name = remoteStationLocation, streamUris = mutableListOf(remoteStationLocation), streamContent = contentType, modificationDate = GregorianCalendar.getInstance().time)
-                    collection = CollectionHelper.addStation(activity as Context, collection, newStation)
-                }
-                // CASE: invalid address
-                else {
-                    Toast.makeText(activity as Context, R.string.toastmessage_station_not_valid, Toast.LENGTH_LONG).show()
+                when {
+                    Keys.MIME_TYPES_M3U.contains(contentType) or
+                            Keys.MIME_TYPES_PLS.contains(contentType) -> {
+                        // download playlist
+                        DownloadHelper.downloadPlaylists(activity as Context, arrayOf(remoteStationLocation))
+                    }
+                    // CASE: stream address detected
+                    Keys.MIME_TYPES_MPEG.contains(contentType) or
+                            Keys.MIME_TYPES_OGG.contains(contentType) or
+                            Keys.MIME_TYPES_AAC.contains(contentType) or
+                            Keys.MIME_TYPES_HLS.contains(contentType) -> {
+                        // create station and add to collection
+                        val newStation = Station(name = remoteStationLocation, streamUris = mutableListOf(remoteStationLocation), streamContent = contentType, modificationDate = GregorianCalendar.getInstance().time)
+                        collection = CollectionHelper.addStation(activity as Context, collection, newStation)
+                    }
+                    // CASE: invalid address
+                    else -> {
+                        Toast.makeText(activity as Context, R.string.toastmessage_station_not_valid, Toast.LENGTH_LONG).show()
+                    }
                 }
             }
         }
@@ -352,7 +353,7 @@ class PlayerFragment: Fragment(), CoroutineScope,
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 // ask user
                 val adapterPosition: Int = viewHolder.adapterPosition
-                val dialogMessage: String = "${getString(R.string.dialog_yes_no_message_remove_station)}\n\n- ${collection.stations[adapterPosition].name}"
+                val dialogMessage = "${getString(R.string.dialog_yes_no_message_remove_station)}\n\n- ${collection.stations[adapterPosition].name}"
                 YesNoDialog(this@PlayerFragment as YesNoDialog.YesNoDialogListener).show(context = activity as Context, type = Keys.DIALOG_REMOVE_STATION, messageString = dialogMessage, yesButton = R.string.dialog_yes_no_positive_button_remove_station, payload = adapterPosition)
             }
         }
@@ -398,7 +399,6 @@ class PlayerFragment: Fragment(), CoroutineScope,
         // main play/pause button
         layout.playButtonView.setOnClickListener {
             onPlayButtonTapped(playerState.stationUuid, playerState.playbackState)
-            //onPlayButtonTapped(playerState.stationUuid, mediaController.playbackState.state) todo remove
         }
 
         // register a callback to stay in sync
@@ -409,7 +409,7 @@ class PlayerFragment: Fragment(), CoroutineScope,
     /* Sets up the player */
     private fun setupPlayer() {
         layout.togglePlayButton(playerState.playbackState)
-        var station: Station = Station()
+        var station = Station()
         if (playerState.stationUuid.isNotEmpty()) {
             // get station from player state
             station = CollectionHelper.getStation(collection, playerState.stationUuid)
@@ -481,7 +481,6 @@ class PlayerFragment: Fragment(), CoroutineScope,
     /* Handles ACTION_SHOW_PLAYER request from notification */
     private fun handleShowPlayer() {
         LogHelper.i(TAG, "Tap on notification registered.")
-        // todo implement
     }
 
 
@@ -497,14 +496,18 @@ class PlayerFragment: Fragment(), CoroutineScope,
     /* Handles START_PLAYER_SERVICE request from App Shortcut */
     private fun handleStartPlayer() {
         val intent: Intent = (activity as Activity).intent
-        if (intent.hasExtra(Keys.EXTRA_START_LAST_PLAYED_STATION)) {
-            playerController.play(playerState.stationUuid)
-        } else if (intent.hasExtra(Keys.EXTRA_STATION_UUID)) {
-            val uuid: String = intent.getStringExtra(Keys.EXTRA_STATION_UUID) ?: String()
-            playerController.play(uuid)
-        } else if (intent.hasExtra(Keys.EXTRA_STREAM_URI)) {
-            val streamUri: String = intent.getStringExtra(Keys.EXTRA_STREAM_URI) ?: String()
-            playerController.playStreamDirectly(streamUri)
+        when {
+            intent.hasExtra(Keys.EXTRA_START_LAST_PLAYED_STATION) -> {
+                playerController.play(playerState.stationUuid)
+            }
+            intent.hasExtra(Keys.EXTRA_STATION_UUID) -> {
+                val uuid: String = intent.getStringExtra(Keys.EXTRA_STATION_UUID) ?: String()
+                playerController.play(uuid)
+            }
+            intent.hasExtra(Keys.EXTRA_STREAM_URI) -> {
+                val streamUri: String = intent.getStringExtra(Keys.EXTRA_STREAM_URI) ?: String()
+                playerController.playStreamDirectly(streamUri)
+            }
         }
     }
 
@@ -526,7 +529,7 @@ class PlayerFragment: Fragment(), CoroutineScope,
 
     /* Observe view model of collection of stations */
     private fun observeCollectionViewModel() {
-        collectionViewModel.collectionLiveData.observe(this, Observer<Collection> { it ->
+        collectionViewModel.collectionLiveData.observe(this, {
             // update collection
             collection = it
             // updates current station in player views
@@ -542,7 +545,7 @@ class PlayerFragment: Fragment(), CoroutineScope,
             // handle navigation arguments
             handleNavigationArguments()
         })
-        collectionViewModel.collectionSizeLiveData.observe(this, Observer<Int> { it ->
+        collectionViewModel.collectionSizeLiveData.observe(this, {
             // size of collection changed
             CollectionHelper.exportCollectionM3u(activity as Context, collection)
         })
@@ -555,7 +558,7 @@ class PlayerFragment: Fragment(), CoroutineScope,
         val updateStationImages: Boolean = arguments?.getBoolean(Keys.ARG_UPDATE_IMAGES, false) ?: false
         if (updateCollection) {
             arguments?.putBoolean(Keys.ARG_UPDATE_COLLECTION, false)
-            val updateHelper: UpdateHelper = UpdateHelper(activity as Context, collectionAdapter, collection)
+            val updateHelper = UpdateHelper(activity as Context, collectionAdapter, collection)
             updateHelper.updateCollection()
         }
         if (updateStationImages) {
@@ -671,12 +674,14 @@ class PlayerFragment: Fragment(), CoroutineScope,
     /*
      * ResultReceiver: Handles results from commands send to player
      */
-    var resultReceiver: ResultReceiver = object: ResultReceiver(Handler()) {
+    var resultReceiver: ResultReceiver = object: ResultReceiver(Handler(Looper.getMainLooper())) {
         override fun onReceiveResult(resultCode: Int, resultData: Bundle?) {
             when (resultCode) {
                 Keys.RESULT_CODE_PERIODIC_PROGRESS_UPDATE -> {
                     if (resultData != null && resultData.containsKey(Keys.RESULT_DATA_METADATA)) {
-                        layout.updateMetadata(resultData.getStringArrayList(Keys.RESULT_DATA_METADATA) ?: mutableListOf(), station.name, playerState.playbackState)
+                        layout.updateMetadata(
+                            resultData.getStringArrayList(Keys.RESULT_DATA_METADATA) ?: mutableListOf()
+                        )
                     }
                     if (resultData != null && resultData.containsKey(Keys.RESULT_DATA_SLEEP_TIMER_REMAINING)) {
                         layout.updateSleepTimer(activity as Context, resultData.getLong(Keys.RESULT_DATA_SLEEP_TIMER_REMAINING, 0L))

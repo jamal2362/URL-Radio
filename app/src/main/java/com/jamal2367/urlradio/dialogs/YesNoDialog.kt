@@ -31,10 +31,6 @@ class YesNoDialog (private var yesNoDialogListener: YesNoDialogListener) {
     }
 
 
-    /* Define log tag */
-    private val TAG = LogHelper.makeLogTag(YesNoDialog::class.java.simpleName)
-
-
     /* Construct and show dialog - variant: message from string  */
     fun show(context: Context,
              type: Int,
@@ -60,7 +56,7 @@ class YesNoDialog (private var yesNoDialogListener: YesNoDialogListener) {
              payloadString: String = Keys.DIALOG_EMPTY_PAYLOAD_STRING) {
 
         // prepare dialog builder
-        val builder: MaterialAlertDialogBuilder = MaterialAlertDialogBuilder(context, R.style.AlertDialogTheme)
+        val builder = MaterialAlertDialogBuilder(context, R.style.AlertDialogTheme)
 
         // set title and message
         builder.setMessage(messageString)

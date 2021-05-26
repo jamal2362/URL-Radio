@@ -42,35 +42,31 @@ import com.jamal2367.urlradio.helpers.*
  */
 data class LayoutHolder(var rootView: View) {
 
-    /* Define log tag */
-    private val TAG: String = LogHelper.makeLogTag(LayoutHolder::class.java)
-
 
     /* Main class variables */
-    var recyclerView: RecyclerView
+    var recyclerView: RecyclerView = rootView.findViewById(R.id.station_list)
+    var sleepTimerRunningViews: Group = rootView.findViewById(R.id.sleep_timer_running_views)
+    var playButtonView: ImageView = rootView.findViewById(R.id.player_play_button)
+    var sheetSleepTimerStartButtonView: ImageView = rootView.findViewById(R.id.sleep_timer_start_button)
+    var sheetSleepTimerCancelButtonView: ImageView = rootView.findViewById(R.id.sleep_timer_cancel_button)
     val layoutManager: LinearLayoutManager
-    var bottomSheet: ConstraintLayout
-    //private var sheetMetadataViews: Group
-    var sleepTimerRunningViews: Group
-    private var downloadProgressIndicator: ProgressBar
-    private var stationImageView: ImageView
-    private var stationNameView: TextView
-    private var metadataView: TextView
-    var playButtonView: ImageView
-    var bufferingIndicator: ProgressBar
-    private var sheetStreamingLinkHeadline: TextView
-    private var sheetStreamingLinkView: TextView
-    private var sheetMetadataHistoryHeadline: TextView
-    private var sheetMetadataHistoryView: TextView
-    var sheetNextMetadataView: ImageView
-    var sheetPreviousMetadataView: ImageView
-    var sheetSleepTimerStartButtonView: ImageView
-    var sheetSleepTimerCancelButtonView: ImageView
-    private var sheetSleepTimerRemainingTimeView: TextView
-    private var onboardingLayout: ConstraintLayout
-    private var onboardingQuoteViews: Group
-    private var onboardingImportViews: Group
-    private var bottomSheetBehavior: BottomSheetBehavior<ConstraintLayout>
+    private var bottomSheet: ConstraintLayout = rootView.findViewById(R.id.bottom_sheet)
+    private var downloadProgressIndicator: ProgressBar = rootView.findViewById(R.id.download_progress_indicator)
+    private var stationImageView: ImageView = rootView.findViewById(R.id.station_icon)
+    private var stationNameView: TextView = rootView.findViewById(R.id.player_station_name)
+    private var metadataView: TextView = rootView.findViewById(R.id.player_station_metadata)
+    private var bufferingIndicator: ProgressBar = rootView.findViewById(R.id.player_buffering_indicator)
+    private var sheetStreamingLinkHeadline: TextView = rootView.findViewById(R.id.sheet_streaming_link_headline)
+    private var sheetStreamingLinkView: TextView = rootView.findViewById(R.id.sheet_streaming_link)
+    private var sheetMetadataHistoryHeadline: TextView = rootView.findViewById(R.id.sheet_metadata_headline)
+    private var sheetMetadataHistoryView: TextView = rootView.findViewById(R.id.sheet_metadata_history)
+    private var sheetNextMetadataView: ImageView = rootView.findViewById(R.id.sheet_next_metadata_button)
+    private var sheetPreviousMetadataView: ImageView = rootView.findViewById(R.id.sheet_previous_metadata_button)
+    private var sheetSleepTimerRemainingTimeView: TextView = rootView.findViewById(R.id.sleep_timer_remaining_time)
+    private var onboardingLayout: ConstraintLayout = rootView.findViewById(R.id.onboarding_layout)
+    private var onboardingQuoteViews: Group = rootView.findViewById(R.id.onboarding_quote_views)
+    private var onboardingImportViews: Group = rootView.findViewById(R.id.onboarding_import_views)
+    private var bottomSheetBehavior: BottomSheetBehavior<ConstraintLayout> = BottomSheetBehavior.from(bottomSheet)
     private var metadataHistory: MutableList<String>
     private var metadataHistoryPosition: Int
 
@@ -78,29 +74,7 @@ data class LayoutHolder(var rootView: View) {
     /* Init block */
     init {
         // find views
-        recyclerView = rootView.findViewById(R.id.station_list)
-        bottomSheet = rootView.findViewById(R.id.bottom_sheet)
         //sheetMetadataViews = rootView.findViewById(R.id.sheet_metadata_views)
-        sleepTimerRunningViews = rootView.findViewById(R.id.sleep_timer_running_views)
-        downloadProgressIndicator = rootView.findViewById(R.id.download_progress_indicator)
-        stationImageView = rootView.findViewById(R.id.station_icon)
-        stationNameView = rootView.findViewById(R.id.player_station_name)
-        metadataView = rootView.findViewById(R.id.player_station_metadata)
-        playButtonView = rootView.findViewById(R.id.player_play_button)
-        bufferingIndicator = rootView.findViewById(R.id.player_buffering_indicator)
-        sheetStreamingLinkView = rootView.findViewById(R.id.sheet_streaming_link)
-        sheetStreamingLinkHeadline = rootView.findViewById(R.id.sheet_streaming_link_headline)
-        sheetMetadataHistoryHeadline = rootView.findViewById(R.id.sheet_metadata_headline)
-        sheetMetadataHistoryView = rootView.findViewById(R.id.sheet_metadata_history)
-        sheetNextMetadataView = rootView.findViewById(R.id.sheet_next_metadata_button)
-        sheetPreviousMetadataView = rootView.findViewById(R.id.sheet_previous_metadata_button)
-        sheetSleepTimerStartButtonView = rootView.findViewById(R.id.sleep_timer_start_button)
-        sheetSleepTimerCancelButtonView = rootView.findViewById(R.id.sleep_timer_cancel_button)
-        sheetSleepTimerRemainingTimeView = rootView.findViewById(R.id.sleep_timer_remaining_time)
-        onboardingLayout = rootView.findViewById(R.id.onboarding_layout)
-        onboardingQuoteViews = rootView.findViewById(R.id.onboarding_quote_views)
-        onboardingImportViews = rootView.findViewById(R.id.onboarding_import_views)
-        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
         metadataHistory = PreferencesHelper.loadMetadataHistory(rootView.context)
         metadataHistoryPosition = metadataHistory.size - 1
 
@@ -147,11 +121,7 @@ data class LayoutHolder(var rootView: View) {
         }
 
         // toggle buffering indicator
-        if (playbackState == PlaybackStateCompat.STATE_BUFFERING) {
-            bufferingIndicator.isVisible = true
-        } else {
-            bufferingIndicator.isVisible = false
-        }
+        bufferingIndicator.isVisible = playbackState == PlaybackStateCompat.STATE_BUFFERING
 
         // update name
         stationNameView.text = station.name
@@ -185,7 +155,7 @@ data class LayoutHolder(var rootView: View) {
 
 
     /* Updates the metadata views */
-    fun updateMetadata(metadataHistoryList: MutableList<String>, stationName: String, playbackState: Int) {
+    fun updateMetadata(metadataHistoryList: MutableList<String>) {
         if (metadataHistoryList.isNotEmpty()) {
             metadataHistory = metadataHistoryList
             if (metadataHistory.last() != metadataView.text) {
@@ -209,7 +179,7 @@ data class LayoutHolder(var rootView: View) {
                 sleepTimerRunningViews.isVisible = true
                 val sleepTimerTimeRemaining = DateTimeHelper.convertToMinutesAndSeconds(timeRemaining)
                 sheetSleepTimerRemainingTimeView.text = sleepTimerTimeRemaining
-                sheetSleepTimerRemainingTimeView.contentDescription = "${context.getString(R.string.descr_expanded_player_sleep_timer_remaining_time)}: ${sleepTimerTimeRemaining}"            }
+                sheetSleepTimerRemainingTimeView.contentDescription = "${context.getString(R.string.descr_expanded_player_sleep_timer_remaining_time)}: $sleepTimerTimeRemaining"            }
         }
     }
 
@@ -261,14 +231,14 @@ data class LayoutHolder(var rootView: View) {
 
     /* Toggles visibility of the onboarding screen */
     fun toggleOnboarding(context: Context, collectionSize: Int): Boolean {
-        if (collectionSize == 0) {
+        return if (collectionSize == 0) {
             onboardingLayout.isVisible = true
             hidePlayer(context)
-            return true
+            true
         } else {
             onboardingLayout.isGone = true
             showPlayer(context)
-            return false
+            false
         }
     }
 
@@ -330,17 +300,9 @@ data class LayoutHolder(var rootView: View) {
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
         bottomSheetBehavior.addBottomSheetCallback(object: BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(view: View, slideOffset: Float) {
-                if (slideOffset < 0.25f) {
-                    // showPlayerViews()
-                    // todo
-                } else {
-                    // hidePlayerViews()
-                    // todo
-                }
             }
             override fun onStateChanged(view: View, state: Int) {
                 when (state) {
-                    // todo
                     BottomSheetBehavior.STATE_COLLAPSED -> Unit // do nothing
                     BottomSheetBehavior.STATE_DRAGGING -> Unit // do nothing
                     BottomSheetBehavior.STATE_EXPANDED -> Unit // do nothing

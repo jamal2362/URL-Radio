@@ -26,9 +26,6 @@ import com.jamal2367.urlradio.helpers.LogHelper
  */
 class RadioBrowserResultAdapter(private val listener: RadioBrowserResultAdapterListener, var searchResults: Array<RadioBrowserResult>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    /* Define log tag */
-    private val TAG: String = LogHelper.makeLogTag(RadioBrowserResultAdapter::class.java)
-
 
     /* Main class variables */
     private var selectedPosition: Int = RecyclerView.NO_POSITION

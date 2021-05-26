@@ -49,7 +49,7 @@ object DownloadHelper {
         // initialize main class variables, if necessary
         initialize(context)
         // convert array
-        val uris: Array<Uri> = Array<Uri>(playlistUrlStrings.size) { index -> playlistUrlStrings[index].toUri() }
+        val uris: Array<Uri> = Array(playlistUrlStrings.size) { index -> playlistUrlStrings[index].toUri() }
         // enqueue playlists
         enqueueDownload(context, uris, Keys.FILE_TYPE_PLAYLIST)
     }
@@ -126,7 +126,7 @@ object DownloadHelper {
             modificationDate = PreferencesHelper.loadCollectionModificationDate(context)
         }
         if (!this::collection.isInitialized || CollectionHelper.isNewerCollectionAvailable(context, modificationDate)) {
-            collection = FileHelper.readCollection(context) // todo make async
+            collection = FileHelper.readCollection(context)
             modificationDate = PreferencesHelper.loadCollectionModificationDate(context)
         }
         if (!this::downloadManager.isInitialized) {
@@ -152,7 +152,7 @@ object DownloadHelper {
             val scheme: String = uri.scheme ?: String()
             val pathSegments: List<String> = uri.pathSegments
             if (scheme.startsWith("http") && isNotInDownloadQueue(uri.toString()) && pathSegments.isNotEmpty()) {
-                val fileName: String = pathSegments.last() ?: String()
+                val fileName: String = pathSegments.last()
                 val request: DownloadManager.Request = DownloadManager.Request(uri)
                         .setAllowedNetworkTypes(allowedNetworkTypes)
                         .setTitle(fileName)
@@ -195,13 +195,6 @@ object DownloadHelper {
     }
 
 
-    /* Saves collection of radio station to storage */
-    private fun saveCollection(context: Context, m3uExport: Boolean = false) {
-        // save collection (not async) - and store modification date
-        modificationDate = CollectionHelper.saveCollection(context, collection, async = false)
-    }
-
-
     /* Reads station playlist file and adds it to collection */
     private fun addStation(context: Context, localFileUri: Uri, remoteFileLocation: String) {
         // read station playlist
@@ -211,7 +204,7 @@ object DownloadHelper {
             val deferred: Deferred<NetworkHelper.ContentType> = async(Dispatchers.Default) { NetworkHelper.detectContentTypeSuspended(station.getStreamUri()) }
             // wait for result
             val contentType: NetworkHelper.ContentType = deferred.await()
-            LogHelper.e(TAG, "DING $localFileUri $remoteFileLocation ${contentType.type}") // todo remove
+            LogHelper.e(TAG, "DING $localFileUri $remoteFileLocation ${contentType.type}")
             // set content type
             station.streamContent = contentType.type
             // add station and save collection
@@ -253,8 +246,8 @@ object DownloadHelper {
 
     /* Loads active downloads (IntArray) from shared preferences */
     private fun getActiveDownloads(context: Context): ArrayList<Long> {
-        var inactiveDownloadsFound: Boolean = false
-        val activeDownloadsList: ArrayList<Long> = arrayListOf<Long>()
+        var inactiveDownloadsFound = false
+        val activeDownloadsList: ArrayList<Long> = arrayListOf()
         val activeDownloadsString: String = PreferencesHelper.loadActiveDownloads(context)
         val count = activeDownloadsString.split(",").size - 1
         val tokenizer = StringTokenizer(activeDownloadsString, ",")
@@ -272,7 +265,7 @@ object DownloadHelper {
 
     /* Determines the remote file location (the original URL) */
     private fun getRemoteFileLocation(downloadManager: DownloadManager, downloadId: Long): String {
-        var remoteFileLocation: String = ""
+        var remoteFileLocation = ""
         val cursor: Cursor = downloadManager.query(DownloadManager.Query().setFilterById(downloadId))
         if (cursor.count > 0) {
             cursor.moveToFirst()
@@ -284,25 +277,13 @@ object DownloadHelper {
 
     /* Determines the file name for given download id (the original URL) */
     private fun getDownloadFileName(downloadManager: DownloadManager, downloadId: Long): String {
-        var remoteFileLocation: String = ""
+        var remoteFileLocation = ""
         val cursor: Cursor = downloadManager.query(DownloadManager.Query().setFilterById(downloadId))
         if (cursor.count > 0) {
             cursor.moveToFirst()
             remoteFileLocation = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_TITLE))
         }
         return remoteFileLocation
-    }
-
-
-    /* Checks if a given download ID represents a finished download */
-    private fun isDownloadFinished(downloadId: Long): Boolean {
-        var downloadStatus: Int = -1
-        val cursor: Cursor = downloadManager.query(DownloadManager.Query().setFilterById(downloadId))
-        if (cursor.count > 0) {
-            cursor.moveToFirst()
-            downloadStatus = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
-        }
-        return (downloadStatus == DownloadManager.STATUS_SUCCESSFUL)
     }
 
 

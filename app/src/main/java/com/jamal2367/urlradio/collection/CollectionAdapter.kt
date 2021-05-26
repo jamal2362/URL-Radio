@@ -30,7 +30,6 @@ import androidx.core.net.toUri
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DiffUtil
@@ -48,13 +47,9 @@ import com.jamal2367.urlradio.helpers.*
  */
 class CollectionAdapter(private val context: Context, private val collectionAdapterListener: CollectionAdapterListener) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), UpdateHelper.UpdateHelperListener, RenameStationDialog.RenameStationListener, EditStationDialog.EditStationListener {
 
-    /* Define log tag */
-    private val TAG: String = LogHelper.makeLogTag(CollectionAdapter::class.java)
-
 
     /* Main class variables */
     private lateinit var collectionViewModel: CollectionViewModel
-    // private lateinit var collectionAdapterListener: CollectionAdapterListener
     private var collection: Collection = Collection()
 
 
@@ -80,16 +75,16 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
     /* Overrides onCreateViewHolder */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
 
-        when (viewType) {
+        return when (viewType) {
             Keys.VIEW_TYPE_ADD_NEW -> {
                 // get view, put view into holder and return
                 val v = LayoutInflater.from(parent.context).inflate(R.layout.card_add_new_station, parent, false)
-                return AddNewViewHolder(v)
+                AddNewViewHolder(v)
             }
             else -> {
                 // get view, put view into holder and return
                 val v = LayoutInflater.from(parent.context).inflate(R.layout.card_station, parent, false)
-                return StationViewHolder(v)
+                StationViewHolder(v)
             }
         }
     }
@@ -124,7 +119,7 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
                 // set up station views
                 setStarredIcon(stationViewHolder, station)
                 setStationName(stationViewHolder, station, position)
-                setStationImage(stationViewHolder, station, position)
+                setStationImage(stationViewHolder, station)
                 setStationButtons(stationViewHolder, station, position)
             }
         }
@@ -169,12 +164,12 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
 
 
     /* Sets the station name view */
+    @Suppress("DEPRECATION")
     private fun setStationName(stationViewHolder: StationViewHolder, station: Station, position: Int) {
         stationViewHolder.stationNameView.text = station.name
         stationViewHolder.stationNameView.setOnLongClickListener {
             val v = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
             v.vibrate(50)
-            // v.vibrate(VibrationEffect.createOneShot(50, android.os.VibrationEffect.DEFAULT_AMPLITUDE)); // todo check if there is an androidx vibrator
             RenameStationDialog(this).show(context, station.name, station.uuid, position)
             return@setOnLongClickListener true
         }
@@ -197,7 +192,8 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
 
 
     /* Sets the station image view */
-    private fun setStationImage(stationViewHolder: StationViewHolder, station: Station, position: Int) {
+    @Suppress("DEPRECATION")
+    private fun setStationImage(stationViewHolder: StationViewHolder, station: Station) {
         if (station.imageColor != -1) {
             stationViewHolder.stationImageView.setBackgroundColor(station.imageColor)
         }
@@ -206,7 +202,6 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
         stationViewHolder.stationImageView.setOnLongClickListener {
             val v = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
             v.vibrate(50)
-            // v.vibrate(VibrationEffect.createOneShot(50, android.os.VibrationEffect.DEFAULT_AMPLITUDE)); // todo check if there is an androidx vibrator
             collectionAdapterListener.onChangeImageButtonTapped(station.uuid)
             return@setOnLongClickListener true
         }
@@ -214,6 +209,7 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
 
 
     /* Sets up a station's play and edit buttons */
+    @Suppress("DEPRECATION")
     private fun setStationButtons(stationViewHolder: StationViewHolder, station: Station, position: Int) {
         val playbackState: Int = station.playbackState
         when (playbackState) {
@@ -238,23 +234,20 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
         stationViewHolder.playButtonView.setOnLongClickListener {
             val v = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
             v.vibrate(50)
-            // v.vibrate(VibrationEffect.createOneShot(50, android.os.VibrationEffect.DEFAULT_AMPLITUDE)); // todo check if there is an androidx vibrator
             Toast.makeText(context, R.string.toastmessage_updating_station, Toast.LENGTH_SHORT).show()
-            val updateHelper: UpdateHelper = UpdateHelper(context, this, collection)
+            val updateHelper = UpdateHelper(context, this, collection)
             updateHelper.updateStation(station)
             return@setOnLongClickListener true
         }
         stationViewHolder.stationStarredView.setOnLongClickListener {
             val v = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
             v.vibrate(50)
-            // v.vibrate(VibrationEffect.createOneShot(50, android.os.VibrationEffect.DEFAULT_AMPLITUDE)); // todo check if there is an androidx vibrator
             // create shortcut
             ShortcutHelper.placeShortcut(context, station)
             return@setOnLongClickListener true
         }
 
         stationViewHolder.menuButtonView.setOnClickListener {
-            // EditStationDialog(this).show(context, station, position) // Todo
             showStationPopupMenu(it, station.uuid, position)
         }
     }
@@ -277,15 +270,10 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
                     RenameStationDialog(this).show(context, name, stationUuid, position)
                     true
                 }
-//                R.id.menu_delete -> {
-//                    // show delete dialog
-//                    // DialogDelete.show(activity, station)
-//                    true
-//                }
                 R.id.menu_update -> {
                     // update this station
                     Toast.makeText(context, R.string.toastmessage_updating_station, Toast.LENGTH_SHORT).show()
-                    val updateHelper: UpdateHelper = UpdateHelper(context, this, collection)
+                    val updateHelper = UpdateHelper(context, this, collection)
                     updateHelper.updateStation(CollectionHelper.getStation(collection, stationUuid))
                     true
                 }
@@ -311,27 +299,19 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
 
         } else if (holder is StationViewHolder) {
             // get station from position
-            val station = collection.stations[holder.getAdapterPosition()]
-
-            // get reference to StationViewHolder
-            val stationViewHolder = holder
+            collection.stations[holder.getAdapterPosition()]
 
             for (data in payloads) {
                 when (data as Int) {
                     Keys.HOLDER_UPDATE_COVER -> {
-                        // todo implement
                     }
                     Keys.HOLDER_UPDATE_NAME -> {
-                        // todo implement
                     }
                     Keys.HOLDER_UPDATE_PLAYBACK_STATE -> {
-                        // todo implement
                     }
                     Keys.HOLDER_UPDATE_PLAYBACK_PROGRESS -> {
-                        // todo implement
                     }
                     Keys.HOLDER_UPDATE_DOWNLOAD_STATE -> {
-                        // todo implement
                     }
                 }
             }
@@ -341,9 +321,9 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
 
     /* Overrides getItemViewType */
     override fun getItemViewType(position: Int): Int {
-        when (isPositionFooter(position)) {
-            true -> return Keys.VIEW_TYPE_ADD_NEW
-            false -> return Keys.VIEW_TYPE_STATION
+        return when (isPositionFooter(position)) {
+            true -> Keys.VIEW_TYPE_ADD_NEW
+            false -> Keys.VIEW_TYPE_STATION
         }
     }
 
@@ -386,22 +366,6 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
     }
 
 
-//    /* Initiates update of a station's information */ // todo move to CollectionHelper
-//    private fun updateStation(context: Context, station: Station) {
-//        if (station.radioBrowserStationUuid.isNotEmpty()) {
-//            // get updated station from radio browser - results are handled by onRadioBrowserSearchResults
-//            val radioBrowserSearch: RadioBrowserSearch = RadioBrowserSearch(context, this)
-//            radioBrowserSearch.searchStation(context, station.radioBrowserStationUuid, Keys.SEARCH_TYPE_BY_UUID)
-//        } else if (station.remoteStationLocation.isNotEmpty()) {
-//            // download playlist // todo check content type detection is necessary here
-//            DownloadHelper.downloadPlaylists(context, arrayOf(station.remoteStationLocation))
-//        } else {
-//            LogHelper.w(TAG, "Unable to update station: ${station.name}.")
-//        }
-//    }
-
-
-
     /* Determines if position is last */
     private fun isPositionFooter(position: Int): Boolean {
         return position == collection.stations.size
@@ -424,7 +388,7 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
 
     /* Observe view model of station collection*/
     private fun observeCollectionViewModel(owner: LifecycleOwner) {
-        collectionViewModel.collectionLiveData.observe(owner, Observer<Collection> { newCollection ->
+        collectionViewModel.collectionLiveData.observe(owner, { newCollection ->
             updateRecyclerView(collection, newCollection)
         })
     }

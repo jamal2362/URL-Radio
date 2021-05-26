@@ -48,12 +48,11 @@ class RadioBrowserSearch(private var context: Context, private var radioBrowserS
 
         // create queue and request
         requestQueue = Volley.newRequestQueue(context)
-        val requestUrl: String
-        when (searchType) {
+        val requestUrl: String = when (searchType) {
             // CASE: single station search - by radio browser UUID
-            Keys.SEARCH_TYPE_BY_UUID -> requestUrl = "https://${radioBrowserApi}/json/stations/byuuid/${query}"
+            Keys.SEARCH_TYPE_BY_UUID -> "https://${radioBrowserApi}/json/stations/byuuid/${query}"
             // CASE: multiple results search by search term
-            else -> requestUrl = "https://${radioBrowserApi}/json/stations/search?name=${query.replace(" ", "+")}"
+            else -> "https://${radioBrowserApi}/json/stations/search?name=${query.replace(" ", "+")}"
         }
 
         // request data from request URL

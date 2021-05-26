@@ -13,13 +13,9 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.preference.PreferenceManager
 import com.jamal2367.urlradio.helpers.AppThemeHelper
 import com.jamal2367.urlradio.helpers.FileHelper
-import com.jamal2367.urlradio.helpers.LogHelper
 import com.jamal2367.urlradio.helpers.PreferencesHelper
 
 class MainActivity: AppCompatActivity() {
-
-    /* Define log tag */
-    private val TAG: String = LogHelper.makeLogTag(MainActivity::class.java)
 
 
     /* Main class variables */
@@ -64,7 +60,7 @@ class MainActivity: AppCompatActivity() {
     /*
      * Defines the listener for changes in shared preferences
      */
-    private val sharedPreferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
+    private val sharedPreferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
         when (key) {
             Keys.PREF_THEME_SELECTION -> {
                 AppThemeHelper.setTheme(PreferencesHelper.loadThemeSelection(this@MainActivity))

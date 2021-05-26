@@ -19,16 +19,12 @@ import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.os.bundleOf
 import com.jamal2367.urlradio.Keys
-import com.jamal2367.urlradio.helpers.LogHelper
 
 
 /*
  * PlayerController class
  */
 class PlayerController (private val mediaController: MediaControllerCompat) {
-
-    /* Define log tag */
-    private val TAG: String = LogHelper.makeLogTag(PlayerController::class.java)
 
 
     /* Main class variables */
@@ -48,20 +44,9 @@ class PlayerController (private val mediaController: MediaControllerCompat) {
         transportControls.pause()
     }
 
-    /* Skip back 10 seconds */
-    fun skipBack() {
-        transportControls.skipToPrevious()
-    }
-
     /* Skip forward 30 seconds */
-    fun skipForward(episodeDuration: Long) {
+    fun skipForward() {
         transportControls.skipToNext()
-    }
-
-
-    /* Seek to given position */
-    fun seekTo(position: Long) {
-        transportControls.seekTo(position)
     }
 
 

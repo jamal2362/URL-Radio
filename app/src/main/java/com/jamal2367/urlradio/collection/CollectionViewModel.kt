@@ -49,7 +49,7 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
     /* Init constructor */
     init {
         // load collection
-        loadCollection(application)
+        loadCollection()
         // create and register collection changed receiver
         collectionChangedReceiver = createCollectionChangedReceiver()
         LocalBroadcastManager.getInstance(application).registerReceiver(collectionChangedReceiver, IntentFilter(Keys.ACTION_COLLECTION_CHANGED))
@@ -73,7 +73,7 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
                     // check if reload is necessary
                     if (date.after(modificationDateViewModel)) {
                         LogHelper.v(TAG, "CollectionViewModel - reload collection after broadcast received.")
-                        loadCollection(context)
+                        loadCollection()
                     }
                 }
             }
@@ -82,7 +82,7 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
 
 
     /* Reads collection of radio stations from storage using GSON */
-    private fun loadCollection(context: Context) {
+    private fun loadCollection() {
         LogHelper.v(TAG, "Loading collection of stations from storage")
         uiScope.launch {
             // load collection on background thread

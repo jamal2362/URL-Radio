@@ -23,9 +23,6 @@ import com.jamal2367.urlradio.Keys
  */
 class DownloadWorker(context : Context, params : WorkerParameters): Worker(context, params) {
 
-    /* Define log tag */
-    private val TAG: String = LogHelper.makeLogTag(DownloadWorker::class.java)
-
 
     /* Overrides doWork */
     override fun doWork(): Result {
@@ -54,7 +51,7 @@ class DownloadWorker(context : Context, params : WorkerParameters): Worker(conte
             /* add whatever housekeeping is necessary here */
 
             // housekeeping finished - save state
-            // PreferencesHelper.saveHouseKeepingNecessaryState(applicationContext) // TODO uncomment if you need to do housekeeping here
+            // PreferencesHelper.saveHouseKeepingNecessaryState(applicationContext)
         }
     }
 

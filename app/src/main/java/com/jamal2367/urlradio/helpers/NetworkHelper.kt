@@ -16,8 +16,6 @@ package com.jamal2367.urlradio.helpers
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
-import android.net.NetworkCapabilities
-import android.net.NetworkCapabilities.*
 import com.jamal2367.urlradio.Keys
 import java.net.HttpURLConnection
 import java.net.InetAddress
@@ -40,54 +38,6 @@ object NetworkHelper {
     data class ContentType(var type: String = String(), var charset: String = String())
 
 
-    /* Checks if the active network connection is over Wifi */
-    fun isConnectedToWifi(context: Context): Boolean {
-        var result: Boolean = false
-        val connMgr = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val activeNetwork: Network? = connMgr.activeNetwork
-        if (activeNetwork != null) {
-            val capabilities: NetworkCapabilities? = connMgr.getNetworkCapabilities(activeNetwork)
-            if (capabilities != null) {
-                // check if a Wifi connection is active
-                result = capabilities.hasTransport(TRANSPORT_WIFI)
-            }
-        }
-        return result
-    }
-
-
-    /* Checks if the active network connection is over Cellular */
-    fun isConnectedToCellular(context: Context): Boolean {
-        var result: Boolean = false
-        val connMgr = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val activeNetwork: Network? = connMgr.activeNetwork
-        if (activeNetwork != null) {
-            val capabilities: NetworkCapabilities? = connMgr.getNetworkCapabilities(activeNetwork)
-            if (capabilities != null) {
-                // check if a cellular connection is active
-                result = capabilities.hasTransport(TRANSPORT_CELLULAR)
-            }
-        }
-        return result
-    }
-
-
-    /* Checks if the active network connection is over VPN */
-    fun isConnectedToVpn(context: Context): Boolean {
-        var result: Boolean = false
-        val connMgr = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val activeNetwork: Network? = connMgr.activeNetwork
-        if (activeNetwork != null) {
-            val capabilities: NetworkCapabilities? = connMgr.getNetworkCapabilities(activeNetwork)
-            if (capabilities != null) {
-                // check if a VPN connection is active
-                result = capabilities.hasTransport(TRANSPORT_VPN)
-            }
-        }
-        return result
-    }
-
-
     /* Checks if the active network connection is connected to any network */
     fun isConnectedToNetwork(context: Context): Boolean {
         val connMgr = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -99,7 +49,7 @@ object NetworkHelper {
     /* Detects content type (mime type) from given URL string - async using coroutine - use only on separate threat */
     fun detectContentType(urlString: String): ContentType {
         LogHelper.v(TAG, "Determining content type - Thread: ${Thread.currentThread().name}")
-        val contentType: ContentType = ContentType(Keys.MIME_TYPE_UNSUPPORTED, Keys.CHARSET_UNDEFINDED)
+        val contentType = ContentType(Keys.MIME_TYPE_UNSUPPORTED, Keys.CHARSET_UNDEFINDED)
         val connection: HttpURLConnection? = createConnection(urlString)
         if (connection != null) {
             val contentTypeHeader: String = connection.contentType ?: String()
@@ -141,16 +91,16 @@ object NetworkHelper {
 
 
     /* Suspend function: Gets a random radio-browser.info api address - async using coroutine */
+    @Suppress("BlockingMethodInNonBlockingContext")
     suspend fun getRadioBrowserServerSuspended(context: Context): String {
         return suspendCoroutine { cont ->
-            var serverAddress: String
-            try {
+            val serverAddress: String = try {
                 // get all available radio browser servers
                 val serverAddressList: Array<InetAddress> = InetAddress.getAllByName(Keys.RADIO_BROWSER_API_BASE)
                 // select a random address
-                serverAddress = serverAddressList[Random().nextInt(serverAddressList.size)].canonicalHostName
+                serverAddressList[Random().nextInt(serverAddressList.size)].canonicalHostName
             } catch (e: UnknownHostException) {
-                serverAddress = Keys.RADIO_BROWSER_API_DEFAULT
+                Keys.RADIO_BROWSER_API_DEFAULT
             }
             PreferencesHelper.saveRadioBrowserApiAddress(context, serverAddress)
             cont.resume(serverAddress)

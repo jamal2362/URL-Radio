@@ -27,13 +27,8 @@ object Keys {
     const val CURRENT_COLLECTION_CLASS_VERSION_NUMBER: Int = 0
 
     // time values
-    const val UPDATE_REPEAT_INTERVAL: Long = 4L             // every 4 hours
-    const val MINIMUM_TIME_BETWEEN_UPDATES: Long = 180000L  // 3 minutes in milliseconds
     const val SLEEP_TIMER_DURATION: Long = 300000L          // 5 minutes in  milliseconds
     const val SLEEP_TIMER_INTERVAL: Long = 1000L            // 1 second in milliseconds
-
-    // ranges
-    val PLAYBACK_SPEEDS = arrayOf(1.0f, 1.2f, 1.4f, 1.6f, 1.8f, 2.0f)
 
     // notification
     const val NOW_PLAYING_NOTIFICATION_ID: Int = 42
@@ -117,11 +112,9 @@ object Keys {
     // dialog types
     const val DIALOG_UPDATE_COLLECTION: Int = 1
     const val DIALOG_REMOVE_STATION: Int = 2
-    const val DIALOG_DELETE_DOWNLOADS: Int = 3
     const val DIALOG_UPDATE_STATION_IMAGES: Int = 4
 
     // dialog results
-    const val DIALOG_RESULT_DEFAULT: Int = -1
     const val DIALOG_EMPTY_PAYLOAD_STRING: String = ""
     const val DIALOG_EMPTY_PAYLOAD_INT: Int = -1
 
@@ -139,11 +132,9 @@ object Keys {
     const val CHARSET_UNDEFINDED = "undefined"
     const val MIME_TYPE_JPG = "image/jpeg"
     const val MIME_TYPE_PNG = "image/png"
-    const val MIME_TYPE_MPEG = "audio/mpeg"
     const val MIME_TYPE_HLS = "application/vnd.apple.mpegurl.audio"
     const val MIME_TYPE_M3U = "audio/x-mpegurl"
     const val MIME_TYPE_PLS = "audio/x-scpls"
-    const val MIME_TYPE_XML = "text/xml"
     const val MIME_TYPE_OCTET_STREAM = "application/octet-stream"
     const val MIME_TYPE_UNSUPPORTED = "unsupported"
     val MIME_TYPES_M3U = arrayOf("application/mpegurl", "application/x-mpegurl", "audio/mpegurl", "audio/x-mpegurl")
@@ -177,23 +168,19 @@ object Keys {
     const val LOCATION_DEFAULT_STATION_IMAGE: String = "android.resource://com.jamal2367.urlradio/drawable/ic_default_station_image_24dp"
 
     // sizes (in dp)
-    const val SIZE_COVER_NOTIFICATION_LARGE_ICON: Int = 256
     const val SIZE_COVER_LOCK_SCREEN: Int = 320
     const val SIZE_STATION_IMAGE_CARD: Int = 72
     const val SIZE_STATION_IMAGE_MAXIMUM: Int = 640
-    const val SIZE_STATION_IMAGE_LOCK_SCREEN: Int = 320
     const val BOTTOM_SHEET_PEEK_HEIGHT: Int = 72
 
     // default values
     val DEFAULT_DATE: Date = Date(0L)
-    const val DEFAULT_RFC2822_DATE: String = "Thu, 01 Jan 1970 01:00:00 +0100"
     const val EMPTY_STRING_RESOURCE: Int = 0
 
     // requests
     const val REQUEST_LOAD_IMAGE: Int = 1
     const val REQUEST_UPDATE_COLLECTION: Int = 2
     const val REQUEST_SAVE_M3U: Int = 3
-    const val PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE: Int = 23
     const val PERMISSION_REQUEST_IMAGE_PICKER_READ_EXTERNAL_STORAGE = 42
 
     // results
@@ -205,8 +192,5 @@ object Keys {
     const val STATE_THEME_FOLLOW_SYSTEM: String = "stateFollowSystem"
     const val STATE_THEME_LIGHT_MODE: String = "stateLightMode"
     const val STATE_THEME_DARK_MODE: String = "stateDarkMode"
-
-    // unique names
-    const val NAME_PERIODIC_COLLECTION_UPDATE_WORK: String = "PERIODIC_COLLECTION_UPDATE_WORK"
 
 }

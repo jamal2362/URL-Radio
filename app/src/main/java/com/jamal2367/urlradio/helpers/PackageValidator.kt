@@ -191,6 +191,7 @@ class PackageValidator(context: Context, @XmlRes xmlResId: Int) {
      * @return PackageInfo for the package name or null if it's not found.
      */
     @SuppressLint("PackageManagerGetSignatures")
+    @Suppress("DEPRECATION")
     private fun getPackageInfo(callingPackage: String): PackageInfo? =
             packageManager.getPackageInfo(callingPackage,
                     PackageManager.GET_SIGNATURES or PackageManager.GET_PERMISSIONS)
@@ -204,14 +205,15 @@ class PackageValidator(context: Context, @XmlRes xmlResId: Int) {
      * If the app is not found, or if the app does not have exactly one signature, this method
      * returns `null` as the signature.
      */
+    @Suppress("DEPRECATION")
     private fun getSignature(packageInfo: PackageInfo): String? {
         // Security best practices dictate that an app should be signed with exactly one (1)
         // signature. Because of this, if there are multiple signatures, reject it.
-        if (packageInfo.signatures == null || packageInfo.signatures.size != 1) {
-            return null
+        return if (packageInfo.signatures == null || packageInfo.signatures.size != 1) {
+            null
         } else {
             val certificate = packageInfo.signatures[0].toByteArray()
-            return getSignatureSha256(certificate)
+            getSignatureSha256(certificate)
         }
     }
 
@@ -275,7 +277,7 @@ class PackageValidator(context: Context, @XmlRes xmlResId: Int) {
         var eventType = parser.next()
         while (eventType != XmlResourceParser.END_TAG) {
             val isRelease = parser.getAttributeBooleanValue(null, "release", false)
-            val signature = parser.nextText().replace(WHITESPACE_REGEX, "").toLowerCase(Locale.ROOT)
+            val signature = parser.nextText().replace(WHITESPACE_REGEX, "").lowercase(Locale.ROOT)
             callerSignatures += KnownSignature(signature, isRelease)
 
             eventType = parser.next()
@@ -320,14 +322,14 @@ class PackageValidator(context: Context, @XmlRes xmlResId: Int) {
     }
 
     private data class KnownCallerInfo(
-            internal val name: String,
-            internal val packageName: String,
-            internal val signatures: MutableSet<KnownSignature>
+            val name: String,
+            val packageName: String,
+            val signatures: MutableSet<KnownSignature>
     )
 
     private data class KnownSignature(
-            internal val signature: String,
-            internal val release: Boolean
+            val signature: String,
+            val release: Boolean
     )
 
     /**
@@ -335,11 +337,11 @@ class PackageValidator(context: Context, @XmlRes xmlResId: Int) {
      * to see if it's a known caller.
      */
     private data class CallerPackageInfo(
-            internal val name: String,
-            internal val packageName: String,
-            internal val uid: Int,
-            internal val signature: String?,
-            internal val permissions: Set<String>
+            val name: String,
+            val packageName: String,
+            val uid: Int,
+            val signature: String?,
+            val permissions: Set<String>
     )
 }
 

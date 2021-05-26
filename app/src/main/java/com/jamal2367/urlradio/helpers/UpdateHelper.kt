@@ -79,16 +79,20 @@ class UpdateHelper(private val context: Context, private val updateHelperListene
     fun updateCollection() {
         PreferencesHelper.saveLastUpdateCollection(context)
         collection.stations.forEach {station ->
-            if (station.radioBrowserStationUuid.isNotEmpty()) {
-                // increase counter
-                radioBrowserSearchCounter++
-                // request download from radio browser
-                downloadFromRadioBrowser(station.radioBrowserStationUuid)
-            } else if (station.remoteStationLocation.isNotEmpty()) {
-                // add playlist link to list for later download
-                remoteStationLocationsList.add(station.remoteStationLocation)
-            } else {
-                LogHelper.w(TAG, "Unable to update station: ${station.name}.")
+            when {
+                station.radioBrowserStationUuid.isNotEmpty() -> {
+                    // increase counter
+                    radioBrowserSearchCounter++
+                    // request download from radio browser
+                    downloadFromRadioBrowser(station.radioBrowserStationUuid)
+                }
+                station.remoteStationLocation.isNotEmpty() -> {
+                    // add playlist link to list for later download
+                    remoteStationLocationsList.add(station.remoteStationLocation)
+                }
+                else -> {
+                    LogHelper.w(TAG, "Unable to update station: ${station.name}.")
+                }
             }
         }
     }
@@ -96,21 +100,25 @@ class UpdateHelper(private val context: Context, private val updateHelperListene
 
     /* Initiates update of a station's information */
     fun updateStation(station: Station) {
-        if (station.radioBrowserStationUuid.isNotEmpty()) {
-            // request download from radio browser
-            downloadFromRadioBrowser(station.radioBrowserStationUuid)
-        } else if (station.remoteStationLocation.isNotEmpty()) {
-            // direct playlist download
-            DownloadHelper.downloadPlaylists(context, arrayOf(station.remoteStationLocation))
-        } else {
-            LogHelper.w(TAG, "Unable to update station: ${station.name}.")
+        when {
+            station.radioBrowserStationUuid.isNotEmpty() -> {
+                // request download from radio browser
+                downloadFromRadioBrowser(station.radioBrowserStationUuid)
+            }
+            station.remoteStationLocation.isNotEmpty() -> {
+                // direct playlist download
+                DownloadHelper.downloadPlaylists(context, arrayOf(station.remoteStationLocation))
+            }
+            else -> {
+                LogHelper.w(TAG, "Unable to update station: ${station.name}.")
+            }
         }
     }
 
 
     /* Get updated station from radio browser - results are handled by onRadioBrowserSearchResults */
     private fun downloadFromRadioBrowser(radioBrowserStationUuid: String) {
-        val radioBrowserSearch: RadioBrowserSearch = RadioBrowserSearch(context, this)
+        val radioBrowserSearch = RadioBrowserSearch(context, this)
         radioBrowserSearch.searchStation(context, radioBrowserStationUuid, Keys.SEARCH_TYPE_BY_UUID)
     }
 

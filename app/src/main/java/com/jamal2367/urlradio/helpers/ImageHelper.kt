@@ -30,9 +30,6 @@ import java.io.InputStream
  */
 object ImageHelper {
 
-    /* Define log tag */
-    private val TAG: String = LogHelper.makeLogTag(ImageHelper::class.java)
-
     /* Get scaling factor from display density */
     fun getDensityScalingFactor(context: Context): Float {
         return context.resources.displayMetrics.density
@@ -68,16 +65,6 @@ object ImageHelper {
     }
 
 
-    /* Composes foreground bitmap onto background bitmap */
-    private fun composeImages(foreground: Bitmap, background: Bitmap, size: Int, yOffset: Int): Bitmap {
-        val outputImage = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(outputImage)
-        canvas.drawBitmap(background, 0f, 0f, null)
-        canvas.drawBitmap(foreground, createTransformationMatrix(size, yOffset, foreground.height.toFloat(), foreground.width.toFloat(), true), null)
-        return outputImage
-    }
-
-
     /* Creates station image on a square background with the main station image color and option padding for adaptive icons */
     fun createSquareImage(context: Context, bitmap: Bitmap, backgroundColor: Int, size: Int, adaptivePadding: Boolean): Bitmap? {
 
@@ -102,7 +89,12 @@ object ImageHelper {
         // draw input image onto canvas using transformation matrix
         val paint = Paint()
         paint.isFilterBitmap = true
-        imageCanvas.drawBitmap(bitmap, createTransformationMatrix(size, 0, bitmap.height.toFloat(), bitmap.width.toFloat(), adaptivePadding), paint)
+        imageCanvas.drawBitmap(bitmap, createTransformationMatrix(
+            size,
+            bitmap.height.toFloat(),
+            bitmap.width.toFloat(),
+            adaptivePadding
+        ), paint)
         return outputImage
     }
 
@@ -194,7 +186,12 @@ object ImageHelper {
 
 
     /* Creates a transformation matrix with the given size and optional padding  */
-    private fun createTransformationMatrix(size: Int, yOffset: Int, inputImageHeight: Float, inputImageWidth: Float, scaled: Boolean): Matrix {
+    private fun createTransformationMatrix(
+        size: Int,
+        inputImageHeight: Float,
+        inputImageWidth: Float,
+        scaled: Boolean
+    ): Matrix {
         val matrix = Matrix()
 
         // calculate padding
@@ -212,10 +209,10 @@ object ImageHelper {
         if (inputImageWidth >= inputImageHeight) {
             aspectRatio = (size - padding * 2) / inputImageWidth
             xTranslation = 0.0f + padding
-            yTranslation = (size - inputImageHeight * aspectRatio) / 2.0f + yOffset
+            yTranslation = (size - inputImageHeight * aspectRatio) / 2.0f + 0
         } else if (inputImageHeight > inputImageWidth) {
             aspectRatio = (size - padding * 2) / inputImageHeight
-            yTranslation = 0.0f + padding + yOffset
+            yTranslation = 0.0f + padding + 0
             xTranslation = (size - inputImageWidth * aspectRatio) / 2.0f
         }
 

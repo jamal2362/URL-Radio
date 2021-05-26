@@ -25,12 +25,9 @@ import com.jamal2367.urlradio.helpers.CollectionHelper
  */
 class CollectionProvider {
 
-    /* Define log tag */
-    private val TAG = CollectionProvider::class.java.simpleName
-
 
     /* Main class variables */
-    private enum class State { NON_INITIALIZED, INITIALIZING, INITIALIZED }
+    private enum class State { NON_INITIALIZED, INITIALIZED }
     private var currentState = State.NON_INITIALIZED
     val stationListByName: MutableList<MediaBrowserCompat.MediaItem> = mutableListOf()
 
@@ -67,49 +64,9 @@ class CollectionProvider {
 
     /* Get first station as media item */
     fun getFirstStation(): MediaBrowserCompat.MediaItem? {
-        when (isInitialized() && stationListByName.isNotEmpty()) {
-            true -> return stationListByName.first()
-            false -> return null
+        return when (isInitialized() && stationListByName.isNotEmpty()) {
+            true -> stationListByName.first()
+            false -> null
         }
     }
-
-
-    /* Get last station as media item */
-    fun getLastStation(): MediaBrowserCompat.MediaItem? {
-        when (isInitialized() && stationListByName.isNotEmpty()) {
-            true -> return stationListByName.last()
-            false -> return null
-        }
-    }
-
-
-    /* Get next station as media item */
-    fun getNextStation(stationUuid: String): MediaBrowserCompat.MediaItem? {
-        stationListByName.forEachIndexed { index, mediaItem ->
-            if (mediaItem.description.mediaId == stationUuid) {
-                if (index + 1 > stationListByName.size) {
-                    // return next station
-                    return stationListByName[index + 1]
-                }
-            }
-        }
-        // default: return newest (cycle through from oldest)
-        return getFirstStation()
-    }
-
-
-    /* Get previous station as media item */
-    fun getPreviousStation(stationUuid: String): MediaBrowserCompat.MediaItem? {
-        stationListByName.forEachIndexed { index, mediaItem ->
-            if (mediaItem.description.mediaId == stationUuid) {
-                if (index - 1 >= 0) {
-                    // return previous station
-                    return stationListByName[index - 1]
-                }
-            }
-        }
-        // default: return oldest (cycle through from newest)
-        return getLastStation()
-    }
-
 }

@@ -27,9 +27,6 @@ import java.util.*
  */
 object ImportHelper {
 
-    /* Define log tag */
-    private val TAG: String = LogHelper.makeLogTag(ImportHelper::class.java)
-
 
     /* Converts older station of type .m3u  */
     fun convertOldStations(context: Context): Boolean {
@@ -37,7 +34,7 @@ object ImportHelper {
         val oldCollectionFolder: File? = context.getExternalFilesDir(Keys.URLRADIO_LEGACY_FOLDER_COLLECTION)
         if (oldCollectionFolder != null && shouldStartImport(oldCollectionFolder)) {
             GlobalScope.launch {
-                var success: Boolean = false
+                var success = false
                 // start import
                 oldCollectionFolder.listFiles()?.forEach { file ->
                     // look for station files from URLRadio v3
@@ -98,16 +95,16 @@ object ImportHelper {
     /* Gets Uri for station images created by older URLRadio versions */
     private fun getLegacyStationImageFileUri(context: Context, station: Station): String {
         val collectionFolder: File? = context.getExternalFilesDir(Keys.URLRADIO_LEGACY_FOLDER_COLLECTION)
-        if (collectionFolder != null && collectionFolder.exists() && collectionFolder.isDirectory) {
+        return if (collectionFolder != null && collectionFolder.exists() && collectionFolder.isDirectory) {
             val stationNameCleaned: String = station.name.replace(Regex("[:/]"), "_")
             val legacyStationImage = File("$collectionFolder/$stationNameCleaned.png")
             if (legacyStationImage.exists()) {
-                return legacyStationImage.toString()
+                legacyStationImage.toString()
             } else {
-                return Keys.LOCATION_DEFAULT_STATION_IMAGE
+                Keys.LOCATION_DEFAULT_STATION_IMAGE
             }
         } else {
-            return Keys.LOCATION_DEFAULT_STATION_IMAGE
+            Keys.LOCATION_DEFAULT_STATION_IMAGE
         }
     }
 }

@@ -32,22 +32,20 @@ object DateTimeHelper {
 
     /* Converts RFC 2822 string representation of a date to DATE */
     fun convertFromRfc2822(dateString: String): Date {
-        var date: Date = Keys.DEFAULT_DATE
-        try {
+        return try {
             // parse date string using standard pattern
-            date = dateFormat.parse((dateString)) ?: Keys.DEFAULT_DATE
+            dateFormat.parse((dateString)) ?: Keys.DEFAULT_DATE
         } catch (e: Exception) {
             LogHelper.w(TAG, "Unable to parse. Trying an alternative Date format. $e")
             // try alternative parsing patterns
-            date = tryAlternativeRfc2822Parsing(dateString)
+            tryAlternativeRfc2822Parsing(dateString)
         }
-        return date
     }
 
 
     /* Converts a DATE to its RFC 2822 string representation */
     fun convertToRfc2822(date: Date): String {
-        val dateFormat: SimpleDateFormat = SimpleDateFormat(pattern, Locale.ENGLISH)
+        val dateFormat = SimpleDateFormat(pattern, Locale.ENGLISH)
         return dateFormat.format(date)
     }
 
@@ -57,7 +55,7 @@ object DateTimeHelper {
         // convert milliseconds to minutes and seconds
         val minutes: Long = milliseconds / 1000 / 60
         val seconds: Long = milliseconds / 1000 % 60
-        var timeString: String = "${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
+        var timeString = "${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
         if (negativeValue) {
             // add a minus sign if a negative values was requested
             timeString = "-$timeString"

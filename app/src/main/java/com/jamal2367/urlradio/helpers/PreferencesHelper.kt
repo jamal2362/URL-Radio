@@ -56,22 +56,6 @@ object PreferencesHelper {
     }
 
 
-    /* Saves keepDebugLog true or false */
-    fun saveKeepDebugLog(context: Context, keepDebugLog: Boolean = false) {
-        val settings = PreferenceManager.getDefaultSharedPreferences(context)
-        settings.edit {
-        putBoolean(Keys.PREF_KEEP_DEBUG_LOG, keepDebugLog)
-        }
-    }
-
-
-    /* Loads state of playback for player / PlayerService from shared preferences */
-    fun loadPlayerPlaybackState(context: Context): Int {
-        val settings = PreferenceManager.getDefaultSharedPreferences(context)
-        return settings.getInt(Keys.PREF_CURRENT_PLAYBACK_STATE, PlaybackStateCompat.STATE_STOPPED)
-    }
-
-
     /* Saves state of playback for player / PlayerService to shared preferences */
     fun savePlayerPlaybackState(context: Context, playbackState: Int) {
         val settings = PreferenceManager.getDefaultSharedPreferences(context)
@@ -94,14 +78,6 @@ object PreferencesHelper {
         settings.edit {
             putFloat(Keys.PREF_PLAYER_STATE_PLAYBACK_SPEED, playbackSpeed)
         }
-    }
-
-
-    /* Loads last update from shared preferences */
-    fun loadLastUpdateCollection(context: Context): Date {
-        val settings = PreferenceManager.getDefaultSharedPreferences(context)
-        val lastSaveString: String = settings.getString(Keys.PREF_LAST_UPDATE_COLLECTION, "") ?: String()
-        return DateTimeHelper.convertFromRfc2822(lastSaveString)
     }
 
 
@@ -168,7 +144,7 @@ object PreferencesHelper {
     /* Loads state of player user interface from shared preferences */
     fun loadPlayerState(context: Context): PlayerState {
         val settings = PreferenceManager.getDefaultSharedPreferences(context)
-        val playerState: PlayerState = PlayerState()
+        val playerState = PlayerState()
         playerState.stationUuid = settings.getString(Keys.PREF_PLAYER_STATE_STATION_UUID, String()) ?: String()
         playerState.playbackState = settings.getInt(Keys.PREF_PLAYER_STATE_PLAYBACK_STATE, PlaybackStateCompat.STATE_STOPPED)
         playerState.bottomSheetState = settings.getInt(Keys.PREF_PLAYER_STATE_BOTTOM_SHEET_STATE, BottomSheetBehavior.STATE_HIDDEN)

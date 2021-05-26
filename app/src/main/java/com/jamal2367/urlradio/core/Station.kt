@@ -30,7 +30,7 @@ data class Station (@Expose val uuid: String = UUID.randomUUID().toString(),
                     @Expose var starred: Boolean = false,
                     @Expose var name: String = String(),
                     @Expose var nameManuallySet: Boolean = false,
-                    @Expose var streamUris: MutableList<String> = mutableListOf<String>(),
+                    @Expose var streamUris: MutableList<String> = mutableListOf(),
                     @Expose var stream: Int = 0,
                     @Expose var streamContent: String = Keys.MIME_TYPE_UNSUPPORTED,
                     @Expose var homepage: String = String(),
@@ -58,10 +58,10 @@ data class Station (@Expose val uuid: String = UUID.randomUUID().toString(),
 
     /* Getter for currently selected stream */
     fun getStreamUri(): String {
-        if (streamUris.isNotEmpty()) {
-            return streamUris[stream]
+        return if (streamUris.isNotEmpty()) {
+            streamUris[stream]
         } else {
-            return String()
+            String()
         }
     }
 

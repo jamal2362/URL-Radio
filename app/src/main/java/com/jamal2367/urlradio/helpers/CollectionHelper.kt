@@ -45,28 +45,11 @@ object CollectionHelper {
 
 
     /* Checks if station is already in collection */
-    fun isNewStation(collection: Collection, station: Station): Boolean {
-        collection.stations.forEach {
-            if (it.getStreamUri() == station.getStreamUri()) return false
-        }
-        return true
-    }
-
-
-    /* Checks if station is already in collection */
     fun isNewStation(collection: Collection, remoteStationLocation: String): Boolean {
         collection.stations.forEach {
             if (it.remoteStationLocation == remoteStationLocation) return false
         }
         return true
-    }
-
-
-    /* Checks if enough time passed since last update */
-    fun hasEnoughTimePassedSinceLastUpdate(context: Context): Boolean {
-        val lastUpdate: Date = PreferencesHelper.loadLastUpdateCollection(context)
-        val currentDate: Date = Calendar.getInstance().time
-        return currentDate.time - lastUpdate.time  > Keys.MINIMUM_TIME_BETWEEN_UPDATES
     }
 
 
@@ -90,7 +73,7 @@ object CollectionHelper {
             station.name = FileHelper.getFileName(context, localFileUri).substringBeforeLast(".")
         }
         station.remoteStationLocation = remoteFileLocation
-        station.remoteImageLocation = CollectionHelper.getFaviconAddress(remoteFileLocation)
+        station.remoteImageLocation = getFaviconAddress(remoteFileLocation)
         station.modificationDate = GregorianCalendar.getInstance().time
         return station
     }
@@ -119,8 +102,8 @@ object CollectionHelper {
 
         // CASE: Update station retrieved from radio browser
         if (station.radioBrowserStationUuid.isNotEmpty()) {
-            updatedCollection.stations.forEach { it ->
-                if (it.radioBrowserStationUuid.equals(station.radioBrowserStationUuid)) {
+            updatedCollection.stations.forEach {
+                if (it.radioBrowserStationUuid == station.radioBrowserStationUuid) {
                     // update station in collection with values from new station
                     it.streamUris[it.stream] = station.getStreamUri()
                     it.streamContent = station.streamContent
@@ -140,8 +123,8 @@ object CollectionHelper {
 
         // CASE: Update station retrieved via playlist
         else if (station.remoteStationLocation.isNotEmpty()) {
-            updatedCollection.stations.forEach { it ->
-                if (it.remoteStationLocation.equals(station.remoteStationLocation)) {
+            updatedCollection.stations.forEach {
+                if (it.remoteStationLocation == station.remoteStationLocation) {
                     // update stream uri, mime type and station image url
                     it.streamUris[it.stream] = station.getStreamUri()
                     it.streamContent = station.streamContent
@@ -189,7 +172,8 @@ object CollectionHelper {
         collection.stations.forEach { station ->
             // compare image location protocol-agnostic (= without http / https)
             if (station.remoteImageLocation.substringAfter(":") == remoteFileLocation.substringAfter(":")) {
-                station.smallImage = FileHelper.saveStationImage(context, station.uuid, tempImageFileUri.toString(), Keys.SIZE_STATION_IMAGE_CARD, Keys.STATION_IMAGE_FILE).toString()
+                station.smallImage = FileHelper.saveStationImage(context, station.uuid,
+                    tempImageFileUri, Keys.SIZE_STATION_IMAGE_CARD, Keys.STATION_IMAGE_FILE).toString()
                 station.image = FileHelper.saveStationImage(context, station.uuid, tempImageFileUri, Keys.SIZE_STATION_IMAGE_MAXIMUM, Keys.STATION_IMAGE_FILE).toString()
                 station.imageColor = ImageHelper.getMainColor(context, tempImageFileUri)
                 station.imageManuallySet = imageManuallySet
@@ -221,14 +205,14 @@ object CollectionHelper {
     /* Clears an image folder for a given station */
     fun clearImagesFolder(context: Context, station: Station) {
         // clear image folder
-        val imagesFolder: File = File(context.getExternalFilesDir(""), FileHelper.determineDestinationFolderPath(Keys.FILE_TYPE_IMAGE, station.uuid))
+        val imagesFolder = File(context.getExternalFilesDir(""), FileHelper.determineDestinationFolderPath(Keys.FILE_TYPE_IMAGE, station.uuid))
         FileHelper.clearFolder(imagesFolder, 0)
     }
 
 
     /* Deletes Images of a given station */
     fun deleteStationImages(context: Context, station: Station) {
-        val imagesFolder: File = File(context.getExternalFilesDir(""), FileHelper.determineDestinationFolderPath(Keys.FILE_TYPE_IMAGE, station.uuid))
+        val imagesFolder = File(context.getExternalFilesDir(""), FileHelper.determineDestinationFolderPath(Keys.FILE_TYPE_IMAGE, station.uuid))
         FileHelper.clearFolder(imagesFolder, 0, true)
     }
 
@@ -241,10 +225,10 @@ object CollectionHelper {
                 }
         }
         // fallback: return first station
-        if (collection.stations.isNotEmpty()) {
-            return collection.stations.first()
+        return if (collection.stations.isNotEmpty()) {
+            collection.stations.first()
         } else {
-            return Station()
+            Station()
         }
     }
 
@@ -257,10 +241,10 @@ object CollectionHelper {
             }
         }
         // fallback: return first station
-        if (collection.stations.isNotEmpty()) {
-            return collection.stations.first()
+        return if (collection.stations.isNotEmpty()) {
+            collection.stations.first()
         } else {
-            return Station()
+            Station()
         }
     }
 
@@ -269,12 +253,12 @@ object CollectionHelper {
     fun getNextStation(collection: Collection, stationUuid: String): Station {
         val currentStationPosition: Int = getStationPosition(collection, stationUuid)
         LogHelper.d(TAG, "Number of stations: ${collection.stations.size} | current position: $currentStationPosition") // todo remove
-        if (collection.stations.isEmpty() || currentStationPosition == -1) {
-            return Station()
+        return if (collection.stations.isEmpty() || currentStationPosition == -1) {
+            Station()
         } else if (currentStationPosition < collection.stations.size -1) {
-            return collection.stations[currentStationPosition + 1]
+            collection.stations[currentStationPosition + 1]
         } else {
-            return collection.stations.first()
+            collection.stations.first()
         }
     }
 
@@ -283,12 +267,12 @@ object CollectionHelper {
     fun getPreviousStation(collection: Collection, stationUuid: String): Station {
         val currentStationPosition: Int = getStationPosition(collection, stationUuid)
         LogHelper.d(TAG, "Number of stations: ${collection.stations.size} | current position: $currentStationPosition") // todo remove
-        if (collection.stations.isEmpty() || currentStationPosition == -1) {
-            return Station()
+        return if (collection.stations.isEmpty() || currentStationPosition == -1) {
+            Station()
         } else if (currentStationPosition > 0) {
-            return collection.stations[currentStationPosition - 1]
+            collection.stations[currentStationPosition - 1]
         } else {
-            return collection.stations.last()
+            collection.stations.last()
         }
     }
 
@@ -329,7 +313,7 @@ object CollectionHelper {
 
     /* Saves the playback state of a given station */
     fun savePlaybackState(context: Context, collection: Collection, station: Station, playbackState: Int): Collection {
-        collection.stations.forEach { it ->
+        collection.stations.forEach {
             // reset playback state everywhere
             it.playbackState = PlaybackStateCompat.STATE_STOPPED
             // set given playback state at this station
@@ -425,19 +409,6 @@ object CollectionHelper {
     }
 
 
-    /* Creates MediaMetadata for a single station - used in media session*/
-    fun buildStationMediaMetadata(context: Context, station: Station, metadata: String): MediaMetadataCompat {
-        return MediaMetadataCompat.Builder().apply {
-            putString(MediaMetadataCompat.METADATA_KEY_ARTIST, station.name)
-            putString(MediaMetadataCompat.METADATA_KEY_TITLE, metadata)
-            putString(MediaMetadataCompat.METADATA_KEY_ALBUM, context.getString(R.string.app_name))
-            putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI, station.getStreamUri())
-            putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, ImageHelper.getScaledStationImage(context, station.image, Keys.SIZE_COVER_LOCK_SCREEN))
-            //putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI, station.image)
-        }.build()
-    }
-
-
     /* Creates MediaItem for a station - used by collection provider */
     fun buildStationMediaMetaItem(context: Context, station: Station): MediaBrowserCompat.MediaItem {
         val mediaDescriptionBuilder = MediaDescriptionCompat.Builder()
@@ -452,7 +423,7 @@ object CollectionHelper {
     /* Creates description for a single episode - used in MediaSessionConnector */
     fun buildStationMediaDescription(context: Context, station: Station, metadata: String): MediaDescriptionCompat {
         val coverBitmap: Bitmap = ImageHelper.getScaledStationImage(context, station.image, Keys.SIZE_COVER_LOCK_SCREEN)
-        val extras: Bundle = Bundle()
+        val extras = Bundle()
         extras.putParcelable(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, coverBitmap)
         extras.putParcelable(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, coverBitmap)
         return MediaDescriptionCompat.Builder().apply {
@@ -465,22 +436,18 @@ object CollectionHelper {
     }
 
 
-    /* Creates a fallback station - stupid hack for Android Auto compatibility :-/ */
-    fun createFallbackStation(): Station {
-        return Station(name = "KCSB", streamUris = mutableListOf("http://live.kcsb.org:80/KCSB_128"), streamContent = Keys.MIME_TYPE_MPEG)
-    }
-
-
     /* Sorts radio stations by name */
     fun sortCollection(collection: Collection): Collection {
-        collection.stations = collection.stations.sortedWith(compareByDescending<Station> { it.starred }.thenBy { it.name.toLowerCase(Locale.getDefault()) }) as MutableList<Station>
+        collection.stations = collection.stations.sortedWith(compareByDescending<Station> { it.starred }.thenBy { it.name.lowercase(
+            Locale.getDefault()
+        ) }) as MutableList<Station>
         return collection
     }
 
 
     /* Get favicon address */
-    fun getFaviconAddress(urlString: String): String {
-        var faviconAddress: String = String()
+    private fun getFaviconAddress(urlString: String): String {
+        var faviconAddress = String()
         try {
             var host: String = URL(urlString).host
             if (!host.startsWith("www")) {

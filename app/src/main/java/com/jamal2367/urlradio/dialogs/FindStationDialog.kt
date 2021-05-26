@@ -16,13 +16,13 @@ package com.jamal2367.urlradio.dialogs
 import android.app.Activity
 import android.content.Context
 import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.inputmethod.InputMethodManager
 import android.widget.ProgressBar
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.isGone
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -31,7 +31,6 @@ import com.google.android.material.textview.MaterialTextView
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
 import com.jamal2367.urlradio.core.Station
-import com.jamal2367.urlradio.helpers.LogHelper
 import com.jamal2367.urlradio.search.RadioBrowserResult
 import com.jamal2367.urlradio.search.RadioBrowserResultAdapter
 import com.jamal2367.urlradio.search.RadioBrowserSearch
@@ -47,10 +46,6 @@ class FindStationDialog (private var context: Context, private var listener: Fin
         }
     }
 
-    /* Define log tag */
-    private val TAG = LogHelper.makeLogTag(FindStationDialog::class.java.simpleName)
-
-
     /* Main class variables */
     private lateinit var dialog: AlertDialog
     private lateinit var stationSearchBoxView: SearchView
@@ -60,7 +55,7 @@ class FindStationDialog (private var context: Context, private var listener: Fin
     private lateinit var searchResultAdapter: RadioBrowserResultAdapter
     private lateinit var radioBrowserSearch: RadioBrowserSearch
     private var currentSearchString: String = String()
-    private val handler: Handler = Handler()
+    private val handler: Handler = Handler(Looper.getMainLooper())
     private var remoteStationLocation: String = String()
     private var station: Station = Station()
 
@@ -94,7 +89,7 @@ class FindStationDialog (private var context: Context, private var listener: Fin
         radioBrowserSearch = RadioBrowserSearch(context, this)
 
         // prepare dialog builder
-        val builder: MaterialAlertDialogBuilder = MaterialAlertDialogBuilder(context, R.style.AlertDialogTheme)
+        val builder = MaterialAlertDialogBuilder(context, R.style.AlertDialogTheme)
 
         // set title
         builder.setTitle(R.string.dialog_find_station_title)

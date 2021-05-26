@@ -26,7 +26,7 @@ import java.util.*
 @Keep
 @Parcelize
 data class Collection(@Expose val version: Int = Keys.CURRENT_COLLECTION_CLASS_VERSION_NUMBER,
-                      @Expose var stations: MutableList<Station> = mutableListOf<Station>(),
+                      @Expose var stations: MutableList<Station> = mutableListOf(),
                       @Expose var modificationDate: Date = Date()) : Parcelable {
 
     /* overrides toString method */
@@ -43,7 +43,7 @@ data class Collection(@Expose val version: Int = Keys.CURRENT_COLLECTION_CLASS_V
 
     /* Creates a deep copy of a Collection */
     fun deepCopy(): Collection {
-        val stationsCopy: MutableList<Station> = mutableListOf<Station>()
+        val stationsCopy: MutableList<Station> = mutableListOf()
         stations.forEach { stationsCopy.add(it.deepCopy()) }
         return Collection(version = version,
                           stations = stationsCopy,

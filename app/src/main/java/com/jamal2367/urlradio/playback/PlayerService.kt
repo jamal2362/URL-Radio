@@ -42,7 +42,6 @@ import com.google.android.exoplayer2.analytics.AnalyticsListener
 import com.google.android.exoplayer2.audio.AudioAttributes
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.ext.mediasession.TimelineQueueNavigator
-import com.google.android.exoplayer2.metadata.Metadata
 import com.google.android.exoplayer2.metadata.MetadataOutput
 import com.google.android.exoplayer2.metadata.icy.IcyHeaders
 import com.google.android.exoplayer2.metadata.icy.IcyInfo
@@ -66,7 +65,7 @@ import kotlin.math.min
 /*
  * PlayerService class
  */
-class PlayerService(): MediaBrowserServiceCompat() {
+open class PlayerService : MediaBrowserServiceCompat() {
 
 
     /* Define log tag */
@@ -83,7 +82,7 @@ class PlayerService(): MediaBrowserServiceCompat() {
     private lateinit var backgroundJob: Job
     private lateinit var packageValidator: PackageValidator
     protected lateinit var mediaSession: MediaSessionCompat
-    protected lateinit var mediaSessionConnector: MediaSessionConnector
+    private lateinit var mediaSessionConnector: MediaSessionConnector
     private lateinit var notificationHelper: NotificationHelper
     private lateinit var userAgent: String
     private lateinit var modificationDate: Date
@@ -98,11 +97,12 @@ class PlayerService(): MediaBrowserServiceCompat() {
             .setUsage(C.USAGE_MEDIA)
             .build()
 
+    @Suppress("DEPRECATION")
     private val player: SimpleExoPlayer by lazy {
         SimpleExoPlayer.Builder(this).build().apply {
             setAudioAttributes(attributes, true)
             setHandleAudioBecomingNoisy(true)
-            setRepeatMode(Player.REPEAT_MODE_ALL)
+            repeatMode = Player.REPEAT_MODE_ALL
             addListener(playerListener)
             addMetadataOutput(metadataOutput)
             addAnalyticsListener(analyticsListener)
@@ -123,7 +123,7 @@ class PlayerService(): MediaBrowserServiceCompat() {
         // load modification date of collection
         modificationDate = PreferencesHelper.loadCollectionModificationDate(this)
 
-        // get the package validator // todo can be local?
+        // get the package validator
         packageValidator = PackageValidator(this, R.xml.allowed_media_browser_callers)
 
         // fetch the player state
@@ -146,11 +146,11 @@ class PlayerService(): MediaBrowserServiceCompat() {
                 return CollectionHelper.buildStationMediaDescription(this@PlayerService, station, getCurrentMetadata())
             }
             override fun onSkipToPrevious(player: Player, controlDispatcher: ControlDispatcher) {
-                LogHelper.d(TAG, "onSkipToPrevious called") // todo remove
+                LogHelper.d(TAG, "onSkipToPrevious called")
                 skipToPreviousStation()
             }
             override fun onSkipToNext(player: Player, controlDispatcher: ControlDispatcher) {
-                LogHelper.d(TAG, "onSkipToNext called") // todo remove
+                LogHelper.d(TAG, "onSkipToNext called")
                 skipToNextStation()
             }
         })
@@ -175,14 +175,18 @@ class PlayerService(): MediaBrowserServiceCompat() {
             player.stop()
         }
         if (intent != null && intent.action == Keys.ACTION_START) {
-            if (intent.hasExtra(Keys.EXTRA_STATION_UUID)) {
-                val stationUuid: String = intent.getStringExtra(Keys.EXTRA_STATION_UUID) ?: String()
-                station = CollectionHelper.getStation(collection, stationUuid)
-            } else if(intent.hasExtra(Keys.EXTRA_STREAM_URI)) {
-                val streamUri: String = intent.getStringExtra(Keys.EXTRA_STREAM_URI) ?: String()
-                station = CollectionHelper.getStationWithStreamUri(collection, streamUri)
-            } else {
-                station = CollectionHelper.getStation(collection, playerState.stationUuid)
+            station = when {
+                intent.hasExtra(Keys.EXTRA_STATION_UUID) -> {
+                    val stationUuid: String = intent.getStringExtra(Keys.EXTRA_STATION_UUID) ?: String()
+                    CollectionHelper.getStation(collection, stationUuid)
+                }
+                intent.hasExtra(Keys.EXTRA_STREAM_URI) -> {
+                    val streamUri: String = intent.getStringExtra(Keys.EXTRA_STREAM_URI) ?: String()
+                    CollectionHelper.getStationWithStreamUri(collection, streamUri)
+                }
+                else -> {
+                    CollectionHelper.getStation(collection, playerState.stationUuid)
+                }
             }
             if (station.isValid()) {
                 preparePlayer(true)
@@ -201,6 +205,7 @@ class PlayerService(): MediaBrowserServiceCompat() {
 
 
     /* Overrides onDestroy from Service */
+    @Suppress("DEPRECATION")
     override fun onDestroy() {
         // save playback state
         handlePlaybackChange(PlaybackStateCompat.STATE_STOPPED)
@@ -222,11 +227,10 @@ class PlayerService(): MediaBrowserServiceCompat() {
     /* Updates metadata */
     private fun updateMetadata(metadata: String?) {
         // get metadata string
-        val metadataString: String
-        if (metadata != null && metadata.isNotEmpty()) {
-            metadataString = metadata.substring(0, min(metadata.length, Keys.DEFAULT_MAX_LENGTH_OF_METADATA_ENTRY))
+        val metadataString: String = if (metadata != null && metadata.isNotEmpty()) {
+            metadata.substring(0, min(metadata.length, Keys.DEFAULT_MAX_LENGTH_OF_METADATA_ENTRY))
         } else {
-            metadataString = station.name
+            station.name
         }
         // append metadata to metadata history
         if (metadataHistory.contains(metadataString)) {
@@ -247,7 +251,7 @@ class PlayerService(): MediaBrowserServiceCompat() {
     }
 
 
-    /* Overrides onGetRoot from MediaBrowserService */ // todo: implement a hierarchical structure -> https://github.com/googlesamples/android-UniversalMusicPlayer/blob/47da058112cee0b70442bcd0370c1e46e830c66b/media/src/main/java/com/example/android/uamp/media/library/BrowseTree.kt
+    /* Overrides onGetRoot from MediaBrowserService */
     override fun onGetRoot(clientPackageName: String, clientUid: Int, rootHints: Bundle?): BrowserRoot {
         // Credit: https://github.com/googlesamples/android-UniversalMusicPlayer (->  MusicService)
         // LogHelper.d(TAG, "OnGetRoot: clientPackageName=$clientPackageName; clientUid=$clientUid ; rootHints=$rootHints")
@@ -260,15 +264,15 @@ class PlayerService(): MediaBrowserServiceCompat() {
             return BrowserRoot(Keys.MEDIA_BROWSER_ROOT_EMPTY, null)
         } else {
             // content style extras: see https://developer.android.com/training/cars/media#apply_content_style
-            val CONTENT_STYLE_SUPPORTED = "android.media.browse.CONTENT_STYLE_SUPPORTED"
-            val CONTENT_STYLE_PLAYABLE_HINT = "android.media.browse.CONTENT_STYLE_PLAYABLE_HINT"
-            val CONTENT_STYLE_BROWSABLE_HINT = "android.media.browse.CONTENT_STYLE_BROWSABLE_HINT"
-            val CONTENT_STYLE_LIST_ITEM_HINT_VALUE = 1
-            val CONTENT_STYLE_GRID_ITEM_HINT_VALUE = 2
+            val contenstylesupported = "android.media.browse.CONTENT_STYLE_SUPPORTED"
+            val contenstyleplayablehint = "android.media.browse.CONTENT_STYLE_PLAYABLE_HINT"
+            val contenstylebrowsablehint = "android.media.browse.CONTENT_STYLE_BROWSABLE_HINT"
+            val contenstylelistitemhintvalue = 1
+            val contenstylegriditemhintvalue = 2
             val rootExtras = bundleOf(
-                    CONTENT_STYLE_SUPPORTED to true,
-                    CONTENT_STYLE_BROWSABLE_HINT to CONTENT_STYLE_GRID_ITEM_HINT_VALUE,
-                    CONTENT_STYLE_PLAYABLE_HINT to CONTENT_STYLE_LIST_ITEM_HINT_VALUE
+                contenstylesupported to true,
+                contenstylebrowsablehint to contenstylegriditemhintvalue,
+                contenstyleplayablehint to contenstylelistitemhintvalue
             )
             // check if rootHints contained EXTRA_RECENT - return BrowserRoot with MEDIA_BROWSER_ROOT_RECENT in that case
             val isRecentRequest = rootHints?.getBoolean(EXTRA_RECENT) ?: false
@@ -357,17 +361,19 @@ class PlayerService(): MediaBrowserServiceCompat() {
         val mediaItem: MediaItem = MediaItem.fromUri(station.getStreamUri())
 
         // create DataSource.Factory - produces DataSource instances through which media data is loaded
-        val dataSourceFactory: DataSource.Factory = createDataSourceFactory(this, Util.getUserAgent(this, userAgent), null)
+        val dataSourceFactory: DataSource.Factory = createDataSourceFactory(
+            this,
+            Util.getUserAgent(this, userAgent)
+        )
 
         // create MediaSource
-        val mediaSource: MediaSource
-        if (station.streamContent in Keys.MIME_TYPE_HLS || station.streamContent in Keys.MIME_TYPES_M3U) {
+        val mediaSource: MediaSource = if (station.streamContent in Keys.MIME_TYPE_HLS || station.streamContent in Keys.MIME_TYPES_M3U) {
             // HLS media source
             //Toast.makeText(this, this.getString(R.string.toastmessage_stream_may_not_work), Toast.LENGTH_LONG).show()
-            mediaSource = HlsMediaSource.Factory(dataSourceFactory).createMediaSource(mediaItem)
+            HlsMediaSource.Factory(dataSourceFactory).createMediaSource(mediaItem)
         } else {
             // MPEG or OGG media source
-            mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory).setContinueLoadingCheckIntervalBytes(32).createMediaSource(mediaItem)
+            ProgressiveMediaSource.Factory(dataSourceFactory).setContinueLoadingCheckIntervalBytes(32).createMediaSource(mediaItem)
         }
 
         // set source and prepare player
@@ -387,19 +393,20 @@ class PlayerService(): MediaBrowserServiceCompat() {
 
 
     /* Creates a DataSourceFactor that supports http redirects */
-    private fun createDataSourceFactory(context: Context, userAgent: String, listener: TransferListener?): DefaultDataSourceFactory {
+    @Suppress("DEPRECATION")
+    private fun createDataSourceFactory(context: Context, userAgent: String): DefaultDataSourceFactory {
         // Credit: https://stackoverflow.com/questions/41517440/exoplayer2-how-can-i-make-a-http-301-redirect-work
         // Default parameters, except allowCrossProtocolRedirects is true
         val httpDataSourceFactory = DefaultHttpDataSourceFactory(
                 userAgent,
-                listener,
+                null,
                 DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS,
                 DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS,
                 true /* allowCrossProtocolRedirects */
         )
         return DefaultDataSourceFactory(
                 context,
-                listener,
+                null,
                 httpDataSourceFactory
         )
     }
@@ -448,8 +455,8 @@ class PlayerService(): MediaBrowserServiceCompat() {
                 }
             }
             Keys.MEDIA_BROWSER_ROOT_RECENT -> {
-                LogHelper.w(TAG, "recent station requested.") // todo remove
-                val recentStation = collectionProvider.getFirstStation() // todo change
+                LogHelper.w(TAG, "recent station requested.")
+                val recentStation = collectionProvider.getFirstStation()
                 if (recentStation != null) mediaItems.add(recentStation)
             }
             Keys.MEDIA_BROWSER_ROOT_EMPTY -> {
@@ -468,7 +475,7 @@ class PlayerService(): MediaBrowserServiceCompat() {
         return object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 if (intent.hasExtra(Keys.EXTRA_COLLECTION_MODIFICATION_DATE)) {
-                    val date: Date = Date(intent.getLongExtra(Keys.EXTRA_COLLECTION_MODIFICATION_DATE, 0L))
+                    val date = Date(intent.getLongExtra(Keys.EXTRA_COLLECTION_MODIFICATION_DATE, 0L))
 
                     if (date.after(collection.modificationDate)) {
                         LogHelper.v(TAG, "PlayerService - reload collection after broadcast received.")
@@ -509,13 +516,11 @@ class PlayerService(): MediaBrowserServiceCompat() {
 
     /* Gets the most current metadata string */
     private fun getCurrentMetadata(): String {
-        val metadataString: String
-        if (metadataHistory.isEmpty()) {
-            metadataString = station.name
+        return if (metadataHistory.isEmpty()) {
+            station.name
         } else {
-            metadataString = metadataHistory.last()
+            metadataHistory.last()
         }
-        return metadataString
     }
 
 
@@ -542,7 +547,7 @@ class PlayerService(): MediaBrowserServiceCompat() {
     /*
      * EventListener: Listener for ExoPlayer Events
      */
-    private val playerListener = object : Player.EventListener {
+    private val playerListener = object : Player.Listener {
         override fun onIsPlayingChanged(isPlaying: Boolean){
             if (isPlaying) {
                 // active playback
@@ -608,24 +613,23 @@ class PlayerService(): MediaBrowserServiceCompat() {
     /*
      * MetadataOutput: handles metadata associated with current playback time
      */
-    private val metadataOutput = object : MetadataOutput {
-        override fun onMetadata(metadata: Metadata) {
-            for (i in 0 until metadata.length()) {
-                val entry = metadata[i]
-                // extract IceCast metadata
-                if (entry is IcyInfo) {
-                    val icyInfo: IcyInfo = entry as IcyInfo
+    private val metadataOutput = MetadataOutput { metadata ->
+        for (i in 0 until metadata.length()) {
+            // extract IceCast metadata
+            when (val entry = metadata[i]) {
+                is IcyInfo -> {
+                    val icyInfo: IcyInfo = entry
                     updateMetadata(icyInfo.title)
-                } else if (entry is IcyHeaders) {
-                    val icyHeaders = entry as IcyHeaders
-                    LogHelper.i(TAG, "icyHeaders:" + icyHeaders.name + " - " + icyHeaders.genre)
-                } else {
+                }
+                is IcyHeaders -> {
+                    LogHelper.i(TAG, "icyHeaders:" + entry.name + " - " + entry.genre)
+                }
+                else -> {
                     LogHelper.w(TAG, "Unsupported metadata received (type = ${entry.javaClass.simpleName})")
                     updateMetadata(null)
                 }
-                // TODO implement HLS metadata extraction (Id3Frame / PrivFrame)
-                // https://exoplayer.dev/doc/reference/com/google/android/exoplayer2/metadata/Metadata.Entry.html
             }
+            // https://exoplayer.dev/doc/reference/com/google/android/exoplayer2/metadata/Metadata.Entry.html
         }
     }
     /*
@@ -636,22 +640,21 @@ class PlayerService(): MediaBrowserServiceCompat() {
     /*
      * MediaButtonEventHandler: overrides headphone next/previous button behavior
      */
-    private val buttonEventHandler = object : MediaSessionConnector.MediaButtonEventHandler {
-        override fun onMediaButtonEvent(player: Player, controlDispatcher: ControlDispatcher, mediaButtonEvent: Intent): Boolean {
+    private val buttonEventHandler =
+        MediaSessionConnector.MediaButtonEventHandler { _, _, mediaButtonEvent ->
             val event: KeyEvent? = mediaButtonEvent.getParcelableExtra(Intent.EXTRA_KEY_EVENT)
             when (event?.keyCode) {
                 KeyEvent.KEYCODE_MEDIA_NEXT -> {
                     if (event.action == KeyEvent.ACTION_UP) skipToNextStation()
-                    return true
+                    true
                 }
                 KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {
                     if (event.action == KeyEvent.ACTION_UP) skipToPreviousStation()
-                    return true
+                    true
                 }
-                else -> return false
+                else -> false
             }
         }
-    }
     /*
      * End of declaration
      */
@@ -693,7 +696,7 @@ class PlayerService(): MediaBrowserServiceCompat() {
 
         override fun onPrepareFromMediaId(mediaId: String, playWhenReady: Boolean, extras: Bundle?) {
             // get station and start playback
-            station = CollectionHelper.getStation(collection, mediaId ?: String())
+            station = CollectionHelper.getStation(collection, mediaId)
             preparePlayer(playWhenReady)
         }
 
@@ -713,10 +716,11 @@ class PlayerService(): MediaBrowserServiceCompat() {
             }
             // NORMAL CASE: Try to match podcast name and voice query
             else {
-                val queryLowercase: String = query.toLowerCase(Locale.getDefault())
+                val queryLowercase: String = query.lowercase(Locale.getDefault())
                 collectionProvider.stationListByName.forEach { mediaItem ->
                     // get station name (here -> title)
-                    val stationName: String = mediaItem.description.title.toString().toLowerCase(Locale.getDefault())
+                    val stationName: String = mediaItem.description.title.toString()
+                        .lowercase(Locale.getDefault())
                     // FIRST: try to match the whole query
                     if (stationName == queryLowercase) {
                         // start playback of newest podcast episode
@@ -749,7 +753,7 @@ class PlayerService(): MediaBrowserServiceCompat() {
                     return true
                 }
                 Keys.CMD_REQUEST_PROGRESS_UPDATE -> {
-                    if (cb != null) {
+                    return if (cb != null) {
                         // check if episode has been prepared - assumes that then the player has been prepared as well
                         if (station.isValid()) {
                             val playbackProgressBundle: Bundle = bundleOf(Keys.RESULT_DATA_METADATA to metadataHistory)
@@ -757,12 +761,12 @@ class PlayerService(): MediaBrowserServiceCompat() {
                                 playbackProgressBundle.putLong(Keys.RESULT_DATA_SLEEP_TIMER_REMAINING, sleepTimerTimeRemaining)
                             }
                             cb.send(Keys.RESULT_CODE_PERIODIC_PROGRESS_UPDATE, playbackProgressBundle)
-                            return true
+                            true
                         } else {
-                            return false
+                            false
                         }
                     } else {
-                        return false
+                        false
                     }
                 }
                 Keys.CMD_START_SLEEP_TIMER -> {
@@ -815,7 +819,7 @@ class PlayerService(): MediaBrowserServiceCompat() {
         override fun onAudioSessionIdChanged(eventTime: AnalyticsListener.EventTime, audioSessionId: Int) {
             super.onAudioSessionIdChanged(eventTime, audioSessionId)
             // integrate with system equalizer (AudioFX)
-            val intent: Intent = Intent(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION)
+            val intent = Intent(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION)
             intent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, audioSessionId)
             intent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, packageName)
             sendBroadcast(intent)
