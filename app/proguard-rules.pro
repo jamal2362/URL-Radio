@@ -20,7 +20,10 @@
 # hide the original source file name.
 -renamesourcefileattribute SourceFile
 
-# Preserve the core classes - because they need to be de-/serialized with GSON
+# Preserve the core classes - because they need to be de-/serialized with GSON.
 -keep public class com.jamal2367.urlradio.core.*  { *; }
 -keep public class com.jamal2367.urlradio.playback.PlayerService  { *; }
 -keep public class com.jamal2367.urlradio.search.RadioBrowserResult  { *; }
+
+# Dont warn for this classes.
+-dontwarn org.chromium.net.*
