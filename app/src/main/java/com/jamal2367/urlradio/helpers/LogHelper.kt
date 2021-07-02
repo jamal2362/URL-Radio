@@ -11,12 +11,14 @@
  * http://opensource.org/licenses/MIT
  */
 
+
 package com.jamal2367.urlradio.helpers
 
 import android.content.Context
 import android.util.Log
 import com.jamal2367.urlradio.BuildConfig
 import java.util.*
+
 
 /*
  * LogHelper object
@@ -78,7 +80,7 @@ object LogHelper {
     }
 
     fun save(context: Context, tag: String, t: Throwable?, vararg messages: Any) {
-        if (PreferencesHelper.loadKeepDebugLog(context)) {
+        if (PreferencesHelper.loadKeepDebugLog()) {
             val sb = StringBuilder()
             sb.append(DateTimeHelper.convertToRfc2822(Calendar.getInstance().time))
             sb.append(" | ")
@@ -112,5 +114,24 @@ object LogHelper {
             sb.toString()
         }
         Log.println(level, tag, message)
+
+//        if (Log.isLoggable(tag, level)) {
+//            val message: String
+//            if (t == null && messages != null && messages.size == 1) {
+//                // handle this common case without the extra cost of creating a stringbuffer:
+//                message = messages[0].toString()
+//            } else {
+//                val sb = StringBuilder()
+//                if (messages != null)
+//                    for (m in messages) {
+//                        sb.append(m)
+//                    }
+//                if (t != null) {
+//                    sb.append("\n").append(Log.getStackTraceString(t))
+//                }
+//                message = sb.toString()
+//            }
+//            Log.println(level, tag, message)
+//        }
     }
 }

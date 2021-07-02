@@ -1,7 +1,7 @@
 /*
  * PlayerService.kt
  * Implements the PlayerService class
- * PlayerService is Transistor's foreground service that plays radio station audio
+ * PlayerService is URLRadio's foreground service that plays radio station audio
  *
  * This file is part of
  * URL Radio - Radio App for Android
@@ -10,6 +10,7 @@
  * Licensed under the MIT-License
  * http://opensource.org/licenses/MIT
  */
+
 
 package com.jamal2367.urlradio.playback
 
@@ -61,6 +62,7 @@ import com.jamal2367.urlradio.ui.PlayerState
 import java.util.*
 import kotlin.math.min
 
+
 /*
  * PlayerService class
  */
@@ -90,13 +92,11 @@ open class PlayerService : MediaBrowserServiceCompat() {
     private var sleepTimerTimeRemaining: Long = 0L
     private var playbackRestartCounter: Int = 0
 
-
     private val attributes = AudioAttributes.Builder()
             .setContentType(C.CONTENT_TYPE_MUSIC)
             .setUsage(C.USAGE_MEDIA)
             .build()
 
-    @Suppress("DEPRECATION")
     private val player: SimpleExoPlayer by lazy {
         SimpleExoPlayer.Builder(this).build().apply {
             setAudioAttributes(attributes, true)
@@ -120,16 +120,16 @@ open class PlayerService : MediaBrowserServiceCompat() {
         userAgent = Util.getUserAgent(this, Keys.APPLICATION_NAME)
 
         // load modification date of collection
-        modificationDate = PreferencesHelper.loadCollectionModificationDate(this)
+        modificationDate = PreferencesHelper.loadCollectionModificationDate()
 
         // get the package validator
         packageValidator = PackageValidator(this, R.xml.allowed_media_browser_callers)
 
         // fetch the player state
-        playerState = PreferencesHelper.loadPlayerState(this)
+        playerState = PreferencesHelper.loadPlayerState()
 
         // fetch the metadata history
-        metadataHistory = PreferencesHelper.loadMetadataHistory(this)
+        metadataHistory = PreferencesHelper.loadMetadataHistory()
 
         // create a new MediaSession
         createMediaSession()
@@ -142,7 +142,7 @@ open class PlayerService : MediaBrowserServiceCompat() {
         mediaSessionConnector.setQueueNavigator(object : TimelineQueueNavigator(mediaSession) {
             override fun getMediaDescription(player: Player, windowIndex: Int): MediaDescriptionCompat {
                 // create media description - used in notification
-                return CollectionHelper.buildStationMediaDescription(this@PlayerService, station, getCurrentMetadata())
+                 return CollectionHelper.buildStationMediaDescription(this@PlayerService, station, getCurrentMetadata())
             }
         })
 
@@ -162,6 +162,7 @@ open class PlayerService : MediaBrowserServiceCompat() {
     /* Overrides onStartCommand from Service */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
+        // handle start/stop requests issued via Intent - used for example by the home screen shortcuts
         if (intent != null && intent.action == Keys.ACTION_STOP) {
             player.stop()
         }
@@ -196,7 +197,6 @@ open class PlayerService : MediaBrowserServiceCompat() {
 
 
     /* Overrides onDestroy from Service */
-    @Suppress("DEPRECATION")
     override fun onDestroy() {
         // save playback state
         handlePlaybackChange(PlaybackStateCompat.STATE_STOPPED)
@@ -238,7 +238,7 @@ open class PlayerService : MediaBrowserServiceCompat() {
         mediaSessionConnector.invalidateMediaSessionMetadata()
         notificationHelper.updateNotification()
         // save history
-        PreferencesHelper.saveMetadataHistory(this, metadataHistory)
+        PreferencesHelper.saveMetadataHistory(metadataHistory)
     }
 
 
@@ -331,7 +331,7 @@ open class PlayerService : MediaBrowserServiceCompat() {
         mediaSession = MediaSessionCompat(this, TAG).apply {
             setSessionActivity(sessionActivityPendingIntent)
             isActive = true
-//            setCallback(object : MediaSessionCompat.Callback() { // todo remove
+//            setCallback(object : MediaSessionCompat.Callback() {
 //                override fun onPause() {
 //                    LogHelper.e(TAG, "Ding")
 //                    super.onPause()
@@ -357,10 +357,7 @@ open class PlayerService : MediaBrowserServiceCompat() {
         val mediaItem: MediaItem = MediaItem.fromUri(station.getStreamUri())
 
         // create DataSource.Factory - produces DataSource instances through which media data is loaded
-        val dataSourceFactory: DataSource.Factory = createDataSourceFactory(
-            this,
-            Util.getUserAgent(this, userAgent)
-        )
+        val dataSourceFactory: DataSource.Factory = createDataSourceFactory(this, Util.getUserAgent(this, userAgent), null)
 
         // create MediaSource
         val mediaSource: MediaSource = if (station.streamContent in Keys.MIME_TYPE_HLS || station.streamContent in Keys.MIME_TYPES_M3U) {
@@ -389,20 +386,19 @@ open class PlayerService : MediaBrowserServiceCompat() {
 
 
     /* Creates a DataSourceFactor that supports http redirects */
-    @Suppress("DEPRECATION")
-    private fun createDataSourceFactory(context: Context, userAgent: String): DefaultDataSourceFactory {
+    private fun createDataSourceFactory(context: Context, userAgent: String, listener: TransferListener?): DefaultDataSourceFactory {
         // Credit: https://stackoverflow.com/questions/41517440/exoplayer2-how-can-i-make-a-http-301-redirect-work
         // Default parameters, except allowCrossProtocolRedirects is true
         val httpDataSourceFactory = DefaultHttpDataSourceFactory(
                 userAgent,
-                null,
+                listener,
                 DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS,
                 DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS,
                 true /* allowCrossProtocolRedirects */
         )
         return DefaultDataSourceFactory(
                 context,
-                null,
+                listener,
                 httpDataSourceFactory
         )
     }
@@ -456,6 +452,7 @@ open class PlayerService : MediaBrowserServiceCompat() {
                 if (recentStation != null) mediaItems.add(recentStation)
             }
             Keys.MEDIA_BROWSER_ROOT_EMPTY -> {
+                // do nothing
             }
             else -> {
                 // log error
@@ -506,7 +503,7 @@ open class PlayerService : MediaBrowserServiceCompat() {
             playerState.stationUuid = station.uuid
         }
         playerState.playbackState = playbackState
-        PreferencesHelper.savePlayerState(this, playerState)
+        PreferencesHelper.savePlayerState(playerState)
     }
 
 
@@ -548,6 +545,8 @@ open class PlayerService : MediaBrowserServiceCompat() {
             if (isPlaying) {
                 // active playback
                 handlePlaybackChange(PlaybackStateCompat.STATE_PLAYING)
+            } else {
+                // handled in onPlayWhenReadyChanged
             }
         }
 
@@ -570,13 +569,13 @@ open class PlayerService : MediaBrowserServiceCompat() {
                 }
             } else if (playWhenReady && player.playbackState == Player.STATE_BUFFERING) {
                 handlePlaybackChange(PlaybackStateCompat.STATE_BUFFERING)
-
             }
         }
     }
     /*
      * End of declaration
      */
+
 
 
     /*
@@ -643,7 +642,6 @@ open class PlayerService : MediaBrowserServiceCompat() {
 //     * End of declaration
 //     */
 
-
     /*
      * DefaultControlDispatcher: intercepts commands from MediaSessionConnector
      */
@@ -670,6 +668,7 @@ open class PlayerService : MediaBrowserServiceCompat() {
      */
 
 
+
     /*
      * PlaybackPreparer: Handles prepare and play requests - as well as custom commands like sleep timer control
      */
@@ -680,13 +679,14 @@ open class PlayerService : MediaBrowserServiceCompat() {
                         PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID or
                         PlaybackStateCompat.ACTION_PREPARE_FROM_SEARCH or
                         PlaybackStateCompat.ACTION_PLAY_FROM_SEARCH
+
         override fun onPrepareFromUri(uri: Uri, playWhenReady: Boolean, extras: Bundle?) = Unit
 
         override fun onPrepare(playWhenReady: Boolean) {
             if (station.isValid()) {
                 preparePlayer(playWhenReady)
             } else {
-                val currentStationUuid: String = PreferencesHelper.loadLastPlayedStationUuid(this@PlayerService)
+                val currentStationUuid: String = PreferencesHelper.loadLastPlayedStationUuid()
                 onPrepareFromMediaId(currentStationUuid, playWhenReady, null)
             }
         }
@@ -716,8 +716,7 @@ open class PlayerService : MediaBrowserServiceCompat() {
                 val queryLowercase: String = query.lowercase(Locale.getDefault())
                 collectionProvider.stationListByName.forEach { mediaItem ->
                     // get station name (here -> title)
-                    val stationName: String = mediaItem.description.title.toString()
-                        .lowercase(Locale.getDefault())
+                    val stationName: String = mediaItem.description.title.toString().lowercase(Locale.getDefault())
                     // FIRST: try to match the whole query
                     if (stationName == queryLowercase) {
                         // start playback of newest podcast episode
@@ -742,11 +741,10 @@ open class PlayerService : MediaBrowserServiceCompat() {
             }
         }
 
-
         override fun onCommand(player: Player, controlDispatcher: ControlDispatcher, command: String, extras: Bundle?, cb: ResultReceiver?): Boolean {
             when (command) {
                 Keys.CMD_RELOAD_PLAYER_STATE -> {
-                    playerState = PreferencesHelper.loadPlayerState(this@PlayerService)
+                    playerState = PreferencesHelper.loadPlayerState()
                     return true
                 }
                 Keys.CMD_REQUEST_PROGRESS_UPDATE -> {
@@ -775,8 +773,6 @@ open class PlayerService : MediaBrowserServiceCompat() {
                     return true
                 }
                 Keys.CMD_PLAY_STREAM -> {
-                    // stop playback if necessary
-                    if (player.isPlaying) { player.pause() }
                     // get station and start playback
                     val streamUri: String = extras?.getString(Keys.KEY_STREAM_URI) ?: String()
                     station = CollectionHelper.getStationWithStreamUri(collection, streamUri)
@@ -802,7 +798,6 @@ open class PlayerService : MediaBrowserServiceCompat() {
                 }
             }
         }
-
     }
     /*
      * End of declaration

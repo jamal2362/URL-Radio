@@ -11,6 +11,7 @@
  * http://opensource.org/licenses/MIT
  */
 
+
 package com.jamal2367.urlradio.helpers
 
 import android.app.DownloadManager
@@ -19,7 +20,6 @@ import android.database.Cursor
 import android.net.Uri
 import android.widget.Toast
 import androidx.core.net.toUri
-import androidx.preference.PreferenceManager
 import kotlinx.coroutines.*
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
@@ -27,6 +27,7 @@ import com.jamal2367.urlradio.core.Collection
 import com.jamal2367.urlradio.core.Station
 import com.jamal2367.urlradio.extensions.copy
 import java.util.*
+
 
 /*
  * DownloadHelper object
@@ -73,7 +74,7 @@ object DownloadHelper {
         // initialize main class variables, if necessary
         initialize(context)
         // re-download all station images
-        PreferencesHelper.saveLastUpdateCollection(context)
+        PreferencesHelper.saveLastUpdateCollection()
         val uris: MutableList<Uri> = mutableListOf()
         collection.stations.forEach { station ->
             station.radioBrowserStationUuid
@@ -97,7 +98,7 @@ object DownloadHelper {
             val downloadErrorFileName: String = getDownloadFileName(downloadManager, downloadId)
             Toast.makeText(context, "${context.getString(R.string.toastmessage_error_download_error)}: $downloadErrorFileName ($downloadErrorCode)", Toast.LENGTH_LONG).show()
             LogHelper.w(TAG, "Download not successful: File name = $downloadErrorFileName Error code = $downloadErrorCode")
-            removeFromActiveDownloads(context, arrayOf(downloadId), deleteDownload = true)
+            removeFromActiveDownloads(arrayOf(downloadId), deleteDownload = true)
             return
         } else {
             val localFileUri: Uri = downloadResult
@@ -115,7 +116,7 @@ object DownloadHelper {
                 collection = CollectionHelper.setStationImageWithRemoteLocation(context, collection, localFileUri.toString(), remoteFileLocation, false)
             }
             // remove ID from active downloads
-            removeFromActiveDownloads(context, arrayOf(downloadId))
+            removeFromActiveDownloads(arrayOf(downloadId))
         }
     }
 
@@ -123,18 +124,18 @@ object DownloadHelper {
     /* Initializes main class variables of DownloadHelper, if necessary */
     private fun initialize(context: Context) {
         if (!this::modificationDate.isInitialized) {
-            modificationDate = PreferencesHelper.loadCollectionModificationDate(context)
+            modificationDate = PreferencesHelper.loadCollectionModificationDate()
         }
-        if (!this::collection.isInitialized || CollectionHelper.isNewerCollectionAvailable(context, modificationDate)) {
+        if (!this::collection.isInitialized || CollectionHelper.isNewerCollectionAvailable(modificationDate)) {
             collection = FileHelper.readCollection(context)
-            modificationDate = PreferencesHelper.loadCollectionModificationDate(context)
+            modificationDate = PreferencesHelper.loadCollectionModificationDate()
         }
         if (!this::downloadManager.isInitialized) {
             FileHelper.clearFolder(context.getExternalFilesDir(Keys.FOLDER_TEMP), 0)
             downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         }
         if (!this::activeDownloads.isInitialized) {
-            activeDownloads = getActiveDownloads(context)
+            activeDownloads = getActiveDownloads()
         }
     }
 
@@ -142,7 +143,7 @@ object DownloadHelper {
     /* Enqueues an Array of files in DownloadManager */
     private fun enqueueDownload(context: Context, uris: Array<Uri>, type: Int, ignoreWifiRestriction: Boolean = false) {
         // determine allowed network types
-        val allowedNetworkTypes: Int = determineAllowedNetworkTypes(context, type, ignoreWifiRestriction)
+        val allowedNetworkTypes: Int = determineAllowedNetworkTypes(type, ignoreWifiRestriction)
         // enqueue downloads
         val newIds = LongArray(uris.size)
         for (i in uris.indices) {
@@ -162,7 +163,7 @@ object DownloadHelper {
                 activeDownloads.add(newIds[i])
             }
         }
-        setActiveDownloads(context, activeDownloads)
+        setActiveDownloads(activeDownloads)
     }
 
 
@@ -181,11 +182,11 @@ object DownloadHelper {
 
 
     /* Safely remove given download IDs from activeDownloads and delete download if requested */
-    private fun removeFromActiveDownloads(context: Context, downloadIds: Array<Long>, deleteDownload: Boolean = false): Boolean {
+    private fun removeFromActiveDownloads(downloadIds: Array<Long>, deleteDownload: Boolean = false): Boolean {
         // remove download ids from activeDownloads
         val success: Boolean = activeDownloads.removeAll { downloadId -> downloadIds.contains(downloadId) }
         if (success) {
-            setActiveDownloads(context, activeDownloads)
+            setActiveDownloads(activeDownloads)
         }
         // optionally: delete download
         if (deleteDownload) {
@@ -204,7 +205,6 @@ object DownloadHelper {
             val deferred: Deferred<NetworkHelper.ContentType> = async(Dispatchers.Default) { NetworkHelper.detectContentTypeSuspended(station.getStreamUri()) }
             // wait for result
             val contentType: NetworkHelper.ContentType = deferred.await()
-            LogHelper.e(TAG, "DING $localFileUri $remoteFileLocation ${contentType.type}")
             // set content type
             station.streamContent = contentType.type
             // add station and save collection
@@ -231,7 +231,7 @@ object DownloadHelper {
 
 
     /* Saves active downloads (IntArray) to shared preferences */
-    private fun setActiveDownloads(context: Context, activeDownloads: ArrayList<Long>) {
+    private fun setActiveDownloads(activeDownloads: ArrayList<Long>) {
         val builder = StringBuilder()
         for (i in activeDownloads.indices) {
             builder.append(activeDownloads[i]).append(",")
@@ -240,15 +240,15 @@ object DownloadHelper {
         if (activeDownloadsString.isEmpty()) {
             activeDownloadsString = Keys.ACTIVE_DOWNLOADS_EMPTY
         }
-        PreferencesHelper.saveActiveDownloads(context, activeDownloadsString)
+        PreferencesHelper.saveActiveDownloads(activeDownloadsString)
     }
 
 
     /* Loads active downloads (IntArray) from shared preferences */
-    private fun getActiveDownloads(context: Context): ArrayList<Long> {
+    private fun getActiveDownloads(): ArrayList<Long> {
         var inactiveDownloadsFound = false
         val activeDownloadsList: ArrayList<Long> = arrayListOf()
-        val activeDownloadsString: String = PreferencesHelper.loadActiveDownloads(context)
+        val activeDownloadsString: String = PreferencesHelper.loadActiveDownloads()
         val count = activeDownloadsString.split(",").size - 1
         val tokenizer = StringTokenizer(activeDownloadsString, ",")
         repeat(count) {
@@ -258,7 +258,7 @@ object DownloadHelper {
                 false -> inactiveDownloadsFound = true
             }
         }
-        if (inactiveDownloadsFound) setActiveDownloads(context, activeDownloadsList)
+        if (inactiveDownloadsFound) setActiveDownloads(activeDownloadsList)
         return activeDownloadsList
     }
 
@@ -315,12 +315,11 @@ object DownloadHelper {
 
 
     /* Determine allowed network type */
-    private fun determineAllowedNetworkTypes(context: Context, type: Int, ignoreWifiRestriction: Boolean): Int {
+    private fun determineAllowedNetworkTypes(type: Int, ignoreWifiRestriction: Boolean): Int {
         var allowedNetworkTypes: Int =  (DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
         // restrict download of audio files to WiFi if necessary
         if (type == Keys.FILE_TYPE_AUDIO) {
-            val downloadOverMobile = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(Keys.PREF_DOWNLOAD_OVER_MOBILE, Keys.DEFAULT_DOWNLOAD_OVER_MOBILE)
-            if (!ignoreWifiRestriction && !downloadOverMobile) {
+            if (!ignoreWifiRestriction && !PreferencesHelper.downloadOverMobile()) {
                 allowedNetworkTypes = DownloadManager.Request.NETWORK_WIFI
             }
         }

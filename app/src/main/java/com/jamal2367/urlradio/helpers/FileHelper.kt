@@ -11,6 +11,7 @@
  * http://opensource.org/licenses/MIT
  */
 
+
 package com.jamal2367.urlradio.helpers
 
 import android.app.Activity
@@ -23,16 +24,17 @@ import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
-import kotlin.math.ln
-import kotlin.math.pow
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.core.Collection
 import com.jamal2367.urlradio.core.Station
 import java.io.*
 import java.text.NumberFormat
 import java.util.*
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
+import kotlin.math.ln
+import kotlin.math.pow
+
 
 /*
  * FileHelper object
@@ -113,7 +115,6 @@ object FileHelper {
 
 
     /* Clears given folder - keeps given number of files */
-    @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
     fun clearFolder(folder: File?, keep: Int, deleteFolder: Boolean = false) {
         if (folder != null && folder.exists()) {
             val files = folder.listFiles()
@@ -135,7 +136,7 @@ object FileHelper {
     fun saveStationImage(context: Context, stationUuid: String, sourceImageUri: String, size: Int, fileName: String): Uri {
         val coverBitmap: Bitmap = ImageHelper.getScaledStationImage(context, sourceImageUri, size)
         val file = File(context.getExternalFilesDir(determineDestinationFolderPath(Keys.FILE_TYPE_IMAGE, stationUuid)), fileName)
-        writeImageFile(coverBitmap, file)
+        writeImageFile(coverBitmap, file, Bitmap.CompressFormat.JPEG, quality = 75)
         return file.toUri()
     }
 
@@ -145,7 +146,7 @@ object FileHelper {
         LogHelper.v(TAG, "Saving collection - Thread: ${Thread.currentThread().name}")
         val collectionSize: Int = collection.stations.size
         // do not override an existing collection with an empty one - except when last station is deleted
-        if (collectionSize > 0 || PreferencesHelper.loadCollectionSize(context) == 1) {
+        if (collectionSize > 0 || PreferencesHelper.loadCollectionSize() == 1) {
             // convert to JSON
             val gson: Gson = getCustomGson()
             var json = String()
@@ -156,10 +157,10 @@ object FileHelper {
             }
             if (json.isNotBlank()) {
                 // write text file
-                writeTextFile(context, json, Keys.COLLECTION_FILE)
+                writeTextFile(context, json, Keys.FOLDER_COLLECTION, Keys.COLLECTION_FILE)
                 // save modification date and collection size
-                PreferencesHelper.saveCollectionModificationDate(context, lastSave)
-                PreferencesHelper.saveCollectionSize(context, collectionSize)
+                PreferencesHelper.saveCollectionModificationDate(lastSave)
+                PreferencesHelper.saveCollectionSize(collectionSize)
             } else {
                 LogHelper.w(TAG, "Not writing collection file. Reason: JSON string was completely empty.")
             }
@@ -210,7 +211,7 @@ object FileHelper {
     fun readCollection(context: Context): Collection {
         LogHelper.v(TAG, "Reading collection - Thread: ${Thread.currentThread().name}")
         // get JSON from text file
-        val json: String = readTextFile(context, Keys.COLLECTION_FILE)
+        val json: String = readTextFile(context, Keys.FOLDER_COLLECTION, Keys.COLLECTION_FILE)
         var collection = Collection()
         when (json.isNotBlank()) {
             // convert JSON and return as collection
@@ -227,9 +228,9 @@ object FileHelper {
 
     /* Appends a message to an existing log - and saves it */
     fun saveLog(context: Context, logMessage: String) {
-        var log: String = readTextFile(context, Keys.DEBUG_LOG_FILE)
+        var log: String = readTextFile(context, Keys.FOLDER_COLLECTION, Keys.DEBUG_LOG_FILE)
         log = "$log {$logMessage}"
-        writeTextFile(context, log, Keys.DEBUG_LOG_FILE)
+        writeTextFile(context, log, Keys.FOLDER_COLLECTION, Keys.DEBUG_LOG_FILE)
     }
 
 
@@ -243,6 +244,7 @@ object FileHelper {
         if (m3uFile.exists()) { m3ulUri = FileProvider.getUriForFile(activity, "${activity.applicationContext.packageName}.provider", m3uFile) }
         return m3ulUri
     }
+
 
 
     /* Suspend function: Wrapper for saveCollection */
@@ -264,7 +266,7 @@ object FileHelper {
     /* Suspend function: Wrapper for copyFile */
     suspend fun saveCopyOfFileSuspended(context: Context, originalFileUri: Uri, targetFileUri: Uri): Boolean {
         return suspendCoroutine { cont ->
-            cont.resume(copyFile(context, originalFileUri, targetFileUri))
+            cont.resume(copyFile(context, originalFileUri, targetFileUri, deleteOriginal = true))
         }
     }
 
@@ -276,13 +278,13 @@ object FileHelper {
             // create M3U string
             val m3uString: String = CollectionHelper.createM3uString(collection)
             // save M3U as text file
-            cont.resume(writeTextFile(context, m3uString, Keys.COLLECTION_M3U_FILE))
+            cont.resume(writeTextFile(context, m3uString, Keys.FOLDER_COLLECTION, Keys.COLLECTION_M3U_FILE))
         }
     }
 
 
     /* Copies file to specified target */
-    private fun copyFile(context: Context, originalFileUri: Uri, targetFileUri: Uri): Boolean {
+    private fun copyFile(context: Context, originalFileUri: Uri, targetFileUri: Uri, deleteOriginal: Boolean = false): Boolean {
         var success = true
         try {
             val inputStream = context.contentResolver.openInputStream(originalFileUri)
@@ -295,11 +297,13 @@ object FileHelper {
             success = false
             exception.printStackTrace()
         }
-        try {
-            // use contentResolver to handle files of type content://
-            context.contentResolver.delete(originalFileUri, null, null)
-        } catch (e: Exception) {
-            LogHelper.e(TAG, "Unable to delete the original file. Stack trace: $e")
+        if (deleteOriginal) {
+            try {
+                // use contentResolver to handle files of type content://
+                context.contentResolver.delete(originalFileUri, null, null)
+            } catch (e: Exception) {
+                LogHelper.e(TAG, "Unable to delete the original file. Stack trace: $e")
+            }
         }
         return success
     }
@@ -366,11 +370,12 @@ object FileHelper {
 
 
     /* Reads InputStream from file uri and returns it as String */
-    private fun readTextFile(context: Context, fileName: String): String {
+    private fun readTextFile(context: Context, folder: String, fileName: String): String {
+        // todo read https://commonsware.com/blog/2016/03/15/how-consume-content-uri.html
         // https://developer.android.com/training/secure-file-sharing/retrieve-info
 
         // check if file exists
-        val file = File(context.getExternalFilesDir(Keys.FOLDER_COLLECTION), fileName)
+        val file = File(context.getExternalFilesDir(folder), fileName)
         if (!file.exists() || !file.canRead()) {
             return String()
         }
@@ -387,9 +392,9 @@ object FileHelper {
 
 
     /* Writes given text to file on storage */
-    private fun writeTextFile(context: Context, text: String, fileName: String) {
+    private fun writeTextFile(context: Context, text: String, folder: String, fileName: String) {
         if (text.isNotBlank()) {
-            File(context.getExternalFilesDir(Keys.FOLDER_COLLECTION), fileName).writeText(text)
+            File(context.getExternalFilesDir(folder), fileName).writeText(text)
         } else {
             LogHelper.w(TAG, "Writing text file $fileName failed. Empty text string text was provided.")
         }
@@ -397,14 +402,11 @@ object FileHelper {
 
 
     /* Writes given bitmap as image file to storage */
-    private fun writeImageFile(
-        bitmap: Bitmap,
-        file: File
-    ) {
+    private fun writeImageFile(bitmap: Bitmap, file: File, format: Bitmap.CompressFormat = Bitmap.CompressFormat.JPEG, quality: Int = 75) {
         if (file.exists()) file.delete ()
         try {
             val out = FileOutputStream(file)
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
+            bitmap.compress(format, quality, out)
             out.flush()
             out.close()
         } catch (e: Exception) {
@@ -417,6 +419,5 @@ object FileHelper {
     private fun getNoMediaFile(folder: File): File {
         return File(folder, ".nomedia")
     }
-
 
 }

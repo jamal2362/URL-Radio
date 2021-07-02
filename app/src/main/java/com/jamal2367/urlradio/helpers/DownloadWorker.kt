@@ -11,12 +11,14 @@
  * http://opensource.org/licenses/MIT
  */
 
+
 package com.jamal2367.urlradio.helpers
 
 import android.content.Context
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.jamal2367.urlradio.Keys
+
 
 /*
  * DownloadWorker class
@@ -41,17 +43,16 @@ class DownloadWorker(context : Context, params : WorkerParameters): Worker(conte
 
     /* Updates collection of stations */
     private fun updateCollection() {
-        // todo implement / or delete
     }
 
 
     /* Execute one-time housekeeping */
     private fun doOneTimeHousekeeping() {
-        if (PreferencesHelper.isHouseKeepingNecessary(applicationContext)) {
+        if (PreferencesHelper.isHouseKeepingNecessary()) {
             /* add whatever housekeeping is necessary here */
 
             // housekeeping finished - save state
-            // PreferencesHelper.saveHouseKeepingNecessaryState(applicationContext)
+            // PreferencesHelper.saveHouseKeepingNecessaryState()
         }
     }
 

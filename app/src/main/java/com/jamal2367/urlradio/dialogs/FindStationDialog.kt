@@ -11,6 +11,7 @@
  * http://opensource.org/licenses/MIT
  */
 
+
 package com.jamal2367.urlradio.dialogs
 
 import android.app.Activity
@@ -23,6 +24,7 @@ import android.widget.ProgressBar
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -35,6 +37,7 @@ import com.jamal2367.urlradio.search.RadioBrowserResult
 import com.jamal2367.urlradio.search.RadioBrowserResultAdapter
 import com.jamal2367.urlradio.search.RadioBrowserSearch
 
+
 /*
  * FindStationDialog class
  */
@@ -45,6 +48,7 @@ class FindStationDialog (private var context: Context, private var listener: Fin
         fun onFindStationDialog(remoteStationLocation: String, station: Station) {
         }
     }
+
 
     /* Main class variables */
     private lateinit var dialog: AlertDialog
@@ -86,10 +90,10 @@ class FindStationDialog (private var context: Context, private var listener: Fin
     /* Construct and show dialog */
     fun show() {
         // initialize a radio browser search
-        radioBrowserSearch = RadioBrowserSearch(context, this)
+        radioBrowserSearch = RadioBrowserSearch(this)
 
         // prepare dialog builder
-        val builder = MaterialAlertDialogBuilder(context, R.style.AlertDialogTheme)
+        val builder = MaterialAlertDialogBuilder(context)
 
         // set title
         builder.setTitle(R.string.dialog_find_station_title)
@@ -188,14 +192,14 @@ class FindStationDialog (private var context: Context, private var listener: Fin
             // handle direct URL input
             remoteStationLocation = query
             activateAddButton()
-        } else if (query.contains(" ") || query.length > 1 ) {
+        } else if (query.contains(" ") || query.length > 2 ) {
             // show progress indicator
             showProgressIndicator()
             // handle search string input - delay request to manage server load (not sure if necessary)
             handler.postDelayed({
                 // only start search if query is the same as one second ago
                 if (currentSearchString == query) radioBrowserSearch.searchStation(context, query, Keys.SEARCH_TYPE_BY_KEYWORD)
-            }, 100)
+            }, 1000)
         } else if (query.isEmpty()) {
             resetLayout(clearAdapter = true)
         }
@@ -223,14 +227,14 @@ class FindStationDialog (private var context: Context, private var listener: Fin
     private fun showNoResultsError() {
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = false
         searchRequestProgressIndicator.isGone = true
-        noSearchResultsTextView.isGone = true
+        noSearchResultsTextView.isVisible = true
     }
 
 
     /* Display the "No Results" error - hide other unneeded views */
     private fun showProgressIndicator() {
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = false
-        searchRequestProgressIndicator.isGone = true
+        searchRequestProgressIndicator.isVisible = true
         noSearchResultsTextView.isGone = true
     }
 

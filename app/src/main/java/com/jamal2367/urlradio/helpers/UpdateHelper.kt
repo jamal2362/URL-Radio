@@ -11,6 +11,7 @@
  * http://opensource.org/licenses/MIT
  */
 
+
 package com.jamal2367.urlradio.helpers
 
 import android.content.Context
@@ -20,6 +21,7 @@ import com.jamal2367.urlradio.core.Collection
 import com.jamal2367.urlradio.core.Station
 import com.jamal2367.urlradio.search.RadioBrowserResult
 import com.jamal2367.urlradio.search.RadioBrowserSearch
+
 
 /*
  * UpdateHelper class
@@ -77,7 +79,7 @@ class UpdateHelper(private val context: Context, private val updateHelperListene
 
     /* Updates the whole collection of stations */
     fun updateCollection() {
-        PreferencesHelper.saveLastUpdateCollection(context)
+        PreferencesHelper.saveLastUpdateCollection()
         collection.stations.forEach {station ->
             when {
                 station.radioBrowserStationUuid.isNotEmpty() -> {
@@ -87,13 +89,18 @@ class UpdateHelper(private val context: Context, private val updateHelperListene
                     downloadFromRadioBrowser(station.radioBrowserStationUuid)
                 }
                 station.remoteStationLocation.isNotEmpty() -> {
-                    // add playlist link to list for later download
+                    // add playlist link to list for later(!) download in onRadioBrowserSearchResults
                     remoteStationLocationsList.add(station.remoteStationLocation)
                 }
                 else -> {
                     LogHelper.w(TAG, "Unable to update station: ${station.name}.")
                 }
             }
+        }
+        // special case: collection contained only playlist files
+        if (radioBrowserSearchCounter == 0) {
+            // direct download of playlists
+            DownloadHelper.downloadPlaylists(context, remoteStationLocationsList.toTypedArray())
         }
     }
 
@@ -118,7 +125,7 @@ class UpdateHelper(private val context: Context, private val updateHelperListene
 
     /* Get updated station from radio browser - results are handled by onRadioBrowserSearchResults */
     private fun downloadFromRadioBrowser(radioBrowserStationUuid: String) {
-        val radioBrowserSearch = RadioBrowserSearch(context, this)
+        val radioBrowserSearch = RadioBrowserSearch(this)
         radioBrowserSearch.searchStation(context, radioBrowserStationUuid, Keys.SEARCH_TYPE_BY_UUID)
     }
 

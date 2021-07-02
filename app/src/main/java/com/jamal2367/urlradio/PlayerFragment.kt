@@ -1,7 +1,7 @@
 /*
  * PlayerFragment.kt
  * Implements the PlayerFragment class
- * PlayerFragment is the fragment that hosts URL Radio's list of stations and a player sheet
+ * PlayerFragment is the fragment that hosts URLRadio's list of stations and a player sheet
  *
  * This file is part of
  * URL Radio - Radio App for Android
@@ -10,6 +10,7 @@
  * Licensed under the MIT-License
  * http://opensource.org/licenses/MIT
  */
+
 
 package com.jamal2367.urlradio
 
@@ -56,6 +57,7 @@ import com.jamal2367.urlradio.ui.LayoutHolder
 import com.jamal2367.urlradio.ui.PlayerState
 import java.util.*
 import kotlin.coroutines.CoroutineContext
+
 
 /*
  * PlayerFragment class
@@ -119,9 +121,9 @@ class PlayerFragment: Fragment(), CoroutineScope,
         initializeViews()
 
         // convert old stations (one-time import)
-        if (PreferencesHelper.isHouseKeepingNecessary(activity as Context)) {
+        if (PreferencesHelper.isHouseKeepingNecessary()) {
             if (ImportHelper.convertOldStations(activity as Context)) layout.toggleImportingStationViews()
-            PreferencesHelper.saveHouseKeepingNecessaryState(activity as Context)
+            PreferencesHelper.saveHouseKeepingNecessaryState()
         }
 
         // hide action bar
@@ -129,7 +131,7 @@ class PlayerFragment: Fragment(), CoroutineScope,
 
         // set the navigation bar color
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-        activity?.window!!.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.player_sheet_background)
+            activity?.window!!.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.player_sheet_background)
         }
 
         return rootView
@@ -170,14 +172,14 @@ class PlayerFragment: Fragment(), CoroutineScope,
         // assign volume buttons to music volume
         activity?.volumeControlStream = AudioManager.STREAM_MUSIC
         // try to recreate player state
-        playerState = PreferencesHelper.loadPlayerState(activity as Context)
+        playerState = PreferencesHelper.loadPlayerState()
         // setup ui
         setupPlayer()
         setupList()
         // start watching for changes in shared preferences
-        PreferencesHelper.registerPreferenceChangeListener(activity as Context, this as SharedPreferences.OnSharedPreferenceChangeListener)
+        PreferencesHelper.registerPreferenceChangeListener(this as SharedPreferences.OnSharedPreferenceChangeListener)
         // toggle download progress indicator
-        layout.toggleDownloadProgressIndicator(activity as Context)
+        layout.toggleDownloadProgressIndicator()
     }
 
 
@@ -185,11 +187,11 @@ class PlayerFragment: Fragment(), CoroutineScope,
     override fun onPause() {
         super.onPause()
         // save player state
-        PreferencesHelper.savePlayerState(activity as Context, playerState)
+        PreferencesHelper.savePlayerState(playerState)
         // stop receiving playback progress updates
         handler.removeCallbacks(periodicProgressUpdateRequestRunnable)
         // stop watching for changes in shared preferences
-        PreferencesHelper.unregisterPreferenceChangeListener(activity as Context, this as SharedPreferences.OnSharedPreferenceChangeListener)
+        PreferencesHelper.unregisterPreferenceChangeListener(this as SharedPreferences.OnSharedPreferenceChangeListener)
 
     }
 
@@ -244,7 +246,7 @@ class PlayerFragment: Fragment(), CoroutineScope,
     /* Overrides onSharedPreferenceChanged from OnSharedPreferenceChangeListener */
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (key == Keys.PREF_ACTIVE_DOWNLOADS) {
-            layout.toggleDownloadProgressIndicator(activity as Context)
+            layout.toggleDownloadProgressIndicator()
         }
     }
 
@@ -331,6 +333,7 @@ class PlayerFragment: Fragment(), CoroutineScope,
     override fun onYesNoDialog(type: Int, dialogResult: Boolean, payload: Int, payloadString: String) {
         super.onYesNoDialog(type, dialogResult, payload, payloadString)
         when (type) {
+            // handle result of remove dialog
             Keys.DIALOG_REMOVE_STATION -> {
                 when (dialogResult) {
                     // user tapped remove station
@@ -394,11 +397,12 @@ class PlayerFragment: Fragment(), CoroutineScope,
     private fun buildPlaybackControls() {
 
         // get player state
-        playerState = PreferencesHelper.loadPlayerState(activity as Context)
+        playerState = PreferencesHelper.loadPlayerState()
 
         // main play/pause button
         layout.playButtonView.setOnClickListener {
             onPlayButtonTapped(playerState.stationUuid, playerState.playbackState)
+            //onPlayButtonTapped(playerState.stationUuid, playerController.getPlaybackState().state)
         }
 
         // register a callback to stay in sync
@@ -458,7 +462,7 @@ class PlayerFragment: Fragment(), CoroutineScope,
                 startActivityForResult(pickImageIntent, Keys.REQUEST_LOAD_IMAGE, null )
             } catch (e: Exception) {
                 LogHelper.e(TAG, "Unable to select image. Probably no image picker available.")
-                Toast.makeText(activity as Context, R.string.toastalert_no_image_picker, Toast.LENGTH_LONG).show()
+                Toast.makeText(context, R.string.toastalert_no_image_picker, Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -533,7 +537,7 @@ class PlayerFragment: Fragment(), CoroutineScope,
             // update collection
             collection = it
             // updates current station in player views
-            playerState = PreferencesHelper.loadPlayerState(activity as Context)
+            playerState = PreferencesHelper.loadPlayerState()
             // toggle onboarding layout
             onboarding = layout.toggleOnboarding(activity as Context, collection.stations.size)
             // get station
@@ -618,7 +622,13 @@ class PlayerFragment: Fragment(), CoroutineScope,
      * Defines callbacks for media browser service subscription
      */
     private val mediaBrowserSubscriptionCallback = object : MediaBrowserCompat.SubscriptionCallback() {
+        override fun onChildrenLoaded(parentId: String, children: MutableList<MediaBrowserCompat.MediaItem>) {
+            super.onChildrenLoaded(parentId, children)
+        }
 
+        override fun onError(parentId: String) {
+            super.onError(parentId)
+        }
     }
     /*
      * End of callback

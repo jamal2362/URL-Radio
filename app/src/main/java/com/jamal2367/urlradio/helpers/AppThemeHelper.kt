@@ -11,12 +11,14 @@
  * http://opensource.org/licenses/MIT
  */
 
+
 package com.jamal2367.urlradio.helpers
 
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
+
 
 /*
  * AppThemeHelper object
@@ -62,7 +64,7 @@ object AppThemeHelper {
 
     /* Returns a readable String for currently selected App Theme */
     fun getCurrentTheme(context: Context): String {
-        return when (PreferencesHelper.loadThemeSelection(context)) {
+        return when (PreferencesHelper.loadThemeSelection()) {
             Keys.STATE_THEME_LIGHT_MODE -> context.getString(R.string.pref_theme_selection_mode_light)
             Keys.STATE_THEME_DARK_MODE -> context.getString(R.string.pref_theme_selection_mode_dark)
             else -> context.getString(R.string.pref_theme_selection_mode_device_default)

@@ -12,7 +12,9 @@
  * http://opensource.org/licenses/MIT
  */
 
+
 package com.jamal2367.urlradio.helpers
+
 
 import android.Manifest.permission.BIND_NOTIFICATION_LISTENER_SERVICE
 import android.Manifest.permission.MEDIA_CONTENT_CONTROL
@@ -191,7 +193,6 @@ class PackageValidator(context: Context, @XmlRes xmlResId: Int) {
      * @return PackageInfo for the package name or null if it's not found.
      */
     @SuppressLint("PackageManagerGetSignatures")
-    @Suppress("DEPRECATION")
     private fun getPackageInfo(callingPackage: String): PackageInfo? =
             packageManager.getPackageInfo(callingPackage,
                     PackageManager.GET_SIGNATURES or PackageManager.GET_PERMISSIONS)
@@ -205,7 +206,6 @@ class PackageValidator(context: Context, @XmlRes xmlResId: Int) {
      * If the app is not found, or if the app does not have exactly one signature, this method
      * returns `null` as the signature.
      */
-    @Suppress("DEPRECATION")
     private fun getSignature(packageInfo: PackageInfo): String? {
         // Security best practices dictate that an app should be signed with exactly one (1)
         // signature. Because of this, if there are multiple signatures, reject it.

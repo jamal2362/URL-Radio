@@ -11,6 +11,7 @@
  * http://opensource.org/licenses/MIT
  */
 
+
 package com.jamal2367.urlradio.helpers
 
 import android.app.PendingIntent
@@ -36,8 +37,10 @@ import com.jamal2367.urlradio.R
  * NotificationHelper class
  * Credit: https://github.com/android/uamp/blob/5bae9316b60ba298b6080de1fcad53f6f74eb0bf/common/src/main/java/com/example/android/uamp/media/UampNotificationManager.kt
  */
-@Suppress("DEPRECATION")
 class NotificationHelper(private val context: Context, sessionToken: MediaSessionCompat.Token, notificationListener: PlayerNotificationManager.NotificationListener) {
+
+    /* Define log tag */
+    private val TAG: String = LogHelper.makeLogTag(NotificationHelper::class.java)
 
 
     /* Main class variables */
@@ -128,7 +131,7 @@ class NotificationHelper(private val context: Context, sessionToken: MediaSessio
 
 
     /*
-     * Inner class: Create content of notification from metadata
+     * Inner class: Create content of notification from metaddata
      */
     private inner class DescriptionAdapter(private val controller: MediaControllerCompat) : PlayerNotificationManager.MediaDescriptionAdapter {
 

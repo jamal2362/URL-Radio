@@ -11,12 +11,11 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import com.jamal2367.urlradio.Keys
-import com.jamal2367.urlradio.R
 import com.jamal2367.urlradio.helpers.LogHelper
 import com.jamal2367.urlradio.helpers.NetworkHelper
 import com.jamal2367.urlradio.helpers.PreferencesHelper
 
-class RadioBrowserSearch(private var context: Context, private var radioBrowserSearchListener: RadioBrowserSearchListener) {
+class RadioBrowserSearch(private var radioBrowserSearchListener: RadioBrowserSearchListener) {
 
     /* Interface used to send back search results */
     interface RadioBrowserSearchListener {
@@ -37,7 +36,7 @@ class RadioBrowserSearch(private var context: Context, private var radioBrowserS
     /* Init constructor */
     init {
         // get address of radio-browser.info api and update it in background
-        radioBrowserApi = PreferencesHelper.loadRadioBrowserApiAddress(context)
+        radioBrowserApi = PreferencesHelper.loadRadioBrowserApiAddress()
         updateRadioBrowserApi()
     }
 
@@ -60,7 +59,7 @@ class RadioBrowserSearch(private var context: Context, private var radioBrowserS
             @Throws(AuthFailureError::class)
             override fun getHeaders(): Map<String, String> {
                 val params = HashMap<String, String>()
-                params["User-Agent"] = context.getString(R.string.app_name)
+                params["User-Agent"] = "$Keys.APPLICATION_NAME ${BuildConfig.VERSION_NAME}"
                 return params
             }
         }
@@ -103,7 +102,7 @@ class RadioBrowserSearch(private var context: Context, private var radioBrowserS
     /* Updates the address of the radio-browser.info api */
     private fun updateRadioBrowserApi() {
         GlobalScope.launch {
-            val deferred: Deferred<String> = async { NetworkHelper.getRadioBrowserServerSuspended(context) }
+            val deferred: Deferred<String> = async { NetworkHelper.getRadioBrowserServerSuspended() }
             radioBrowserApi = deferred.await()
         }
     }

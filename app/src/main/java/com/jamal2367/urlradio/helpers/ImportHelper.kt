@@ -11,6 +11,7 @@
  * http://opensource.org/licenses/MIT
  */
 
+
 package com.jamal2367.urlradio.helpers
 
 import android.content.Context
@@ -21,6 +22,7 @@ import com.jamal2367.urlradio.core.Collection
 import com.jamal2367.urlradio.core.Station
 import java.io.File
 import java.util.*
+
 
 /*
  * ImportHelper object
@@ -66,7 +68,7 @@ object ImportHelper {
                 }
                 // check for success (= at least one station was found)
                 if (success) {
-                    // delete files from URLRadio v2
+                    // delete files from URLRadio v3
                     oldCollectionFolder.deleteRecursively()
                     // sort and save collection
                     val newCollection: Collection = CollectionHelper.sortCollection(Collection(stations = oldStations))
@@ -107,4 +109,6 @@ object ImportHelper {
             Keys.LOCATION_DEFAULT_STATION_IMAGE
         }
     }
+
+
 }

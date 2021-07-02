@@ -11,6 +11,7 @@
  * http://opensource.org/licenses/MIT
  */
 
+
 package com.jamal2367.urlradio.ui
 
 import android.content.ClipData
@@ -37,6 +38,7 @@ import com.jamal2367.urlradio.R
 import com.jamal2367.urlradio.core.Station
 import com.jamal2367.urlradio.helpers.*
 
+
 /*
  * LayoutHolder class
  */
@@ -45,16 +47,14 @@ data class LayoutHolder(var rootView: View) {
 
     /* Main class variables */
     var recyclerView: RecyclerView = rootView.findViewById(R.id.station_list)
-    var sleepTimerRunningViews: Group = rootView.findViewById(R.id.sleep_timer_running_views)
-    var playButtonView: ImageView = rootView.findViewById(R.id.player_play_button)
-    var sheetSleepTimerStartButtonView: ImageView = rootView.findViewById(R.id.sleep_timer_start_button)
-    var sheetSleepTimerCancelButtonView: ImageView = rootView.findViewById(R.id.sleep_timer_cancel_button)
     val layoutManager: LinearLayoutManager
     private var bottomSheet: ConstraintLayout = rootView.findViewById(R.id.bottom_sheet)
+    var sleepTimerRunningViews: Group = rootView.findViewById(R.id.sleep_timer_running_views)
     private var downloadProgressIndicator: ProgressBar = rootView.findViewById(R.id.download_progress_indicator)
     private var stationImageView: ImageView = rootView.findViewById(R.id.station_icon)
     private var stationNameView: TextView = rootView.findViewById(R.id.player_station_name)
     private var metadataView: TextView = rootView.findViewById(R.id.player_station_metadata)
+    var playButtonView: ImageView = rootView.findViewById(R.id.player_play_button)
     private var bufferingIndicator: ProgressBar = rootView.findViewById(R.id.player_buffering_indicator)
     private var sheetStreamingLinkHeadline: TextView = rootView.findViewById(R.id.sheet_streaming_link_headline)
     private var sheetStreamingLinkView: TextView = rootView.findViewById(R.id.sheet_streaming_link)
@@ -62,6 +62,8 @@ data class LayoutHolder(var rootView: View) {
     private var sheetMetadataHistoryView: TextView = rootView.findViewById(R.id.sheet_metadata_history)
     private var sheetNextMetadataView: ImageView = rootView.findViewById(R.id.sheet_next_metadata_button)
     private var sheetPreviousMetadataView: ImageView = rootView.findViewById(R.id.sheet_previous_metadata_button)
+    var sheetSleepTimerStartButtonView: ImageView = rootView.findViewById(R.id.sleep_timer_start_button)
+    var sheetSleepTimerCancelButtonView: ImageView = rootView.findViewById(R.id.sleep_timer_cancel_button)
     private var sheetSleepTimerRemainingTimeView: TextView = rootView.findViewById(R.id.sleep_timer_remaining_time)
     private var onboardingLayout: ConstraintLayout = rootView.findViewById(R.id.onboarding_layout)
     private var onboardingQuoteViews: Group = rootView.findViewById(R.id.onboarding_quote_views)
@@ -75,7 +77,7 @@ data class LayoutHolder(var rootView: View) {
     init {
         // find views
         //sheetMetadataViews = rootView.findViewById(R.id.sheet_metadata_views)
-        metadataHistory = PreferencesHelper.loadMetadataHistory(rootView.context)
+        metadataHistory = PreferencesHelper.loadMetadataHistory()
         metadataHistoryPosition = metadataHistory.size - 1
 
         // set up RecyclerView
@@ -203,8 +205,8 @@ data class LayoutHolder(var rootView: View) {
             onboardingImportViews.isVisible = true
             onboardingQuoteViews.isVisible = false
         } else {
-            onboardingImportViews.isVisible = true
-            onboardingQuoteViews.isVisible = false
+            onboardingImportViews.isVisible = false
+            onboardingQuoteViews.isVisible = true
         }
     }
 
@@ -221,8 +223,8 @@ data class LayoutHolder(var rootView: View) {
 
 
     /* Toggles visibility of the download progress indicator */
-    fun toggleDownloadProgressIndicator(context: Context) {
-        when (PreferencesHelper.loadActiveDownloads(context)) {
+    fun toggleDownloadProgressIndicator() {
+        when (PreferencesHelper.loadActiveDownloads()) {
             Keys.ACTIVE_DOWNLOADS_EMPTY -> downloadProgressIndicator.isGone = true
             else -> downloadProgressIndicator.isVisible = true
         }
@@ -300,9 +302,17 @@ data class LayoutHolder(var rootView: View) {
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
         bottomSheetBehavior.addBottomSheetCallback(object: BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(view: View, slideOffset: Float) {
+                if (slideOffset < 0.25f) {
+                    // showPlayerViews()
+                    // todo
+                } else {
+                    // hidePlayerViews()
+                    // todo
+                }
             }
             override fun onStateChanged(view: View, state: Int) {
                 when (state) {
+                    // todo
                     BottomSheetBehavior.STATE_COLLAPSED -> Unit // do nothing
                     BottomSheetBehavior.STATE_DRAGGING -> Unit // do nothing
                     BottomSheetBehavior.STATE_EXPANDED -> Unit // do nothing
@@ -340,5 +350,6 @@ data class LayoutHolder(var rootView: View) {
     /*
      * End of inner class
      */
+
 
 }

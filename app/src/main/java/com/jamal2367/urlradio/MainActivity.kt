@@ -1,26 +1,41 @@
+/*
+ * MainActivity.kt
+ * Implements the MainActivity class
+ * MainActivity is the default activity that can host the player fragment and the settings fragment
+ *
+ * This file is part of
+ * URL Radio - Radio App for Android
+ *
+ * Copyright (c) 2015-21 - Y20K.org
+ * Licensed under the MIT-License
+ * http://opensource.org/licenses/MIT
+ */
+
+
 package com.jamal2367.urlradio
 
-import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.navigation.fragment.NavHostFragment
-
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.navigateUp
-
-import androidx.preference.PreferenceManager
 import com.jamal2367.urlradio.helpers.AppThemeHelper
 import com.jamal2367.urlradio.helpers.FileHelper
 import com.jamal2367.urlradio.helpers.PreferencesHelper
 
+
+/*
+ * MainActivity class
+ */
 class MainActivity: AppCompatActivity() {
 
 
     /* Main class variables */
     private lateinit var appBarConfiguration: AppBarConfiguration
+
 
     /* Overrides onCreate from AppCompatActivity */
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,7 +57,7 @@ class MainActivity: AppCompatActivity() {
         supportActionBar?.hide()
 
         // register listener for changes in shared preferences
-        PreferenceManager.getDefaultSharedPreferences(this as Context).registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener)
+        PreferencesHelper.registerPreferenceChangeListener(sharedPreferenceChangeListener)
     }
 
 
@@ -59,8 +74,9 @@ class MainActivity: AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         // unregister listener for changes in shared preferences
-        PreferenceManager.getDefaultSharedPreferences(this as Context).unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener)
+        PreferencesHelper.unregisterPreferenceChangeListener(sharedPreferenceChangeListener)
     }
+
 
     /*
      * Defines the listener for changes in shared preferences
@@ -68,12 +84,14 @@ class MainActivity: AppCompatActivity() {
     private val sharedPreferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
         when (key) {
             Keys.PREF_THEME_SELECTION -> {
-                AppThemeHelper.setTheme(PreferencesHelper.loadThemeSelection(this@MainActivity))
+                AppThemeHelper.setTheme(PreferencesHelper.loadThemeSelection())
             }
         }
     }
     /*
      * End of declaration
      */
+
+
 
 }

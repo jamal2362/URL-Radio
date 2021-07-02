@@ -11,6 +11,7 @@
  * http://opensource.org/licenses/MIT
  */
 
+
 package com.jamal2367.urlradio.helpers
 
 import android.content.Context
@@ -35,6 +36,7 @@ import java.io.File
 import java.net.URL
 import java.util.*
 
+
 /*
  * CollectionHelper object
  */
@@ -54,9 +56,9 @@ object CollectionHelper {
 
 
     /* Checks if a newer collection of radio stations is available on storage */
-    fun isNewerCollectionAvailable(context: Context, date: Date): Boolean {
+    fun isNewerCollectionAvailable(date: Date): Boolean {
         var newerCollectionAvailable = false
-        val modificationDate: Date = PreferencesHelper.loadCollectionModificationDate(context)
+        val modificationDate: Date = PreferencesHelper.loadCollectionModificationDate()
         if (modificationDate.after(date) || date == Keys.DEFAULT_DATE) {
             newerCollectionAvailable = true
         }
@@ -97,7 +99,6 @@ object CollectionHelper {
 
     /* Updates radio station in collection */
     fun updateStation(context: Context, collection: Collection, station: Station): Collection {
-
         var updatedCollection: Collection = collection
 
         // CASE: Update station retrieved from radio browser
@@ -154,8 +155,10 @@ object CollectionHelper {
         // all clear -> add station
         else {
             var updatedCollection: Collection = collection
+            val updatedStationList: MutableList<Station> = collection.stations.toMutableList()
             // add station
-            updatedCollection.stations.add(newStation)
+            updatedStationList.add(newStation)
+            updatedCollection.stations = updatedStationList
             // sort and save collection
             updatedCollection = sortCollection(updatedCollection)
             saveCollection(context, updatedCollection, false)
@@ -188,7 +191,7 @@ object CollectionHelper {
     /* Sets station image - determines station by remote image file location */
     fun setStationImageWithStationUuid(context: Context, collection: Collection, tempImageFileUri: String, stationUuid: String, imageManuallySet: Boolean = false): Collection {
         collection.stations.forEach { station ->
-            // find stattion by uuid
+            // find station by uuid
             if (station.uuid == stationUuid) {
                 station.smallImage = FileHelper.saveStationImage(context, station.uuid, tempImageFileUri, Keys.SIZE_STATION_IMAGE_CARD, Keys.STATION_IMAGE_FILE).toString()
                 station.image = FileHelper.saveStationImage(context, station.uuid, tempImageFileUri, Keys.SIZE_STATION_IMAGE_MAXIMUM, Keys.STATION_IMAGE_FILE).toString()
@@ -252,7 +255,7 @@ object CollectionHelper {
     /* Gets next station within collection */
     fun getNextStation(collection: Collection, stationUuid: String): Station {
         val currentStationPosition: Int = getStationPosition(collection, stationUuid)
-        LogHelper.d(TAG, "Number of stations: ${collection.stations.size} | current position: $currentStationPosition") // todo remove
+        LogHelper.d(TAG, "Number of stations: ${collection.stations.size} | current position: $currentStationPosition")
         return if (collection.stations.isEmpty() || currentStationPosition == -1) {
             Station()
         } else if (currentStationPosition < collection.stations.size -1) {
@@ -266,7 +269,7 @@ object CollectionHelper {
     /* Gets previous station within collection */
     fun getPreviousStation(collection: Collection, stationUuid: String): Station {
         val currentStationPosition: Int = getStationPosition(collection, stationUuid)
-        LogHelper.d(TAG, "Number of stations: ${collection.stations.size} | current position: $currentStationPosition") // todo remove
+        LogHelper.d(TAG, "Number of stations: ${collection.stations.size} | current position: $currentStationPosition")
         return if (collection.stations.isEmpty() || currentStationPosition == -1) {
             Station()
         } else if (currentStationPosition > 0) {
@@ -310,7 +313,6 @@ object CollectionHelper {
     }
 
 
-
     /* Saves the playback state of a given station */
     fun savePlaybackState(context: Context, collection: Collection, station: Station, playbackState: Int): Collection {
         collection.stations.forEach {
@@ -324,7 +326,7 @@ object CollectionHelper {
         // save collection and store modification date
         collection.modificationDate = saveCollection(context, collection)
         // save playback state of PlayerService
-        PreferencesHelper.savePlayerPlaybackState(context, playbackState)
+        PreferencesHelper.savePlayerPlaybackState(playbackState)
         return collection
     }
 
@@ -399,6 +401,7 @@ object CollectionHelper {
     }
 
 
+
     /* Sends a broadcast containing the collection as parcel */
     private fun sendCollectionBroadcast(context: Context, modificationDate: Date) {
         LogHelper.v(TAG, "Broadcasting that collection has changed.")
@@ -438,9 +441,7 @@ object CollectionHelper {
 
     /* Sorts radio stations by name */
     fun sortCollection(collection: Collection): Collection {
-        collection.stations = collection.stations.sortedWith(compareByDescending<Station> { it.starred }.thenBy { it.name.lowercase(
-            Locale.getDefault()
-        ) }) as MutableList<Station>
+        collection.stations = collection.stations.sortedWith(compareByDescending<Station> { it.starred }.thenBy { it.name.lowercase(Locale.getDefault()) }) as MutableList<Station>
         return collection
     }
 

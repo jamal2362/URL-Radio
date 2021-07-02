@@ -11,6 +11,7 @@
  * http://opensource.org/licenses/MIT
  */
 
+
 package com.jamal2367.urlradio.helpers
 
 import android.content.Context
@@ -24,6 +25,7 @@ import java.net.UnknownHostException
 import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+
 
 /*
  * NetworkHelper object
@@ -91,8 +93,7 @@ object NetworkHelper {
 
 
     /* Suspend function: Gets a random radio-browser.info api address - async using coroutine */
-    @Suppress("BlockingMethodInNonBlockingContext")
-    suspend fun getRadioBrowserServerSuspended(context: Context): String {
+    suspend fun getRadioBrowserServerSuspended(): String {
         return suspendCoroutine { cont ->
             val serverAddress: String = try {
                 // get all available radio browser servers
@@ -102,7 +103,7 @@ object NetworkHelper {
             } catch (e: UnknownHostException) {
                 Keys.RADIO_BROWSER_API_DEFAULT
             }
-            PreferencesHelper.saveRadioBrowserApiAddress(context, serverAddress)
+            PreferencesHelper.saveRadioBrowserApiAddress(serverAddress)
             cont.resume(serverAddress)
         }
     }
@@ -141,5 +142,6 @@ object NetworkHelper {
 
         return connection
     }
+
 
 }

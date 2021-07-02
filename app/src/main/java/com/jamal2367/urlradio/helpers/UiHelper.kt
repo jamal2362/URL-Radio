@@ -27,11 +27,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
 
+
 /*
  * UiHelper object
  */
 object UiHelper {
-
 
     /* Sets layout margins for given view in DP */
     fun setViewMargins(context: Context, view: View, left: Int = 0, right: Int = 0, top: Int= 0, bottom: Int = 0) {
@@ -185,4 +185,8 @@ object UiHelper {
     /*
      * End of inner class
      */
+
+
+
+
 }

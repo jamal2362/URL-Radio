@@ -11,6 +11,7 @@
  * http://opensource.org/licenses/MIT
  */
 
+
 package com.jamal2367.urlradio.helpers
 
 import android.content.Context
@@ -24,6 +25,7 @@ import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
 import java.io.IOException
 import java.io.InputStream
+
 
 /*
  * ImageHelper class
@@ -89,12 +91,7 @@ object ImageHelper {
         // draw input image onto canvas using transformation matrix
         val paint = Paint()
         paint.isFilterBitmap = true
-        imageCanvas.drawBitmap(bitmap, createTransformationMatrix(
-            size,
-            bitmap.height.toFloat(),
-            bitmap.width.toFloat(),
-            adaptivePadding
-        ), paint)
+        imageCanvas.drawBitmap(bitmap, createTransformationMatrix(size, 0, bitmap.height.toFloat(), bitmap.width.toFloat(), adaptivePadding), paint)
         return outputImage
     }
 
@@ -186,12 +183,7 @@ object ImageHelper {
 
 
     /* Creates a transformation matrix with the given size and optional padding  */
-    private fun createTransformationMatrix(
-        size: Int,
-        inputImageHeight: Float,
-        inputImageWidth: Float,
-        scaled: Boolean
-    ): Matrix {
+    private fun createTransformationMatrix(size: Int, yOffset: Int, inputImageHeight: Float, inputImageWidth: Float, scaled: Boolean): Matrix {
         val matrix = Matrix()
 
         // calculate padding
@@ -209,10 +201,10 @@ object ImageHelper {
         if (inputImageWidth >= inputImageHeight) {
             aspectRatio = (size - padding * 2) / inputImageWidth
             xTranslation = 0.0f + padding
-            yTranslation = (size - inputImageHeight * aspectRatio) / 2.0f + 0
+            yTranslation = (size - inputImageHeight * aspectRatio) / 2.0f + yOffset
         } else if (inputImageHeight > inputImageWidth) {
             aspectRatio = (size - padding * 2) / inputImageHeight
-            yTranslation = 0.0f + padding + 0
+            yTranslation = 0.0f + padding + yOffset
             xTranslation = (size - inputImageWidth * aspectRatio) / 2.0f
         }
 

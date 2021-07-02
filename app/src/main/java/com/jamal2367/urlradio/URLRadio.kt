@@ -1,7 +1,7 @@
 /*
  * URLRadio.kt
  * Implements the URLRadio class
- * URL Radio is the base Application class that sets up day and night theme
+ * URLRadio is the base Application class that sets up day and night theme
  *
  * This file is part of
  * URL Radio - Radio App for Android
@@ -11,12 +11,15 @@
  * http://opensource.org/licenses/MIT
  */
 
+
 package com.jamal2367.urlradio
 
 import android.app.Application
 import com.jamal2367.urlradio.helpers.AppThemeHelper
 import com.jamal2367.urlradio.helpers.LogHelper
 import com.jamal2367.urlradio.helpers.PreferencesHelper
+import com.jamal2367.urlradio.helpers.PreferencesHelper.initPreferences
+
 
 /**
  * URLRadio.class
@@ -31,8 +34,9 @@ class URLRadio: Application () {
     override fun onCreate() {
         super.onCreate()
         LogHelper.v(TAG, "URLRadio application started.")
+        initPreferences()
         // set Dark / Light theme state
-        AppThemeHelper.setTheme(PreferencesHelper.loadThemeSelection(this))
+        AppThemeHelper.setTheme(PreferencesHelper.loadThemeSelection())
     }
 
 
