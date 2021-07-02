@@ -11,7 +11,6 @@
  * http://opensource.org/licenses/MIT
  */
 
-
 package com.jamal2367.urlradio.playback
 
 import android.os.ResultReceiver
@@ -20,12 +19,10 @@ import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.os.bundleOf
 import com.jamal2367.urlradio.Keys
 
-
 /*
  * PlayerController class
  */
 class PlayerController (private val mediaController: MediaControllerCompat) {
-
 
     /* Main class variables */
     val transportControls: MediaControllerCompat.TransportControls = mediaController.transportControls
@@ -39,14 +36,25 @@ class PlayerController (private val mediaController: MediaControllerCompat) {
     }
 
 
-    /* Pause playback */
-    fun pause() {
-        transportControls.pause()
+    /* Stop playback */
+    fun stop() {
+        transportControls.stop()
+    }
+
+    /* Skip back 10 seconds */
+    fun skipBack() {
+        transportControls.skipToPrevious()
     }
 
     /* Skip forward 30 seconds */
-    fun skipForward() {
+    fun skipForward(episodeDuration: Long) {
         transportControls.skipToNext()
+    }
+
+
+    /* Seek to given position */
+    fun seekTo(position: Long) {
+        transportControls.seekTo(position)
     }
 
 

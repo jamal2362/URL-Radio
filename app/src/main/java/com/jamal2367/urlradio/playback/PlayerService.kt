@@ -30,7 +30,6 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.view.KeyEvent
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
@@ -138,20 +137,12 @@ open class PlayerService : MediaBrowserServiceCompat() {
         // ExoPlayer manages MediaSession
         mediaSessionConnector = MediaSessionConnector(mediaSession)
         mediaSessionConnector.setPlaybackPreparer(preparer)
-        mediaSessionConnector.setMediaButtonEventHandler(buttonEventHandler)
+        mediaSessionConnector.setControlDispatcher(dispatcher)
         //mediaSessionConnector.setMediaMetadataProvider(metadataProvider)
         mediaSessionConnector.setQueueNavigator(object : TimelineQueueNavigator(mediaSession) {
             override fun getMediaDescription(player: Player, windowIndex: Int): MediaDescriptionCompat {
                 // create media description - used in notification
                 return CollectionHelper.buildStationMediaDescription(this@PlayerService, station, getCurrentMetadata())
-            }
-            override fun onSkipToPrevious(player: Player, controlDispatcher: ControlDispatcher) {
-                LogHelper.d(TAG, "onSkipToPrevious called")
-                skipToPreviousStation()
-            }
-            override fun onSkipToNext(player: Player, controlDispatcher: ControlDispatcher) {
-                LogHelper.d(TAG, "onSkipToNext called")
-                skipToNextStation()
             }
         })
 
@@ -640,40 +631,6 @@ open class PlayerService : MediaBrowserServiceCompat() {
      */
 
 
-    /*
-     * MediaButtonEventHandler: overrides headphone next/previous/play/pause button behavior
-     */
-    private val buttonEventHandler =
-        MediaSessionConnector.MediaButtonEventHandler { _, _, mediaButtonEvent ->
-            val event: KeyEvent? = mediaButtonEvent.getParcelableExtra(Intent.EXTRA_KEY_EVENT)
-            LogHelper.e(TAG, "onMediaButtonEvent") // todo remove
-            when (event?.keyCode) {
-                KeyEvent.KEYCODE_MEDIA_NEXT -> {
-                    // debug: adb shell input keyevent 87
-                    if (event.action == KeyEvent.ACTION_UP) skipToNextStation()
-                    true
-                }
-                KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {
-                    // debug: adb shell input keyevent 87
-                    if (event.action == KeyEvent.ACTION_UP) skipToPreviousStation()
-                    true
-                }
-                KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> {
-                    // debug: adb shell input keyevent 85
-                    if (event.action == KeyEvent.ACTION_UP) {
-                        if (player.isPlaying) player.pause()
-                        else preparer.onPrepare(true)
-                    }
-                    true
-                }
-                else -> false
-            }
-        }
-    /*
-     * End of declaration
-     */
-
-
 //    /*
 //     * MediaMetadataProvider: creates metadata for currently playing station
 //     */
@@ -685,6 +642,32 @@ open class PlayerService : MediaBrowserServiceCompat() {
 //    /*
 //     * End of declaration
 //     */
+
+
+    /*
+     * DefaultControlDispatcher: intercepts commands from MediaSessionConnector
+     */
+    private val dispatcher = object : DefaultControlDispatcher() {
+        override fun dispatchSetPlayWhenReady(player: Player, playWhenReady: Boolean): Boolean {
+            // changes the default behavior of !playWhenReady from player.pause() to player.stop()
+            when (playWhenReady) {
+                true -> player.play()
+                false -> player.stop()
+            }
+            return true
+        }
+        override fun dispatchNext(player: Player): Boolean {
+            skipToNextStation()
+            return true
+        }
+        override fun dispatchPrevious(player: Player): Boolean {
+            skipToPreviousStation()
+            return true
+        }
+    }
+    /*
+     * End of declaration
+     */
 
 
     /*
