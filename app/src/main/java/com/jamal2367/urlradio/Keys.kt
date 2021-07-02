@@ -178,10 +178,7 @@ object Keys {
     const val EMPTY_STRING_RESOURCE: Int = 0
 
     // requests
-    const val REQUEST_LOAD_IMAGE: Int = 1
     const val REQUEST_UPDATE_COLLECTION: Int = 2
-    const val REQUEST_SAVE_M3U: Int = 3
-    const val PERMISSION_REQUEST_IMAGE_PICKER_READ_EXTERNAL_STORAGE = 42
 
     // results
     const val RESULT_DATA_SLEEP_TIMER_REMAINING: String = "DATA_SLEEP_TIMER_REMAINING"

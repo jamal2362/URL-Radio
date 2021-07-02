@@ -110,6 +110,7 @@
     <!-- Toasts -->
     <string name="toastmessage_copied_to_clipboard">Copied to clipboard.</string>
     <string name="toastmessage_error_download_error">Download error</string>
+    <string name="toastmessage_error_missing_storage_permission">Grant \"Read Storage\" permission to open this file.</string>
     <string name="toastmessage_error_no_station_found">Unable to start playback. Please add a radio station first.</string>
     <string name="toastmessage_error_no_station_matches_search">Unable to find a station that matches your search.</string>
     <string name="toastmessage_error_restart_playback_failed">Unable to restart playback.</string>
