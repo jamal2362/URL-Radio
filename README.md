@@ -1,5 +1,5 @@
 # URL-Radio
-[![GitHub license](https://img.shields.io/github/license/jamal2362/URL-Radio)](https://github.com/jamal2362/URL-Radio/blob/master/LICENSE.md) [![GitHub issues](https://img.shields.io/github/issues/jamal2362/URL-Radio)](https://github.com/jamal2362/URL-Radio/issues) [![Crowdin](https://badges.crowdin.net/url-radio/localized.svg)](https://crowdin.com/project/url-radio)
+[![GitHub license](https://img.shields.io/github/license/jamal2362/URL-Radio)](https://github.com/jamal2362/URL-Radio/blob/master/LICENSE.md) [![GitHub issues](https://img.shields.io/github/issues/jamal2362/URL-Radio)](https://github.com/jamal2362/URL-Radio/issues)
 
 #### URL-Radio is an app with a minimalistic approach for listening to radio programs over the internet, which may not be to everyone's liking. It has no radio station discovery feature.
 #### URL-Radio only offers a very simple search option and it imports audio streaming links when you tap them in a web browser.
