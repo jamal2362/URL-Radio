@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- App Name -->
-    <string name="app_name">Transistor</string>
+    <string name="app_name">URL Radio</string>
     <!-- please do not translate app_name - transcription into different alphabet types is fine though -->
-    <string name="app_version_name" translatable="false">\"Modern Love\"</string>
+    <string name="app_version_name" translatable="false">\"Lima\"</string>
     <!-- Fragment -->
     <string name="fragment_settings_title">Settings</string>
     <!-- Dialogs -->
@@ -87,6 +87,8 @@
     <string name="pref_edit_station_stream_summary_disabled">Editing of streaming links disabled. </string>
     <string name="pref_edit_station_stream_title">Edit Streaming Links</string>
     <string name="pref_general_title">General</string>
+    <string name="pref_handle_audio_focus_title">Handle Audio Focus</string>
+    <string name="pref_handle_audio_focus_summary">Stop playback when other app starts playback or phone call is started</string>
     <string name="pref_maintenance_title">Maintenance</string>
     <string name="pref_m3u_export_summary">Save your radio stations to an M3U playlist file that can be imported into other players.</string>
     <string name="pref_m3u_export_title">Export M3U</string>
@@ -131,7 +133,7 @@
     <string name="sample_text_station_name" translatable="false">Byte FM</string>
     <string name="sample_text_steam_url" translatable="false">http://bytefm.cast.addradio.de/bytefm/main/mid/stream</string>
     <string name="sample_text_sleep_timer_remaining_time" translatable="false">00:00</string>
-    <!-- Strings from Classic Transistor -->
+    <!-- Strings from Classic URL Radio -->
     <!-- please do not translate app_name - transcription into different alphabet types is fine though -->
     <!-- app shortcuts -->
     <string name="shortcut_last_station_short_label">Last station</string>
@@ -187,15 +189,15 @@
     <string name="dialog_error_title_fetch_read">Read Issue</string>
     <string name="dialog_error_title_fetch_write">Write Issue</string>
     <string name="dialog_error_message_fetch_general_external_storage">External storage:</string>
-    <string name="dialog_error_message_fetch_general_hint_m3u">Hint: Transistor can only process MP3, AAC and Ogg/Opus encoded streams or links ending in .m3u or .pls.</string>
+    <string name="dialog_error_message_fetch_general_hint_m3u">Hint: URL Radio can only process MP3, AAC and Ogg/Opus encoded streams or links ending in .m3u or .pls.</string>
     <string name="dialog_error_message_fetch_general_playlist_type">Media type of file:</string>
     <string name="dialog_error_message_fetch_general_stream_type">MIME type of stream:</string>
     <string name="dialog_error_message_fetch_general_file_content">Content of file:</string>
-    <string name="dialog_error_message_fetch_download">Transistor tried hard but could not make sense of the link.</string>
+    <string name="dialog_error_message_fetch_download">URL Radio tried hard but could not make sense of the link.</string>
     <string name="dialog_error_message_fetch_download_station_url">Streaming link of station:</string>
-    <string name="dialog_error_message_fetch_read">Transistor tried hard but could not make sense of the file.</string>
+    <string name="dialog_error_message_fetch_read">URL Radio tried hard but could not make sense of the file.</string>
     <string name="dialog_error_message_fetch_read_file_location">Location of file:</string>
-    <string name="dialog_error_message_fetch_write">Transistor tried hard but could not save the station.</string>
+    <string name="dialog_error_message_fetch_write">URL Radio tried hard but could not save the station.</string>
     <!-- messages -->
     <string name="toastmessage_add_download_started">Download started.</string>
     <string name="toastmessage_add_open_file_started">Opening file.</string>
@@ -221,7 +223,7 @@
     <string name="toastalert_headphones_unplugged">Headphones unplugged. Playback stopped.</string>
     <string name="toastalert_permission_denied">Permission denied:</string>
     <string name="toastalert_station_not_found">Unable to find station.</string>
-    <string name="snackbar_request_storage_access">Transistor needs to be granted read permissions to be able access data from external storage.</string>
+    <string name="snackbar_request_storage_access">URL Radio needs to be granted read permissions to be able access data from external storage.</string>
     <string name="snackbar_message_timer_set">Sleep timer set to</string>
     <!-- notification -->
     <string name="notification_stop">Stop</string>

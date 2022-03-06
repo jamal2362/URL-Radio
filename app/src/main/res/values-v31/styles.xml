@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
+
+        <!-- Default colors -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryContainer">@color/colorPrimaryContainer</item>
+        <item name="colorAccent">@color/colorAccent</item>
+
+        <!-- Do not use primary colored elevation overlays to present a visual hierarchy - TOO COLORFUL  -->
+        <item name="elevationOverlayEnabled">false</item>
+
+        <!-- Use "light" Status and Navigation Bar -->
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:statusBarColor">@color/status_bar_background</item>
+
+        <!-- Alert Dialog -->
+        <item name="alertDialogTheme">@style/AlertDialogTheme</item>
+
+    </style>
+
+    <style name="AlertDialogTheme" parent="ThemeOverlay.Material3.Dialog.Alert">
+        <item name="android:fontFamily">@font/google_sans_medium</item>
+        <item name="android:background">@color/dialog_background</item>
+    </style>
+</resources>

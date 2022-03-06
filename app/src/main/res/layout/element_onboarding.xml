@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/onboarding_layout"
     android:layout_width="match_parent"
@@ -10,11 +11,12 @@
         android:id="@+id/onboarding_headline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:fontFamily="@font/google_sans_bold"
         android:layout_marginStart="8dp"
         android:layout_marginTop="96dp"
         android:layout_marginEnd="8dp"
         android:text="@string/onboarding_app_get_started"
-        android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
         android:textColor="@color/text_default"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.501"
@@ -22,6 +24,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
+        android:contentDescription="@null"
         android:id="@+id/arrow_left"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -32,6 +35,7 @@
         app:srcCompat="@drawable/ic_arrow_upward_24dp" />
 
     <ImageView
+        android:contentDescription="@null"
         android:id="@+id/arrow_right"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -56,11 +60,11 @@
         android:id="@+id/app_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:fontFamily="@font/google_sans_bold"
         android:layout_marginTop="16dp"
         android:text="@string/app_name"
-        android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
         android:textColor="@color/text_default"
-        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="@+id/app_icon"
         app:layout_constraintStart_toStartOf="@+id/app_icon"
         app:layout_constraintTop_toBottomOf="@+id/app_icon" />
@@ -69,8 +73,9 @@
         android:id="@+id/app_description"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:fontFamily="@font/google_sans_regular"
         android:text="@string/onboarding_app_description"
-        android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle2"
         android:textColor="@color/text_lightweight"
         app:layout_constraintEnd_toEndOf="@+id/app_name"
         app:layout_constraintStart_toStartOf="@+id/app_name"
@@ -91,7 +96,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/onboarding_app_import_running"
-        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
         android:textColor="@color/text_lightweight"
         app:layout_constraintEnd_toEndOf="@+id/progress_indicator"
         app:layout_constraintStart_toStartOf="@+id/progress_indicator"
@@ -101,9 +106,10 @@
         android:id="@+id/rodriguez_quote_1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:fontFamily="@font/google_sans_regular"
         android:layout_marginTop="48dp"
         android:text="@string/onboarding_app_rodriguez_quote_1"
-        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle2"
         android:textColor="@color/text_lightweight"
         android:textStyle="italic"
         app:layout_constraintEnd_toEndOf="@+id/app_description"
@@ -114,8 +120,9 @@
         android:id="@+id/rodriguez_quote_2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:fontFamily="@font/google_sans_regular"
         android:text="@string/onboarding_app_rodriguez_quote_2"
-        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle2"
         android:textColor="@color/text_lightweight"
         android:textStyle="italic"
         app:layout_constraintEnd_toEndOf="@+id/rodriguez_quote_1"
@@ -137,6 +144,4 @@
         android:layout_height="0dp"
         android:visibility="visible"
         app:constraint_referenced_ids="rodriguez_quote_1,rodriguez_quote_2" />
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -80,7 +80,7 @@ Adding New Keys:
     Its key needs to be recreated for each local install of android-media-controller from git
     Steps to get the valif signature:
     - comment out the below signature
-    - start android-media-controller & connect Transistor
+    - start android-media-controller & connect URL Radio
     - search logcat for "Caller has a valid certificate, but its package doesn't match"
     - grab the signature with the new key
     -->

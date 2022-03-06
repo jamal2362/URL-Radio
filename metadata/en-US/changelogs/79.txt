@@ -1,5 +1,0 @@
-# v4.0.7 - Andy Warhol
-
-**2020-10-01**
-
-- updated translations

@@ -1,7 +1,7 @@
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="org.y20k.transistor">
+    package="com.jamal2367.urlradio">
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -13,7 +13,7 @@
 
 
     <application
-        android:name=".Transistor"
+        android:name=".URLRadio"
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_rules"
         android:networkSecurityConfig="@xml/network_security_config"
@@ -35,7 +35,7 @@
             android:name=".PlayerServiceStarterActivity"
             android:exported="true">
             <intent-filter>
-                <action android:name="org.y20k.transistor.action.START_PLAYER_SERVICE" />
+                <action android:name="com.jamal2367.urlradio.action.START_PLAYER_SERVICE" />
             </intent-filter>
         </activity>
 
@@ -105,7 +105,7 @@
 
             <!-- react to "start player service" intents -->
             <intent-filter>
-                <action android:name="org.y20k.transistor.action.START_PLAYER_SERVICE" />
+                <action android:name="com.jamal2367.urlradio.action.START_PLAYER_SERVICE" />
             </intent-filter>
 
             <!-- App Shortcuts -->
@@ -123,7 +123,7 @@
             tools:ignore="ExportedService">
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService"/>
-                <action android:name="org.y20k.transistor.action.START_PLAYER_SERVICE" />
+                <action android:name="com.jamal2367.urlradio.action.START_PLAYER_SERVICE" />
             </intent-filter>
         </service>
 

@@ -1,7 +1,0 @@
-# v3.2.2 - Life on Mars?
-
-**2019-10-18**
-
-- Thai language version
-- updated translations
-

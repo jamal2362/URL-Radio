@@ -8,7 +8,7 @@
     <!-- PLAYER -->
     <fragment
         android:id="@+id/player_destination"
-        android:name="org.y20k.transistor.PlayerFragment"
+        android:name="com.jamal2367.urlradio.PlayerFragment"
         android:label="Player"
         tools:layout="@layout/fragment_player">
         <action
@@ -19,7 +19,7 @@
     <!-- SETTINGS -->
     <fragment
         android:id="@+id/settings_destination"
-        android:name="org.y20k.transistor.SettingsFragment"
+        android:name="com.jamal2367.urlradio.SettingsFragment"
         android:label="Settings"/>
 
 </navigation>

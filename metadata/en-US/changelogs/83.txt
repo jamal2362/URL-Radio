@@ -1,5 +1,0 @@
-# v4.0.12 - Andy Warhol
-
-**2021-03-10**
-
-- fixes broken playback from home screen shortcut
