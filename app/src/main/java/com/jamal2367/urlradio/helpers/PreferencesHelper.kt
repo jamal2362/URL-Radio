@@ -257,7 +257,7 @@ object PreferencesHelper {
 
     /* Loads value of the option: Edit Stations */
     fun loadEditStationsEnabled(): Boolean {
-        return sharedPreferences.getBoolean(Keys.PREF_EDIT_STATIONS, false)
+        return sharedPreferences.getBoolean(Keys.PREF_EDIT_STATIONS, true)
     }
 
 
@@ -271,7 +271,7 @@ object PreferencesHelper {
 
     /* Loads value of the option: Edit Station Streams */
     fun loadEditStreamUrisEnabled(): Boolean {
-        return sharedPreferences.getBoolean(Keys.PREF_EDIT_STREAMS_URIS, false)
+        return sharedPreferences.getBoolean(Keys.PREF_EDIT_STREAMS_URIS, true)
     }
 
 
