@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Accessibility Descriptions -->
+    <string name="descr_app_icon">App-Symbol in der Form eines alten Radios</string>
+    <string name="descr_card_small_play_button">Start/Stopp</string>
+    <string name="descr_card_starred_station">Markierter Sender</string>
+    <string name="descr_card_station_image_change">Senderbild ändern</string>
+    <string name="descr_card_station_image">Senderbild</string>
+    <string name="descr_dialog_edit_place_on_home_screen_icon">Auf dem Startbildschirm platzieren</string>
+    <string name="descr_expanded_player_sleep_timer_cancel_button">Schlaf-Timer abbrechen</string>
+    <string name="descr_expanded_player_sleep_timer_remaining_time">Verbleibende Zeit des Schlaf-Timers</string>
+    <string name="descr_expanded_player_sleep_timer_start_button">Schlaf-Timer starten</string>
+    <string name="descr_player_playback_button">Start/Pause</string>
+    <string name="descr_player_station_image">Senderbild</string>
+	
+    <!-- Dialogs -->
+    <string name="dialog_edit_save_changes">Änderungen speichern</string>
+    <string name="dialog_edit_station_name">Sendername</string>
+    <string name="dialog_edit_stream_uri">Stream-Adresse</string>
+    <string name="dialog_error_message_default">Ein Fehler ist aufgetreten</string>
+    <string name="dialog_error_message_no_network">Mit dem Internet verbinden.</string>
+    <string name="dialog_error_title_no_network">Offline</string>
+    <string name="dialog_find_station_button_add">Hinzufügen</string>
+    <string name="dialog_find_station_hint">Name oder Stream-Adresse</string>
+    <string name="dialog_find_station_no_results">Keine Ergebnisse gefunden.</string>
+    <string name="dialog_find_station_title">Sender finden</string>
+    <string name="dialog_generic_button_cancel">Abbrechen</string>
+    <string name="dialog_generic_button_okay">OK</string>
+    <string name="dialog_generic_details_button">Details anzeigen</string>
+    <string name="dialog_opml_import_details_default">Keine Details verfügbar</string>
+    <string name="dialog_yes_no_message_remove_station">Diesen Sender entfernen\?</string>
+    <string name="dialog_yes_no_message_update_station_images">Neueste Version aller Senderbilder herunterladen\?</string>
+    <string name="dialog_yes_no_negative_button_cancel">Abbrechen</string>
+    <string name="dialog_yes_no_positive_button_default">Ja</string>
+    <string name="dialog_yes_no_positive_button_remove_station">Entfernen</string>
+    <string name="dialog_yes_no_positive_button_update_covers">Aktualisieren</string>
+	
+    <!-- Fragment -->
+    <string name="fragment_settings_title">Einstellungen</string>
+	
+    <!-- Notification -->
+    <string name="notification_now_playing_channel_description">Wiedergabesteuerungen, Sendername und Bild.</string>
+    <string name="notification_now_playing_channel_name">Wiedergabesteuerung</string>
+	
+    <!-- Onboarding -->
+    <string name="onboarding_app_description">Radio App</string>
+    <string name="onboarding_app_get_started">Jetzt starten</string>
+    <string name="onboarding_app_import_running">Importiere deine Sender. Bitte warten…</string>
+	
+    <!-- Player -->
+    <string name="player_sheet_h2_station_metadata">Momentan läuft</string>
+    <string name="player_sheet_h2_stream_url">Streaming-Adresse</string>
+	
+    <!-- Settings -->
+    <string name="pref_about_title">Über</string>
+    <string name="pref_advanced_title">Erweitert</string>
+    <string name="pref_app_version_summary">Version</string>
+    <string name="pref_app_version_title">App-Version</string>
+    <string name="pref_edit_station_stream_summary_disabled">Die Bearbeitung von Streaming-Links ist deaktiviert.</string>
+    <string name="pref_edit_station_stream_summary_enabled">Die Bearbeitung von Streaming-Links ist aktiviert. Stelle sicher, dass du eine korrekte Stream-Adresse eingibst.</string>
+    <string name="pref_edit_station_stream_title">Streaming-Links bearbeiten</string>
+    <string name="pref_edit_station_summary_disabled">Die Bearbeitung von Senderinformationen ist deaktiviert.</string>
+    <string name="pref_edit_station_summary_enabled">Die Bearbeitung von Senderinformationen ist aktiviert. Drücke lange, um den Bearbeitungsmodus aufzurufen.</string>
+    <string name="pref_edit_station_title">Sender bearbeiten</string>
+    <string name="pref_general_title">Allgemein</string>
+    <string name="pref_handle_audio_focus_summary">Wiedergabe stoppen wenn andere Anwendung Audio ausgibt oder Telefonanruf gestartet wird.</string>
+    <string name="pref_handle_audio_focus_title">Audio-Fokus berücksichtigen</string>
+    <string name="pref_m3u_export_summary">Speichert deine Radiosender in einer M3U-Playlistdatei, die in andere Player importiert werden kann.</string>
+    <string name="pref_m3u_export_title">M3U-Playlist exportieren</string>
+    <string name="pref_maintenance_title">Wartung</string>
+    <string name="pref_report_issue_summary">Fehler auf GitHub melden und Verbesserungen vorschlagen.</string>
+    <string name="pref_report_issue_title">Fehler melden</string>
+    <string name="pref_theme_selection_mode_dark">Dunkles Design</string>
+    <string name="pref_theme_selection_mode_device_default">Systemstandard</string>
+    <string name="pref_theme_selection_mode_light">Helles Design</string>
+    <string name="pref_theme_selection_summary">Aktuell:</string>
+    <string name="pref_theme_selection_title">App-Design</string>
+    <string name="pref_update_station_images_summary">Die neueste Version aller Senderbilder herunterladen.</string>
+    <string name="pref_update_station_images_title">Senderbilder aktualisieren</string>
+	
+    <!-- App Shortcuts -->
+    <string name="shortcut_last_station_disabled_message">Verknüpfung für Wiedergabe des letzten Senders deaktiviert.</string>
+    <string name="shortcut_last_station_long_label">Letzten Sender wiedergeben</string>
+    <string name="shortcut_last_station_short_label">Letzter Sender</string>
+	
+    <!-- Station List -->
+    <string name="station_list_button_add_new_station">Neuen Sender hinzufügen</string>
+	
+    <!-- Toast Alerts -->
+    <string name="toastalert_no_image_picker">Bildauswahl nicht verfügbar. Installation einer Galerie-Anwendung notwendig.</string>
+	
+    <!-- Toasts -->
+    <string name="toastmessage_copied_to_clipboard">In die Zwischenablage kopiert</string>
+    <string name="toastmessage_error_download_error">Fehler beim Herunterladen</string>
+    <string name="toastmessage_error_missing_storage_permission">Erteile die Berechtigung „Speicher lesen“, um diese Datei zu öffnen</string>
+    <string name="toastmessage_error_no_station_found">Die Wiedergabe konnte nicht gestartet werden. Bitte füge zuerst einen Radiosender hinzu.</string>
+    <string name="toastmessage_error_no_station_matches_search">Es konnte kein Sender gefunden werden, der deiner Suche entspricht</string>
+    <string name="toastmessage_error_restart_playback_failed">Die Wiedergabe konnte nicht neu gestartet werden</string>
+    <string name="toastmessage_install_file_helper">Bitte installiere einen Dateimanager</string>
+    <string name="toastmessage_save_m3u">Radiosender als M3U gespeichert…</string>
+    <string name="toastmessage_shortcut_created">Sender auf Startbildschirm platzieren</string>
+    <string name="toastmessage_shortcut_not_created">Sender konnte nicht auf dem Startbildschirm platziert werden. Das Gerät unterbindet das Platzieren von Verknüpfungen.</string>
+    <string name="toastmessage_sleep_timer_unable_to_start">Bitte zuerst die Wiedergabe starten</string>
+    <string name="toastmessage_station_duplicate">Sender duplizieren</string>
+    <string name="toastmessage_station_not_valid">Dieser Sender existiert nicht</string>
+    <string name="toastmessage_updating_collection">Alle Sender werden aktualisiert</string>
+    <string name="toastmessage_updating_station_images">Alle Senderbilder werden aktualisiert</string>
+</resources>
