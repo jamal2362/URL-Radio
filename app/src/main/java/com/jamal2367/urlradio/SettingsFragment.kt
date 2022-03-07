@@ -68,7 +68,7 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
         // set up "App Theme" preference
         val preferenceThemeSelection = ListPreference(activity as Context)
         preferenceThemeSelection.title = getString(R.string.pref_theme_selection_title)
-        preferenceThemeSelection.setIcon(R.drawable.ic_smartphone_24dp)
+        preferenceThemeSelection.setIcon(R.drawable.ic_brush_24dp)
         preferenceThemeSelection.key = Keys.PREF_THEME_SELECTION
         preferenceThemeSelection.summary = "${getString(R.string.pref_theme_selection_summary)} ${AppThemeHelper.getCurrentTheme(activity as Context)}"
         preferenceThemeSelection.entries = arrayOf(getString(R.string.pref_theme_selection_mode_device_default), getString(R.string.pref_theme_selection_mode_light), getString(R.string.pref_theme_selection_mode_dark))
@@ -87,7 +87,7 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
         // set up "Handle Audio Focus" preference
         val preferenceHandleAudioFocus = SwitchPreferenceCompat(activity as Context)
         preferenceHandleAudioFocus.title = getString(R.string.pref_handle_audio_focus_title)
-        preferenceHandleAudioFocus.setIcon(R.drawable.ic_volume_off)
+        preferenceHandleAudioFocus.setIcon(R.drawable.ic_volume_off_24dp)
         preferenceHandleAudioFocus.key = Keys.PREF_HANDLE_AUDIO_FOCUS
         preferenceHandleAudioFocus.summary = getString(R.string.pref_handle_audio_focus_summary)
         preferenceHandleAudioFocus.setDefaultValue(true)
@@ -166,7 +166,7 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
         // set up "M3U Export" preference
         val preferenceM3uExport = Preference(activity as Context)
         preferenceM3uExport.title = getString(R.string.pref_m3u_export_title)
-        preferenceM3uExport.setIcon(R.drawable.ic_save_24dp)
+        preferenceM3uExport.setIcon(R.drawable.ic_cloud_download_24dp)
         preferenceM3uExport.summary = getString(R.string.pref_m3u_export_summary)
         preferenceM3uExport.setOnPreferenceClickListener {
             openSaveM3uDialog()
