@@ -271,7 +271,7 @@ object FileHelper {
 
     /* Deletes the debug log file */
     fun deleteLog(context: Context) {
-        val logFile: File = File(context.getExternalFilesDir(Keys.FOLDER_COLLECTION), Keys.DEBUG_LOG_FILE)
+        val logFile = File(context.getExternalFilesDir(Keys.FOLDER_COLLECTION), Keys.DEBUG_LOG_FILE)
         if (logFile.exists()) {
             logFile.delete()
         }
@@ -482,10 +482,10 @@ object FileHelper {
     fun getCollectionFolderSize(context: Context): Int {
         val folder: File? = context.getExternalFilesDir(Keys.FOLDER_COLLECTION)
         val files = folder?.listFiles()
-        if (folder != null && folder.exists() && folder.isDirectory) {
-            return files?.size ?: -1
+        return if (folder != null && folder.exists() && folder.isDirectory) {
+            files?.size ?: -1
         } else {
-            return -1
+            -1
         }
     }
 

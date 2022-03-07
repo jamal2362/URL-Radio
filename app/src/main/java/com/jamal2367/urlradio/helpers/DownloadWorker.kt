@@ -25,10 +25,6 @@ import com.jamal2367.urlradio.Keys
  */
 class DownloadWorker(context : Context, params : WorkerParameters): Worker(context, params) {
 
-    /* Define log tag */
-    private val aTAG: String = LogHelper.makeLogTag(DownloadWorker::class.java)
-
-
     /* Overrides doWork */
     override fun doWork(): Result {
         // determine what type of download is requested

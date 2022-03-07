@@ -26,10 +26,6 @@ import com.jamal2367.urlradio.helpers.PreferencesHelper.initPreferences
  */
 class URLRadio: Application () {
 
-    /* Define log tag */
-    private val aTAG: String = LogHelper.makeLogTag(URLRadio::class.java)
-
-
     /* Implements onCreate */
     override fun onCreate() {
         super.onCreate()

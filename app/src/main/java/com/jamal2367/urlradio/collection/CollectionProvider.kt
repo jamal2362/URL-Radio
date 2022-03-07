@@ -27,10 +27,6 @@ import com.jamal2367.urlradio.helpers.CollectionHelper
  */
 class CollectionProvider {
 
-    /* Define log tag */
-    private val aTAG = CollectionProvider::class.java.simpleName
-
-
     /* Main class variables */
     private enum class State { NON_INITIALIZED, INITIALIZING, INITIALIZED }
     private var currentState = State.NON_INITIALIZED
@@ -69,18 +65,18 @@ class CollectionProvider {
 
     /* Get first station as media item */
     fun getFirstStation(): MediaBrowserCompat.MediaItem? {
-        when (isInitialized() && stationListByName.isNotEmpty()) {
-            true -> return stationListByName.first()
-            false -> return null
+        return when (isInitialized() && stationListByName.isNotEmpty()) {
+            true -> stationListByName.first()
+            false -> null
         }
     }
 
 
     /* Get last station as media item */
-    fun getLastStation(): MediaBrowserCompat.MediaItem? {
-        when (isInitialized() && stationListByName.isNotEmpty()) {
-            true -> return stationListByName.last()
-            false -> return null
+    private fun getLastStation(): MediaBrowserCompat.MediaItem? {
+        return when (isInitialized() && stationListByName.isNotEmpty()) {
+            true -> stationListByName.last()
+            false -> null
         }
     }
 

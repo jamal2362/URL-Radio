@@ -34,17 +34,13 @@ import kotlin.coroutines.suspendCoroutine
  */
 object NetworkHelper {
 
-    /* Define log tag */
-    private val aTAG: String = LogHelper.makeLogTag(NetworkHelper::class.java)
-
-
     /* Data class: holder for content type information */
     data class ContentType(var type: String = String(), var charset: String = String())
 
 
     /* Checks if the active network connection is over Wifi */
     fun isConnectedToWifi(context: Context): Boolean {
-        var result: Boolean = false
+        var result = false
         val connMgr = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val activeNetwork: Network? = connMgr.activeNetwork
         if (activeNetwork != null) {
@@ -60,7 +56,7 @@ object NetworkHelper {
 
     /* Checks if the active network connection is over Cellular */
     fun isConnectedToCellular(context: Context): Boolean {
-        var result: Boolean = false
+        var result = false
         val connMgr = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val activeNetwork: Network? = connMgr.activeNetwork
         if (activeNetwork != null) {
@@ -76,7 +72,7 @@ object NetworkHelper {
 
     /* Checks if the active network connection is over VPN */
     fun isConnectedToVpn(context: Context): Boolean {
-        var result: Boolean = false
+        var result = false
         val connMgr = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val activeNetwork: Network? = connMgr.activeNetwork
         if (activeNetwork != null) {
@@ -101,7 +97,7 @@ object NetworkHelper {
     /* Detects content type (mime type) from given URL string - async using coroutine - use only on separate threat */
     fun detectContentType(urlString: String): ContentType {
         LogHelper.v("Determining content type - Thread: ${Thread.currentThread().name}")
-        val contentType: ContentType = ContentType(Keys.MIME_TYPE_UNSUPPORTED, Keys.CHARSET_UNDEFINDED)
+        val contentType = ContentType(Keys.MIME_TYPE_UNSUPPORTED, Keys.CHARSET_UNDEFINDED)
         val connection: HttpURLConnection? = createConnection(urlString)
         if (connection != null) {
             val contentTypeHeader: String = connection.contentType ?: String()
@@ -145,14 +141,13 @@ object NetworkHelper {
     /* Suspend function: Gets a random radio-browser.info api address - async using coroutine */
     suspend fun getRadioBrowserServerSuspended(): String {
         return suspendCoroutine { cont ->
-            var serverAddress: String
-            try {
+            val serverAddress: String = try {
                 // get all available radio browser servers
                 val serverAddressList: Array<InetAddress> = InetAddress.getAllByName(Keys.RADIO_BROWSER_API_BASE)
                 // select a random address
-                serverAddress = serverAddressList[Random().nextInt(serverAddressList.size)].canonicalHostName
+                serverAddressList[Random().nextInt(serverAddressList.size)].canonicalHostName
             } catch (e: UnknownHostException) {
-                serverAddress = Keys.RADIO_BROWSER_API_DEFAULT
+                Keys.RADIO_BROWSER_API_DEFAULT
             }
             PreferencesHelper.saveRadioBrowserApiAddress(serverAddress)
             cont.resume(serverAddress)

@@ -18,7 +18,6 @@ import android.content.Context
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
-import com.jamal2367.urlradio.helpers.LogHelper
 
 
 /*
@@ -31,10 +30,6 @@ class YesNoDialog (private var yesNoDialogListener: YesNoDialogListener) {
         fun onYesNoDialog(type: Int, dialogResult: Boolean, payload: Int, payloadString: String) {
         }
     }
-
-
-    /* Define log tag */
-    private val aTAG = LogHelper.makeLogTag(YesNoDialog::class.java.simpleName)
 
 
     /* Construct and show dialog - variant: message from string  */
@@ -62,7 +57,7 @@ class YesNoDialog (private var yesNoDialogListener: YesNoDialogListener) {
              payloadString: String = Keys.DIALOG_EMPTY_PAYLOAD_STRING) {
 
         // prepare dialog builder
-        val builder: MaterialAlertDialogBuilder = MaterialAlertDialogBuilder(context, R.style.AlertDialogTheme)
+        val builder = MaterialAlertDialogBuilder(context, R.style.AlertDialogTheme)
 
         // set title and message
         builder.setMessage(messageString)

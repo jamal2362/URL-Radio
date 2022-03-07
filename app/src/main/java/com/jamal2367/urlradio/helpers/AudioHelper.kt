@@ -24,14 +24,10 @@ import android.net.Uri
  */
 object AudioHelper {
 
-    /* Define log tag */
-    private val aTAG: String = LogHelper.makeLogTag(AudioHelper::class.java)
-
-
     /* Extract duration metadata from audio file */
     fun getDuration(context: Context, audioFileUri: Uri): Long {
-        val metadataRetriever: MediaMetadataRetriever = MediaMetadataRetriever()
-        var duration: Long = 0L
+        val metadataRetriever = MediaMetadataRetriever()
+        var duration = 0L
         try {
             metadataRetriever.setDataSource(context, audioFileUri)
             val durationString = metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION) ?: String()

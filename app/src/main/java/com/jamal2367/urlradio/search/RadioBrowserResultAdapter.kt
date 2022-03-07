@@ -20,17 +20,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textview.MaterialTextView
 import com.jamal2367.urlradio.R
-import com.jamal2367.urlradio.helpers.LogHelper
 
 
 /*
  * RadioBrowserResult class
  */
 class RadioBrowserResultAdapter(private val listener: RadioBrowserResultAdapterListener, var searchResults: Array<RadioBrowserResult>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-
-    /* Define log tag */
-    private val aTAG: String = LogHelper.makeLogTag(RadioBrowserResultAdapter::class.java)
-
 
     /* Main class variables */
     private var selectedPosition: Int = RecyclerView.NO_POSITION

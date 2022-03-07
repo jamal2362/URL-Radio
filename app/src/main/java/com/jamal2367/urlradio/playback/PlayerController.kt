@@ -19,17 +19,12 @@ import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.os.bundleOf
 import com.jamal2367.urlradio.Keys
-import com.jamal2367.urlradio.helpers.LogHelper
 
 
 /*
  * PlayerController class
  */
 class PlayerController (private val mediaController: MediaControllerCompat) {
-
-    /* Define log tag */
-    private val aTAG: String = LogHelper.makeLogTag(PlayerController::class.java)
-
 
     /* Main class variables */
     private val transportControls: MediaControllerCompat.TransportControls = mediaController.transportControls

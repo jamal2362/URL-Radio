@@ -36,10 +36,6 @@ import com.jamal2367.urlradio.R
  */
 object UiHelper {
 
-    /* Define log tag */
-    private val aTAG: String = LogHelper.makeLogTag(UiHelper::class.java)
-
-
     /* Sets layout margins for given view in DP */
     fun setViewMargins(context: Context, view: View, left: Int = 0, right: Int = 0, top: Int= 0, bottom: Int = 0) {
         val l: Int = (left * ImageHelper.getDensityScalingFactor(context)).toInt()
@@ -83,7 +79,7 @@ object UiHelper {
 
     /* Get the height of the system's top status bar */
     fun getStatusBarHeight(context: Context): Int {
-        var result: Int = 0
+        var result = 0
         val resourceId: Int = context.resources.getIdentifier("status_bar_height", "dimen", "android")
         if (resourceId > 0) {
             result = context.resources.getDimensionPixelSize(resourceId)

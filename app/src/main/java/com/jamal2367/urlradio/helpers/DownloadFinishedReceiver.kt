@@ -23,12 +23,7 @@ import android.content.Intent
 /*
  * DownloadFinishedReceiver class
  */
-class DownloadFinishedReceiver(): BroadcastReceiver() {
-
-
-    /* Define log tag */
-    private val aTAG: String = LogHelper.makeLogTag(DownloadFinishedReceiver::class.java)
-
+class DownloadFinishedReceiver : BroadcastReceiver() {
 
     /* Overrides onReceive */
     override fun onReceive(context: Context, intent: Intent) {

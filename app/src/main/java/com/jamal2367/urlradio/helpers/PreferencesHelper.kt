@@ -39,9 +39,6 @@ object PreferencesHelper {
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
     }
 
-    /* Define log tag */
-    private val aTAG: String = LogHelper.makeLogTag(PreferencesHelper::class.java)
-
 
     /* Loads address of radio-browser.info API from shared preferences */
     fun loadRadioBrowserApiAddress(): String {

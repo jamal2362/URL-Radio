@@ -38,10 +38,6 @@ import com.jamal2367.urlradio.R
  */
 class NotificationHelper(private val context: Context, sessionToken: MediaSessionCompat.Token, notificationListener: PlayerNotificationManager.NotificationListener) {
 
-    /* Define log tag */
-    private val aTAG: String = LogHelper.makeLogTag(NotificationHelper::class.java)
-
-
     /* Main class variables */
     private val serviceJob = SupervisorJob()
     private val serviceScope = CoroutineScope(Main + serviceJob)
