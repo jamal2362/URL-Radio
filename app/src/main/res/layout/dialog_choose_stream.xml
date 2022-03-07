@@ -44,5 +44,4 @@
         app:layout_constraintStart_toStartOf="@+id/dialog_choose_stream_message"
         app:layout_constraintTop_toBottomOf="@+id/dialog_choose_stream_message" />
 
-
 </androidx.constraintlayout.widget.ConstraintLayout>

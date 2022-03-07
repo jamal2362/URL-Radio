@@ -46,21 +46,6 @@
         app:shapeAppearanceOverlay="@style/RoundedCorners"
         app:srcCompat="@drawable/ic_image_white_36dp" />
 
-<!--    <com.google.android.material.imageview.ShapeableImageView-->
-<!--        android:id="@+id/imageView"-->
-<!--        android:layout_width="0dp"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:cropToPadding="false"-->
-<!--        app:contentPadding="8dp"-->
-<!--        app:layout_constraintBottom_toTopOf="@+id/cancel_button"-->
-<!--        app:layout_constraintEnd_toEndOf="@+id/station_icon"-->
-<!--        app:layout_constraintStart_toStartOf="@+id/station_icon"-->
-<!--        app:layout_constraintTop_toBottomOf="@+id/station_icon"-->
-<!--        app:shapeAppearanceOverlay="@style/RoundedCorners"-->
-<!--        app:srcCompat="@drawable/ic_add_to_home_screen_24dp"-->
-<!--        app:strokeColor="@color/text_default"-->
-<!--        app:strokeWidth="1dp" />-->
-
     <ImageView
         android:id="@+id/starred_icon"
         android:layout_width="wrap_content"

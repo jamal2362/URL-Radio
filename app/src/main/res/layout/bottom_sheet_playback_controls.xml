@@ -13,20 +13,6 @@
     app:gestureInsetBottomIgnored="true"
     app:layout_behavior="@string/bottom_sheet_behavior">
 
-
-    <!-- main player views -->
-    <!-- ... down here, because lower views are in a layout are above the higher views -->
-
-<!--    <View-->
-<!--        android:id="@+id/player_background"-->
-<!--        android:layout_width="0dp"-->
-<!--        android:layout_height="80dp"-->
-<!--        android:background="@drawable/shape_player_background"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintHorizontal_bias="1.0"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent" />-->
-
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/station_icon"
         android:layout_width="64dp"
@@ -156,7 +142,8 @@
         android:padding="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/sheet_streaming_link_icon"
-        app:srcCompat="@drawable/ic_chevron_left_24dp" />
+        app:srcCompat="@drawable/ic_chevron_left_24dp"
+        android:contentDescription="@null" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/sheet_metadata_headline"
@@ -198,7 +185,8 @@
         app:layout_constraintBottom_toBottomOf="@+id/sheet_previous_metadata_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/sheet_previous_metadata_button"
-        app:srcCompat="@drawable/ic_chevron_right_24dp" />
+        app:srcCompat="@drawable/ic_chevron_right_24dp"
+        android:contentDescription="@null"/>
 
 
     <ImageView
@@ -247,7 +235,6 @@
 
 
     <!-- Constraintlayout View Groups -->
-
     <androidx.constraintlayout.widget.Group
         android:id="@+id/sheet_metadata_views"
         android:layout_width="0dp"
@@ -261,6 +248,5 @@
         android:layout_height="0dp"
         android:visibility="gone"
         app:constraint_referenced_ids="sleep_timer_remaining_time,sleep_timer_cancel_button" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

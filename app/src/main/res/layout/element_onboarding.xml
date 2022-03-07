@@ -130,7 +130,6 @@
         app:layout_constraintTop_toBottomOf="@+id/rodriguez_quote_1" />
 
     <!-- Constraintlayout View Groups -->
-
     <androidx.constraintlayout.widget.Group
         android:id="@+id/onboarding_import_views"
         android:layout_width="0dp"
@@ -144,4 +143,5 @@
         android:layout_height="0dp"
         android:visibility="visible"
         app:constraint_referenced_ids="rodriguez_quote_1,rodriguez_quote_2" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
