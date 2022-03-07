@@ -95,27 +95,12 @@
         app:layout_constraintTop_toTopOf="@+id/station_icon"
         app:srcCompat="@drawable/ic_player_play_symbol_36dp" />
 
-<!--    <ImageView-->
-<!--        android:id="@+id/player_play_button"-->
-<!--        android:layout_width="60dp"-->
-<!--        android:layout_height="60dp"-->
-<!--        android:layout_marginEnd="8dp"-->
-<!--        android:background="@drawable/ic_circular_button_playback_56dp"-->
-<!--        android:clickable="true"-->
-<!--        android:contentDescription="@string/descr_player_playback_button"-->
-<!--        android:focusable="true"-->
-<!--        android:scaleType="center"-->
-<!--        app:layout_constraintBottom_toBottomOf="@+id/station_icon"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="@+id/station_icon"-->
-<!--        app:srcCompat="@drawable/ic_player_play_symbol_36dp" />-->
-
     <ProgressBar
         android:id="@+id/player_buffering_indicator"
-        style="?android:attr/progressBarStyle"
+        style="?android:attr/progressBarStyleLarge"
         android:layout_width="72dp"
         android:layout_height="72dp"
-        android:layout_marginEnd="3dp"
+        android:layout_marginEnd="2dp"
         android:indeterminateTint="@color/player_button_buffering"
         android:indeterminateTintMode="src_in"
         android:visibility="visible"
@@ -131,7 +116,8 @@
         android:padding="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/station_icon"
-        app:srcCompat="@drawable/ic_player_sheet_music_note_24dp" />
+        app:srcCompat="@drawable/ic_player_sheet_music_note_24dp"
+        android:contentDescription="@null" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/sheet_streaming_link_headline"
