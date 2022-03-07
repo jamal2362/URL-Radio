@@ -18,14 +18,14 @@
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_marginStart="10dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:background="@drawable/shape_cover_small"
         android:contentDescription="@string/descr_player_station_image"
-        app:shapeAppearanceOverlay="@style/RoundedCorners"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:shapeAppearanceOverlay="@style/RoundedCorners"
         app:srcCompat="@drawable/ic_default_station_image_24dp" />
 
     <com.google.android.material.textview.MaterialTextView
@@ -35,8 +35,8 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
-        android:fontFamily="@font/inter_medium"
         android:ellipsize="end"
+        android:fontFamily="@font/inter_medium"
         android:letterSpacing="0"
         android:singleLine="true"
         android:textAlignment="center"
@@ -55,8 +55,8 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="8dp"
-        android:fontFamily="@font/inter_medium"
         android:ellipsize="end"
+        android:fontFamily="@font/inter_medium"
         android:letterSpacing="0"
         android:singleLine="true"
         android:textAlignment="center"
@@ -99,11 +99,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
+        android:contentDescription="@null"
         android:padding="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/station_icon"
-        app:srcCompat="@drawable/ic_player_sheet_music_note_24dp"
-        android:contentDescription="@null" />
+        app:srcCompat="@drawable/ic_player_sheet_music_note_24dp" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/sheet_streaming_link_headline"
@@ -122,9 +122,9 @@
         android:id="@+id/sheet_streaming_link"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/inter_medium"
         android:layout_marginEnd="16dp"
         android:ellipsize="end"
+        android:fontFamily="@font/inter_medium"
         android:singleLine="true"
         android:textAppearance="@style/TextAppearance.Material3.BodySmall"
         android:textColor="@color/player_sheet_text_main"
@@ -139,11 +139,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
+        android:contentDescription="@null"
         android:padding="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/sheet_streaming_link_icon"
-        app:srcCompat="@drawable/ic_chevron_left_24dp"
-        android:contentDescription="@null" />
+        app:srcCompat="@drawable/ic_chevron_left_24dp" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/sheet_metadata_headline"
@@ -162,10 +162,10 @@
         android:id="@+id/sheet_metadata_history"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/inter_medium"
         android:ellipsize="marquee"
         android:focusable="true"
         android:focusableInTouchMode="true"
+        android:fontFamily="@font/inter_medium"
         android:marqueeRepeatLimit="marquee_forever"
         android:singleLine="true"
         android:textAppearance="@style/TextAppearance.Material3.BodySmall"
@@ -181,12 +181,12 @@
         android:id="@+id/sheet_next_metadata_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:contentDescription="@null"
         android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="@+id/sheet_previous_metadata_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/sheet_previous_metadata_button"
-        app:srcCompat="@drawable/ic_chevron_right_24dp"
-        android:contentDescription="@null"/>
+        app:srcCompat="@drawable/ic_chevron_right_24dp" />
 
 
     <ImageView
@@ -210,8 +210,8 @@
         android:id="@+id/sleep_timer_remaining_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/inter_medium"
         android:contentDescription="@string/descr_expanded_player_sleep_timer_remaining_time"
+        android:fontFamily="@font/inter_medium"
         android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
         android:textColor="@color/player_sheet_text_main"
         app:layout_constraintBottom_toBottomOf="@+id/sleep_timer_start_button"
