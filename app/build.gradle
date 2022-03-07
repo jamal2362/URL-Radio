@@ -14,7 +14,7 @@ android {
         versionCode 82
         versionName '8.2'
         resConfigs 'en', 'de'
-        setProperty("archivesBaseName", 'URL_Radio_v' + versionName)
+        setProperty("archivesBaseName", 'URL_Radio_' + versionName)
     }
 
     kotlinOptions {
