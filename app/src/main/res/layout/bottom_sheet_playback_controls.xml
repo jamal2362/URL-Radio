@@ -236,7 +236,6 @@
 
     <!-- Constraintlayout View Groups -->
     <androidx.constraintlayout.widget.Group
-        android:id="@+id/sheet_metadata_views"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:visibility="visible"
