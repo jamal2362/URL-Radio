@@ -22,7 +22,7 @@
     </style>
 
     <style name="AlertDialogTheme" parent="ThemeOverlay.Material3.Dialog.Alert">
-        <item name="android:fontFamily">@font/google_sans_medium</item>
+        <item name="android:fontFamily">@font/inter_medium</item>
         <item name="android:background">@color/dialog_background</item>
     </style>
 </resources>

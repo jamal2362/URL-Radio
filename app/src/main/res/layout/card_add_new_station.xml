@@ -13,7 +13,7 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="24dp"
-        android:fontFamily="@font/google_sans_medium"
+        android:fontFamily="@font/inter_medium"
         android:textAllCaps="true"
         android:text="@string/station_list_button_add_new_station"
         app:icon="@drawable/ic_add_24"
