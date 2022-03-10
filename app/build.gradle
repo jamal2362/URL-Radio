@@ -4,13 +4,13 @@ apply plugin: 'kotlin-parcelize'
 
 android {
 
-    compileSdkVersion 31
-    buildToolsVersion '31.0.0'
+    compileSdkVersion 32
+    buildToolsVersion '32.0.0'
 
     defaultConfig {
         applicationId 'com.jamal2367.urlradio'
         minSdkVersion 27
-        targetSdkVersion 31
+        targetSdkVersion 32
         versionCode 82
         versionName '8.2'
         resConfigs 'en', 'de'
