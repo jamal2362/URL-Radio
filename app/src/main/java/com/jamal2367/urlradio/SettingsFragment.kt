@@ -20,6 +20,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -54,7 +55,9 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
         (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.fragment_settings_title)
         // set the navigation bar color
-        activity?.window!!.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.app_window_background)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            activity?.window!!.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.app_window_background)
+        }
     }
 
 

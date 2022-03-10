@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId 'com.jamal2367.urlradio'
-        minSdkVersion 27
+        minSdkVersion 25
         targetSdkVersion 32
         versionCode 82
         versionName '8.2'

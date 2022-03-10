@@ -17,6 +17,7 @@ package com.jamal2367.urlradio.helpers
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.os.Build
 import android.widget.Toast
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
@@ -64,15 +65,11 @@ object ShortcutHelper {
     /* Create shortcut icon */
     private fun createShortcutIcon(context: Context, stationImage: String, stationImageColor: Int): IconCompat {
         val stationImageBitmap: Bitmap = ImageHelper.getScaledStationImage(context, stationImage,192)
-        return IconCompat.createWithAdaptiveBitmap(
-            ImageHelper.createSquareImage(
-                context,
-                stationImageBitmap,
-                stationImageColor,
-                192,
-                true
-            )
-        )
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            IconCompat.createWithAdaptiveBitmap(ImageHelper.createSquareImage(context, stationImageBitmap, stationImageColor, 192, true))
+        } else {
+            IconCompat.createWithAdaptiveBitmap(ImageHelper.createSquareImage(context, stationImageBitmap, stationImageColor, 192, false))
+        }
     }
 
 }

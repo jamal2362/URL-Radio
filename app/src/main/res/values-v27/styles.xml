@@ -14,19 +14,9 @@
 
         <!-- Use "light" Status and Navigation Bar -->
         <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
         <item name="android:statusBarColor">@color/status_bar_background</item>
 
-    </style>
-	
-	<style name="RoundedCorners" parent="">
-        <item name="cornerSizeTopLeft">8dp</item>
-        <item name="cornerFamilyTopLeft">rounded</item>
-        <item name="cornerSizeTopRight">8dp</item>
-        <item name="cornerFamilyTopRight">rounded</item>
-        <item name="cornerSizeBottomLeft">8dp</item>
-        <item name="cornerFamilyBottomLeft">rounded</item>
-        <item name="cornerSizeBottomRight">8dp</item>
-        <item name="cornerFamilyBottomRight">rounded</item>
     </style>
 
 </resources>
