@@ -14,40 +14,41 @@
     <!-- text & icons -->
     <color name="text_default">#FF595959</color> <!-- colorOnBackground / colorOnSurface-->
     <color name="text_lightweight">#FF595959</color> <!-- colorOnSurfaceVariant -->
-    <color name="text_link">#ffd0bcff</color> <!-- colorPrimaryInverse -->
-    <color name="text_link_separator">#ffd0bcff</color> <!-- colorPrimaryInverse -->
-    <color name="icon_default">#ff1c1b1f</color> <!-- colorOnBackground / colorOnSurface-->
-    <color name="icon_lightweight">#ff49454f</color> <!-- colorOnSurfaceVariant -->
+    <color name="text_link">#FFD0BCFF</color> <!-- colorPrimaryInverse -->
+    <color name="text_link_separator">#FFD0BCFF</color> <!-- colorPrimaryInverse -->
+    <color name="icon_default">#FF1C1B1F</color> <!-- colorOnBackground / colorOnSurface-->
+    <color name="icon_default_add_new_station">#FF1C1B1F</color> <!-- android:colorBackground / colorSurface -->
+    <color name="icon_lightweight">#FF49454f</color> <!-- colorOnSurfaceVariant -->
     <color name="icon_lightweight_background">#FFF2F2F2</color> <!-- colorSurfaceVariant -->
 
     <!-- list -->
-    <color name="list_card_background">#ffffffff</color> <!-- android:colorBackground / colorSurface -->
-    <color name="list_card_cover_background">#ffe7e0ec</color> <!-- colorSurfaceVariant -->
+    <color name="list_card_background">#FFFFFFFF</color> <!-- android:colorBackground / colorSurface -->
+    <color name="list_card_cover_background">#FFE7E0EC</color> <!-- colorSurfaceVariant -->
     <color name="list_card_delete_background">#FFF44336</color> <!-- colorError -->
-    <color name="list_card_delete_icon">#ffffffff</color> <!-- colorOnError (white) -->
+    <color name="list_card_delete_icon">#FFFFFFFF</color> <!-- colorOnError (white) -->
     <color name="list_card_mark_starred_background">#FF4CAF50</color> <!-- colorPrimary -->
-    <color name="list_card_mark_starred_star">#ffffffff</color> <!-- colorOnPrimary -->
+    <color name="list_card_mark_starred_star">#FFFFFFFF</color> <!-- colorOnPrimary -->
     <color name="search_result_background">#FFE6E6E6</color> <!-- android:colorBackground / colorSurface -->
     <color name="search_result_background_selected">#FFC7C7C7</color> <!-- colorSurfaceVariant -->
 
     <!-- player sheet -->
-    <color name="player_play_pause_icon">#ffffffff</color> <!-- colorOnPrimary-->
-    <color name="player_button_background">#FFF44336</color> <!-- colorPrimary -->
-    <color name="player_button_buffering">#FFE57373</color> <!-- colorPrimaryInverse -->
-    <color name="player_sheet_background">#ff313033</color> <!-- colorSurfaceInverse -->
-    <color name="player_sheet_text_main">#fff4eff4</color> <!-- colorOnSurfaceInverse -->
-    <color name="player_sheet_text_details">#fff4eff4</color> <!-- colorOnSurfaceInverse -->
-    <color name="player_sheet_icon">#fff4eff4</color> <!-- colorOnSurfaceInverse -->
+    <color name="player_play_pause_icon">#FFFFFFFF</color> <!-- colorOnPrimary-->
+    <color name="player_button_background">#FF3F51B5</color> <!-- colorPrimary -->
+    <color name="player_button_buffering">#FF7986CB</color> <!-- colorPrimaryInverse -->
+    <color name="player_sheet_background">#FF313033</color> <!-- colorSurfaceInverse -->
+    <color name="player_sheet_text_main">#FFF4EFF4</color> <!-- colorOnSurfaceInverse -->
+    <color name="player_sheet_text_details">#FFF4EFF4</color> <!-- colorOnSurfaceInverse -->
+    <color name="player_sheet_icon">#FFF4EFF4</color> <!-- colorOnSurfaceInverse -->
 
 
     <!-- default colors -->
-    <color name="default_neutral_white">#ffffffff</color> <!-- system_accent1_0 -->
-    <color name="default_neutral_lighter">#ffe6e1e5</color> <!-- system_neutral1_100 -->
-    <color name="default_neutral_medium_light">#ff7d7d7d</color> <!-- system_neutral1_300  todo check -->
-    <color name="default_neutral_dark">#ff595959</color> <!-- system_neutral1_600 todo check-->
-    <color name="default_neutral_darker">#ff1c1b1f</color> <!-- system_neutral1_900-->
+    <color name="default_neutral_white">#FFFFFFFF</color> <!-- system_accent1_0 -->
+    <color name="default_neutral_lighter">#FFE6E1E5</color> <!-- system_neutral1_100 -->
+    <color name="default_neutral_medium_light">#FF7D7D7D</color> <!-- system_neutral1_300  todo check -->
+    <color name="default_neutral_dark">#FF595959</color> <!-- system_neutral1_600 todo check-->
+    <color name="default_neutral_darker">#FF1C1B1F</color> <!-- system_neutral1_900-->
 
-    <color name="default_neutral_85percent">#d9313033</color> <!-- 85% system_neutral1_800 -->
-    <color name="default_transparent">#00ffffff</color>
+    <color name="default_neutral_85percent">#D9313033</color> <!-- 85% system_neutral1_800 -->
+    <color name="default_transparent">#00FFFFFF</color>
 
 </resources>

@@ -15,6 +15,7 @@
     <color name="text_link">#ff6750a4</color> <!-- colorPrimaryInverse -->
     <color name="text_link_separator">#ff6750a4</color> <!-- colorPrimaryInverse -->
     <color name="icon_default">#FFFFFFFF</color> <!-- colorOnBackground / colorOnSurface-->
+    <color name="icon_default_add_new_station">#FFFFFFFF</color> <!-- android:colorBackground / colorSurface -->
     <color name="icon_lightweight">#FFF2F2F2</color> <!-- colorOnSurfaceVariant -->
     <color name="icon_lightweight_background">#FF595959</color> <!-- colorSurfaceVariant -->
 
@@ -30,8 +31,8 @@
 
     <!-- player sheet -->
     <color name="player_play_pause_icon">#FFFFFFFF</color> <!-- colorOnPrimary (light theme) -->
-    <color name="player_button_background">#FFE57373</color> <!-- colorPrimary (light theme) -->
-    <color name="player_button_buffering">#FFEF5350</color> <!-- colorPrimaryInverse (light theme) -->
+    <color name="player_button_background">#FF7986CB</color> <!-- colorPrimary (light theme) -->
+    <color name="player_button_buffering">#FF5C6BC0</color> <!-- colorPrimaryInverse (light theme) -->
     <color name="player_sheet_background">#FF2D2D2D</color> <!-- colorSurfaceInverse (light theme) -->
     <color name="player_sheet_text_main">#FFFFFFFF</color> <!-- colorOnSurfaceInverse (light theme) -->
     <color name="player_sheet_text_details">#FFFFFFFF</color> <!-- colorOnSurfaceInverse (light theme) -->
