@@ -19,6 +19,7 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkCapabilities.*
+import android.os.Build
 import com.jamal2367.urlradio.Keys
 import java.net.HttpURLConnection
 import java.net.InetAddress
@@ -42,7 +43,11 @@ object NetworkHelper {
     fun isConnectedToWifi(context: Context): Boolean {
         var result = false
         val connMgr = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val activeNetwork: Network? = connMgr.activeNetwork
+        val activeNetwork: Network? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            connMgr.activeNetwork
+        } else {
+            return true
+        }
         if (activeNetwork != null) {
             val capabilities: NetworkCapabilities? = connMgr.getNetworkCapabilities(activeNetwork)
             if (capabilities != null) {
@@ -58,7 +63,11 @@ object NetworkHelper {
     fun isConnectedToCellular(context: Context): Boolean {
         var result = false
         val connMgr = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val activeNetwork: Network? = connMgr.activeNetwork
+        val activeNetwork: Network? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            connMgr.activeNetwork
+        } else {
+            return true
+        }
         if (activeNetwork != null) {
             val capabilities: NetworkCapabilities? = connMgr.getNetworkCapabilities(activeNetwork)
             if (capabilities != null) {
@@ -74,7 +83,11 @@ object NetworkHelper {
     fun isConnectedToVpn(context: Context): Boolean {
         var result = false
         val connMgr = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val activeNetwork: Network? = connMgr.activeNetwork
+        val activeNetwork: Network? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            connMgr.activeNetwork
+        } else {
+            return true
+        }
         if (activeNetwork != null) {
             val capabilities: NetworkCapabilities? = connMgr.getNetworkCapabilities(activeNetwork)
             if (capabilities != null) {
@@ -89,7 +102,11 @@ object NetworkHelper {
     /* Checks if the active network connection is connected to any network */
     fun isConnectedToNetwork(context: Context): Boolean {
         val connMgr = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val activeNetwork: Network? = connMgr.activeNetwork
+        val activeNetwork: Network? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            connMgr.activeNetwork
+        } else {
+            return true
+        }
         return activeNetwork != null
     }
 

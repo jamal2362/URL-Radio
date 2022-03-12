@@ -24,6 +24,7 @@ import android.content.IntentFilter
 import android.media.audiofx.AudioEffect
 import android.media.session.PlaybackState
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.ResultReceiver
@@ -225,7 +226,9 @@ open class PlayerService : MediaBrowserServiceCompat() {
         }
         // append metadata to metadata history
         if (metadataHistory.contains(metadataString)) {
-            metadataHistory.removeIf { it == metadataString }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                metadataHistory.removeIf { it == metadataString }
+            }
         }
         metadataHistory.add(metadataString)
         // trim metadata list
