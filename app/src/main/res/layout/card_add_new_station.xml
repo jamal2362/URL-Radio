@@ -10,36 +10,41 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="24dp"
         android:fontFamily="@font/inter_medium"
         android:text="@string/station_list_button_add_new_station"
         android:textAllCaps="true"
+        android:textColor="@color/icon_default_add_new_station"
         app:icon="@drawable/ic_add_24"
         app:iconGravity="textStart"
+        app:iconTint="@color/icon_default_add_new_station"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/card_settings"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:strokeColor="@color/icon_default" />
+        app:strokeColor="@color/icon_default_add_new_station"
+        app:strokeWidth="1.5dp" />
 
     <Button
         android:id="@+id/card_settings"
         style="?attr/materialButtonOutlinedStyle"
         android:layout_width="56dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="24dp"
         android:padding="0dp"
+        android:textColor="@color/icon_default_add_new_station"
         app:icon="@drawable/ic_settings_24dp"
         app:iconGravity="textStart"
         app:iconPadding="0dp"
+        app:iconTint="@color/icon_default_add_new_station"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:strokeColor="@color/icon_default" />
+        app:strokeColor="@color/icon_default_add_new_station"
+        app:strokeWidth="1.5dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-
