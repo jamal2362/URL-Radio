@@ -26,7 +26,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:shapeAppearanceOverlay="@style/RoundedCorners"
-        app:srcCompat="@drawable/ic_default_station_image_24dp" />
+        app:srcCompat="@drawable/ic_default_station_image_72dp" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/player_station_name"
