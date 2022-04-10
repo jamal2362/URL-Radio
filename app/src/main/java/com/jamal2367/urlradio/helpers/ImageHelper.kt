@@ -17,6 +17,7 @@ package com.jamal2367.urlradio.helpers
 import android.content.Context
 import android.graphics.*
 import android.net.Uri
+import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.net.toUri
@@ -108,7 +109,6 @@ object ImageHelper {
 
     /* Extracts color from an image */
     fun getMainColor(context: Context, imageUri: String): Int {
-
         // extract color palette from station image
         val palette: Palette = Palette.from(decodeSampledBitmapFromUri(context, imageUri, 72, 72)).generate()
         // get muted and vibrant swatches
@@ -128,7 +128,11 @@ object ImageHelper {
             }
             else -> {
                 // default return
-                return context.resources.getColor(R.color.default_neutral_medium_light, null)
+                return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    context.resources.getColor(R.color.default_neutral_medium_light, null)
+                } else {
+                    ContextCompat.getColor(context, R.color.default_neutral_medium_light)
+                }
             }
         }
     }
