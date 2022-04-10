@@ -127,7 +127,8 @@
             app:layout_constraintEnd_toEndOf="@+id/edit_station_name"
             app:layout_constraintStart_toStartOf="@+id/edit_station_name"
             app:layout_constraintTop_toBottomOf="@+id/edit_stream_uri"
-            app:strokeColor="@color/icon_default" />
+            app:strokeColor="@color/icon_default"
+            app:strokeWidth="2dp"/>
 
         <Button
             android:id="@+id/save_button"

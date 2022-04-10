@@ -25,7 +25,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:strokeColor="@color/icon_default_add_new_station"
-        app:strokeWidth="1.5dp" />
+        app:strokeWidth="2dp" />
 
     <Button
         android:id="@+id/card_settings"
@@ -45,6 +45,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:strokeColor="@color/icon_default_add_new_station"
-        app:strokeWidth="1.5dp" />
+        app:strokeWidth="2dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
