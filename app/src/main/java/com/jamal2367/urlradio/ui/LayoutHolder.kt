@@ -30,6 +30,7 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.snackbar.Snackbar
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
 import com.jamal2367.urlradio.core.Station
@@ -158,7 +159,7 @@ data class LayoutHolder(var rootView: View) {
         val clip: ClipData = ClipData.newPlainText("simple text", clipString)
         val cm: ClipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         cm.setPrimaryClip(clip)
-        Toast.makeText(context, R.string.toastmessage_copied_to_clipboard, Toast.LENGTH_LONG).show()
+        Snackbar.make(rootView, R.string.toastmessage_copied_to_clipboard, Snackbar.LENGTH_LONG).show()
     }
 
 

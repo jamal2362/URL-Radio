@@ -32,7 +32,7 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.widget.Toast
+import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -52,6 +52,7 @@ import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 import com.google.android.exoplayer2.util.Util
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.*
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
@@ -90,6 +91,8 @@ open class PlayerService : MediaBrowserServiceCompat() {
     private lateinit var modificationDate: Date
     private lateinit var collectionChangedReceiver: BroadcastReceiver
     private lateinit var sleepTimer: CountDownTimer
+    private lateinit var view: View
+
     private var sleepTimerTimeRemaining: Long = 0L
     private var playbackRestartCounter: Int = 0
     private var handleAudioFocus: Boolean = true
@@ -321,7 +324,7 @@ open class PlayerService : MediaBrowserServiceCompat() {
             player.play()
         } else {
             player.stop()
-            Toast.makeText(this, this.getString(R.string.toastmessage_error_restart_playback_failed), Toast.LENGTH_LONG).show()
+            Snackbar.make(view, R.string.toastmessage_error_restart_playback_failed, Snackbar.LENGTH_LONG).show()
         }
     }
 
@@ -680,7 +683,7 @@ open class PlayerService : MediaBrowserServiceCompat() {
                     onPrepareFromMediaId(stationMediaItem.mediaId!!, playWhenReady = true, extras = null)
                 } else {
                     // unable to get the first station - notify user
-                    Toast.makeText(this@PlayerService, R.string.toastmessage_error_no_station_found, Toast.LENGTH_LONG).show()
+                    Snackbar.make(view, R.string.toastmessage_error_no_station_found, Snackbar.LENGTH_LONG).show()
                     LogHelper.e("Unable to start playback. Please add a radio station first. (Collection size = ${collection.stations.size} | provider initialized = ${collectionProvider.isInitialized()})")
                 }
             }
@@ -709,7 +712,7 @@ open class PlayerService : MediaBrowserServiceCompat() {
                     }
                 }
                 // NO MATCH: unable to match query - notify user
-                Toast.makeText(this@PlayerService, R.string.toastmessage_error_no_station_matches_search, Toast.LENGTH_LONG).show()
+                Snackbar.make(view, R.string.toastmessage_error_no_station_matches_search, Snackbar.LENGTH_LONG).show()
                 LogHelper.e("Unable to find a station that matches your search query: $query")
             }
         }

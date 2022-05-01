@@ -70,6 +70,8 @@
     <string name="pref_maintenance_title">Wartung</string>
     <string name="pref_report_issue_summary">Fehler auf GitHub melden und Verbesserungen vorschlagen.</string>
     <string name="pref_report_issue_title">Fehler melden</string>
+    <string name="pref_station_export_summary">Die gesamte Sammlung von Radiosendern einschließlich der Bilder im Gerätespeicher speichern.</string>
+    <string name="pref_station_export_title">Stationen exportieren</string>
     <string name="pref_theme_selection_mode_dark">Dunkles Design</string>
     <string name="pref_theme_selection_mode_device_default">Systemstandard</string>
     <string name="pref_theme_selection_mode_light">Helles Design</string>
@@ -90,6 +92,7 @@
     <string name="toastalert_no_image_picker">Bildauswahl nicht verfügbar. Installation einer Galerie-Anwendung notwendig.</string>
 	
     <!-- Toasts -->
+    <string name="toastmessage_backed_up">Die Stationen wurden erfolgreich gesichert.</string>
     <string name="toastmessage_copied_to_clipboard">In die Zwischenablage kopiert</string>
     <string name="toastmessage_error_download_error">Fehler beim Herunterladen</string>
     <string name="toastmessage_error_missing_storage_permission">Erteile die Berechtigung „Speicher lesen“, um diese Datei zu öffnen</string>

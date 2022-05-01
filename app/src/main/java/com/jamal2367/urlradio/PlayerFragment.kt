@@ -34,7 +34,6 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
@@ -46,6 +45,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.*
 import com.jamal2367.urlradio.collection.CollectionAdapter
 import com.jamal2367.urlradio.collection.CollectionViewModel
@@ -240,7 +240,7 @@ class PlayerFragment: Fragment(), CoroutineScope,
             pickImage()
         } else {
             // permission denied
-            Toast.makeText(activity as Context, R.string.toastmessage_error_missing_storage_permission, Toast.LENGTH_LONG).show()
+            Snackbar.make(requireView(), R.string.toastmessage_error_missing_storage_permission, Snackbar.LENGTH_LONG).show()
         }
     }
 
@@ -280,7 +280,7 @@ class PlayerFragment: Fragment(), CoroutineScope,
                     }
                     // CASE: invalid address
                     else -> {
-                        Toast.makeText(activity as Context, R.string.toastmessage_station_not_valid, Toast.LENGTH_LONG).show()
+                        Snackbar.make(requireView(), R.string.toastmessage_station_not_valid, Snackbar.LENGTH_LONG).show()
                     }
                 }
             }
@@ -381,7 +381,7 @@ class PlayerFragment: Fragment(), CoroutineScope,
             val playbackState: PlaybackStateCompat = playerController.getPlaybackState()
             when (playbackState.isActive) {
                 true -> playerController.startSleepTimer()
-                false -> Toast.makeText(activity as Context, R.string.toastmessage_sleep_timer_unable_to_start, Toast.LENGTH_LONG).show()
+                false -> Snackbar.make(requireView(), R.string.toastmessage_sleep_timer_unable_to_start, Snackbar.LENGTH_LONG).show()
             }
         }
 
@@ -464,7 +464,7 @@ class PlayerFragment: Fragment(), CoroutineScope,
                 requestLoadImageLauncher.launch(pickImageIntent)
             } catch (e: Exception) {
                 LogHelper.e("Unable to select image. Probably no image picker available.")
-                Toast.makeText(context, R.string.toastalert_no_image_picker, Toast.LENGTH_LONG).show()
+                Snackbar.make(requireView(), R.string.toastalert_no_image_picker, Snackbar.LENGTH_LONG).show()
             }
         }
     }
