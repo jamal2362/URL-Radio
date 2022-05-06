@@ -4,25 +4,26 @@
     <!-- DAY THEME COLORS -->
 
     <!-- app colors -->
-    <color name="app_window_background">#FFF2F2F2</color> <!-- android:colorBackground / colorSurface -->
-    <color name="status_bar_background">#FFF2F2F2</color> <!-- colorSurfaceVariant -->
+    <color name="app_window_background">#FFFFFFFF</color> <!-- android:colorBackground / colorSurface -->
+    <color name="status_bar_background">#FFFFFFFF</color> <!-- colorSurfaceVariant -->
     <color name="dialog_background">#FFF2F2F2</color> <!-- android:colorBackground / colorSurface -->
-<!--    <color name="dialog_background">#ffe7e0ec</color> &lt;!&ndash; colorSurfaceVariant &ndash;&gt;-->
     <color name="app_onboarding_icons">#FF313131</color> <!-- colorOnBackground / colorOnSurface-->
-    <color name="toolbar_background">#FFF2F2F2</color> <!-- colorSurfaceVariant -->
+    <color name="toolbar_background">#FFFFFFFF</color> <!-- colorSurfaceVariant -->
 
     <!-- text & icons -->
     <color name="text_default">#FF595959</color> <!-- colorOnBackground / colorOnSurface-->
     <color name="text_lightweight">#FF595959</color> <!-- colorOnSurfaceVariant -->
     <color name="text_link">#FFD0BCFF</color> <!-- colorPrimaryInverse -->
     <color name="text_link_separator">#FFD0BCFF</color> <!-- colorPrimaryInverse -->
-    <color name="icon_default">#FF1C1B1F</color> <!-- colorOnBackground / colorOnSurface-->
+    <color name="icon_default">#FF6B6B6B</color> <!-- colorOnBackground / colorOnSurface-->
     <color name="icon_default_add_new_station">#FF1C1B1F</color> <!-- android:colorBackground / colorSurface -->
     <color name="icon_lightweight">#FF49454f</color> <!-- colorOnSurfaceVariant -->
     <color name="icon_lightweight_background">#FFF2F2F2</color> <!-- colorSurfaceVariant -->
 
     <!-- list -->
-    <color name="list_card_background">#FFFFFFFF</color> <!-- android:colorBackground / colorSurface -->
+    <color name="list_card_background">#FFF5F5F5</color> <!-- android:colorBackground / colorSurface -->
+    <color name="list_card_stroke_background">#FFA3A3A3</color> <!-- android:colorBackground / colorSurface -->
+    <color name="list_card_stroke1_background">#FFCCCCCC</color> <!-- android:colorBackground / colorSurface -->
     <color name="list_card_cover_background">#FFE7E0EC</color> <!-- colorSurfaceVariant -->
     <color name="list_card_delete_background">#FFF44336</color> <!-- colorError -->
     <color name="list_card_delete_icon">#FFFFFFFF</color> <!-- colorOnError (white) -->

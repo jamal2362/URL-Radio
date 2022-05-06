@@ -53,17 +53,22 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
     /* Overrides onViewCreated from PreferenceFragmentCompat */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         // set the background color
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             view.setBackgroundColor(resources.getColor(R.color.app_window_background, null))
+        } else {
+            view.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.app_window_background))
         }
+
         // show action bar
         (activity as AppCompatActivity).supportActionBar?.show()
         (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.fragment_settings_title)
+
         // set the navigation bar color
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-            activity?.window!!.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.app_window_background)
+            (activity as AppCompatActivity).window.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.app_window_background)
         }
     }
 

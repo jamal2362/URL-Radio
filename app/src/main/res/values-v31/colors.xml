@@ -22,6 +22,8 @@
 
     <!-- list -->
     <color name="list_card_background">@android:color/system_neutral2_50</color> <!-- android:colorBackground / colorSurface -->
+    <color name="list_card_stroke_background">@android:color/system_accent2_200</color> <!-- android:colorBackground / colorSurface -->
+    <color name="list_card_stroke1_background">@android:color/system_accent2_200</color> <!-- android:colorBackground / colorSurface -->
     <color name="list_card_cover_background">@android:color/system_neutral2_100</color> <!-- colorSurfaceVariant -->
     <color name="list_card_delete_background">#ffb3261e</color> <!-- colorError -->
     <color name="list_card_delete_icon">@android:color/system_accent1_0</color> <!-- colorOnError (white) -->

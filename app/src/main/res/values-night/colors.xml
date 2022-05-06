@@ -14,13 +14,15 @@
     <color name="text_lightweight">#FFF2F2F2</color> <!-- colorOnSurfaceVariant -->
     <color name="text_link">#ff6750a4</color> <!-- colorPrimaryInverse -->
     <color name="text_link_separator">#ff6750a4</color> <!-- colorPrimaryInverse -->
-    <color name="icon_default">#FFFFFFFF</color> <!-- colorOnBackground / colorOnSurface-->
+    <color name="icon_default">#FFCFCFCF</color> <!-- colorOnBackground / colorOnSurface-->
     <color name="icon_default_add_new_station">#FFFFFFFF</color> <!-- android:colorBackground / colorSurface -->
     <color name="icon_lightweight">#FFF2F2F2</color> <!-- colorOnSurfaceVariant -->
     <color name="icon_lightweight_background">#FF595959</color> <!-- colorSurfaceVariant -->
 
     <!-- list -->
     <color name="list_card_background">#FF313131</color> <!-- android:colorBackground / colorSurface -->
+    <color name="list_card_stroke_background">#FF595959</color> <!-- android:colorBackground / colorSurface -->
+    <color name="list_card_stroke1_background">#FF595959</color> <!-- android:colorBackground / colorSurface -->
     <color name="list_card_cover_background">#ff49454f</color> <!-- colorSurfaceVariant -->
     <color name="list_card_delete_background">#FFE57373</color> <!-- colorError -->
     <color name="list_card_delete_icon">#ff601410</color> <!-- colorOnError -->

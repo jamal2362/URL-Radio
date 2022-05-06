@@ -140,7 +140,7 @@ class PlayerFragment: Fragment(), CoroutineScope,
 
         // set the navigation bar color
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-            activity?.window!!.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.player_sheet_background)
+            (activity as AppCompatActivity).window.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.player_sheet_background)
         }
 
         // hide action bar
