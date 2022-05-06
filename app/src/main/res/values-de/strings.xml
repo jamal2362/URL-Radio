@@ -28,7 +28,8 @@
     <string name="dialog_generic_button_okay">OK</string>
     <string name="dialog_generic_details_button">Details anzeigen</string>
     <string name="dialog_opml_import_details_default">Keine Details verfügbar</string>
-    <string name="dialog_yes_no_message_remove_station">Diesen Sender entfernen\?</string>
+    <string name="dialog_yes_no_message_remove_station">Diesen Sender entfernen?</string>
+    <string name="dialog_yes_no_message_restore_collection">Aktuelle Radiosender der Sammlung durch die Radiosender aus der Sicherung ersetzen?</string>
     <string name="dialog_yes_no_message_update_station_images">Neueste Version aller Senderbilder herunterladen\?</string>
     <string name="dialog_yes_no_negative_button_cancel">Abbrechen</string>
     <string name="dialog_yes_no_positive_button_default">Ja</string>
@@ -56,6 +57,7 @@
     <string name="pref_advanced_title">Erweitert</string>
     <string name="pref_app_version_summary">Version</string>
     <string name="pref_app_version_title">App-Version</string>
+    <string name="pref_backup_import_export_title">Importieren &amp; Exportieren</string>
     <string name="pref_edit_station_stream_summary_disabled">Die Bearbeitung von Streaming-Links ist deaktiviert.</string>
     <string name="pref_edit_station_stream_summary_enabled">Die Bearbeitung von Streaming-Links ist aktiviert. Stelle sicher, dass du eine korrekte Stream-Adresse eingibst.</string>
     <string name="pref_edit_station_stream_title">Streaming-Links bearbeiten</string>
@@ -65,13 +67,15 @@
     <string name="pref_general_title">Allgemein</string>
     <string name="pref_handle_audio_focus_summary">Wiedergabe stoppen wenn andere Anwendung Audio ausgibt oder Telefonanruf gestartet wird.</string>
     <string name="pref_handle_audio_focus_title">Audio-Fokus berücksichtigen</string>
-    <string name="pref_m3u_export_summary">Speichert deine Radiosender in einer M3U-Playlistdatei, die in andere Player importiert werden kann.</string>
+    <string name="pref_m3u_export_summary">Radiosender in einer M3U-Playlistdatei sichern, die in andere Player importiert werden können.</string>
     <string name="pref_m3u_export_title">M3U-Playlist exportieren</string>
     <string name="pref_maintenance_title">Wartung</string>
     <string name="pref_report_issue_summary">Fehler auf GitHub melden und Verbesserungen vorschlagen.</string>
     <string name="pref_report_issue_title">Fehler melden</string>
-    <string name="pref_station_export_summary">Die gesamte Sammlung von Radiosendern einschließlich der Bilder im Gerätespeicher speichern.</string>
+    <string name="pref_station_export_summary">Die gesamte Sammlung von Radiosendern einschließlich der Bilder im Gerätespeicher sichern.</string>
     <string name="pref_station_export_title">Stationen exportieren</string>
+    <string name="pref_station_restore_summary">Sammlung von Radiosendern aus der Sicherung wiederherstellen. Vorhandene Sender werden ersetzt.</string>
+    <string name="pref_station_restore_title">Stationen importieren</string>
     <string name="pref_theme_selection_mode_dark">Dunkles Design</string>
     <string name="pref_theme_selection_mode_device_default">Systemstandard</string>
     <string name="pref_theme_selection_mode_light">Helles Design</string>
@@ -92,7 +96,7 @@
     <string name="toastalert_no_image_picker">Bildauswahl nicht verfügbar. Installation einer Galerie-Anwendung notwendig.</string>
 	
     <!-- Toasts -->
-    <string name="toastmessage_backed_up">Die Stationen wurden erfolgreich gesichert.</string>
+    <string name="toastmessage_backed_up">wurde erfolgreich gesichert.</string>
     <string name="toastmessage_copied_to_clipboard">In die Zwischenablage kopiert</string>
     <string name="toastmessage_error_download_error">Fehler beim Herunterladen</string>
     <string name="toastmessage_error_missing_storage_permission">Erteile die Berechtigung „Speicher lesen“, um diese Datei zu öffnen</string>
@@ -100,6 +104,7 @@
     <string name="toastmessage_error_no_station_matches_search">Es konnte kein Sender gefunden werden, der deiner Suche entspricht</string>
     <string name="toastmessage_error_restart_playback_failed">Die Wiedergabe konnte nicht neu gestartet werden</string>
     <string name="toastmessage_install_file_helper">Bitte installiere einen Dateimanager</string>
+    <string name="toastmessage_restored">Stationen wurden erfolgreich wiederhergestellt.</string>
     <string name="toastmessage_save_m3u">Radiosender als M3U gespeichert…</string>
     <string name="toastmessage_shortcut_created">Sender auf Startbildschirm platzieren</string>
     <string name="toastmessage_shortcut_not_created">Sender konnte nicht auf dem Startbildschirm platziert werden. Das Gerät unterbindet das Platzieren von Verknüpfungen.</string>

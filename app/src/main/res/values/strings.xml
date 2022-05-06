@@ -33,6 +33,7 @@
     <string name="dialog_generic_details_button">Show details</string>
     <string name="dialog_opml_import_details_default">No details available</string>
     <string name="dialog_yes_no_message_remove_station">Remove this station?</string>
+    <string name="dialog_yes_no_message_restore_collection">Replace current collection radio stations with the radio station from backup?</string>
     <string name="dialog_yes_no_message_update_station_images">Download latest version of all station images?</string>
     <string name="dialog_yes_no_negative_button_cancel">Cancel</string>
     <string name="dialog_yes_no_positive_button_default">Yes</string>
@@ -62,6 +63,7 @@
     <string name="pref_advanced_title">Advanced</string>
     <string name="pref_app_version_summary">Version</string>
     <string name="pref_app_version_title">App Version</string>
+    <string name="pref_backup_import_export_title">Import &amp; Export</string>
     <string name="pref_edit_station_stream_summary_disabled">Editing of streaming links disabled. </string>
     <string name="pref_edit_station_stream_summary_enabled">Editing of streaming links enabled. Make sure to enter a correct stream address.</string>
     <string name="pref_edit_station_stream_title">Edit Streaming Links</string>
@@ -77,7 +79,9 @@
     <string name="pref_report_issue_summary">Report bugs and suggest improvements on GitHub.</string>
     <string name="pref_report_issue_title">Report Issue</string>
     <string name="pref_station_export_summary">Save entire collection of radio stations including images to device storage.</string>
-    <string name="pref_station_export_title">Export M3U</string>
+    <string name="pref_station_export_title">Export Station</string>
+    <string name="pref_station_restore_summary">Restore collection of radio stations from backup. Existing stations will be replaced.</string>
+    <string name="pref_station_restore_title">Restore Stations</string>
     <string name="pref_theme_selection_mode_dark">Dark mode</string>
     <string name="pref_theme_selection_mode_device_default">Same as device</string>
     <string name="pref_theme_selection_mode_light">Light mode</string>
@@ -104,7 +108,7 @@
     <string name="toastalert_no_image_picker">No image picker available. Consider installing a Gallery application.</string>
 
     <!-- Toasts -->
-    <string name="toastmessage_backed_up">Stations has been successfully backed up.</string>
+    <string name="toastmessage_backed_up">has been successfully backed up.</string>
     <string name="toastmessage_copied_to_clipboard">Copied to clipboard.</string>
     <string name="toastmessage_error_download_error">Download error</string>
     <string name="toastmessage_error_missing_storage_permission">Grant \"Read Storage\" permission to open this file.</string>
@@ -112,6 +116,7 @@
     <string name="toastmessage_error_no_station_matches_search">Unable to find a station that matches your search.</string>
     <string name="toastmessage_error_restart_playback_failed">Unable to restart playback.</string>
     <string name="toastmessage_install_file_helper">Please install a file manager.</string>
+    <string name="toastmessage_restored">Stations has been successfully restored.</string>
     <string name="toastmessage_save_m3u">Saving radio stations as M3U…</string>
     <string name="toastmessage_shortcut_created">Shortcut created.</string>
     <string name="toastmessage_shortcut_not_created">Shortcut not created. This device does not allow the creation of shortcuts.</string>

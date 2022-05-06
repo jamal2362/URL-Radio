@@ -17,8 +17,13 @@ package com.jamal2367.urlradio.helpers
 import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
+import android.view.View
+import com.google.android.material.snackbar.Snackbar
+import com.jamal2367.urlradio.R
 import java.io.*
+import java.util.*
 import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 
 object BackupHelper {
@@ -27,10 +32,11 @@ object BackupHelper {
     private val TAG: String = LogHelper.makeLogTag(BackupHelper::class.java)
 
 
-    /* xyz */
-    fun backup(context: Context, destinationUri: Uri) {
+    /* Compresses all files in the app's external files directory into destination zip file */
+    fun backup(view: View, context: Context, destinationUri: Uri) {
         val sourceFolder: File? = context.getExternalFilesDir("")
         if (sourceFolder != null && sourceFolder.isDirectory) {
+            Snackbar.make(view, "${FileHelper.getFileName(context, destinationUri)} ${context.getString(R.string.toastmessage_backed_up)}", Snackbar.LENGTH_LONG).show()
             val resolver: ContentResolver = context.contentResolver
             val outputStream: OutputStream? = resolver.openOutputStream(destinationUri)
             ZipOutputStream(BufferedOutputStream(outputStream)).use { zipOutputStream ->
@@ -41,6 +47,59 @@ object BackupHelper {
         } else {
             LogHelper.e(TAG, "Unable to access External Storage.")
         }
+    }
+
+
+    /* Extracts zip backup  file and restores files and folders - Credit: https://www.baeldung.com/java-compress-and-uncompress*/
+    fun restore(view: View, context: Context, sourceUri: Uri) {
+        Snackbar.make(view, R.string.toastmessage_restored, Snackbar.LENGTH_LONG).show()
+
+        val resolver: ContentResolver = context.contentResolver
+        val sourceInputStream: InputStream? = resolver.openInputStream(sourceUri)
+        val destinationFolder: File? = context.getExternalFilesDir("")
+        val buffer = ByteArray(1024)
+        val zipInputStream = ZipInputStream(sourceInputStream)
+        var zipEntry: ZipEntry? = zipInputStream.nextEntry
+
+        // iterate through ZipInputStream until last ZipEntry
+        while (zipEntry != null) {
+            try {
+                val newFile: File = getFile(destinationFolder!!, zipEntry)
+                when (zipEntry.isDirectory) {
+                    // CASE: Folder
+                    true -> {
+                        // create folder if new file is just a file
+                        if (!newFile.isDirectory && !newFile.mkdirs()) {
+                            LogHelper.w(TAG,"Failed to create directory $newFile")
+                        }
+                    }
+                    // CASE: Files
+                    false -> {
+                        // create parent directory, if necessary
+                        val parent: File? = newFile.parentFile
+                        if (parent != null && !parent.isDirectory && !parent.mkdirs()) {
+                            LogHelper.w(TAG, "Failed to create directory $parent")
+                        }
+                        // write file content
+                        val fileOutputStream = FileOutputStream(newFile)
+                        var len: Int
+                        while (zipInputStream.read(buffer).also { len = it } > 0) {
+                            fileOutputStream.write(buffer, 0, len)
+                        }
+                        fileOutputStream.close()
+                    }
+                }
+            } catch (e: Exception) {
+                LogHelper.e(TAG, "Unable to safely create get file. $e")
+            }
+            // get next entry - zipEntry will be null, when zipInputStream has no more entries left
+            zipEntry = zipInputStream.nextEntry
+        }
+        zipInputStream.closeEntry()
+        zipInputStream.close()
+
+        // notify CollectionViewModel that collection has changed
+        CollectionHelper.sendCollectionBroadcast(context, modificationDate = Calendar.getInstance().time)
     }
 
 
@@ -82,7 +141,6 @@ object BackupHelper {
                     }
                 }
             }
-
         }
     }
 
