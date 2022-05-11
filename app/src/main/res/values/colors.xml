@@ -45,11 +45,13 @@
     <!-- default colors -->
     <color name="default_neutral_white">#FFFFFFFF</color> <!-- system_accent1_0 -->
     <color name="default_neutral_lighter">#FFE6E1E5</color> <!-- system_neutral1_100 -->
-    <color name="default_neutral_medium_light">#FF7D7D7D</color> <!-- system_neutral1_300  todo check -->
-    <color name="default_neutral_dark">#FF595959</color> <!-- system_neutral1_600 todo check-->
+    <color name="default_neutral_medium_light">#FF7D7D7D</color> <!-- system_neutral1_300 -->
+    <color name="default_neutral_dark">#FF595959</color> <!-- system_neutral1_600 -->
     <color name="default_neutral_darker">#FF1C1B1F</color> <!-- system_neutral1_900-->
 
     <color name="default_neutral_85percent">#D9313033</color> <!-- 85% system_neutral1_800 -->
     <color name="default_transparent">#00FFFFFF</color>
+
+    <color name="colorPrimaryContainer">#FF7986CB</color>
 
 </resources>

@@ -39,4 +39,6 @@
     <color name="player_sheet_text_main">#FFFFFFFF</color> <!-- colorOnSurfaceInverse (light theme) -->
     <color name="player_sheet_text_details">#FFFFFFFF</color> <!-- colorOnSurfaceInverse (light theme) -->
     <color name="player_sheet_icon">#FFFFFFFF</color> <!-- colorOnSurfaceInverse (light theme) -->
+
+    <color name="colorPrimaryContainer">#FF3F51B5</color>
 </resources>
