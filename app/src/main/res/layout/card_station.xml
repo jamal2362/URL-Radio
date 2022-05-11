@@ -10,7 +10,7 @@
     app:cardBackgroundColor="@color/list_card_background"
     app:strokeColor="@color/list_card_stroke1_background"
     app:strokeWidth="2dp"
-    app:cardCornerRadius="16dp">
+    app:cardCornerRadius="24dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"

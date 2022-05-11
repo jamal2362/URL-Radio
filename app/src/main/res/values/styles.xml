@@ -16,14 +16,14 @@
 
     </style>
 
-	<style name="RoundedCorners" parent="">
-        <item name="cornerSizeTopLeft">8dp</item>
+	<style name="RoundedCorners">
+        <item name="cornerSizeTopLeft">16dp</item>
         <item name="cornerFamilyTopLeft">rounded</item>
-        <item name="cornerSizeTopRight">8dp</item>
+        <item name="cornerSizeTopRight">16dp</item>
         <item name="cornerFamilyTopRight">rounded</item>
-        <item name="cornerSizeBottomLeft">8dp</item>
+        <item name="cornerSizeBottomLeft">16dp</item>
         <item name="cornerFamilyBottomLeft">rounded</item>
-        <item name="cornerSizeBottomRight">8dp</item>
+        <item name="cornerSizeBottomRight">16dp</item>
         <item name="cornerFamilyBottomRight">rounded</item>
     </style>
 
