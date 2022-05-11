@@ -25,7 +25,7 @@
     <color name="list_card_stroke_background">@android:color/system_accent2_200</color> <!-- android:colorBackground / colorSurface -->
     <color name="list_card_stroke1_background">@android:color/system_accent2_200</color> <!-- android:colorBackground / colorSurface -->
     <color name="list_card_cover_background">@android:color/system_neutral2_100</color> <!-- colorSurfaceVariant -->
-    <color name="list_card_delete_background">#ffb3261e</color> <!-- colorError -->
+    <color name="list_card_delete_background">#FFB3261E</color> <!-- colorError -->
     <color name="list_card_delete_icon">@android:color/system_accent1_0</color> <!-- colorOnError (white) -->
     <color name="list_card_mark_starred_background">@android:color/system_accent1_600</color> <!-- colorPrimary -->
     <color name="list_card_mark_starred_star">@android:color/system_accent1_0</color> <!-- colorOnPrimary -->
@@ -36,7 +36,7 @@
     <color name="player_play_pause_icon">@android:color/system_neutral1_0</color> <!-- colorOnPrimary-->
     <color name="player_button_background">@android:color/system_accent1_600</color> <!-- colorPrimary -->
     <color name="player_button_buffering">@android:color/system_accent1_200</color> <!-- colorPrimaryInverse -->
-    <color name="player_sheet_background">@android:color/system_neutral1_800</color> <!-- colorSurfaceInverse -->
+    <color name="player_sheet_background">@android:color/system_neutral2_800</color> <!-- colorSurfaceInverse -->
     <color name="player_sheet_text_main">@android:color/system_neutral1_50</color> <!-- colorOnSurfaceInverse -->
     <color name="player_sheet_text_details">@android:color/system_neutral1_50</color> <!-- colorOnSurfaceInverse -->
     <color name="player_sheet_icon">@android:color/system_neutral1_50</color> <!-- colorOnSurfaceInverse -->

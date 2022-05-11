@@ -25,8 +25,8 @@
     <color name="list_card_stroke_background">@android:color/system_accent2_700</color> <!-- android:colorBackground / colorSurface -->
     <color name="list_card_stroke1_background">@android:color/system_accent2_700</color> <!-- android:colorBackground / colorSurface -->
     <color name="list_card_cover_background">@android:color/system_neutral2_700</color> <!-- colorSurfaceVariant -->
-    <color name="list_card_delete_background">#FFF2b8b5</color> <!-- colorError -->
-    <color name="list_card_delete_icon">#ff601410</color> <!-- colorOnError -->
+    <color name="list_card_delete_background">#FFF2B8B5</color> <!-- colorError -->
+    <color name="list_card_delete_icon">#FF601410</color> <!-- colorOnError -->
     <color name="list_card_mark_starred_background">@android:color/system_accent1_100</color> <!-- colorPrimary -->
     <color name="list_card_mark_starred_star">@android:color/system_accent1_800</color> <!-- colorOnPrimary -->
     <color name="search_result_background">@android:color/system_neutral2_700</color> <!-- android:colorBackground / colorSurface -->
@@ -36,13 +36,13 @@
     <color name="player_play_pause_icon">@android:color/system_accent1_800</color> <!-- colorOnPrimary (dark theme) -->
     <color name="player_button_background">@android:color/system_accent1_100</color> <!-- colorPrimary (dark theme) -->
     <color name="player_button_buffering">@android:color/system_accent1_600</color> <!-- colorPrimaryInverse (dark theme) -->
-    <color name="player_sheet_background">@android:color/system_neutral1_800</color> <!-- colorSurfaceInverse (dark theme) -->
+    <color name="player_sheet_background">@android:color/system_neutral2_800</color> <!-- colorSurfaceInverse (dark theme) -->
     <color name="player_sheet_text_main">@android:color/system_neutral1_50</color> <!-- colorOnSurfaceInverse (light theme) -->
     <color name="player_sheet_text_details">@android:color/system_neutral1_50</color> <!-- colorOnSurfaceInverse (dark theme) -->
     <color name="player_sheet_icon">@android:color/system_neutral1_50</color> <!-- colorOnSurfaceInverse (light theme) -->
 
     <!-- default colors -->
-    <color name="default_neutral_white">#ff601410</color>
+    <color name="default_neutral_white">#FF601410</color>
 
     <color name="colorAccent">@android:color/system_accent1_100</color>
     <color name="colorPrimary">@android:color/system_accent1_100</color>
