@@ -21,6 +21,8 @@ import com.jamal2367.urlradio.core.Collection
 import com.jamal2367.urlradio.core.Station
 import com.jamal2367.urlradio.search.RadioBrowserResult
 import com.jamal2367.urlradio.search.RadioBrowserSearch
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
 
 
 /*
@@ -41,10 +43,9 @@ class UpdateHelper(private val context: Context, private val updateHelperListene
 
 
     /* Overrides onRadioBrowserSearchResults from RadioBrowserSearchListener */
-    @OptIn(DelicateCoroutinesApi::class)
     override fun onRadioBrowserSearchResults(results: Array<RadioBrowserResult>) {
         if (results.isNotEmpty()){
-            GlobalScope.launch {
+            CoroutineScope(IO).launch {
                 // get station from results
                 val station: Station = results[0].toStation()
                 // detect content type
@@ -60,7 +61,7 @@ class UpdateHelper(private val context: Context, private val updateHelperListene
                 // get new position
                 val positionAfterUpdate: Int = CollectionHelper.getStationPositionFromRadioBrowserStationUuid(collection, station.radioBrowserStationUuid)
                 // hand over results
-                withContext(Dispatchers.Main) {
+                withContext(Main) {
                     updateHelperListener.onStationUpdated(collection, positionPriorUpdate, positionAfterUpdate)
                 }
                 // decrease counter

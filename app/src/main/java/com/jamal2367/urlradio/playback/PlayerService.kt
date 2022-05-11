@@ -61,6 +61,7 @@ import com.jamal2367.urlradio.core.Collection
 import com.jamal2367.urlradio.core.Station
 import com.jamal2367.urlradio.helpers.*
 import com.jamal2367.urlradio.ui.PlayerState
+import kotlinx.coroutines.Dispatchers.Main
 import java.util.*
 import kotlin.math.min
 
@@ -515,7 +516,7 @@ open class PlayerService : MediaBrowserServiceCompat() {
     /* Reads collection of stations from storage using GSON */
     private fun loadCollection(context: Context) {
         LogHelper.v("Loading collection of stations from storage")
-        CoroutineScope(Dispatchers.Main).launch {
+        CoroutineScope(Main).launch {
             // load collection on background thread
             val deferred: Deferred<Collection> = async(Dispatchers.Default) { FileHelper.readCollectionSuspended(context) }
             // wait for result and update collection

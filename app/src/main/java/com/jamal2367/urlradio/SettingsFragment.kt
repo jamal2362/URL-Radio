@@ -33,7 +33,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.preference.*
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
 import com.jamal2367.urlradio.dialogs.ErrorDialog
 import com.jamal2367.urlradio.dialogs.YesNoDialog
@@ -319,7 +319,7 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
             val targetUri: Uri? = result.data?.data
             if (targetUri != null && sourceUri != null) {
                 // copy file async (= fire & forget - no return value needed)
-                CoroutineScope(Dispatchers.IO).launch {
+                CoroutineScope(IO).launch {
                     FileHelper.saveCopyOfFileSuspended(activity as Context, sourceUri, targetUri)
                 }
                 Snackbar.make(requireView(),R.string.toastmessage_save_m3u, Snackbar.LENGTH_LONG).show()

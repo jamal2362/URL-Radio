@@ -33,6 +33,7 @@ import com.jamal2367.urlradio.R
 import com.jamal2367.urlradio.core.Collection
 import com.jamal2367.urlradio.core.Station
 import com.jamal2367.urlradio.search.RadioBrowserResult
+import kotlinx.coroutines.Dispatchers.IO
 import java.io.File
 import java.net.URL
 import java.util.*
@@ -343,16 +344,11 @@ object CollectionHelper {
         // save collection to storage
         when (async) {
             true -> {
-                val backgroundJob = Job()
-                val uiScope = CoroutineScope(Dispatchers.Main + backgroundJob)
-                uiScope.launch {
+                CoroutineScope(IO).launch {
                     // save collection on background thread
-                    val deferred = async(Dispatchers.Default) { FileHelper.saveCollectionSuspended(context, collection, date) }
-                    // wait for result
-                    deferred.await()
+                    FileHelper.saveCollectionSuspended(context, collection, date)
                     // broadcast collection update
                     sendCollectionBroadcast(context, date)
-                    backgroundJob.cancel()
                 }
             }
             false -> {
@@ -372,7 +368,7 @@ object CollectionHelper {
         LogHelper.v("Exporting collection of stations as M3U")
         // export collection as M3U - launch = fire & forget (no return value from save collection)
         if (collection.stations.size > 0) {
-            CoroutineScope(Dispatchers.IO).launch { FileHelper.backupCollectionAsM3uSuspended(context, collection) }
+            CoroutineScope(IO).launch { FileHelper.backupCollectionAsM3uSuspended(context, collection) }
         }
     }
 

@@ -15,12 +15,12 @@
 package com.jamal2367.urlradio.helpers
 
 import android.content.Context
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.core.Collection
 import com.jamal2367.urlradio.core.Station
-import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.launch
 import java.io.File
 import java.util.*
 
@@ -31,12 +31,11 @@ import java.util.*
 object ImportHelper {
 
     /* Converts older station of type .m3u  */
-    @OptIn(DelicateCoroutinesApi::class)
     fun convertOldStations(context: Context): Boolean {
         val oldStations: ArrayList<Station> = arrayListOf()
         val oldCollectionFolder: File? = context.getExternalFilesDir(Keys.TRANSISTOR_LEGACY_FOLDER_COLLECTION)
         if (oldCollectionFolder != null && shouldStartImport(oldCollectionFolder)) {
-            GlobalScope.launch {
+            CoroutineScope(IO).launch {
                 var success = false
                 // start import
                 oldCollectionFolder.listFiles()?.forEach { file ->
