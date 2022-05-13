@@ -1,19 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
-
         <!-- Set AppCompat’s colors -->
-        <item name="colorPrimary">#FF3F51B5</item>
-        <item name="colorPrimaryDark">#FFFFFFFF</item>
-        <item name="colorAccent">#FF3F51B5</item>
-        <item name="colorPrimaryContainer">#803F51B5</item>
+        <item name="colorPrimary">#FFF44336</item>
+        <item name="colorAccent">#FFF44336</item>
+        <item name="colorPrimaryContainer">#80F44336</item>
 
         <!-- Do not use primary colored elevation overlays to present a visual hierarchy - TOO COLORFUL  -->
         <item name="elevationOverlayEnabled">false</item>
-        <item name="android:navigationBarColor">@color/player_sheet_background</item>
-        <item name="android:statusBarColor">@android:color/black</item>
 
+        <!-- Use "light" Status Bar -->
+        <item name="android:statusBarColor">@android:color/black</item>
+    </style>
+
+    <style name="App.Widget.Material3.Button.TextButton" parent="@style/Widget.Material3.Button.TextButton">
+        <item name="android:fontFamily">@font/inter_medium</item>
+        <item name="android:textColor">?attr/colorControlNormal</item>
+        <item name="textAllCaps">true</item>
+    </style>
+
+    <style name="App.Widget.Material3.Button.OutlinedButton.Icon" parent="@style/Widget.Material3.Button.OutlinedButton.Icon">
+        <item name="android:textColor">?attr/colorControlNormal</item>
+        <item name="iconTint">?attr/colorControlNormal</item>
+        <item name="strokeColor">?attr/colorControlNormal</item>
+        <item name="android:fontFamily">@font/inter_medium</item>
+        <item name="strokeWidth">2dp</item>
+        <item name="textAllCaps">true</item>
+    </style>
+
+    <style name="App.Widget.Material3.CardView.Outlined" parent="@style/Widget.Material3.CardView.Outlined">
+        <item name="cardBackgroundColor">@color/list_card_background</item>
+        <item name="strokeColor">?attr/colorControlNormal</item>
+        <item name="strokeWidth">2dp</item>
+        <item name="cardCornerRadius">24dp</item>
+    </style>
+
+    <style name="App.Widget.MaterialComponents.TextView" parent="@style/Widget.MaterialComponents.TextView">
+        <item name="android:textColor">?attr/colorControlNormal</item>
+        <item name="android:textAppearance">@style/TextAppearance.Material3.TitleMedium</item>
     </style>
 
 	<style name="RoundedCorners">
@@ -26,5 +50,4 @@
         <item name="cornerSizeBottomRight">16dp</item>
         <item name="cornerFamilyBottomRight">rounded</item>
     </style>
-
 </resources>

@@ -19,25 +19,29 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.view.Window
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.fragment.findNavController
 import androidx.preference.*
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.launch
 import com.jamal2367.urlradio.dialogs.ErrorDialog
 import com.jamal2367.urlradio.dialogs.YesNoDialog
 import com.jamal2367.urlradio.helpers.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.launch
 
 
 /*
@@ -54,22 +58,17 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // set the background color
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            view.setBackgroundColor(resources.getColor(R.color.app_window_background, null))
-        } else {
-            view.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.app_window_background))
-        }
-
         // show action bar
         (activity as AppCompatActivity).supportActionBar?.show()
         (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.fragment_settings_title)
 
-        // set the navigation bar color
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-            (activity as AppCompatActivity).window.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.app_window_background)
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O) {
+            (activity as AppCompatActivity).window.navigationBarColor = ContextCompat.getColor(requireContext(), android.R.color.black)
+        } else {
+            (activity as AppCompatActivity).window.navigationBarColor = ContextCompat.getColor(requireContext(), android.R.color.transparent)
         }
+
     }
 
 

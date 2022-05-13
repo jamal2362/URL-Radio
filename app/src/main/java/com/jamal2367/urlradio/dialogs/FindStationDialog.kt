@@ -95,7 +95,7 @@ class FindStationDialog (private var context: Context, private var listener: Fin
         radioBrowserSearch = RadioBrowserSearch(this)
 
         // prepare dialog builder
-        val builder = MaterialAlertDialogBuilder(context, R.style.AlertDialogTheme)
+        val builder = MaterialAlertDialogBuilder(context)
 
         // set title
         builder.setTitle(R.string.dialog_find_station_title)
@@ -148,6 +148,8 @@ class FindStationDialog (private var context: Context, private var listener: Fin
 
         // initially disable "Add" button
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = false
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).isAllCaps = true
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).isAllCaps = true
 
     }
 

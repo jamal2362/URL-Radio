@@ -80,7 +80,7 @@ object AppThemeHelper {
 
     /* Displays the default status bar */
     @Suppress("DEPRECATION")
-    private fun displayDefaultStatusBar(activity: Activity) {
+    fun displayDefaultStatusBar(activity: Activity) {
         val decorView = activity.window.decorView
         decorView.systemUiVisibility = 0
     }
@@ -88,7 +88,7 @@ object AppThemeHelper {
 
     /* Displays the light (inverted) status bar */
     @Suppress("DEPRECATION")
-    private fun displayLightStatusBar(activity: Activity) {
+    fun displayLightStatusBar(activity: Activity) {
         val decorView = activity.window.decorView
         decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
     }

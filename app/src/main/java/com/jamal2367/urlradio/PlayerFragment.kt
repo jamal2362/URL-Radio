@@ -34,6 +34,7 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
@@ -41,13 +42,13 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.*
 import com.jamal2367.urlradio.collection.CollectionAdapter
 import com.jamal2367.urlradio.collection.CollectionViewModel
 import com.jamal2367.urlradio.core.Collection
@@ -60,6 +61,7 @@ import com.jamal2367.urlradio.playback.PlayerController
 import com.jamal2367.urlradio.playback.PlayerService
 import com.jamal2367.urlradio.ui.LayoutHolder
 import com.jamal2367.urlradio.ui.PlayerState
+import kotlinx.coroutines.*
 import java.util.*
 import kotlin.coroutines.CoroutineContext
 
@@ -138,10 +140,7 @@ class PlayerFragment: Fragment(), CoroutineScope,
             PreferencesHelper.saveHouseKeepingNecessaryState()
         }
 
-        // set the navigation bar color
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-            (activity as AppCompatActivity).window.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.player_sheet_background)
-        }
+        (activity as AppCompatActivity).window.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.player_sheet_background)
 
         // hide action bar
         (activity as AppCompatActivity).supportActionBar?.hide()

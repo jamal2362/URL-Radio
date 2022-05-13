@@ -14,7 +14,7 @@
     <string name="descr_player_station_image">Senderbild</string>
 	
     <!-- Dialogs -->
-    <string name="dialog_edit_save_changes">Änderungen speichern</string>
+    <string name="dialog_edit_save_changes">Speichern</string>
     <string name="dialog_edit_station_name">Sendername</string>
     <string name="dialog_edit_stream_uri">Stream-Adresse</string>
     <string name="dialog_error_message_default">Ein Fehler ist aufgetreten</string>

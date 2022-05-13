@@ -15,6 +15,7 @@
 package com.jamal2367.urlradio.dialogs
 
 import android.content.Context
+import androidx.appcompat.app.AlertDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
@@ -30,6 +31,10 @@ class YesNoDialog (private var yesNoDialogListener: YesNoDialogListener) {
         fun onYesNoDialog(type: Int, dialogResult: Boolean, payload: Int, payloadString: String) {
         }
     }
+
+
+    /* Main class variables */
+    private lateinit var dialog: AlertDialog
 
 
     /* Construct and show dialog - variant: message from string  */
@@ -57,7 +62,7 @@ class YesNoDialog (private var yesNoDialogListener: YesNoDialogListener) {
              payloadString: String = Keys.DIALOG_EMPTY_PAYLOAD_STRING) {
 
         // prepare dialog builder
-        val builder = MaterialAlertDialogBuilder(context, R.style.AlertDialogTheme)
+        val builder = MaterialAlertDialogBuilder(context)
 
         // set title and message
         builder.setMessage(messageString)
@@ -84,6 +89,10 @@ class YesNoDialog (private var yesNoDialogListener: YesNoDialogListener) {
         }
 
         // display dialog
-        builder.show()
+        dialog = builder.create()
+        dialog.show()
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).isAllCaps = true
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).isAllCaps = true
     }
 }
