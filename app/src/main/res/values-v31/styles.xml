@@ -5,6 +5,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryContainer">@color/colorPrimaryContainer</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:colorBackground">@android:color/system_neutral2_10</item>
 
         <!-- Do not use primary colored elevation overlays to present a visual hierarchy - TOO COLORFUL  -->
         <item name="elevationOverlayEnabled">false</item>

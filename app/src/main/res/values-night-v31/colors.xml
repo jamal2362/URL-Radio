@@ -17,9 +17,9 @@
     <color name="icon_lightweight_background">@android:color/system_neutral2_700</color> <!-- colorSurfaceVariant -->
 
     <!-- list -->
-    <color name="list_card_background">@android:color/system_neutral1_800</color> <!-- android:colorBackground / colorSurface -->
-    <color name="list_card_stroke_background">@android:color/system_neutral2_700</color> <!-- android:colorBackground / colorSurface -->
-    <color name="list_card_stroke1_background">@android:color/system_neutral2_700</color> <!-- android:colorBackground / colorSurface -->
+    <color name="list_card_background">@android:color/system_neutral2_800</color> <!-- android:colorBackground / colorSurface -->
+    <color name="list_card_stroke_background">@android:color/system_accent2_700</color> <!-- android:colorBackground / colorSurface -->
+    <color name="list_card_stroke1_background">@android:color/system_accent2_700</color> <!-- android:colorBackground / colorSurface -->
     <color name="list_card_cover_background">@android:color/system_neutral2_700</color> <!-- colorSurfaceVariant -->
     <color name="list_card_delete_background">#FFF2B8B5</color> <!-- colorError -->
     <color name="list_card_delete_icon">#FF601410</color> <!-- colorOnError -->
