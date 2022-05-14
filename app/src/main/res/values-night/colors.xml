@@ -24,7 +24,7 @@
     <color name="list_card_delete_icon">#FF601410</color> <!-- colorOnError -->
     <color name="list_card_mark_starred_background">#FF81C784</color> <!-- colorPrimary -->
     <color name="list_card_mark_starred_star">#FFFFFFFF</color> <!-- colorOnPrimary -->
-    <color name="search_result_background">#FF2A2A2A</color> <!-- android:colorBackground / colorSurface -->
+    <color name="search_result_background">#FF3C3B3E</color> <!-- android:colorBackground / colorSurface -->
     <color name="search_result_background_selected">#FF595959</color> <!-- colorSurfaceVariant -->
 
     <!-- player sheet -->
