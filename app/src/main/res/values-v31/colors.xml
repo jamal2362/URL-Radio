@@ -17,7 +17,7 @@
     <color name="icon_lightweight_background">@android:color/system_neutral2_200</color> <!-- colorSurfaceVariant -->
 
     <!-- list -->
-    <color name="list_card_background">@android:color/system_neutral2_50</color> <!-- android:colorBackground / colorSurface -->
+    <color name="list_card_background">@android:color/system_neutral2_10</color> <!-- android:colorBackground / colorSurface -->
     <color name="list_card_stroke_background">@android:color/system_accent2_200</color> <!-- android:colorBackground / colorSurface -->
     <color name="list_card_stroke1_background">@android:color/system_accent2_200</color> <!-- android:colorBackground / colorSurface -->
     <color name="list_card_cover_background">@android:color/system_neutral2_100</color> <!-- colorSurfaceVariant -->
@@ -44,10 +44,5 @@
     <color name="default_neutral_medium_light">@android:color/system_neutral1_300</color> <!-- system_neutral1_300 -->
     <color name="default_neutral_dark">@android:color/system_neutral1_600</color> <!-- system_neutral1_600 -->
     <color name="default_neutral_darker">@android:color/system_neutral1_900</color> <!-- system_neutral1_900-->
-
-    <color name="colorAccent">@android:color/system_accent1_600</color>
-    <color name="colorPrimary">@android:color/system_accent1_600</color>
-    <color name="colorPrimaryContainer">@android:color/system_accent1_100</color>
-    <color name="colorSecondaryContainer">@android:color/system_accent2_100</color>
 
 </resources>
