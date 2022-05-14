@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Base application theme -->
     <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Default colors -->
         <item name="colorPrimary">@android:color/system_accent1_100</item>
         <item name="colorPrimaryContainer">@android:color/system_accent1_500</item>
         <item name="colorSecondary">@android:color/system_accent1_100</item>
-        <item name="android:colorBackground">@android:color/system_neutral1_900</item>
         <item name="colorOnSurfaceVariant">@android:color/system_accent1_100</item>
+        <item name="android:colorBackground">@android:color/system_neutral1_900</item>
+        <item name="android:textColorHighlight">@android:color/system_accent1_500</item>
 
         <!-- Do not use primary colored elevation overlays to present a visual hierarchy - TOO COLORFUL  -->
         <item name="elevationOverlayEnabled">false</item>

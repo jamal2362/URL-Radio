@@ -6,6 +6,7 @@
         <item name="colorPrimary">#FFE57373</item>
         <item name="colorAccent">#FFE57373</item>
         <item name="colorPrimaryContainer">#80E57373</item>
+        <item name="android:textColorHighlight">#FFE57373</item>
 
         <!-- Do not use primary colored elevation overlays to present a visual hierarchy - TOO COLORFUL  -->
         <item name="elevationOverlayEnabled">false</item>
