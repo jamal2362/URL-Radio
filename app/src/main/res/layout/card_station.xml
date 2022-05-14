@@ -77,7 +77,7 @@
 
         <ImageButton
             android:id="@+id/playback_button"
-            android:layout_width="6dp"
+            android:layout_width="8dp"
             android:layout_height="0dp"
             android:background="@color/player_button_background"
             android:contentDescription="@string/descr_card_small_play_button"
