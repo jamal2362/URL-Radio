@@ -99,7 +99,7 @@ open class PlayerService : MediaBrowserServiceCompat() {
     private var handleAudioFocus: Boolean = true
 
     private val attributes = AudioAttributes.Builder()
-            .setContentType(C.CONTENT_TYPE_MUSIC)
+            .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
             .setUsage(C.USAGE_MEDIA)
             .build()
 
@@ -337,6 +337,7 @@ open class PlayerService : MediaBrowserServiceCompat() {
             // start/pause: adb shell input keyevent 85
             // next: adb shell input keyevent 87
             // prev: adb shell input keyevent 88
+            @Deprecated("Deprecated in Java", ReplaceWith("stop()"))
             override fun stop(reset: Boolean) {
                 stop()
             }
