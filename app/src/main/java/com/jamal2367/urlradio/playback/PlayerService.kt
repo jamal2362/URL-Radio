@@ -625,6 +625,7 @@ open class PlayerService : MediaBrowserServiceCompat() {
     /*
      * NotificationListener: handles foreground state of service
      */
+    @Suppress("DEPRECATION")
     private val notificationListener = object : PlayerNotificationManager.NotificationListener {
         override fun onNotificationCancelled(notificationId: Int, dismissedByUser: Boolean) {
             super.onNotificationCancelled(notificationId, dismissedByUser)

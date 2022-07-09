@@ -103,6 +103,7 @@ class PlayerFragment: Fragment(), CoroutineScope,
 
         // handle back press
         requireActivity().onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            @Suppress("DEPRECATION")
             override fun handleOnBackPressed() {
                 // minimize player sheet - or if already minimized let activity handle back press
                 if (isEnabled && !layout.minimizePlayerIfExpanded()) {
@@ -168,6 +169,7 @@ class PlayerFragment: Fragment(), CoroutineScope,
 
 
     /* Overrides onRestoreInstanceState from Activity */
+    @Suppress("DEPRECATION")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         // always call the superclass so it can restore the view hierarchy
         super.onViewCreated(view, savedInstanceState)
