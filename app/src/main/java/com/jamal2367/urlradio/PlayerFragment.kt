@@ -43,6 +43,7 @@ import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Metadata
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionResult
@@ -135,7 +136,7 @@ class PlayerFragment: Fragment(),
     }
 
 
-    /* Overrides onResume from Fragment */
+    /* Overrides onStart from Fragment */
     override fun onStart() {
         super.onStart()
         // initialize MediaController - connect to PlayerService
@@ -175,6 +176,7 @@ class PlayerFragment: Fragment(),
 //        setupPlaybackControls()
         updatePlayerViews()
         updateStationListState()
+        togglePeriodicSleepTimerUpdateRequest()
         // begin looking for changes in collection
         observeCollectionViewModel()
         // handle navigation arguments
@@ -190,7 +192,7 @@ class PlayerFragment: Fragment(),
     override fun onPause() {
         super.onPause()
         // stop receiving playback progress updates
-        handler.removeCallbacks(periodicProgressUpdateRequestRunnable)
+        handler.removeCallbacks(periodicSleepTimerUpdateRequestRunnable)
         // stop watching for changes in shared preferences
         PreferencesHelper.unregisterPreferenceChangeListener(this as SharedPreferences.OnSharedPreferenceChangeListener)
 
@@ -236,6 +238,9 @@ class PlayerFragment: Fragment(),
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (key == Keys.PREF_ACTIVE_DOWNLOADS) {
             layout.toggleDownloadProgressIndicator()
+        }
+        if (key == Keys.PREF_PLAYER_METADATA_HISTORY) {
+            requestMetadataUpdate()
         }
     }
 
@@ -356,13 +361,9 @@ class PlayerFragment: Fragment(),
     /* Sets up the MediaController  */
     private fun setupController() {
         val controller: MediaController = this.controller ?: return
-
-        // update playback progress state
-        togglePeriodicProgressUpdateRequest()
-
         controller.addListener(playerListener)
+        requestMetadataUpdate()
     }
-
 
 
     /* Sets up views and connects tap listeners - first run */
@@ -396,16 +397,20 @@ class PlayerFragment: Fragment(),
         // set up sleep timer start button
         layout.sheetSleepTimerStartButtonView.setOnClickListener {
             when (controller?.isPlaying) {
-                true -> controller?.startSleepTimer()
+                true -> {
+                    playerState.sleepTimerRunning = true
+                    controller?.startSleepTimer()
+                    togglePeriodicSleepTimerUpdateRequest()
+                }
                 else -> Snackbar.make(requireView(), R.string.toastmessage_sleep_timer_unable_to_start, Snackbar.LENGTH_LONG).show()
             }
         }
 
         // set up sleep timer cancel button
         layout.sheetSleepTimerCancelButtonView.setOnClickListener {
+            playerState.sleepTimerRunning = false
             controller?.cancelSleepTimer()
-            layout.updateSleepTimer(activity as Context, 0L)
-            layout.sleepTimerRunningViews.isGone = true
+            togglePeriodicSleepTimerUpdateRequest()
         }
 
     }
@@ -458,16 +463,23 @@ class PlayerFragment: Fragment(),
 
 
     /* Requests an update of the sleep timer from the player service */
-    private fun updateSleepTimer() {
-        if (playerState.sleepTimerRunning) {
-            val resultFuture: ListenableFuture<SessionResult>? = controller?.requestSleepTimerRemaining()
-            resultFuture?.addListener(Runnable {
-                val timeRemaining: Long = resultFuture.get().extras.getLong(Keys.EXTRA_SLEEP_TIMER_REMAINING)
-                layout.updateSleepTimer(activity as Context, timeRemaining)
-            } , MoreExecutors.directExecutor())
-        }
+    private fun requestSleepTimerUpdate() {
+        val resultFuture: ListenableFuture<SessionResult>? = controller?.requestSleepTimerRemaining()
+        resultFuture?.addListener(Runnable {
+            val timeRemaining: Long = resultFuture.get().extras.getLong(Keys.EXTRA_SLEEP_TIMER_REMAINING)
+            layout.updateSleepTimer(activity as Context, timeRemaining)
+        } , MoreExecutors.directExecutor())
     }
 
+
+    /* Requests an update of the metadata history from the player service */
+    private fun requestMetadataUpdate() {
+        val resultFuture: ListenableFuture<SessionResult>? = controller?.requestMetadataHistory()
+        resultFuture?.addListener(Runnable {
+            val metadata: ArrayList<String>? = resultFuture.get().extras.getStringArrayList(Keys.EXTRA_METADATA_HISTORY)
+            layout.updateMetadata(metadata?.toMutableList())
+        } , MoreExecutors.directExecutor())
+    }
 
 
     /* Check permissions and start image picker */
@@ -533,17 +545,14 @@ class PlayerFragment: Fragment(),
     }
 
 
-    /* Toggle periodic request of playback position from player service */
-    private fun togglePeriodicProgressUpdateRequest() {
-        when (controller?.isPlaying) {
-            true -> {
-                handler.removeCallbacks(periodicProgressUpdateRequestRunnable)
-                handler.postDelayed(periodicProgressUpdateRequestRunnable, 0)
-            }
-            else -> {
-                handler.removeCallbacks(periodicProgressUpdateRequestRunnable)
-                layout.sleepTimerRunningViews.isGone = true
-            }
+    /* Toggle periodic update request of Sleep Timer state from player service */
+    private fun togglePeriodicSleepTimerUpdateRequest() {
+        if (playerState.sleepTimerRunning && playerState.isPlaying) {
+            handler.removeCallbacks(periodicSleepTimerUpdateRequestRunnable)
+            handler.postDelayed(periodicSleepTimerUpdateRequestRunnable, 0)
+        } else {
+            handler.removeCallbacks(periodicSleepTimerUpdateRequestRunnable)
+            layout.sleepTimerRunningViews.isGone = true
         }
     }
 
@@ -611,12 +620,13 @@ class PlayerFragment: Fragment(),
 
 
     /*
-     * Runnable: Periodically requests playback position (and sleep timer if running)
+     * Runnable: Periodically requests sleep timer state
      */
-    private val periodicProgressUpdateRequestRunnable: Runnable = object : Runnable {
+    private val periodicSleepTimerUpdateRequestRunnable: Runnable = object : Runnable {
         override fun run() {
             // update sleep timer view
-            updateSleepTimer()
+            LogHelper.e("Requesting Sleep Time update") // todo remove
+            requestSleepTimerUpdate()
             // use the handler to start runnable again after specified delay
             handler.postDelayed(this, 500)
         }
@@ -645,8 +655,6 @@ class PlayerFragment: Fragment(),
             playerState.isPlaying = isPlaying
             // animate state transition of play button(s)
             layout.animatePlaybackButtonStateTransition(activity as Context, isPlaying)
-            // turn on/off periodic playback position updates
-            togglePeriodicProgressUpdateRequest()
 
             if (isPlaying) {
                 // playback is active
@@ -654,6 +662,7 @@ class PlayerFragment: Fragment(),
                 layout.showBufferingIndicator(buffering = false)
             } else {
                 // playback is not active
+                togglePeriodicSleepTimerUpdateRequest()
                 layout.updateSleepTimer(activity as Context)
                 playerState.sleepTimerRunning = false
                 // Not playing because playback is paused, ended, suppressed, or the player
@@ -703,7 +712,11 @@ class PlayerFragment: Fragment(),
                     }
                 }
             }
+        }
 
+        override fun onMetadata(metadata: Metadata) {
+            super.onMetadata(metadata)
+            // method is not called here (but in PlayerService)
         }
     }
     /*

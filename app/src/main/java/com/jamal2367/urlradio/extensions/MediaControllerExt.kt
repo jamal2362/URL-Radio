@@ -43,6 +43,12 @@ fun MediaController.requestSleepTimerRemaining(): ListenableFuture<SessionResult
 }
 
 
+/* Request sleep timer remaining */
+fun MediaController.requestMetadataHistory(): ListenableFuture<SessionResult> {
+    return sendCustomCommand(SessionCommand(Keys.CMD_REQUEST_METADATA_HISTORY, Bundle.EMPTY), Bundle.EMPTY)
+}
+
+
 /* Starts playback with a new media item */
 fun MediaController.play(station: Station) {
     if (isPlaying) pause()

@@ -124,18 +124,11 @@ data class LayoutHolder(var rootView: View) {
     fun updatePlayerViews(context: Context, station: Station, isPlaying: Boolean) {
 
         // set default metadata views, when playback has stopped
-        if (isPlaying) {
+        if (!isPlaying) {
             metadataView.text = station.name
             sheetMetadataHistoryView.text = station.name
 //            sheetMetadataHistoryView.isSelected = true
         }
-
-//        // toggle buffering indicator
-//        if (playbackState == PlaybackStateCompat.STATE_BUFFERING) {
-//            bufferingIndicator.isVisible = true
-//        } else {
-//            bufferingIndicator.isVisible = false
-//        }
 
         // update name
         stationNameView.text = station.name
@@ -178,8 +171,8 @@ data class LayoutHolder(var rootView: View) {
 
 
     /* Updates the metadata views */
-    fun updateMetadata(metadataHistoryList: MutableList<String>) {
-        if (metadataHistoryList.isNotEmpty()) {
+    fun updateMetadata(metadataHistoryList: MutableList<String>?) {
+        if (!metadataHistoryList.isNullOrEmpty()) {
             metadataHistory = metadataHistoryList
             if (metadataHistory.last() != metadataView.text) {
                 metadataHistoryPosition = metadataHistory.size - 1
