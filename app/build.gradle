@@ -4,13 +4,13 @@ apply plugin: 'kotlin-parcelize'
 
 android {
 
-    compileSdkVersion 32
+    compileSdkVersion 33
     buildToolsVersion '33.0.0'
 
     defaultConfig {
         applicationId 'com.jamal2367.urlradio'
         minSdkVersion 21
-        targetSdkVersion 32
+        targetSdkVersion 33
         versionCode 90
         versionName '9.0'
         resConfigs 'en', 'de'
@@ -55,12 +55,13 @@ dependencies {
     // AndroidX Stuff //
     implementation 'androidx.palette:palette-ktx:1.0.0'
     implementation 'androidx.preference:preference-ktx:1.2.0'
+    implementation 'androidx.media:media:1.6.0'
+    implementation "androidx.media3:media3-exoplayer:1.0.0-beta02"
+    implementation "androidx.media3:media3-session:1.0.0-beta02"
+    implementation "androidx.media3:media3-datasource-okhttp:1.0.0-beta02"
     implementation 'androidx.navigation:navigation-fragment-ktx:2.5.1'
     implementation 'androidx.navigation:navigation-ui-ktx:2.5.1'
     implementation 'androidx.work:work-runtime-ktx:2.7.1'
-    implementation "androidx.media3:media3-exoplayer:1.0.0-beta02"
-    implementation "androidx.media3:media3-session:1.0.0-beta02"
-    implementation 'androidx.media:media:1.6.0'
 
     // Volley HTTP request //
     implementation 'com.android.volley:volley:1.2.1'
