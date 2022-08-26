@@ -97,7 +97,6 @@ object Keys {
     const val PREF_PLAYER_STATE_SLEEP_TIMER_RUNNING: String = "PLAYER_STATE_SLEEP_TIMER_RUNNING"
     const val PREF_EDIT_STATIONS: String = "EDIT_STATIONS"
     const val PREF_EDIT_STREAMS_URIS: String = "EDIT_STREAMS_URIS"
-    const val PREF_HANDLE_AUDIO_FOCUS: String = "PREF_HANDLE_AUDIO_FOCUS"
 
     // states
     const val STATE_SLEEP_TIMER_STOPPED: Int = 0

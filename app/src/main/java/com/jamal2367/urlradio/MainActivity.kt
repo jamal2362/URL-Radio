@@ -16,7 +16,6 @@ package com.jamal2367.urlradio
 
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.support.v4.media.session.MediaControllerCompat
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.navigation.fragment.NavHostFragment
@@ -91,9 +90,6 @@ class MainActivity: AppCompatActivity() {
         when (key) {
             Keys.PREF_THEME_SELECTION -> {
                 AppThemeHelper.setTheme(PreferencesHelper.loadThemeSelection())
-            }
-            Keys.PREF_HANDLE_AUDIO_FOCUS -> {
-                MediaControllerCompat.getMediaController(this).sendCommand(Keys.CMD_UPDATE_AUDIO_FOCUS_SETTING, null, null)
             }
         }
     }
