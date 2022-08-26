@@ -15,7 +15,6 @@
 package com.jamal2367.urlradio.core
 
 import android.os.Parcelable
-import android.support.v4.media.session.PlaybackStateCompat
 import androidx.annotation.Keep
 import com.google.gson.annotations.Expose
 import kotlinx.parcelize.Parcelize
@@ -43,7 +42,7 @@ data class Station (@Expose val uuid: String = UUID.randomUUID().toString(),
                     @Expose var remoteImageLocation: String = String(),
                     @Expose var remoteStationLocation: String = String(),
                     @Expose var modificationDate: Date = Keys.DEFAULT_DATE,
-                    @Expose var playbackState: Int = PlaybackStateCompat.STATE_STOPPED,
+                    @Expose var isPlaying: Boolean = false,
                     @Expose var radioBrowserStationUuid: String = String(),
                     @Expose var radioBrowserChangeUuid: String = String()): Parcelable {
 
@@ -60,10 +59,10 @@ data class Station (@Expose val uuid: String = UUID.randomUUID().toString(),
 
     /* Getter for currently selected stream */
     fun getStreamUri(): String {
-        if (streamUris.isNotEmpty()) {
-            return streamUris[stream]
+        return if (streamUris.isNotEmpty()) {
+            streamUris[stream]
         } else {
-            return String()
+            String()
         }
     }
 
@@ -77,22 +76,22 @@ data class Station (@Expose val uuid: String = UUID.randomUUID().toString(),
     /* Creates a deep copy of a Station */
     fun deepCopy(): Station {
         return Station(uuid = uuid,
-                       starred = starred,
-                       name = name,
-                       nameManuallySet = nameManuallySet,
-                       streamUris = streamUris,
-                       stream = stream,
-                       streamContent = streamContent,
-                       homepage = homepage,
-                       image = image,
-                       smallImage = smallImage,
-                       imageColor = imageColor,
-                       imageManuallySet = imageManuallySet,
-                       remoteImageLocation = remoteImageLocation,
-                       remoteStationLocation = remoteStationLocation,
-                       modificationDate = modificationDate,
-                       playbackState = playbackState,
-                       radioBrowserStationUuid = radioBrowserStationUuid,
-                       radioBrowserChangeUuid = radioBrowserChangeUuid)
+            starred = starred,
+            name = name,
+            nameManuallySet = nameManuallySet,
+            streamUris = streamUris,
+            stream = stream,
+            streamContent = streamContent,
+            homepage = homepage,
+            image = image,
+            smallImage = smallImage,
+            imageColor = imageColor,
+            imageManuallySet = imageManuallySet,
+            remoteImageLocation = remoteImageLocation,
+            remoteStationLocation = remoteStationLocation,
+            modificationDate = modificationDate,
+            isPlaying = isPlaying,
+            radioBrowserStationUuid = radioBrowserStationUuid,
+            radioBrowserChangeUuid = radioBrowserChangeUuid)
     }
 }

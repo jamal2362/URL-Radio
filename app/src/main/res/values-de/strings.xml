@@ -42,7 +42,13 @@
     <!-- Notification -->
     <string name="notification_now_playing_channel_description">Wiedergabesteuerungen, Sendername und Bild.</string>
     <string name="notification_now_playing_channel_name">Wiedergabesteuerung</string>
-	
+    <string name="notification_play">Wiedergabe</string>
+    <string name="notification_stop">Stopp</string>
+    <string name="notification_playing">Spielen</string>
+    <string name="notification_skip_to_previous">Zurück</string>
+    <string name="notification_skip_to_next">Nächste</string>
+
+
     <!-- Onboarding -->
     <string name="onboarding_app_description">Radio App</string>
     <string name="onboarding_app_get_started">Jetzt starten</string>

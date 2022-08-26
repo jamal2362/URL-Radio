@@ -14,156 +14,112 @@
 
 package com.jamal2367.urlradio.helpers
 
-import android.app.PendingIntent
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
-import android.graphics.Bitmap
-import android.net.Uri
-import android.support.v4.media.session.MediaControllerCompat
-import android.support.v4.media.session.MediaSessionCompat
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.ui.PlayerNotificationManager
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.Dispatchers.Main
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import androidx.core.app.NotificationCompat
+import androidx.core.graphics.drawable.IconCompat
+import androidx.media3.common.Player
+import androidx.media3.common.util.Util
+import androidx.media3.session.MediaNotification
+import androidx.media3.session.MediaSession
+import androidx.media3.session.MediaStyleNotificationHelper
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
 
 
 /*
  * NotificationHelper class
- * Credit: https://github.com/android/uamp/blob/5bae9316b60ba298b6080de1fcad53f6f74eb0bf/common/src/main/java/com/example/android/uamp/media/UampNotificationManager.kt
  */
-class NotificationHelper(private val context: Context, sessionToken: MediaSessionCompat.Token, notificationListener: PlayerNotificationManager.NotificationListener) {
+class NotificationHelper(private val context: Context) {
+
 
     /* Main class variables */
-    private val serviceJob = SupervisorJob()
-    private val serviceScope = CoroutineScope(Main + serviceJob)
-    private val notificationManager: PlayerNotificationManager
-    private val mediaController: MediaControllerCompat = MediaControllerCompat(context, sessionToken)
+    private val notificationManager: NotificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
 
-    /* Constructor */
-    init {
-        // create a notification builder
-        val notificationBuilder = PlayerNotificationManager.Builder(context, Keys.NOW_PLAYING_NOTIFICATION_ID, Keys.NOW_PLAYING_NOTIFICATION_CHANNEL_ID)
-        notificationBuilder.apply {
-            setChannelNameResourceId(R.string.notification_now_playing_channel_name)
-            setChannelDescriptionResourceId(R.string.notification_now_playing_channel_description)
-            setMediaDescriptionAdapter(DescriptionAdapter(mediaController))
-            setNotificationListener(notificationListener)
+    /* Builds a notification for given media session and controller */
+    fun getNotification(session: MediaSession, actionFactory: MediaNotification.ActionFactory): Notification {
+        ensureNotificationChannel()
+        val player: Player = session.player
+        val metadata = player.mediaMetadata
+        val builder = NotificationCompat.Builder(context, Keys.NOW_PLAYING_NOTIFICATION_CHANNEL_ID)
+
+        // Skip to previous action - duration is set via setSeekBackIncrementMs
+        builder.addAction(
+            actionFactory.createMediaAction(
+                session,
+                IconCompat.createWithResource(context, R.drawable.ic_notification_skip_to_previous_36dp),
+                context.getString(R.string.notification_skip_to_previous),
+                Player.COMMAND_SEEK_TO_PREVIOUS
+            )
+        )
+        if (player.playbackState == Player.STATE_ENDED || !player.playWhenReady) {
+            // Play action.
+            builder.addAction(
+                actionFactory.createMediaAction(
+                    session,
+                    IconCompat.createWithResource(context, R.drawable.ic_notification_play_36dp),
+                    context.getString(R.string.notification_play),
+                    Player.COMMAND_PLAY_PAUSE
+                )
+            )
+        } else {
+            // Pause action.
+            builder.addAction(
+                actionFactory.createMediaAction(
+                    session,
+                    IconCompat.createWithResource(context, R.drawable.ic_notification_stop_36dp),
+                    context.getString(R.string.notification_stop),
+                    Player.COMMAND_PLAY_PAUSE
+                )
+            )
         }
-        // create and configure the notification manager
-        notificationManager = notificationBuilder.build()
-        notificationManager.apply {
-            // note: notification icons are customized in values.xml
-            setMediaSessionToken(sessionToken)
+        // Skip to next action - duration is set via setSeekForwardIncrementMs
+        builder.addAction(
+            actionFactory.createMediaAction(
+                session,
+                IconCompat.createWithResource(
+                    context,
+                    R.drawable.ic_notification_skip_to_next_36dp
+                ),
+                context.getString(R.string.notification_skip_to_next),
+                Player.COMMAND_SEEK_TO_NEXT
+            )
+        )
+
+        // define media style properties for notification
+        val mediaStyle: MediaStyleNotificationHelper.MediaStyle = MediaStyleNotificationHelper.MediaStyle(session)
+//            .setShowCancelButton(true) // only necessary for pre-Lollipop (SDK < 21)
+//            .setCancelButtonIntent(actionFactory.createMediaActionPendingIntent(session, Player.COMMAND_STOP)) // only necessary for pre-Lollipop (SDK < 21)
+            .setShowActionsInCompactView(1 /* Show play/pause button only in compact view */)
+
+        // configure notification content
+        builder.apply {
+            setContentTitle(metadata.title)
+            setContentText(metadata.artist)
+            setContentIntent(session.sessionActivity)
+            setDeleteIntent(actionFactory.createMediaActionPendingIntent(session, Player.COMMAND_STOP.toLong()))
+            setOnlyAlertOnce(true)
             setSmallIcon(R.drawable.ic_notification_app_icon_white_24dp)
-            setUsePlayPauseActions(true)
-            setUseStopAction(true) // set true to display the dismiss button
-            setUsePreviousAction(true)
-            setUsePreviousActionInCompactView(false)
-            setUseNextAction(true) // only visible, if player is set to Player.REPEAT_MODE_ALL
-            setUseNextActionInCompactView(false)
-            setUseChronometer(true)
-        }
-    }
-
-
-    /* Hides notification via notification manager */
-    fun hideNotification() {
-        notificationManager.setPlayer(null)
-    }
-
-
-    /* Displays notification via notification manager */
-    fun showNotificationForPlayer(player: Player) {
-        notificationManager.setPlayer(player)
-    }
-
-
-    /* Triggers notification */
-    fun updateNotification() {
-        notificationManager.invalidate()
-    }
-
-
-//    /*
-//     * Inner class: Intercept stop button tap
-//     */
-//    private inner class Dispatcher: DefaultControlDispatcher(0L, 0L /* hide fast forward and rewind */) {
-//        override fun dispatchStop(player: Player, reset: Boolean): Boolean {
-//            // Default implementation see: https://github.com/google/ExoPlayer/blob/b1000940eaec9e1202d9abf341a48a58b728053f/library/core/src/main/java/com/google/android/exoplayer2/DefaultControlDispatcher.java#L137
-//            mediaController.sendCommand(Keys.CMD_DISMISS_NOTIFICATION, null, null)
-//            return true
-//        }
-//
-//        override fun dispatchSetPlayWhenReady(player: Player, playWhenReady: Boolean): Boolean {
-//            // changes the default behavior of !playWhenReady from player.pause() to player.stop()
-//            when (playWhenReady) {
-//                true -> player.play()
-//                false -> player.stop()
-//            }
-//            return true
-//        }
-//
-//        override fun dispatchPrevious(player: Player): Boolean {
-//            mediaController.sendCommand(Keys.CMD_PREVIOUS_STATION, null, null)
-//            return true
-//        }
-//
-//        override fun dispatchNext(player: Player): Boolean {
-//            mediaController.sendCommand(Keys.CMD_NEXT_STATION, null, null)
-//            return true
-//        }
-//    }
-//    /*
-//     * End of inner class
-//     */
-
-
-    /*
-     * Inner class: Create content of notification from metaddata
-     */
-    private inner class DescriptionAdapter(private val controller: MediaControllerCompat) : PlayerNotificationManager.MediaDescriptionAdapter {
-
-        var currentIconUri: Uri? = null
-        var currentBitmap: Bitmap? = null
-
-        override fun createCurrentContentIntent(player: Player): PendingIntent? = controller.sessionActivity
-
-        override fun getCurrentContentText(player: Player) = controller.metadata.description.subtitle.toString()
-
-        override fun getCurrentContentTitle(player: Player) = controller.metadata.description.title.toString()
-
-        override fun getCurrentLargeIcon(player: Player, callback: PlayerNotificationManager.BitmapCallback): Bitmap? {
-            val iconUri: Uri? = controller.metadata.description.iconUri
-            return if (currentIconUri != iconUri || currentBitmap == null) {
-                // Cache the bitmap for the current song so that successive calls to
-                // `getCurrentLargeIcon` don't cause the bitmap to be recreated.
-                currentIconUri = iconUri
-                serviceScope.launch {
-                    currentBitmap = iconUri?.let {
-                        resolveUriAsBitmap(it)
-                    }
-                    currentBitmap?.let { callback.onBitmap(it) }
-                }
-                null
-            } else {
-                currentBitmap
-            }
+            setLargeIcon(ImageHelper.getStationImage(context, metadata.artworkUri.toString()))
+            setStyle(mediaStyle)
+            setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            setOngoing(false)
         }
 
-        private suspend fun resolveUriAsBitmap(currentIconUri: Uri): Bitmap {
-            return withContext(IO) {
-                // Block on downloading artwork.
-                ImageHelper.getStationImage(context, currentIconUri.toString())
-            }
-        }
+        return builder.build()
     }
-    /*
-     * End of inner class
-     */
+
+
+
+
+    /* Creates a notification channel if necessary */
+    private fun ensureNotificationChannel() {
+        if (Util.SDK_INT < 26 || notificationManager.getNotificationChannel(Keys.NOW_PLAYING_NOTIFICATION_CHANNEL_ID) != null) return
+        val channel = NotificationChannel(Keys.NOW_PLAYING_NOTIFICATION_CHANNEL_ID, context.getString(R.string.notification_now_playing_channel_name), NotificationManager.IMPORTANCE_LOW)
+        notificationManager.createNotificationChannel(channel)
+    }
+
 }

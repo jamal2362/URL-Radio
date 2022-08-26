@@ -46,10 +46,6 @@ import kotlinx.coroutines.launch
 class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListener {
 
 
-    /* Define log tag */
-    private val TAG: String = LogHelper.makeLogTag(SettingsFragment::class.java)
-
-
     /* Overrides onViewCreated from PreferenceFragmentCompat */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -332,9 +328,9 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
             val targetUri: Uri? = result.data?.data
             if (targetUri != null) {
                 BackupHelper.backup(requireView(), activity as Context, targetUri)
-                LogHelper.e(TAG, "Backing up to $targetUri")
+                LogHelper.e("Backing up to $targetUri")
             } else {
-                LogHelper.w(TAG, "Station backup failed.")
+                LogHelper.w("Station backup failed.")
             }
         }
     }
@@ -412,7 +408,7 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
         try {
             requestBackupCollectionLauncher.launch(intent)
         } catch (exception: Exception) {
-            LogHelper.e(TAG, "Unable to save M3U.\n$exception")
+            LogHelper.e("Unable to save M3U.\n$exception")
             Snackbar.make(requireView(), R.string.toastmessage_install_file_helper, Snackbar.LENGTH_LONG).show()
         }
     }
@@ -429,7 +425,7 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
         try {
             requestRestoreCollectionLauncher.launch(intent)
         } catch (exception: Exception) {
-            LogHelper.e(TAG, "Unable to open file picker for ZIP.\n$exception")
+            LogHelper.e("Unable to open file picker for ZIP.\n$exception")
             // Toast.makeText(activity as Context, R.string.toast_message_install_file_helper, Toast.LENGTH_LONG).show()
         }
     }

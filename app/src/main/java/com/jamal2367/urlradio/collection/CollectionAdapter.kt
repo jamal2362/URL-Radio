@@ -17,7 +17,6 @@ package com.jamal2367.urlradio.collection
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
-import android.support.v4.media.session.PlaybackStateCompat
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -56,7 +55,6 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
 
     /* Main class variables */
     private lateinit var collectionViewModel: CollectionViewModel
-    // private lateinit var collectionAdapterListener: CollectionAdapterListener
     private var collection: Collection = Collection()
     private var editStationsEnabled: Boolean = PreferencesHelper.loadEditStationsEnabled()
     private var editStationStreamsEnabled: Boolean = PreferencesHelper.loadEditStreamUrisEnabled()
@@ -66,7 +64,7 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
 
     /* Listener Interface */
     interface CollectionAdapterListener {
-        fun onPlayButtonTapped(stationUuid: String, playbackState: Int)
+        fun onPlayButtonTapped(stationUuid: String)
         fun onAddNewButtonTapped()
         fun onChangeImageButtonTapped(stationUuid: String)
     }
@@ -76,7 +74,7 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
         // create view model and observe changes in collection view model
-        collectionViewModel = ViewModelProvider(context as AppCompatActivity).get(CollectionViewModel::class.java)
+        collectionViewModel = ViewModelProvider(context as AppCompatActivity)[CollectionViewModel::class.java]
         observeCollectionViewModel(context as LifecycleOwner)
         // start listening for changes in shared preferences
         PreferencesHelper.registerPreferenceChangeListener(sharedPreferenceChangeListener)
@@ -195,26 +193,26 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {  }
         })
         stationViewHolder.cancelButton.setOnClickListener {
-            val position: Int = stationViewHolder.bindingAdapterPosition
+            val position: Int = stationViewHolder.adapterPosition
             toggleEditViews(position, station.uuid)
             UiHelper.hideSoftKeyboard(context, stationViewHolder.stationNameEditView)
         }
         stationViewHolder.saveButton.setOnClickListener {
-            val position: Int = stationViewHolder.bindingAdapterPosition
+            val position: Int = stationViewHolder.adapterPosition
             toggleEditViews(position, station.uuid)
             saveStation(station, position, stationViewHolder.stationNameEditView.text.toString(), stationViewHolder.stationUriEditView.text.toString())
             UiHelper.hideSoftKeyboard(context, stationViewHolder.stationNameEditView)
         }
         stationViewHolder.placeOnHomeScreenButton.setOnClickListener {
-            val position: Int = stationViewHolder.bindingAdapterPosition
+            val position: Int = stationViewHolder.adapterPosition
             ShortcutHelper.placeShortcut(context, station)
             toggleEditViews(position, station.uuid)
             UiHelper.hideSoftKeyboard(context, stationViewHolder.stationNameEditView)
         }
         stationViewHolder.stationImageChangeView.setOnClickListener {
-            val position: Int = stationViewHolder.bindingAdapterPosition
+            val position: Int = stationViewHolder.adapterPosition
             collectionAdapterListener.onChangeImageButtonTapped(station.uuid)
-            stationViewHolder.absoluteAdapterPosition
+            stationViewHolder.adapterPosition
             toggleEditViews(position, station.uuid)
             UiHelper.hideSoftKeyboard(context, stationViewHolder.stationNameEditView)
         }
@@ -273,29 +271,28 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
 
     /* Sets up a station's play and edit buttons */
     private fun setStationButtons(stationViewHolder: StationViewHolder, station: Station) {
-        val playbackState: Int = station.playbackState
-        when (playbackState) {
-            PlaybackStateCompat.STATE_PLAYING -> stationViewHolder.playButtonView.visibility = View.VISIBLE
-            else -> stationViewHolder.playButtonView.visibility = View.INVISIBLE
+        when (station.isPlaying) {
+            true -> stationViewHolder.playButtonView.visibility = View.VISIBLE
+            false -> stationViewHolder.playButtonView.visibility = View.INVISIBLE
         }
         stationViewHolder.stationCardView.setOnClickListener {
-            collectionAdapterListener.onPlayButtonTapped(station.uuid, playbackState)
+            collectionAdapterListener.onPlayButtonTapped(station.uuid)
         }
         stationViewHolder.playButtonView.setOnClickListener {
-            collectionAdapterListener.onPlayButtonTapped(station.uuid, playbackState)
+            collectionAdapterListener.onPlayButtonTapped(station.uuid)
         }
         stationViewHolder.stationNameView.setOnClickListener {
-            collectionAdapterListener.onPlayButtonTapped(station.uuid, playbackState)
+            collectionAdapterListener.onPlayButtonTapped(station.uuid)
         }
         stationViewHolder.stationStarredView.setOnClickListener {
-            collectionAdapterListener.onPlayButtonTapped(station.uuid, playbackState)
+            collectionAdapterListener.onPlayButtonTapped(station.uuid)
         }
         stationViewHolder.stationImageView.setOnClickListener {
-            collectionAdapterListener.onPlayButtonTapped(station.uuid, playbackState)
+            collectionAdapterListener.onPlayButtonTapped(station.uuid)
         }
         stationViewHolder.stationCardView.setOnLongClickListener {
             if (editStationsEnabled) {
-                val position: Int = stationViewHolder.bindingAdapterPosition
+                val position: Int = stationViewHolder.adapterPosition
                 toggleEditViews(position, station.uuid)
                 return@setOnLongClickListener true
             } else {
@@ -304,7 +301,7 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
         }
         stationViewHolder.playButtonView.setOnLongClickListener {
             if (editStationsEnabled) {
-                val position: Int = stationViewHolder.bindingAdapterPosition
+                val position: Int = stationViewHolder.adapterPosition
                 toggleEditViews(position, station.uuid)
                 return@setOnLongClickListener true
             } else {
@@ -313,7 +310,7 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
         }
         stationViewHolder.stationNameView.setOnLongClickListener {
             if (editStationsEnabled) {
-                val position: Int = stationViewHolder.bindingAdapterPosition
+                val position: Int = stationViewHolder.adapterPosition
                 toggleEditViews(position, station.uuid)
                 return@setOnLongClickListener true
             } else {
@@ -322,7 +319,7 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
         }
         stationViewHolder.stationStarredView.setOnLongClickListener {
             if (editStationsEnabled) {
-                val position: Int = stationViewHolder.bindingAdapterPosition
+                val position: Int = stationViewHolder.adapterPosition
                 toggleEditViews(position, station.uuid)
                 return@setOnLongClickListener true
             } else {
@@ -331,7 +328,7 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
         }
         stationViewHolder.stationImageView.setOnLongClickListener {
             if (editStationsEnabled) {
-                val position: Int = stationViewHolder.bindingAdapterPosition
+                val position: Int = stationViewHolder.adapterPosition
                 toggleEditViews(position, station.uuid)
                 return@setOnLongClickListener true
             } else {
@@ -384,7 +381,10 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
 
         } else if (holder is StationViewHolder) {
             // get station from position
-            collection.stations[holder.getBindingAdapterPosition()]
+            val station = collection.stations[holder.getAdapterPosition()]
+
+            // get reference to StationViewHolder
+            val stationViewHolder = holder
 
             for (data in payloads) {
                 when (data as Int) {
@@ -609,7 +609,7 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
             val newStation: Station = newCollection.stations[newItemPosition]
 
             // compare relevant contents of a station
-            if (oldStation.playbackState != newStation.playbackState) return false
+            if (oldStation.isPlaying != newStation.isPlaying) return false
             if (oldStation.uuid != newStation.uuid) return false
             if (oldStation.starred != newStation.starred) return false
             if (oldStation.name != newStation.name) return false

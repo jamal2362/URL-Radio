@@ -121,11 +121,13 @@
 
         <!-- Player Service -->
         <service
-            android:name=".playback.PlayerService"
+            android:name=".PlayerService"
+            android:foregroundServiceType="mediaPlayback"
             android:enabled="true"
             android:exported="true"
             tools:ignore="ExportedService">
             <intent-filter>
+                <action android:name="androidx.media3.session.MediaSessionService"/>
                 <action android:name="android.media.browse.MediaBrowserService"/>
                 <action android:name="com.jamal2367.urlradio.action.START_PLAYER_SERVICE" />
             </intent-filter>

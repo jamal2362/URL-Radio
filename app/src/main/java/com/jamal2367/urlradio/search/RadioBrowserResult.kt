@@ -14,7 +14,6 @@
 
 package com.jamal2367.urlradio.search
 
-import android.support.v4.media.session.PlaybackStateCompat
 import com.google.gson.annotations.Expose
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.core.Station
@@ -34,23 +33,23 @@ data class RadioBrowserResult (@Expose val changeuuid: String,
 
     /* Converts RadioBrowserResult to Station  */
     fun toStation(): Station = Station(
-            starred = false,
-            name = name,
-            nameManuallySet = false,
-            streamUris = mutableListOf(url_resolved),
-            stream = 0,
-            streamContent = Keys.MIME_TYPE_UNSUPPORTED,
-            homepage = homepage,
-            image = Keys.LOCATION_DEFAULT_STATION_IMAGE,
-            smallImage = Keys.LOCATION_DEFAULT_STATION_IMAGE,
-            imageColor = -1,
-            imageManuallySet = false,
-            remoteImageLocation = favicon,
-            remoteStationLocation = url,
-            modificationDate = GregorianCalendar.getInstance().time,
-            playbackState = PlaybackStateCompat.STATE_STOPPED,
-            radioBrowserStationUuid = stationuuid,
-            radioBrowserChangeUuid = changeuuid)
+        starred = false,
+        name = name,
+        nameManuallySet = false,
+        streamUris = mutableListOf(url_resolved),
+        stream = 0,
+        streamContent = Keys.MIME_TYPE_UNSUPPORTED,
+        homepage = homepage,
+        image = Keys.LOCATION_DEFAULT_STATION_IMAGE,
+        smallImage = Keys.LOCATION_DEFAULT_STATION_IMAGE,
+        imageColor = -1,
+        imageManuallySet = false,
+        remoteImageLocation = favicon,
+        remoteStationLocation = url,
+        modificationDate = GregorianCalendar.getInstance().time,
+        isPlaying = false,
+        radioBrowserStationUuid = stationuuid,
+        radioBrowserChangeUuid = changeuuid)
 
 }
 

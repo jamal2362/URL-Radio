@@ -16,10 +16,8 @@ package com.jamal2367.urlradio.helpers
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.gson.Gson
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.ui.PlayerState
@@ -68,30 +66,10 @@ object PreferencesHelper {
     }
 
 
-    /* Loads state of playback for player / PlayerService from shared preferences */
-    fun loadPlayerPlaybackState(): Int {
-        return sharedPreferences.getInt(Keys.PREF_CURRENT_PLAYBACK_STATE, PlaybackStateCompat.STATE_STOPPED)
-    }
-
-
-    /* Saves state of playback for player / PlayerService to shared preferences */
-    fun savePlayerPlaybackState(playbackState: Int) {
+    /* Saves state of playback for player to shared preferences */
+    fun saveIsPlaying(isPlaying: Boolean) {
         sharedPreferences.edit {
-            putInt(Keys.PREF_CURRENT_PLAYBACK_STATE, playbackState)
-        }
-    }
-
-
-    /* Loads state of playback for player / PlayerService from shared preferences */
-    fun loadPlayerPlaybackSpeed(): Float {
-        return sharedPreferences.getFloat(Keys.PREF_PLAYER_STATE_PLAYBACK_SPEED, 1f)
-    }
-
-
-    /* Saves state of playback for player / PlayerService to shared preferences */
-    fun savePlayerPlaybackSpeed(playbackSpeed: Float) {
-        sharedPreferences.edit {
-            putFloat(Keys.PREF_PLAYER_STATE_PLAYBACK_SPEED, playbackSpeed)
+            putBoolean(Keys.PREF_PLAYER_STATE_IS_PLAYING, isPlaying)
         }
     }
 
@@ -139,6 +117,14 @@ object PreferencesHelper {
     }
 
 
+    /* Saves state of sleep timer to shared preferences */
+    fun saveSleepTimerRunning(isRunning: Boolean) {
+        sharedPreferences.edit {
+            putBoolean(Keys.PREF_PLAYER_STATE_SLEEP_TIMER_RUNNING, isRunning)
+        }
+    }
+
+
     /* Loads date of last save operation from shared preferences */
     fun loadCollectionModificationDate(): Date {
         val modificationDateString: String = sharedPreferences.getString(Keys.PREF_COLLECTION_MODIFICATION_DATE, "") ?: String()
@@ -174,9 +160,8 @@ object PreferencesHelper {
     fun loadPlayerState(): PlayerState {
         return PlayerState().apply {
             stationUuid = sharedPreferences.getString(Keys.PREF_PLAYER_STATE_STATION_UUID, String()) ?: String()
-            playbackState = sharedPreferences.getInt(Keys.PREF_PLAYER_STATE_PLAYBACK_STATE, PlaybackStateCompat.STATE_STOPPED)
-            bottomSheetState = sharedPreferences.getInt(Keys.PREF_PLAYER_STATE_BOTTOM_SHEET_STATE, BottomSheetBehavior.STATE_HIDDEN)
-            sleepTimerState = sharedPreferences.getInt(Keys.PREF_PLAYER_STATE_SLEEP_TIMER_STATE, Keys.STATE_SLEEP_TIMER_STOPPED)
+            isPlaying = sharedPreferences.getBoolean(Keys.PREF_PLAYER_STATE_IS_PLAYING, false)
+            sleepTimerRunning = sharedPreferences.getBoolean(Keys.PREF_PLAYER_STATE_SLEEP_TIMER_RUNNING, false)
         }
     }
 
@@ -185,9 +170,15 @@ object PreferencesHelper {
     fun savePlayerState(playerState: PlayerState) {
         sharedPreferences.edit {
             putString(Keys.PREF_PLAYER_STATE_STATION_UUID, playerState.stationUuid)
-            putInt(Keys.PREF_PLAYER_STATE_PLAYBACK_STATE, playerState.playbackState)
-            putInt(Keys.PREF_PLAYER_STATE_BOTTOM_SHEET_STATE, playerState.bottomSheetState)
-            putInt(Keys.PREF_PLAYER_STATE_SLEEP_TIMER_STATE, playerState.sleepTimerState)
+            putBoolean(Keys.PREF_PLAYER_STATE_IS_PLAYING, playerState.isPlaying)
+        }
+    }
+
+
+    /* Saves Uuid if currently playing station to shared preferences */
+    fun saveCurrentStationId(stationUuid: String) {
+        sharedPreferences.edit {
+            putString(Keys.PREF_PLAYER_STATE_STATION_UUID, stationUuid)
         }
     }
 

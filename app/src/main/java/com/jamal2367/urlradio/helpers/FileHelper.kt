@@ -148,7 +148,6 @@ object FileHelper {
 
 
     /* Creates a copy of a given uri from downloadmanager - goal is to provide stable Uris */
-    @OptIn(DelicateCoroutinesApi::class)
     fun saveCopyOfFile(context: Context, stationUuid: String, tempFileUri: Uri, fileType: Int, fileName: String, async: Boolean = false): Uri {
         val targetFile = File(context.getExternalFilesDir(determineDestinationFolderPath(fileType, stationUuid)), fileName)
         if (targetFile.exists()) targetFile.delete()
@@ -248,18 +247,18 @@ object FileHelper {
         // get JSON from text file
         val json: String = readTextFile(context, Keys.FOLDER_COLLECTION, Keys.COLLECTION_FILE)
         var collection = Collection()
-        when (json.isNotBlank()) {
+        if (json.isNotBlank()) {
             // convert JSON and return as collection
-            true -> try {
+            try {
                 collection = getCustomGson().fromJson(json, collection::class.java)
             } catch (e: Exception) {
                 LogHelper.e("Error Reading collection.\nContent: $json")
                 e.printStackTrace()
             }
-            else -> {}
         }
         return collection
     }
+
 
 
     /* Appends a message to an existing log - and saves it */
@@ -310,7 +309,7 @@ object FileHelper {
 
     /* Suspend function: Wrapper for readCollection */
     suspend fun readCollectionSuspended(context: Context): Collection =
-        withContext(Dispatchers.IO) {
+        withContext(IO) {
             readCollection(context)
         }
 

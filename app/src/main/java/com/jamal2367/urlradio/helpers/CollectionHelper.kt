@@ -16,16 +16,12 @@ package com.jamal2367.urlradio.helpers
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.net.Uri
-import android.os.Bundle
-import android.support.v4.media.MediaBrowserCompat
-import android.support.v4.media.MediaDescriptionCompat
-import android.support.v4.media.MediaMetadataCompat
-import android.support.v4.media.session.PlaybackStateCompat
 import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import com.google.gson.GsonBuilder
 import kotlinx.coroutines.*
 import com.jamal2367.urlradio.Keys
@@ -318,25 +314,23 @@ object CollectionHelper {
 
 
     /* Saves the playback state of a given station */
-    fun savePlaybackState(context: Context, collection: Collection, station: Station, playbackState: Int): Collection {
+    fun savePlaybackState(context: Context, collection: Collection, stationUuid: String, isPlaying: Boolean): Collection {
         collection.stations.forEach {
             // reset playback state everywhere
-            it.playbackState = PlaybackStateCompat.STATE_STOPPED
+            it.isPlaying = false
             // set given playback state at this station
-            if (it.uuid == station.uuid) {
-                it.playbackState = playbackState
+            if (it.uuid == stationUuid) {
+                it.isPlaying = isPlaying
             }
         }
         // save collection and store modification date
         collection.modificationDate = saveCollection(context, collection)
-        // save playback state of PlayerService
-        PreferencesHelper.savePlayerPlaybackState(playbackState)
         return collection
     }
 
 
     /* Saves collection of radio stations */
-    fun saveCollection (context: Context, collection: Collection, async: Boolean = true): Date {
+    fun saveCollection(context: Context, collection: Collection, async: Boolean = true): Date {
         LogHelper.v("Saving collection of radio stations to storage. Async = ${async}. Size = ${collection.stations.size}")
         // get modification date
         val date: Date = Calendar.getInstance().time
@@ -411,43 +405,66 @@ object CollectionHelper {
     }
 
 
-    /* Creates MediaMetadata for a single station - used in media session*/
-    fun buildStationMediaMetadata(context: Context, station: Station, metadata: String): MediaMetadataCompat {
-        return MediaMetadataCompat.Builder().apply {
-            putString(MediaMetadataCompat.METADATA_KEY_ARTIST, station.name)
-            putString(MediaMetadataCompat.METADATA_KEY_TITLE, metadata)
-            putString(MediaMetadataCompat.METADATA_KEY_ALBUM, context.getString(R.string.app_name))
-            putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI, station.getStreamUri())
-            putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, ImageHelper.getScaledStationImage(context, station.image, Keys.SIZE_COVER_LOCK_SCREEN))
-            //putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI, station.image)
+    //    /* Creates MediaMetadata for a single station - used in media session*/
+//    fun buildStationMediaMetadata(context: Context, station: Station, metadata: String): MediaMetadataCompat {
+//        return MediaMetadataCompat.Builder().apply {
+//            putString(MediaMetadataCompat.METADATA_KEY_ARTIST, station.name)
+//            putString(MediaMetadataCompat.METADATA_KEY_TITLE, metadata)
+//            putString(MediaMetadataCompat.METADATA_KEY_ALBUM, context.getString(R.string.app_name))
+//            putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI, station.getStreamUri())
+//            putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, ImageHelper.getScaledStationImage(context, station.image, Keys.SIZE_COVER_LOCK_SCREEN))
+//            //putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI, station.image)
+//        }.build()
+//    }
+//
+//
+//    /* Creates MediaItem for a station - used by collection provider */
+//    fun buildStationMediaMetaItem(context: Context, station: Station): MediaBrowserCompat.MediaItem {
+//        val mediaDescriptionBuilder = MediaDescriptionCompat.Builder()
+//        mediaDescriptionBuilder.setMediaId(station.uuid)
+//        mediaDescriptionBuilder.setTitle(station.name)
+//        mediaDescriptionBuilder.setIconBitmap(ImageHelper.getScaledStationImage(context, station.image, Keys.SIZE_COVER_LOCK_SCREEN))
+//        // mediaDescriptionBuilder.setIconUri(station.image.toUri())
+//        return MediaBrowserCompat.MediaItem(mediaDescriptionBuilder.build(), MediaBrowserCompat.MediaItem.FLAG_PLAYABLE)
+//    }
+//
+//
+//    /* Creates description for a station - used in MediaSessionConnector */
+//    fun buildStationMediaDescription(context: Context, station: Station, metadata: String): MediaDescriptionCompat {
+//        val coverBitmap: Bitmap = ImageHelper.getScaledStationImage(context, station.image, Keys.SIZE_COVER_LOCK_SCREEN)
+//        val extras: Bundle = Bundle()
+//        extras.putParcelable(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, coverBitmap)
+//        extras.putParcelable(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, coverBitmap)
+//        return MediaDescriptionCompat.Builder().apply {
+//            setMediaId(station.uuid)
+//            setIconBitmap(coverBitmap)
+//            setIconUri(station.image.toUri())
+//            setTitle(metadata)
+//            setSubtitle(station.name)
+//            setExtras(extras)
+//        }.build()
+//    }
+
+
+    /* Creates a MediaItem with MediaMetadata for a single episode - used to prapare player */
+    fun buildMediaItem(station: Station): MediaItem {
+        // todo implement HLS MediaItems
+        // put uri in RequestMetadata - credit: https://stackoverflow.com/a/70103460
+        val requestMetadata = MediaItem.RequestMetadata.Builder().apply {
+            setMediaUri(station.getStreamUri().toUri())
         }.build()
-    }
-
-
-    /* Creates MediaItem for a station - used by collection provider */
-    fun buildStationMediaMetaItem(context: Context, station: Station): MediaBrowserCompat.MediaItem {
-        val mediaDescriptionBuilder = MediaDescriptionCompat.Builder()
-        mediaDescriptionBuilder.setMediaId(station.uuid)
-        mediaDescriptionBuilder.setTitle(station.name)
-        mediaDescriptionBuilder.setIconBitmap(ImageHelper.getScaledStationImage(context, station.image, Keys.SIZE_COVER_LOCK_SCREEN))
-        // mediaDescriptionBuilder.setIconUri(station.image.toUri())
-        return MediaBrowserCompat.MediaItem(mediaDescriptionBuilder.build(), MediaBrowserCompat.MediaItem.FLAG_PLAYABLE)
-    }
-
-
-    /* Creates description for a station - used in MediaSessionConnector */
-    fun buildStationMediaDescription(context: Context, station: Station, metadata: String): MediaDescriptionCompat {
-        val coverBitmap: Bitmap = ImageHelper.getScaledStationImage(context, station.image, Keys.SIZE_COVER_LOCK_SCREEN)
-        val extras = Bundle()
-        extras.putParcelable(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, coverBitmap)
-        extras.putParcelable(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, coverBitmap)
-        return MediaDescriptionCompat.Builder().apply {
+        // build MediaMetadata
+        val mediaMetadata = MediaMetadata.Builder().apply {
+            //setAlbumTitle()
+            setTitle(station.name)
+            setArtworkUri(station.image.toUri())
+        }.build()
+        // build MediaItem and return it
+        return MediaItem.Builder().apply {
             setMediaId(station.uuid)
-            setIconBitmap(coverBitmap)
-            setIconUri(station.image.toUri())
-            setTitle(metadata)
-            setSubtitle(station.name)
-            setExtras(extras)
+            setRequestMetadata(requestMetadata)
+            setMediaMetadata(mediaMetadata)
+            setUri(station.getStreamUri().toUri())
         }.build()
     }
 

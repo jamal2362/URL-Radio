@@ -17,7 +17,6 @@ package com.jamal2367.urlradio.ui
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.support.v4.media.session.PlaybackStateCompat
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
@@ -70,6 +69,7 @@ data class LayoutHolder(var rootView: View) {
     private var bottomSheetBehavior: BottomSheetBehavior<ConstraintLayout> = BottomSheetBehavior.from(bottomSheet)
     private var metadataHistory: MutableList<String>
     private var metadataHistoryPosition: Int
+    private var isBuffering: Boolean
 
 
     /* Init block */
@@ -78,6 +78,7 @@ data class LayoutHolder(var rootView: View) {
         //sheetMetadataViews = rootView.findViewById(R.id.sheet_metadata_views)
         metadataHistory = PreferencesHelper.loadMetadataHistory()
         metadataHistoryPosition = metadataHistory.size - 1
+        isBuffering = false
 
         // set up RecyclerView
         layoutManager = CustomLayoutManager(rootView.context)
@@ -120,17 +121,21 @@ data class LayoutHolder(var rootView: View) {
 
 
     /* Updates the player views */
-    fun updatePlayerViews(context: Context, station: Station, playbackState: Int) {
+    fun updatePlayerViews(context: Context, station: Station, isPlaying: Boolean) {
 
         // set default metadata views, when playback has stopped
-        if (playbackState != PlaybackStateCompat.STATE_PLAYING) {
+        if (isPlaying) {
             metadataView.text = station.name
             sheetMetadataHistoryView.text = station.name
-            sheetMetadataHistoryView.isSelected = true
+//            sheetMetadataHistoryView.isSelected = true
         }
 
-        // toggle buffering indicator
-        bufferingIndicator.isVisible = playbackState == PlaybackStateCompat.STATE_BUFFERING
+//        // toggle buffering indicator
+//        if (playbackState == PlaybackStateCompat.STATE_BUFFERING) {
+//            bufferingIndicator.isVisible = true
+//        } else {
+//            bufferingIndicator.isVisible = false
+//        }
 
         // update name
         stationNameView.text = station.name
@@ -203,15 +208,21 @@ data class LayoutHolder(var rootView: View) {
 
 
     /* Toggles play/pause button */
-    fun togglePlayButton(playbackState: Int) {
-        when (playbackState) {
-            PlaybackStateCompat.STATE_PLAYING -> {
-                playButtonView.setImageResource(R.drawable.ic_player_stop_symbol_36dp)
-            }
-            else -> {
-                playButtonView.setImageResource(R.drawable.ic_player_play_symbol_36dp)
-            }
+    fun togglePlayButton(isPlaying: Boolean) {
+        if (isPlaying) {
+            playButtonView.setImageResource(R.drawable.ic_player_stop_symbol_36dp)
+            bufferingIndicator.isVisible = false
+        } else {
+            playButtonView.setImageResource(R.drawable.ic_player_play_symbol_36dp)
+            bufferingIndicator.isVisible = isBuffering
         }
+    }
+
+
+    /* Toggles buffering indicator */
+    fun showBufferingIndicator(buffering: Boolean) {
+        bufferingIndicator.isVisible = buffering
+        isBuffering = buffering
     }
 
 
@@ -263,17 +274,17 @@ data class LayoutHolder(var rootView: View) {
 
 
     /* Initiates the rotation animation of the play button  */
-    fun animatePlaybackButtonStateTransition(context: Context, playbackState: Int) {
-        when (playbackState) {
-            PlaybackStateCompat.STATE_PLAYING -> {
+    fun animatePlaybackButtonStateTransition(context: Context, isPlaying: Boolean) {
+        when (isPlaying) {
+            true -> {
                 val rotateClockwise = AnimationUtils.loadAnimation(context, R.anim.rotate_clockwise_slow)
-                rotateClockwise.setAnimationListener(createAnimationListener(playbackState))
+                rotateClockwise.setAnimationListener(createAnimationListener(isPlaying))
                 playButtonView.startAnimation(rotateClockwise)
             }
 
-            else -> {
+            false -> {
                 val rotateCounterClockwise = AnimationUtils.loadAnimation(context, R.anim.rotate_counterclockwise_fast)
-                rotateCounterClockwise.setAnimationListener(createAnimationListener(playbackState))
+                rotateCounterClockwise.setAnimationListener(createAnimationListener(isPlaying))
                 playButtonView.startAnimation(rotateCounterClockwise)
             }
 
@@ -282,7 +293,7 @@ data class LayoutHolder(var rootView: View) {
 
 
     /* Shows player */
-    private fun showPlayer(context: Context): Boolean {
+    fun showPlayer(context: Context): Boolean {
         UiHelper.setViewMargins(context, recyclerView, 0,0,0, Keys.BOTTOM_SHEET_PEEK_HEIGHT)
         if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_HIDDEN && onboardingLayout.visibility == View.GONE) {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
@@ -299,6 +310,7 @@ data class LayoutHolder(var rootView: View) {
     }
 
 
+    /* Minimizes player sheet if expanded */
     fun minimizePlayerIfExpanded(): Boolean {
         return if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
@@ -310,12 +322,12 @@ data class LayoutHolder(var rootView: View) {
 
 
     /* Creates AnimationListener for play button */
-    private fun createAnimationListener(playbackState: Int): Animation.AnimationListener {
+    private fun createAnimationListener(isPlaying: Boolean): Animation.AnimationListener {
         return object : Animation.AnimationListener {
             override fun onAnimationStart(animation: Animation) {}
             override fun onAnimationEnd(animation: Animation) {
                 // set up button symbol and playback indicator afterwards
-                togglePlayButton(playbackState)
+                togglePlayButton(isPlaying)
             }
             override fun onAnimationRepeat(animation: Animation) {}
         }
