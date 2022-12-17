@@ -10,7 +10,7 @@
         android:shortcutDisabledMessage="@string/shortcut_last_station_disabled_message">
 
         <intent
-            android:action="com.jamal2367.urlradio.action.START_PLAYER_SERVICE"
+            android:action="org.y20k.transistor.action.START"
             android:targetPackage="com.jamal2367.urlradio"
             android:targetClass="com.jamal2367.urlradio.MainActivity" >
             <extra android:name="START_LAST_PLAYED_STATION" android:value="true" />

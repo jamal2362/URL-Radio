@@ -259,7 +259,6 @@ object CollectionHelper {
     /* Gets MediaIem for next station within collection */
     fun getNextMediaItem(collection: Collection, stationUuid: String): MediaItem {
         val currentStationPosition: Int = getStationPosition(collection, stationUuid)
-        Log.d(TAG, "Number of stations: ${collection.stations.size} | current position: $currentStationPosition") // todo remove
         return if (collection.stations.isEmpty() || currentStationPosition == -1) {
             buildMediaItem(Station())
         } else if (currentStationPosition < collection.stations.size -1) {
@@ -273,7 +272,6 @@ object CollectionHelper {
     /* Gets MediaIem for previous station within collection */
     fun getPreviousMediaItem(collection: Collection, stationUuid: String): MediaItem {
         val currentStationPosition: Int = getStationPosition(collection, stationUuid)
-        Log.d(TAG, "Number of stations: ${collection.stations.size} | current position: $currentStationPosition") // todo remove
         return if (collection.stations.isEmpty() || currentStationPosition == -1) {
             buildMediaItem(Station())
         } else if (currentStationPosition > 0) {
@@ -318,7 +316,7 @@ object CollectionHelper {
     }
 
 
-    /* TODO */
+    /* Returns the children stations under under root (simple media library structure: root > stations) */
     fun getChildren(collection: Collection): List<MediaItem> {
         val mediaItems: MutableList<MediaItem> = mutableListOf()
         collection.stations.forEach { station ->
@@ -328,13 +326,19 @@ object CollectionHelper {
     }
 
 
-    /* TODO */
+    /* Returns media item for given station id */
     fun getItem(collection: Collection, stationUuid: String): MediaItem {
         return buildMediaItem(getStation(collection, stationUuid))
     }
 
 
-    /* TODO */
+    /* Returns media item for last played station */
+    fun getRecent(collection: Collection): MediaItem {
+        return buildMediaItem(getStation(collection, PreferencesHelper.loadLastPlayedStationUuid()))
+    }
+
+
+    /* Returns the library root item */
     fun getRootItem(): MediaItem {
         val metadata: MediaMetadata = MediaMetadata.Builder()
             .setTitle("Root Folder")

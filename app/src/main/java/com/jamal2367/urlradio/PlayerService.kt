@@ -25,6 +25,7 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.media.MediaBrowserServiceCompat.BrowserRoot.EXTRA_RECENT
 import androidx.media3.common.*
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
@@ -59,7 +60,7 @@ class PlayerService: MediaLibraryService() {
     private lateinit var metadataHistory: MutableList<String>
     private lateinit var modificationDate: Date
     private var playbackRestartCounter: Int = 0
-    private var playbackActive = false // todo remove
+    private var playLastStation: Boolean = false
 
 
     /* Overrides onCreate from Service */
@@ -260,7 +261,13 @@ class PlayerService: MediaLibraryService() {
         }
 
         override fun onGetLibraryRoot(session: MediaLibrarySession, browser: MediaSession.ControllerInfo, params: LibraryParams?): ListenableFuture<LibraryResult<MediaItem>> {
-            return Futures.immediateFuture(LibraryResult.ofItem(CollectionHelper.getRootItem(), params))
+            if (params?.extras?.containsKey(EXTRA_RECENT) == true) {
+                // special case: system requested media resumption via EXTRA_RECENT
+                playLastStation = true
+                return Futures.immediateFuture(LibraryResult.ofItem(CollectionHelper.getRecent(collection), params))
+            } else {
+                return Futures.immediateFuture(LibraryResult.ofItem(CollectionHelper.getRootItem(), params))
+            }
         }
 
         override fun onGetItem(session: MediaLibrarySession, browser: MediaSession.ControllerInfo, mediaId: String): ListenableFuture<LibraryResult<MediaItem>> {
@@ -311,6 +318,17 @@ class PlayerService: MediaLibraryService() {
                     player.play()
                     return SessionResult.RESULT_SUCCESS
                 }
+                Player.COMMAND_PREPARE -> {
+                    if (playLastStation) {
+                        // special case: system requested media resumption (see also onGetLibraryRoot)
+                        player.addMediaItem(CollectionHelper.getRecent(collection))
+                        player.prepare()
+                        playLastStation = false
+                        return SessionResult.RESULT_SUCCESS
+                    } else {
+                        return super.onPlayerCommandRequest(session, controller, playerCommand)
+                    }
+                }
 //                Player.COMMAND_PLAY_PAUSE -> {
 //                    // override pause with stop, to prevent unnecessary buffering
 //                    if (player.isPlaying) {
@@ -358,7 +376,6 @@ class PlayerService: MediaLibraryService() {
             super.onIsPlayingChanged(isPlaying)
             // store state of playback
             val currentMediaId: String = player.currentMediaItem?.mediaId ?: String()
-            playbackActive = isPlaying
             PreferencesHelper.saveIsPlaying(isPlaying)
             PreferencesHelper.saveCurrentStationId(currentMediaId)
             // reset restart counter

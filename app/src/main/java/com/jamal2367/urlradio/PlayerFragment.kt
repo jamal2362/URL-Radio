@@ -537,7 +537,6 @@ class PlayerFragment: Fragment(),
     /* Handles START_PLAYER_SERVICE request from App Shortcut */
     private fun handleStartPlayer() {
         val intent: Intent = (activity as Activity).intent
-        Log.e(TAG, "DING! = $intent") // todo remove
         if (intent.hasExtra(Keys.EXTRA_START_LAST_PLAYED_STATION)) {
             controller?.play(CollectionHelper.getStation(collection, playerState.stationUuid))
         } else if (intent.hasExtra(Keys.EXTRA_STATION_UUID)) {
