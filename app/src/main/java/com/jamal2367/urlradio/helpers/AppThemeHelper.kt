@@ -17,8 +17,12 @@ package com.jamal2367.urlradio.helpers
 import android.app.Activity
 import android.content.Context
 import android.content.res.Configuration
+import android.content.res.TypedArray
 import android.util.Log
+import android.util.TypedValue
 import android.view.View
+import androidx.annotation.AttrRes
+import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatDelegate
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
@@ -31,6 +35,8 @@ object AppThemeHelper {
 
     /* Define log tag */
     private val TAG: String = AppThemeHelper::class.java.simpleName
+
+    private val sTypedValue = TypedValue()
 
     /* Sets app theme */
     fun setTheme(nightModeState: String) {
@@ -95,6 +101,15 @@ object AppThemeHelper {
     fun displayLightStatusBar(activity: Activity) {
         val decorView = activity.window.decorView
         decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+    }
+
+
+    @ColorInt
+    fun getColor(context: Context, @AttrRes resource: Int): Int {
+        val a: TypedArray = context.obtainStyledAttributes(sTypedValue.data, intArrayOf(resource))
+        val color = a.getColor(0, 0)
+        a.recycle()
+        return color
     }
 
 }

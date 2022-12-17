@@ -22,5 +22,7 @@
 
         <!-- Don't show light status bar -->
         <item name="android:statusBarColor">@android:color/transparent</item>
+
+        <item name="android:navigationBarColor">@color/player_sheet_background</item>
     </style>
 </resources>

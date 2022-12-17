@@ -24,15 +24,13 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.media.AudioManager
 import android.net.Uri
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.os.Parcelable
+import android.os.*
 import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowInsetsController
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
@@ -53,8 +51,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
-import kotlinx.coroutines.*
-import kotlinx.coroutines.Dispatchers.IO
 import com.jamal2367.urlradio.collection.CollectionAdapter
 import com.jamal2367.urlradio.collection.CollectionViewModel
 import com.jamal2367.urlradio.core.Collection
@@ -65,6 +61,8 @@ import com.jamal2367.urlradio.extensions.*
 import com.jamal2367.urlradio.helpers.*
 import com.jamal2367.urlradio.ui.LayoutHolder
 import com.jamal2367.urlradio.ui.PlayerState
+import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers.IO
 import java.util.*
 
 
@@ -134,6 +132,10 @@ class PlayerFragment: Fragment(),
         }
         // hide action bar
         (activity as AppCompatActivity).supportActionBar?.hide()
+
+        // set player sheet background
+        (activity as AppCompatActivity).window.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.player_sheet_background)
+
         return rootView
     }
 

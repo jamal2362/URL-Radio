@@ -36,6 +36,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.jamal2367.urlradio.dialogs.ErrorDialog
 import com.jamal2367.urlradio.dialogs.YesNoDialog
 import com.jamal2367.urlradio.helpers.*
+import com.jamal2367.urlradio.helpers.AppThemeHelper.getColor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
@@ -62,11 +63,10 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O) {
             (activity as AppCompatActivity).window.navigationBarColor = ContextCompat.getColor(requireContext(), android.R.color.black)
         } else {
-            (activity as AppCompatActivity).window.navigationBarColor = ContextCompat.getColor(requireContext(), android.R.color.transparent)
+            (activity as AppCompatActivity).window.navigationBarColor = getColor(requireContext(), android.R.attr.colorBackground)
         }
 
     }
-
 
     /* Overrides onCreatePreferences from PreferenceFragmentCompat */
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {

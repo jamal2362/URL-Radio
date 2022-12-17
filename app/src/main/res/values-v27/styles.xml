@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Set AppCompat’s colors -->
+        <item name="colorPrimary">#FFF44336</item>
+        <item name="colorAccent">#FFF44336</item>
+        <item name="colorPrimaryContainer">#80F44336</item>
+
+        <!-- Do not use primary colored elevation overlays to present a visual hierarchy - TOO COLORFUL  -->
+        <item name="elevationOverlayEnabled">false</item>
+
+        <!-- Switch Theming  -->
+        <item name="switchStyle">@style/Widget.Material3.CompoundButton.MaterialSwitch</item>
+
+        <!-- Use "light" Status Bar -->
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+
+        <!-- Use "light" Navigation Bar -->
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
+</resources>
