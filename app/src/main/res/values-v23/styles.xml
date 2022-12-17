@@ -10,6 +10,9 @@
         <!-- Do not use primary colored elevation overlays to present a visual hierarchy - TOO COLORFUL  -->
         <item name="elevationOverlayEnabled">false</item>
 
+        <!-- Switch Theming  -->
+        <item name="switchStyle">@style/Widget.Material3.CompoundButton.MaterialSwitch</item>
+
         <!-- Use "light" Status Bar -->
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>

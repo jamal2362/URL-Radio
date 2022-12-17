@@ -3,14 +3,19 @@
     <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Default colors -->
         <item name="colorPrimary">@android:color/system_accent1_600</item>
+        <item name="colorOnPrimary">@android:color/system_accent1_0</item>
         <item name="colorPrimaryContainer">@android:color/system_accent1_200</item>
         <item name="colorSecondary">@android:color/system_accent1_600</item>
+        <item name="colorSurfaceVariant">@android:color/system_neutral2_100</item>
         <item name="colorOnSurfaceVariant">@android:color/system_accent1_600</item>
         <item name="android:colorBackground">@android:color/system_neutral2_10</item>
         <item name="android:textColorHighlight">@android:color/system_accent1_200</item>
 
         <!-- Do not use primary colored elevation overlays to present a visual hierarchy - TOO COLORFUL  -->
         <item name="elevationOverlayEnabled">false</item>
+
+        <!-- Switch Theming  -->
+        <item name="switchStyle">@style/Widget.Material3.CompoundButton.MaterialSwitch</item>
 
         <!-- Material Alert Dialog Theming -->
         <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog</item>
