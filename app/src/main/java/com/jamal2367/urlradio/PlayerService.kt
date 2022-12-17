@@ -89,6 +89,14 @@ class PlayerService: MediaLibraryService() {
     }
 
 
+    /* Overrides onTaskRemoved from Service */
+    override fun onTaskRemoved(rootIntent: Intent) {
+        if (!player.playWhenReady) {
+            stopSelf()
+        }
+    }
+
+
     /* Overrides onGetSession from MediaSessionService */
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession {
         return mediaLibrarySession
@@ -261,18 +269,18 @@ class PlayerService: MediaLibraryService() {
         }
 
         override fun onGetLibraryRoot(session: MediaLibrarySession, browser: MediaSession.ControllerInfo, params: LibraryParams?): ListenableFuture<LibraryResult<MediaItem>> {
-            if (params?.extras?.containsKey(EXTRA_RECENT) == true) {
+            return if (params?.extras?.containsKey(EXTRA_RECENT) == true) {
                 // special case: system requested media resumption via EXTRA_RECENT
                 playLastStation = true
-                return Futures.immediateFuture(LibraryResult.ofItem(CollectionHelper.getRecent(collection), params))
+                Futures.immediateFuture(LibraryResult.ofItem(CollectionHelper.getRecent(collection), params))
             } else {
-                return Futures.immediateFuture(LibraryResult.ofItem(CollectionHelper.getRootItem(), params))
+                Futures.immediateFuture(LibraryResult.ofItem(CollectionHelper.getRootItem(), params))
             }
         }
 
         override fun onGetItem(session: MediaLibrarySession, browser: MediaSession.ControllerInfo, mediaId: String): ListenableFuture<LibraryResult<MediaItem>> {
             val item: MediaItem = CollectionHelper.getItem(collection, mediaId)
-            return Futures.immediateFuture(LibraryResult.ofItem(item, /* params= */ null))
+            return Futures.immediateFuture(LibraryResult.ofItem(item, /* params = */ null))
         }
 
         override fun onCustomCommand(session: MediaSession, controller: MediaSession.ControllerInfo, customCommand: SessionCommand, args: Bundle): ListenableFuture<SessionResult> {
@@ -319,14 +327,24 @@ class PlayerService: MediaLibraryService() {
                     return SessionResult.RESULT_SUCCESS
                 }
                 Player.COMMAND_PREPARE -> {
-                    if (playLastStation) {
+                    return if (playLastStation) {
                         // special case: system requested media resumption (see also onGetLibraryRoot)
                         player.addMediaItem(CollectionHelper.getRecent(collection))
                         player.prepare()
                         playLastStation = false
-                        return SessionResult.RESULT_SUCCESS
+                        SessionResult.RESULT_SUCCESS
                     } else {
-                        return super.onPlayerCommandRequest(session, controller, playerCommand)
+                        super.onPlayerCommandRequest(session, controller, playerCommand)
+                    }
+                }
+                Player.COMMAND_PLAY_PAUSE -> {
+                    Log.e(TAG, "COMMAND_PLAY_PAUSE") // todo remove
+                    return if (player.isPlaying) {
+                        super.onPlayerCommandRequest(session, controller, playerCommand)
+                    } else {
+                        // seek to the start of the "live window"
+                        player.seekTo(0)
+                        SessionResult.RESULT_SUCCESS
                     }
                 }
 //                Player.COMMAND_PLAY_PAUSE -> {
