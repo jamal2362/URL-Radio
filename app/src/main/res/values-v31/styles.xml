@@ -24,6 +24,9 @@
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowLightNavigationBar">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
+
+        <!-- Set splash screen icon background color -->
+        <item name="android:windowSplashScreenIconBackgroundColor">@color/splashBackgroundColor</item>
     </style>
 
     <style name="ThemeOverlay.App.MaterialAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">

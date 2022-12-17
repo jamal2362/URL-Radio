@@ -23,6 +23,10 @@
         <!-- Don't show light status bar -->
         <item name="android:statusBarColor">@android:color/transparent</item>
 
+        <!-- Set Navigation Bar color -->
         <item name="android:navigationBarColor">@color/player_sheet_background</item>
+
+        <!-- Set splash screen icon background color -->
+        <item name="android:windowSplashScreenIconBackgroundColor">@color/splashBackgroundColor</item>
     </style>
 </resources>

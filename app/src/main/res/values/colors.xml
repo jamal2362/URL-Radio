@@ -49,5 +49,6 @@
     <color name="default_transparent">#00FFFFFF</color>
 
     <color name="colorPrimaryContainer">#FFE57373</color>
+    <color name="splashBackgroundColor">#FF1D3E66</color>
 
 </resources>
