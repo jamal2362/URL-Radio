@@ -18,6 +18,7 @@ import android.app.DownloadManager
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.core.net.toUri
 import kotlinx.coroutines.*
@@ -35,6 +36,11 @@ import java.util.*
  * DownloadHelper object
  */
 object DownloadHelper {
+
+
+    /* Define log tag */
+    private val TAG: String = DownloadHelper::class.java.simpleName
+
 
     /* Main class variables */
     private lateinit var collection: Collection
@@ -81,7 +87,7 @@ object DownloadHelper {
             }
         }
         enqueueDownload(context, uris.toTypedArray(), Keys.FILE_TYPE_IMAGE)
-        LogHelper.i("Updating all station images.")
+        Log.i(TAG, "Updating all station images.")
     }
 
 
@@ -95,7 +101,7 @@ object DownloadHelper {
             val downloadErrorCode: Int = getDownloadError(downloadId)
             val downloadErrorFileName: String = getDownloadFileName(downloadManager, downloadId)
             Toast.makeText(context, "${context.getString(R.string.toastmessage_error_download_error)}: $downloadErrorFileName ($downloadErrorCode)", Toast.LENGTH_LONG).show()
-            LogHelper.w("Download not successful: File name = $downloadErrorFileName Error code = $downloadErrorCode")
+            Log.w(TAG, "Download not successful: File name = $downloadErrorFileName Error code = $downloadErrorCode")
             removeFromActiveDownloads(arrayOf(downloadId), deleteDownload = true)
             return
         } else {
@@ -145,7 +151,7 @@ object DownloadHelper {
         // enqueue downloads
         val newIds = LongArray(uris.size)
         for (i in uris.indices) {
-            LogHelper.v("DownloadManager enqueue: ${uris[i]}")
+            Log.v(TAG, "DownloadManager enqueue: ${uris[i]}")
             // check if valid url and prevent double download
             val uri: Uri = uris[i]
             val scheme: String = uri.scheme ?: String()
@@ -170,11 +176,11 @@ object DownloadHelper {
         val activeDownloadsCopy = activeDownloads.copy()
         activeDownloadsCopy.forEach { downloadId ->
             if (getRemoteFileLocation(downloadManager, downloadId) == remoteFileLocation) {
-                LogHelper.w("File is already in download queue: $remoteFileLocation")
+                Log.w(TAG, "File is already in download queue: $remoteFileLocation")
                 return false
             }
         }
-        LogHelper.v("File is not in download queue.")
+        Log.v(TAG, "File is not in download queue.")
         return true
     }
 

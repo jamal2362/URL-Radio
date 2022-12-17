@@ -16,6 +16,7 @@ package com.jamal2367.urlradio.helpers
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.google.gson.Gson
@@ -28,6 +29,11 @@ import java.util.*
  * PreferencesHelper object
  */
 object PreferencesHelper {
+
+
+    /* Define log tag */
+    private val TAG: String = PreferencesHelper::class.java.simpleName
+
 
     /* The sharedPreferences object to be initialized */
     private lateinit var sharedPreferences: SharedPreferences
@@ -143,7 +149,7 @@ object PreferencesHelper {
     /* Loads active downloads from shared preferences */
     fun loadActiveDownloads(): String {
         val activeDownloadsString: String = sharedPreferences.getString(Keys.PREF_ACTIVE_DOWNLOADS, Keys.ACTIVE_DOWNLOADS_EMPTY) ?: Keys.ACTIVE_DOWNLOADS_EMPTY
-        LogHelper.v("IDs of active downloads: $activeDownloadsString")
+        Log.v(TAG, "IDs of active downloads: $activeDownloadsString")
         return activeDownloadsString
     }
 

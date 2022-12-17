@@ -204,10 +204,10 @@ data class LayoutHolder(var rootView: View) {
     fun togglePlayButton(isPlaying: Boolean) {
         if (isPlaying) {
             playButtonView.setImageResource(R.drawable.ic_player_stop_symbol_36dp)
-            bufferingIndicator.isVisible = false
+            // bufferingIndicator.isVisible = false
         } else {
             playButtonView.setImageResource(R.drawable.ic_player_play_symbol_36dp)
-            bufferingIndicator.isVisible = isBuffering
+            // bufferingIndicator.isVisible = isBuffering
         }
     }
 

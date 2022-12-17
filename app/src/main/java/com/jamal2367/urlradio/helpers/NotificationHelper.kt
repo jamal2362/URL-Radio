@@ -21,6 +21,7 @@ import android.content.Context
 import androidx.core.app.NotificationCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util
 import androidx.media3.session.MediaNotification
 import androidx.media3.session.MediaSession
@@ -32,6 +33,7 @@ import com.jamal2367.urlradio.R
 /*
  * NotificationHelper class
  */
+@UnstableApi
 class NotificationHelper(private val context: Context) {
 
 

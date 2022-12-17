@@ -15,6 +15,7 @@
 package com.jamal2367.urlradio.helpers
 
 import android.content.Context
+import android.util.Log
 import kotlinx.coroutines.*
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.core.Collection
@@ -29,6 +30,10 @@ import kotlinx.coroutines.Dispatchers.Main
  * UpdateHelper class
  */
 class UpdateHelper(private val context: Context, private val updateHelperListener: UpdateHelperListener, private var collection: Collection): RadioBrowserSearch.RadioBrowserSearchListener {
+
+
+    /* Define log tag */
+    private val TAG: String = UpdateHelper::class.java.simpleName
 
 
     /* Main class variables */
@@ -92,7 +97,7 @@ class UpdateHelper(private val context: Context, private val updateHelperListene
                     remoteStationLocationsList.add(station.remoteStationLocation)
                 }
                 else -> {
-                    LogHelper.w("Unable to update station: ${station.name}.")
+                    Log.w(TAG, "Unable to update station: ${station.name}.")
                 }
             }
         }
@@ -116,7 +121,7 @@ class UpdateHelper(private val context: Context, private val updateHelperListene
                 DownloadHelper.downloadPlaylists(context, arrayOf(station.remoteStationLocation))
             }
             else -> {
-                LogHelper.w("Unable to update station: ${station.name}.")
+                Log.w(TAG, "Unable to update station: ${station.name}.")
             }
         }
     }

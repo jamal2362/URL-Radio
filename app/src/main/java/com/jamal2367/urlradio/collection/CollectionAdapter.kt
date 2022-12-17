@@ -493,7 +493,7 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
 //            // download playlist // todo check content type detection is necessary here
 //            DownloadHelper.downloadPlaylists(context, arrayOf(station.remoteStationLocation))
 //        } else {
-//            LogHelper.w(aTAG, "Unable to update station: ${station.name}.")
+//            Log.w(TAG, "Unable to update station: ${station.name}.")
 //        }
 //    }
 

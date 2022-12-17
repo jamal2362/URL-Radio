@@ -22,6 +22,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
@@ -45,6 +46,9 @@ import kotlinx.coroutines.launch
  */
 class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListener {
 
+
+    /* Define log tag */
+    private val TAG: String = SettingsFragment::class.java.simpleName
 
     /* Overrides onViewCreated from PreferenceFragmentCompat */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -305,7 +309,7 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
                 }
                 Snackbar.make(requireView(),R.string.toastmessage_save_m3u, Snackbar.LENGTH_LONG).show()
             } else {
-                LogHelper.w("M3U export failed.")
+                Log.w(TAG, "M3U export failed.")
             }
         }
     }
@@ -318,9 +322,9 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
             val targetUri: Uri? = result.data?.data
             if (targetUri != null) {
                 BackupHelper.backup(requireView(), activity as Context, targetUri)
-                LogHelper.e("Backing up to $targetUri")
+                Log.e(TAG, "Backing up to $targetUri")
             } else {
-                LogHelper.w("Station backup failed.")
+                Log.w(TAG, "Station backup failed.")
             }
         }
     }
@@ -381,7 +385,7 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
         try {
             requestSaveM3uLauncher.launch(intent)
         } catch (exception: Exception) {
-            LogHelper.e("Unable to save M3U.\n$exception")
+            Log.e(TAG, "Unable to save M3U.\n$exception")
             Snackbar.make(requireView(), R.string.toastmessage_install_file_helper, Snackbar.LENGTH_LONG).show()
         }
     }
@@ -398,7 +402,7 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
         try {
             requestBackupCollectionLauncher.launch(intent)
         } catch (exception: Exception) {
-            LogHelper.e("Unable to save M3U.\n$exception")
+            Log.e(TAG, "Unable to save M3U.\n$exception")
             Snackbar.make(requireView(), R.string.toastmessage_install_file_helper, Snackbar.LENGTH_LONG).show()
         }
     }
@@ -415,7 +419,7 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
         try {
             requestRestoreCollectionLauncher.launch(intent)
         } catch (exception: Exception) {
-            LogHelper.e("Unable to open file picker for ZIP.\n$exception")
+            Log.e(TAG, "Unable to open file picker for ZIP.\n$exception")
             // Toast.makeText(activity as Context, R.string.toast_message_install_file_helper, Toast.LENGTH_LONG).show()
         }
     }

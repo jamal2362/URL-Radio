@@ -23,13 +23,12 @@ import android.content.IntentFilter
 import android.media.audiofx.AudioEffect
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.media3.common.*
-import androidx.media3.exoplayer.DefaultLoadControl
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.LoadControl
 import androidx.media3.exoplayer.analytics.AnalyticsListener
-import androidx.media3.exoplayer.upstream.DefaultAllocator
 import androidx.media3.session.*
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.Futures
@@ -44,16 +43,22 @@ import java.util.*
 /*
  * PlayerService class
  */
-class PlayerService: MediaSessionService() {
+@UnstableApi
+class PlayerService: MediaLibraryService() {
 
+    /* Define log tag */
+    private val TAG: String = PlayerService::class.java.simpleName
 
     /* Main class variables */
     private lateinit var player: Player
-    private lateinit var mediaSession: MediaSession
+    private lateinit var mediaLibrarySession: MediaLibrarySession
     private lateinit var sleepTimer: CountDownTimer
     var sleepTimerTimeRemaining: Long = 0L
+    private val librarySessionCallback = CustomMediaLibrarySessionCallback()
     private var collection: Collection = Collection()
     private lateinit var metadataHistory: MutableList<String>
+    private lateinit var modificationDate: Date
+    private var playbackRestartCounter: Int = 0
     private var playbackActive = false // todo remove
 
 
@@ -78,34 +83,30 @@ class PlayerService: MediaSessionService() {
         // player.removeAnalyticsListener(analyticsListener)
         player.removeListener(playerListener)
         player.release()
-        mediaSession.release()
+        mediaLibrarySession.release()
         super.onDestroy()
     }
 
 
     /* Overrides onGetSession from MediaSessionService */
-    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession {
-        return mediaSession
+    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession {
+        return mediaLibrarySession
     }
 
 
     /* Initializes the ExoPlayer */
     private fun initializePlayer() {
-        // val loadControl = CustomLoadControl()
         val exoPlayer: ExoPlayer = ExoPlayer.Builder(this).apply {
-            setAudioAttributes(AudioAttributes.DEFAULT, /* handleAudioFocus= */ true)
+            setAudioAttributes(AudioAttributes.DEFAULT, true)
             setHandleAudioBecomingNoisy(true)
-            // setMediaSourceFactory(DefaultMediaSourceFactory(this@PlayerService).setDataSourceFactory(OkHttpDataSource.Factory(OkHttpClient.Builder().build())))  // todo remove
-            // setLoadControl(loadControl) // todo remove
         }.build()
-        // exoPlayer.addAnalyticsListener(analyticsListener)
+        exoPlayer.addAnalyticsListener(analyticsListener)
         exoPlayer.addListener(playerListener)
-        // exoPlayer.addListener(loadControl)  // todo remove
 
-        // manually add seek to next and seek to previous since headphones issue them and they are translated to skip 30 sec forward / 10 sec back
+        // manually add seek to next and seek to previous since headphones issue them and they are translated to next and previous station
         player = object : ForwardingPlayer(exoPlayer) {
             override fun getAvailableCommands(): Player.Commands {
-                return super.getAvailableCommands().buildUpon().add(Player.COMMAND_SEEK_TO_NEXT).add(Player.COMMAND_SEEK_TO_PREVIOUS).build()
+                return super.getAvailableCommands().buildUpon().add(COMMAND_SEEK_TO_NEXT).add(COMMAND_SEEK_TO_PREVIOUS).build()
             }
         }
     }
@@ -119,9 +120,8 @@ class PlayerService: MediaSessionService() {
             getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         }
 
-        mediaSession = MediaSession.Builder(this, player).apply {
+        mediaLibrarySession = MediaLibrarySession.Builder(this, player, librarySessionCallback).apply {
             setSessionActivity(pendingIntent)
-            setCallback(CustomSessionCallback())
         }.build()
     }
 
@@ -135,9 +135,9 @@ class PlayerService: MediaSessionService() {
         // initialize timer
         sleepTimer = object: CountDownTimer(Keys.SLEEP_TIMER_DURATION + sleepTimerTimeRemaining, Keys.SLEEP_TIMER_INTERVAL) {
             override fun onFinish() {
-                LogHelper.v("Sleep timer finished. Sweet dreams.")
+                Log.v(TAG, "Sleep timer finished. Sweet dreams.")
                 sleepTimerTimeRemaining = 0L
-                player.pause()
+                player.pause() // todo may use player.stop() here
             }
             override fun onTick(millisUntilFinished: Long) {
                 sleepTimerTimeRemaining = millisUntilFinished
@@ -164,7 +164,7 @@ class PlayerService: MediaSessionService() {
     private fun updateMetadata(metadata: String = String()) {
         // get metadata string
         val metadataString: String = metadata.ifEmpty {
-            player.currentMediaItem?.mediaMetadata?.title.toString()
+            player.currentMediaItem?.mediaMetadata?.artist.toString()
         }
         // remove duplicates
         if (metadataHistory.contains(metadataString)) {
@@ -184,7 +184,6 @@ class PlayerService: MediaSessionService() {
     }
 
 
-
     /* Gets the most current metadata string */
     private fun getCurrentMetadata(): String {
         val metadataString: String = if (metadataHistory.isEmpty()) {
@@ -196,9 +195,10 @@ class PlayerService: MediaSessionService() {
     }
 
 
+
     /* Reads collection of stations from storage using GSON */
     private fun loadCollection(context: Context) {
-        LogHelper.v("Loading collection of stations from storage")
+        Log.v(TAG, "Loading collection of stations from storage")
         CoroutineScope(Main).launch {
             // load collection on background thread
             val deferred: Deferred<Collection> = async(Dispatchers.Default) { FileHelper.readCollectionSuspended(context) }
@@ -216,16 +216,26 @@ class PlayerService: MediaSessionService() {
     /*
      * Custom MediaSession Callback that handles player commands
      */
-    private inner class CustomSessionCallback: MediaSession.Callback {
+    private inner class CustomMediaLibrarySessionCallback: MediaLibrarySession.Callback {
 
         override fun onAddMediaItems(mediaSession: MediaSession, controller: MediaSession.ControllerInfo, mediaItems: MutableList<MediaItem>): ListenableFuture<List<MediaItem>> {
-            val updatedMediaItems = mediaItems.map { mediaItem ->
-                mediaItem.buildUpon().apply {
-                    setUri(mediaItem.requestMetadata.mediaUri)
-                }.build()
-            }
+            val updatedMediaItems: List<MediaItem> =
+                mediaItems.map { mediaItem -> CollectionHelper.getItem(collection, mediaItem.mediaId)
+//                    if (mediaItem.requestMetadata.searchQuery != null)
+//                        getMediaItemFromSearchQuery(mediaItem.requestMetadata.searchQuery!!)
+//                    else MediaItemTree.getItem(mediaItem.mediaId) ?: mediaItem
+                }
             return Futures.immediateFuture(updatedMediaItems)
+
+
+//            val updatedMediaItems = mediaItems.map { mediaItem ->
+//                mediaItem.buildUpon().apply {
+//                    setUri(mediaItem.requestMetadata.mediaUri)
+//                }.build()
+//            }
+//            return Futures.immediateFuture(updatedMediaItems)
         }
+
 
         override fun onConnect(session: MediaSession, controller: MediaSession.ControllerInfo): MediaSession.ConnectionResult {
             // add custom commands
@@ -236,6 +246,26 @@ class PlayerService: MediaSessionService() {
             builder.add(SessionCommand(Keys.CMD_REQUEST_SLEEP_TIMER_REMAINING, Bundle.EMPTY))
             builder.add(SessionCommand(Keys.CMD_REQUEST_METADATA_HISTORY, Bundle.EMPTY))
             return MediaSession.ConnectionResult.accept(builder.build(), connectionResult.availablePlayerCommands)
+        }
+
+        override fun onSubscribe(session: MediaLibrarySession, browser: MediaSession.ControllerInfo,  parentId: String, params: LibraryParams?): ListenableFuture<LibraryResult<Void>> {
+            val children: List<MediaItem> = CollectionHelper.getChildren(collection)
+            session.notifyChildrenChanged(browser, parentId, children.size, params)
+            return Futures.immediateFuture(LibraryResult.ofVoid())
+        }
+
+        override fun onGetChildren(session: MediaLibrarySession, browser: MediaSession.ControllerInfo, parentId: String, page: Int, pageSize: Int, params: LibraryParams?): ListenableFuture<LibraryResult<ImmutableList<MediaItem>>> {
+            val children: List<MediaItem> = CollectionHelper.getChildren(collection)
+            return Futures.immediateFuture(LibraryResult.ofItemList(children, params))
+        }
+
+        override fun onGetLibraryRoot(session: MediaLibrarySession, browser: MediaSession.ControllerInfo, params: LibraryParams?): ListenableFuture<LibraryResult<MediaItem>> {
+            return Futures.immediateFuture(LibraryResult.ofItem(CollectionHelper.getRootItem(), params))
+        }
+
+        override fun onGetItem(session: MediaLibrarySession, browser: MediaSession.ControllerInfo, mediaId: String): ListenableFuture<LibraryResult<MediaItem>> {
+            val item: MediaItem = CollectionHelper.getItem(collection, mediaId)
+            return Futures.immediateFuture(LibraryResult.ofItem(item, /* params= */ null))
         }
 
         override fun onCustomCommand(session: MediaSession, controller: MediaSession.ControllerInfo, customCommand: SessionCommand, args: Bundle): ListenableFuture<SessionResult> {
@@ -269,20 +299,22 @@ class PlayerService: MediaSessionService() {
             when (playerCommand) {
                 Player.COMMAND_SEEK_TO_NEXT ->  {
                     // todo implememt
-                    LogHelper.e("COMMAND_SEEK_TO_NEXT") // todo remove
-                    return SessionResult.RESULT_INFO_SKIPPED
+                    player.addMediaItem(CollectionHelper.getNextMediaItem(collection, player.currentMediaItem?.mediaId ?: String()))
+                    player.prepare()
+                    player.play()
+                    return SessionResult.RESULT_SUCCESS
                 }
                 Player.COMMAND_SEEK_TO_PREVIOUS ->  {
                     // todo implememt
-                    LogHelper.e("COMMAND_SEEK_TO_PREVIOUS") // todo remove
-                    return SessionResult.RESULT_INFO_SKIPPED
+                    player.addMediaItem(CollectionHelper.getPreviousMediaItem(collection, player.currentMediaItem?.mediaId ?: String()))
+                    player.prepare()
+                    player.play()
+                    return SessionResult.RESULT_SUCCESS
                 }
 //                Player.COMMAND_PLAY_PAUSE -> {
 //                    // override pause with stop, to prevent unnecessary buffering
-//                    LogHelper.e(TAG, "COMMAND_PLAY_PAUSE") // todo remove
 //                    if (player.isPlaying) {
-//                        player.playWhenReady = false
-////                        player.stop()
+//                        player.stop()
 //                        return SessionResult.RESULT_INFO_SKIPPED
 //                    } else {
 //                       return super.onPlayerCommandRequest(session, controller, playerCommand)
@@ -352,7 +384,6 @@ class PlayerService: MediaSessionService() {
                 when (player.playbackState) {
                     // player is able to immediately play from its current position
                     Player.STATE_READY -> {
-                        LogHelper.e("PAUSED") // todo remove
                         // todo
                     }
                     // buffering - data needs to be loaded
@@ -366,6 +397,25 @@ class PlayerService: MediaSessionService() {
                     // initial state or player is stopped or playback failed
                     Player.STATE_IDLE -> {
                         // todo
+                    }
+                }
+            }
+        }
+
+        override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+            super.onPlayWhenReadyChanged(playWhenReady, reason)
+            if (!playWhenReady) {
+                when (reason) {
+                    Player.PLAY_WHEN_READY_CHANGE_REASON_END_OF_MEDIA_ITEM -> {
+                        // playback reached end: stop / end playback
+                    }
+                    else -> {
+                        // playback has been paused by user or OS: update media session and save state
+                        // PLAY_WHEN_READY_CHANGE_REASON_USER_REQUEST or
+                        // PLAY_WHEN_READY_CHANGE_REASON_AUDIO_FOCUS_LOSS or
+                        // PLAY_WHEN_READY_CHANGE_REASON_AUDIO_BECOMING_NOISY or
+                        // PLAY_WHEN_READY_CHANGE_REASON_REMOTE
+                        // handlePlaybackChange(PlaybackStateCompat.STATE_PAUSED)
                     }
                 }
             }
@@ -391,7 +441,7 @@ class PlayerService: MediaSessionService() {
                 val date = Date(intent.getLongExtra(Keys.EXTRA_COLLECTION_MODIFICATION_DATE, 0L))
 
                 if (date.after(collection.modificationDate)) {
-                    LogHelper.v("PlayerService - reload collection after broadcast received.")
+                    Log.v(TAG, "PlayerService - reload collection after broadcast received.")
                     loadCollection(context)
                 }
             }
@@ -418,575 +468,4 @@ class PlayerService: MediaSessionService() {
     /*
      * End of declaration
      */
-
-
-    // todo remove
-    /*
-     * Custom LoadControl that tried to stop buffering after player has been paused
-     * See: https://github.com/androidx/media/issues/146
-     */
-    //    inner class CustomLoadControl: DefaultLoadControl(), Player.Listener {
-    private inner class CustomLoadControl: DefaultLoadControl(
-        DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE),
-        5000,
-        5000,
-        DEFAULT_BUFFER_FOR_PLAYBACK_MS,
-        DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS,
-        DEFAULT_TARGET_BUFFER_BYTES,
-        DEFAULT_PRIORITIZE_TIME_OVER_SIZE_THRESHOLDS,
-        DEFAULT_BACK_BUFFER_DURATION_MS,
-        DEFAULT_RETAIN_BACK_BUFFER_FROM_KEYFRAME), Player.Listener {
-        private var paused: Boolean = true
-        override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
-            paused = !playWhenReady
-            LogHelper.v("Issue #146", "onPlayWhenReadyChanged - paused = $paused") // todo remove
-        }
-
-//        override fun onIsPlayingChanged(isPlaying: Boolean) {
-//            paused = !isPlaying
-//            LogHelper.v("Issue #146", "onIsPlayingChanged - paused = $paused") // todo remove
-//        }
-
-        override fun shouldContinueLoading(playbackPositionUs: Long, bufferedDurationUs: Long, playbackSpeed: Float): Boolean {
-            return if (paused) {
-                LogHelper.v("Issue #146", "shouldContinueLoading - paused = $paused - RETURN false") // todo remove
-                false
-            } else {
-                LogHelper.v("Issue #146", "shouldContinueLoading - paused = $paused - RETURN super.shouldContinueLoading") // todo remove
-                super.shouldContinueLoading(playbackPositionUs, bufferedDurationUs, playbackSpeed)
-            }
-        }
-    }
-    /*
-     * End of declaration
-     */
-
-//    /*
-//     * EventListener: Listener for ExoPlayer Events
-//     */
-//    private val playerListener = object : Player.Listener {
-//
-//        override fun onIsPlayingChanged(isPlaying: Boolean){
-//            if (isPlaying) {
-//                // active playback
-//                handlePlaybackChange(PlaybackStateCompat.STATE_PLAYING)
-//            } else {
-//                // playback stopped by user
-//                handlePlaybackChange(PlaybackStateCompat.STATE_STOPPED)
-//            }
-//        }
-//
-//        override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
-//            super.onPlayWhenReadyChanged(playWhenReady, reason)
-//            if (!playWhenReady) {
-//                // detect dismiss action
-//                if (player.mediaItemCount == 0) {
-//                    stopSelf()
-//                }
-//                when (reason) {
-//                    Player.PLAY_WHEN_READY_CHANGE_REASON_END_OF_MEDIA_ITEM -> {
-//                        // playback reached end: try to resume
-//                        handlePlaybackEnded()
-//                    }
-//                    else -> {
-//                        // playback has been paused by OS
-//                        // PLAY_WHEN_READY_CHANGE_REASON_USER_REQUEST or
-//                        // PLAY_WHEN_READY_CHANGE_REASON_AUDIO_FOCUS_LOSS or
-//                        // PLAY_WHEN_READY_CHANGE_REASON_AUDIO_BECOMING_NOISY or
-//                        // PLAY_WHEN_READY_CHANGE_REASON_REMOTE
-//                        handlePlaybackChange(PlaybackStateCompat.STATE_STOPPED)
-//                    }
-//                }
-//            } else if (playWhenReady && player.playbackState == Player.STATE_BUFFERING) {
-//                handlePlaybackChange(PlaybackStateCompat.STATE_BUFFERING)
-//            }
-//        }
-//
-//
-//        override fun onMetadata(metadata: Metadata) {
-//            super.onMetadata(metadata)
-//            for (i in 0 until metadata.length()) {
-//                val entry = metadata[i]
-//                // extract IceCast metadata
-//                if (entry is IcyInfo) {
-//                    val icyInfo: IcyInfo = entry as IcyInfo
-//                    updateMetadata(icyInfo.title)
-//                } else if (entry is IcyHeaders) {
-//                    val icyHeaders = entry as IcyHeaders
-//                    LogHelper.i(TAG, "icyHeaders:" + icyHeaders.name + " - " + icyHeaders.genre)
-//                } else {
-//                    LogHelper.w(TAG, "Unsupported metadata received (type = ${entry.javaClass.simpleName})")
-//                    updateMetadata(null)
-//                }
-//                // TODO implement HLS metadata extraction (Id3Frame / PrivFrame)
-//                // https://exoplayer.dev/doc/reference/com/google/android/exoplayer2/metadata/Metadata.Entry.html
-//            }
-//        }
-//    }
-//
-//    /*
-//     * End of declaration
-//     */
-
-//
-//
-//    /*
-//     * NotificationListener: handles foreground state of service
-//     */
-//    private val notificationListener = object : PlayerNotificationManager.NotificationListener {
-//        override fun onNotificationCancelled(notificationId: Int, dismissedByUser: Boolean) {
-//            super.onNotificationCancelled(notificationId, dismissedByUser)
-//            stopForeground(true)
-//            isForegroundService = false
-//            stopSelf()
-//        }
-//
-//        override fun onNotificationPosted(notificationId: Int, notification: Notification, ongoing: Boolean) {
-//            super.onNotificationPosted(notificationId, notification, ongoing)
-//            if (ongoing && !isForegroundService) {
-//                ContextCompat.startForegroundService(applicationContext, Intent(applicationContext, this@PlayerService.javaClass))
-//                startForeground(Keys.NOW_PLAYING_NOTIFICATION_ID, notification)
-//                isForegroundService = true
-//            }
-//        }
-//    }
-//    /*
-//     * End of declaration
-//     */
-
-
-
-//    /*
-//     * PlaybackPreparer: Handles prepare and play requests - as well as custom commands like sleep timer control
-//     */
-//    private val preparer = object : MediaSessionConnector.PlaybackPreparer {
-//
-//        override fun getSupportedPrepareActions(): Long =
-//            PlaybackStateCompat.ACTION_PREPARE_FROM_MEDIA_ID or
-//                    PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID or
-//                    PlaybackStateCompat.ACTION_PREPARE_FROM_SEARCH or
-//                    PlaybackStateCompat.ACTION_PLAY_FROM_SEARCH
-//
-//        override fun onPrepareFromUri(uri: Uri, playWhenReady: Boolean, extras: Bundle?) = Unit
-//
-//        override fun onPrepare(playWhenReady: Boolean) {
-//            if (station.isValid()) {
-//                preparePlayer(playWhenReady)
-//            } else {
-//                val currentStationUuid: String = PreferencesHelper.loadLastPlayedStationUuid()
-//                onPrepareFromMediaId(currentStationUuid, playWhenReady, null)
-//            }
-//        }
-//
-//        override fun onPrepareFromMediaId(mediaId: String, playWhenReady: Boolean, extras: Bundle?) {
-//            // get station and start playback
-//            station = CollectionHelper.getStation(collection, mediaId ?: String())
-//            preparePlayer(playWhenReady)
-//        }
-//
-//        override fun onPrepareFromSearch(query: String, playWhenReady: Boolean, extras: Bundle?) {
-//
-//            // SPECIAL CASE: Empty query - user provided generic string e.g. 'Play music'
-//            if (query.isEmpty()) {
-//                // try to get first station
-//                val stationMediaItem: MediaBrowserCompat.MediaItem? = collectionProvider.getFirstStation()
-//                if (stationMediaItem != null) {
-//                    onPrepareFromMediaId(stationMediaItem.mediaId!!, playWhenReady = true, extras = null)
-//                } else {
-//                    // unable to get the first station - notify user
-//                    Toast.makeText(this@PlayerService, R.string.toastmessage_error_no_station_found, Toast.LENGTH_LONG).show()
-//                    LogHelper.e(TAG, "Unable to start playback. Please add a radio station first. (Collection size = ${collection.stations.size} | provider initialized = ${collectionProvider.isInitialized()})")
-//                }
-//            }
-//            // NORMAL CASE: Try to match station name and voice query
-//            else {
-//                val queryLowercase: String = query.lowercase(Locale.getDefault())
-//                collectionProvider.stationListByName.forEach { mediaItem ->
-//                    // get station name (here -> title)
-//                    val stationName: String = mediaItem.description.title.toString().lowercase(Locale.getDefault())
-//                    // FIRST: try to match the whole query
-//                    if (stationName == queryLowercase) {
-//                        // start playback
-//                        onPrepareFromMediaId(mediaItem.description.mediaId!!, playWhenReady = true, extras = null)
-//                        return
-//                    }
-//                    // SECOND: try to match parts of the query
-//                    else {
-//                        val words: List<String> = queryLowercase.split(" ")
-//                        words.forEach { word ->
-//                            if (stationName.contains(word)) {
-//                                // start playback
-//                                onPrepareFromMediaId(mediaItem.description.mediaId!!, playWhenReady = true, extras = null)
-//                                return
-//                            }
-//                        }
-//                    }
-//                }
-//                // NO MATCH: unable to match query - notify user
-//                Toast.makeText(this@PlayerService, R.string.toastmessage_error_no_station_matches_search, Toast.LENGTH_LONG).show()
-//                LogHelper.e(TAG, "Unable to find a station that matches your search query: $query")
-//            }
-//        }
-//
-//        override fun onCommand(player: Player,  command: String, extras: Bundle?, cb: ResultReceiver?): Boolean {
-//            when (command) {
-//                Keys.CMD_RELOAD_PLAYER_STATE -> {
-//                    playerState = PreferencesHelper.loadPlayerState()
-//                    return true
-//                }
-//                Keys.CMD_REQUEST_PROGRESS_UPDATE -> {
-//                    if (cb != null) {
-//                        // check if station is valid - assumes that then the player has been prepared as well
-//                        if (station.isValid()) {
-//                            val playbackProgressBundle: Bundle = bundleOf(Keys.RESULT_DATA_METADATA to metadataHistory)
-//                            if (sleepTimerTimeRemaining > 0L) {
-//                                playbackProgressBundle.putLong(Keys.RESULT_DATA_SLEEP_TIMER_REMAINING, sleepTimerTimeRemaining)
-//                            }
-//                            cb.send(Keys.RESULT_CODE_PERIODIC_PROGRESS_UPDATE, playbackProgressBundle)
-//                            return true
-//                        } else {
-//                            return false
-//                        }
-//                    } else {
-//                        return false
-//                    }
-//                }
-//                Keys.CMD_START_SLEEP_TIMER -> {
-//                    startSleepTimer()
-//                    return true
-//                }
-//                Keys.CMD_CANCEL_SLEEP_TIMER -> {
-//                    cancelSleepTimer()
-//                    return true
-//                }
-//                Keys.CMD_PLAY_STREAM -> {
-//                    // get station and start playback
-//                    val streamUri: String = extras?.getString(Keys.KEY_STREAM_URI) ?: String()
-//                    station = CollectionHelper.getStationWithStreamUri(collection, streamUri)
-//                    preparePlayer(true)
-//                    return true
-//                }
-//                else -> {
-//                    return false
-//                }
-//            }
-//        }
-//    }
-//    /*
-//     * End of declaration
-//     */
-
-
-
-
-
-//    /* Overrides onCreate from Service */
-//    override fun onCreate() {
-//        super.onCreate()
-//
-//        // load modification date of collection
-//        modificationDate = PreferencesHelper.loadCollectionModificationDate()
-//
-//        // get the package validator // todo can be local?
-//        packageValidator = PackageValidator(this, R.xml.allowed_media_browser_callers)
-//
-//        // fetch the player state
-//        playerState = PreferencesHelper.loadPlayerState()
-//
-//        // fetch the metadata history
-//        metadataHistory = PreferencesHelper.loadMetadataHistory()
-//
-//        // create a new MediaSession
-//        createMediaSession()
-//
-//        // create custom ForwardingPlayer used in Notification and playback control
-//        forwardingPlayer = createForwardingPlayer()
-//
-//        // ExoPlayer manages MediaSession
-//        mediaSessionConnector = MediaSessionConnector(mediaSession)
-//        mediaSessionConnector.setPlaybackPreparer(preparer)
-//        mediaSessionConnector.setQueueNavigator(object : TimelineQueueNavigator(mediaSession) {
-//            override fun getMediaDescription(player: Player, windowIndex: Int): MediaDescriptionCompat {
-//                // create media description - used in notification
-//                 return CollectionHelper.buildStationMediaDescription(this@PlayerService, station, getCurrentMetadata())
-//            }
-//        })
-//
-//        // initialize notification helper
-//        notificationHelper = NotificationHelper(this, mediaSession.sessionToken, notificationListener)
-////        notificationHelper.showNotificationForPlayer(forwardingPlayer)
-//
-//        // create and register collection changed receiver
-//        collectionChangedReceiver = createCollectionChangedReceiver()
-//        LocalBroadcastManager.getInstance(application).registerReceiver(collectionChangedReceiver, IntentFilter(Keys.ACTION_COLLECTION_CHANGED))
-//
-//        // load collection
-//        collection = FileHelper.readCollection(this)
-//    }
-
-
-//    /* Overrides onStartCommand from Service */
-//    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-//        super.onStartCommand(intent, flags, startId)
-//        // handle start/stop requests issued via Intent - used for example by the home screen shortcuts
-//        if (intent != null && intent.action == Keys.ACTION_STOP) {
-//            player.stop()
-//        }
-//        if (intent != null && intent.action == Keys.ACTION_START) {
-//            if (intent.hasExtra(Keys.EXTRA_STATION_UUID)) {
-//                val stationUuid: String = intent.getStringExtra(Keys.EXTRA_STATION_UUID) ?: String()
-//                station = CollectionHelper.getStation(collection, stationUuid)
-//            } else if(intent.hasExtra(Keys.EXTRA_STREAM_URI)) {
-//                val streamUri: String = intent.getStringExtra(Keys.EXTRA_STREAM_URI) ?: String()
-//                station = CollectionHelper.getStationWithStreamUri(collection, streamUri)
-//            } else {
-//                station = CollectionHelper.getStation(collection, playerState.stationUuid)
-//            }
-//            if (station.isValid()) {
-//                preparePlayer(true)
-//            }
-//        }
-//        return Service.START_STICKY_COMPATIBILITY
-//    }
-
-
-
-//    /* Overrides onDestroy from Service */
-//    override fun onDestroy() {
-//        // set playback state if necessary
-//        if (player.isPlaying) {
-//            handlePlaybackChange(PlaybackStateCompat.STATE_STOPPED)
-//        }
-//        // release media session
-//        mediaSession.run {
-//            isActive = false
-//            release()
-//        }
-//        // release player
-//        player.removeAnalyticsListener(analyticsListener)
-//        player.removeListener(playerListener)
-//        player.release()
-//    }
-
-
-
-
-
-//    /* Overrides onGetRoot from MediaBrowserService */ // todo: implement a hierarchical structure -> https://github.com/googlesamples/android-UniversalMusicPlayer/blob/47da058112cee0b70442bcd0370c1e46e830c66b/media/src/main/java/com/example/android/uamp/media/library/BrowseTree.kt
-//    override fun onGetRoot(clientPackageName: String, clientUid: Int, rootHints: Bundle?): BrowserRoot {
-//        // Credit: https://github.com/googlesamples/android-UniversalMusicPlayer (->  MusicService)
-//        // LogHelper.d(TAG, "OnGetRoot: clientPackageName=$clientPackageName; clientUid=$clientUid ; rootHints=$rootHints")
-//        // to ensure you are not allowing any arbitrary app to browse your app's contents, you need to check the origin
-//        if (!packageValidator.isKnownCaller(clientPackageName, clientUid)) {
-//            // request comes from an untrusted package
-//            LogHelper.i(TAG, "OnGetRoot: Browsing NOT ALLOWED for unknown caller. "
-//                    + "Returning empty browser root so all apps can use MediaController."
-//                    + clientPackageName)
-//            return BrowserRoot(Keys.MEDIA_BROWSER_ROOT_EMPTY, null)
-//        } else {
-//            // content style extras: see https://developer.android.com/training/cars/media#apply_content_style
-//            val CONTENT_STYLE_SUPPORTED = "android.media.browse.CONTENT_STYLE_SUPPORTED"
-//            val CONTENT_STYLE_PLAYABLE_HINT = "android.media.browse.CONTENT_STYLE_PLAYABLE_HINT"
-//            val CONTENT_STYLE_BROWSABLE_HINT = "android.media.browse.CONTENT_STYLE_BROWSABLE_HINT"
-//            val CONTENT_STYLE_LIST_ITEM_HINT_VALUE = 1
-//            val CONTENT_STYLE_GRID_ITEM_HINT_VALUE = 2
-//            val rootExtras = bundleOf(
-//                    CONTENT_STYLE_SUPPORTED to true,
-//                    CONTENT_STYLE_BROWSABLE_HINT to CONTENT_STYLE_GRID_ITEM_HINT_VALUE,
-//                    CONTENT_STYLE_PLAYABLE_HINT to CONTENT_STYLE_LIST_ITEM_HINT_VALUE
-//            )
-//            // check if rootHints contained EXTRA_RECENT - return BrowserRoot with MEDIA_BROWSER_ROOT_RECENT in that case
-//            val isRecentRequest = rootHints?.getBoolean(BrowserRoot.EXTRA_RECENT) ?: false
-//            val browserRootPath: String = if (isRecentRequest) Keys.MEDIA_BROWSER_ROOT_RECENT else Keys.MEDIA_BROWSER_ROOT
-//            return BrowserRoot(browserRootPath, rootExtras)
-//        }
-//    }
-//
-//
-//    /* Overrides onLoadChildren from MediaBrowserService */
-//    override fun onLoadChildren(parentId: String, result: Result<MutableList<MediaBrowserCompat.MediaItem>>) {
-//        if (!collectionProvider.isInitialized()) {
-//            // use result.detach to allow calling result.sendResult from another thread:
-//            result.detach()
-//            collectionProvider.retrieveMedia(this, collection, object: CollectionProvider.CollectionProviderCallback {
-//                override fun onStationListReady(success: Boolean) {
-//                    if (success) {
-//                        loadChildren(parentId, result)
-//                    }
-//                }
-//            })
-//        } else {
-//            // if music catalog is already loaded/cached, load them into result immediately
-//            loadChildren(parentId, result)
-//        }
-//    }
-
-
-//    /* Updates media session and save state */
-//    private fun handlePlaybackChange(playbackState: Int) {
-//        // reset restart counter
-//        playbackRestartCounter = 0
-//        // save collection state and player state
-//        collection = CollectionHelper.savePlaybackState(this, collection, station, playbackState)
-//        updatePlayerState(station, playbackState)
-//        if (player.isPlaying) {
-//            notificationHelper.showNotificationForPlayer(forwardingPlayer)
-//        } else {
-//            updateMetadata(null)
-//        }
-//    }
-
-
-//    /* Try to restart Playback */
-//    private fun handlePlaybackEnded() {
-//        // restart playback for up to five times
-//        if (playbackRestartCounter < 5) {
-//            playbackRestartCounter++
-//            player.stop()
-//            player.play()
-//        } else {
-//            player.stop()
-//            Toast.makeText(this, this.getString(R.string.toastmessage_error_restart_playback_failed), Toast.LENGTH_LONG).show()
-//        }
-//    }
-
-
-//    /* Prepares player with media source created from current station */
-//    private fun preparePlayer(playWhenReady: Boolean) {
-//        // sanity check
-//        if (!station.isValid()) {
-//            LogHelper.e(TAG, "Unable to start playback. No radio station has been loaded.")
-//            return
-//        }
-//
-//        // stop playback if necessary
-//        if (player.isPlaying) { player.stop() }
-//
-//        // build media item.
-//        val mediaItem: MediaItem = MediaItem.fromUri(station.getStreamUri())
-//
-//        // create DataSource.Factory - produces DataSource instances through which media data is loaded
-//        val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory().apply {
-//            setUserAgent(Util.getUserAgent(this, Keys.APPLICATION_NAME))
-//            // follow http redirects
-//            setAllowCrossProtocolRedirects(true)
-//        }
-//
-//        // create MediaSource
-//        val mediaSource: MediaSource
-//        if (station.streamContent in Keys.MIME_TYPE_HLS || station.streamContent in Keys.MIME_TYPES_M3U) {
-//            // HLS media source
-//            //Toast.makeText(this, this.getString(R.string.toastmessage_stream_may_not_work), Toast.LENGTH_LONG).show()
-//            mediaSource = HlsMediaSource.Factory(dataSourceFactory).createMediaSource(mediaItem)
-//        } else {
-//            // MPEG or OGG media source
-//            mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory).setContinueLoadingCheckIntervalBytes(32).createMediaSource(mediaItem)
-//        }
-//
-//        // set source and prepare player
-//        player.setMediaSource(mediaSource)
-//        // player.setMediaItem() - unable to use here, because different media items may need different MediaSourceFactories to work properly
-//        player.prepare()
-//
-//        // update media session connector using custom player
-//        mediaSessionConnector.setPlayer(forwardingPlayer)
-//
-//        // reset metadata to station name
-//        updateMetadata(station.name)
-//
-//        // set playWhenReady state
-//        player.playWhenReady = playWhenReady
-//    }
-
-
-//    /* Starts sleep timer / adds default duration to running sleeptimer */
-//    private fun startSleepTimer() {
-//        // stop running timer
-//        if (sleepTimerTimeRemaining > 0L && this::sleepTimer.isInitialized) {
-//            sleepTimer.cancel()
-//        }
-//        // initialize timer
-//        sleepTimer = object:CountDownTimer(Keys.SLEEP_TIMER_DURATION + sleepTimerTimeRemaining, Keys.SLEEP_TIMER_INTERVAL) {
-//            override fun onFinish() {
-//                LogHelper.v(TAG, "Sleep timer finished. Sweet dreams.")
-//                // reset time remaining
-//                sleepTimerTimeRemaining = 0L
-//                // stop playback
-//                player.stop()
-//            }
-//            override fun onTick(millisUntilFinished: Long) {
-//                sleepTimerTimeRemaining = millisUntilFinished
-//            }
-//        }
-//        // start timer
-//        sleepTimer.start()
-//    }
-
-
-//    /* Cancels sleep timer */
-//    private fun cancelSleepTimer() {
-//        if (this::sleepTimer.isInitialized) {
-//            sleepTimerTimeRemaining = 0L
-//            sleepTimer.cancel()
-//        }
-//    }
-
-
-//    /* Loads media items into result - assumes that collectionProvider is initialized */
-//    private fun loadChildren(parentId: String, result: Result<MutableList<MediaBrowserCompat.MediaItem>>) {
-//        val mediaItems = ArrayList<MediaBrowserCompat.MediaItem>()
-//        when (parentId) {
-//            Keys.MEDIA_BROWSER_ROOT -> {
-//                collectionProvider.stationListByName.forEach { item ->
-//                    mediaItems.add(item)
-//                }
-//            }
-//            Keys.MEDIA_BROWSER_ROOT_RECENT -> {
-////                // un-comment (and implement ;-) ), if you want the media resumption notification to be shown
-////                val recentStation = collectionProvider.getFirstStation() // todo get last played station
-////                if (recentStation != null) mediaItems.add(recentStation)
-//            }
-//            Keys.MEDIA_BROWSER_ROOT_EMPTY -> {
-//                // do nothing
-//            }
-//            else -> {
-//                // log error
-//                LogHelper.w(TAG, "Skipping unmatched parentId: $parentId")
-//            }
-//        }
-//        result.sendResult(mediaItems)
-//    }
-//
-//
-
-
-
-//    /* Reads collection of stations from storage using GSON */
-//    private fun loadCollection(context: Context) {
-//        LogHelper.v(TAG, "Loading collection of stations from storage")
-//        CoroutineScope(Main).launch {
-//            // load collection on background thread
-//            val deferred: Deferred<Collection> = async(Dispatchers.Default) { FileHelper.readCollectionSuspended(context) }
-//            // wait for result and update collection
-//            collection = deferred.await()
-//            // special case: trigger metadata view update for stations that have no metadata
-//            if (playerState.playbackState == PlaybackState.STATE_PLAYING && station.name == getCurrentMetadata()) {
-//                station = CollectionHelper.getStation(collection, station.uuid)
-//                updateMetadata(null)
-//            }
-//        }
-//    }
-//
-//
-//    /* Updates and saves the state of the player ui */
-//    private fun updatePlayerState(station: Station, playbackState: Int) {
-//        if (station.isValid()) {
-//            playerState.stationUuid = station.uuid
-//        }
-//        playerState.playbackState = playbackState
-//        PreferencesHelper.savePlayerState(playerState)
-//    }
-
-
-
 }

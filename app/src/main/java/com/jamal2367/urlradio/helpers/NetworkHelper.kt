@@ -20,6 +20,7 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkCapabilities.*
 import android.os.Build
+import android.util.Log
 import com.jamal2367.urlradio.Keys
 import java.net.HttpURLConnection
 import java.net.InetAddress
@@ -34,6 +35,9 @@ import kotlin.coroutines.suspendCoroutine
  * NetworkHelper object
  */
 object NetworkHelper {
+
+    /* Define log tag */
+    private val TAG: String = NetworkHelper::class.java.simpleName
 
     /* Data class: holder for content type information */
     data class ContentType(var type: String = String(), var charset: String = String())
@@ -113,12 +117,12 @@ object NetworkHelper {
 
     /* Detects content type (mime type) from given URL string - async using coroutine - use only on separate threat */
     fun detectContentType(urlString: String): ContentType {
-        LogHelper.v("Determining content type - Thread: ${Thread.currentThread().name}")
+        Log.v(TAG, "Determining content type - Thread: ${Thread.currentThread().name}")
         val contentType = ContentType(Keys.MIME_TYPE_UNSUPPORTED, Keys.CHARSET_UNDEFINDED)
         val connection: HttpURLConnection? = createConnection(urlString)
         if (connection != null) {
             val contentTypeHeader: String = connection.contentType ?: String()
-            LogHelper.v("Raw content type header: $contentTypeHeader")
+            Log.v(TAG, "Raw content type header: $contentTypeHeader")
             val contentTypeHeaderParts: List<String> = contentTypeHeader.split(";")
             contentTypeHeaderParts.forEachIndexed { index, part ->
                 if (index == 0 && part.isNotEmpty()) {
@@ -130,19 +134,19 @@ object NetworkHelper {
 
             // special treatment for octet-stream - try to get content type from file extension
             if (contentType.type.contains(Keys.MIME_TYPE_OCTET_STREAM)) {
-                LogHelper.w("Special case \"application/octet-stream\"")
+                Log.w(TAG, "Special case \"application/octet-stream\"")
                 val headerFieldContentDisposition: String? = connection.getHeaderField("Content-Disposition")
                 if (headerFieldContentDisposition != null) {
                     val fileName: String = headerFieldContentDisposition.split("=")[1].replace("\"", "") //getting value after '=' & stripping any "s
                     contentType.type = FileHelper.getContentTypeFromExtension(fileName)
                 } else {
-                    LogHelper.i("Unable to get file name from \"Content-Disposition\" header field.")
+                    Log.i(TAG, "Unable to get file name from \"Content-Disposition\" header field.")
                 }
             }
 
             connection.disconnect()
         }
-        LogHelper.i("content type: ${contentType.type} | character set: ${contentType.charset}")
+        Log.i(TAG, "content type: ${contentType.type} | character set: ${contentType.charset}")
         return contentType
     }
 
@@ -178,7 +182,7 @@ object NetworkHelper {
 
         try {
             // try to open connection and get status
-            LogHelper.i("Opening http connection.")
+            Log.i(TAG, "Opening http connection.")
             connection = URL(urlString).openConnection() as HttpURLConnection
             val status = connection.responseCode
 
@@ -189,17 +193,17 @@ object NetworkHelper {
                     val redirectUrl: String = connection.getHeaderField("Location")
                     connection.disconnect()
                     if (redirectCount < 5) {
-                        LogHelper.i("Following redirect to $redirectUrl")
+                        Log.i(TAG, "Following redirect to $redirectUrl")
                         connection = createConnection(redirectUrl, redirectCount + 1)
                     } else {
                         connection = null
-                        LogHelper.e("Too many redirects.")
+                        Log.e(TAG, "Too many redirects.")
                     }
                 }
             }
 
         } catch (e: Exception) {
-            LogHelper.e("Unable to open http connection.")
+            Log.e(TAG, "Unable to open http connection.")
             e.printStackTrace()
         }
 

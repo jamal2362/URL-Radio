@@ -15,6 +15,7 @@
 package com.jamal2367.urlradio.search
 
 import android.content.Context
+import android.util.Log
 import com.android.volley.*
 import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.Volley
@@ -22,7 +23,6 @@ import com.google.gson.GsonBuilder
 import org.json.JSONArray
 import com.jamal2367.urlradio.BuildConfig
 import com.jamal2367.urlradio.Keys
-import com.jamal2367.urlradio.helpers.LogHelper
 import com.jamal2367.urlradio.helpers.NetworkHelper
 import com.jamal2367.urlradio.helpers.PreferencesHelper
 import kotlinx.coroutines.*
@@ -32,6 +32,11 @@ import kotlinx.coroutines.*
  * RadioBrowserSearch class
  */
 class RadioBrowserSearch(private var radioBrowserSearchListener: RadioBrowserSearchListener) {
+
+
+    /* Define log tag */
+    private val TAG: String = RadioBrowserSearch::class.java.simpleName
+
 
     /* Interface used to send back search results */
     interface RadioBrowserSearchListener {
@@ -55,7 +60,7 @@ class RadioBrowserSearch(private var radioBrowserSearchListener: RadioBrowserSea
 
     /* Searches station(s) on radio-browser.info */
     fun searchStation(context: Context, query: String, searchType: Int) {
-        LogHelper.v("Search - Querying $radioBrowserApi for: $query")
+        Log.v(TAG, "Search - Querying $radioBrowserApi for: $query")
 
         // create queue and request
         requestQueue = Volley.newRequestQueue(context)
@@ -86,7 +91,7 @@ class RadioBrowserSearch(private var radioBrowserSearchListener: RadioBrowserSea
             }
             @Throws(VolleyError::class)
             override fun retry(error: VolleyError) {
-                LogHelper.w("Error: $error")
+                Log.w(TAG, "Error: $error")
             }
         }
 
@@ -130,7 +135,7 @@ class RadioBrowserSearch(private var radioBrowserSearchListener: RadioBrowserSea
 
     /* Listens for error response from server */
     private val errorListener: Response.ErrorListener = Response.ErrorListener { error ->
-        LogHelper.w("Error: $error")
+        Log.w(TAG, "Error: $error")
     }
 
 }

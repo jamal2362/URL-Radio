@@ -34,14 +34,6 @@
         <meta-data android:name="com.google.android.gms.car.notification.SmallIcon"
             android:resource="@mipmap/ic_launcher" />
 
-        <activity
-            android:name=".PlayerServiceStarterActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.jamal2367.urlradio.action.START_PLAYER_SERVICE" />
-            </intent-filter>
-        </activity>
-
         <!-- Main activity for radio station playback on phone -->
         <activity
             android:name=".MainActivity"

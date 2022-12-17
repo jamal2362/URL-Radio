@@ -29,6 +29,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Parcelable
 import android.provider.MediaStore
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -43,7 +44,6 @@ import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.media3.common.MediaItem
-import androidx.media3.common.Metadata
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionResult
@@ -77,6 +77,8 @@ class PlayerFragment: Fragment(),
     CollectionAdapter.CollectionAdapterListener,
     YesNoDialog.YesNoDialogListener {
 
+    /* Define log tag */
+    private val TAG: String = PlayerFragment::class.java.simpleName
 
     /* Main class variables */
     private lateinit var collectionViewModel: CollectionViewModel
@@ -181,8 +183,8 @@ class PlayerFragment: Fragment(),
         observeCollectionViewModel()
         // handle navigation arguments
         handleNavigationArguments()
-        // handle start intent - if started via tap on rss link
-        handleStartIntent()
+//        // handle start intent - if started via tap on rss link
+//        handleStartIntent()
         // start watching for changes in shared preferences
         PreferencesHelper.registerPreferenceChangeListener(this as SharedPreferences.OnSharedPreferenceChangeListener)
     }
@@ -363,6 +365,8 @@ class PlayerFragment: Fragment(),
         val controller: MediaController = this.controller ?: return
         controller.addListener(playerListener)
         requestMetadataUpdate()
+        // handle start intent
+        handleStartIntent()
     }
 
 
@@ -493,7 +497,7 @@ class PlayerFragment: Fragment(),
             try {
                 requestLoadImageLauncher.launch(pickImageIntent)
             } catch (e: Exception) {
-                LogHelper.e("Unable to select image. Probably no image picker available.")
+                Log.e(TAG, "Unable to select image. Probably no image picker available.")
                 Snackbar.make(requireView(), R.string.toastalert_no_image_picker, Snackbar.LENGTH_LONG).show()
             }
         }
@@ -506,7 +510,7 @@ class PlayerFragment: Fragment(),
             when ((activity as Activity).intent.action) {
                 Keys.ACTION_SHOW_PLAYER -> handleShowPlayer()
                 Intent.ACTION_VIEW -> handleViewIntent()
-                Keys.ACTION_START_PLAYER_SERVICE -> handleStartPlayer()
+                Keys.ACTION_START -> handleStartPlayer()
             }
         }
         // clear intent action to prevent double calls
@@ -516,7 +520,7 @@ class PlayerFragment: Fragment(),
 
     /* Handles ACTION_SHOW_PLAYER request from notification */
     private fun handleShowPlayer() {
-        LogHelper.i("Tap on notification registered.")
+        Log.i(TAG, "Tap on notification registered.")
         // todo implement
     }
 
@@ -533,6 +537,7 @@ class PlayerFragment: Fragment(),
     /* Handles START_PLAYER_SERVICE request from App Shortcut */
     private fun handleStartPlayer() {
         val intent: Intent = (activity as Activity).intent
+        Log.e(TAG, "DING! = $intent") // todo remove
         if (intent.hasExtra(Keys.EXTRA_START_LAST_PLAYED_STATION)) {
             controller?.play(CollectionHelper.getStation(collection, playerState.stationUuid))
         } else if (intent.hasExtra(Keys.EXTRA_STATION_UUID)) {
@@ -625,7 +630,7 @@ class PlayerFragment: Fragment(),
     private val periodicSleepTimerUpdateRequestRunnable: Runnable = object : Runnable {
         override fun run() {
             // update sleep timer view
-            LogHelper.e("Requesting Sleep Time update") // todo remove
+            Log.e(TAG, "Requesting Sleep Time update") // todo remove
             requestSleepTimerUpdate()
             // use the handler to start runnable again after specified delay
             handler.postDelayed(this, 500)
@@ -665,205 +670,16 @@ class PlayerFragment: Fragment(),
                 togglePeriodicSleepTimerUpdateRequest()
                 layout.updateSleepTimer(activity as Context)
                 playerState.sleepTimerRunning = false
-                // Not playing because playback is paused, ended, suppressed, or the player
-                // is buffering, stopped or failed. Check player.getPlayWhenReady,
-                // player.getPlaybackState, player.getPlaybackSuppressionReason and
-                // player.getPlaybackError for details.
-                when (controller?.playbackState) {
-                    // player is able to immediately play from its current position
-                    Player.STATE_READY -> {
-                        layout.showBufferingIndicator(buffering = false)
-                    }
-                    // buffering - data needs to be loaded
-                    Player.STATE_BUFFERING -> {
-                        layout.showBufferingIndicator(buffering = true)
-                    }
-                    // player finished playing all media
-                    Player.STATE_ENDED -> {
-                        // layout.hidePlayer(activity as Context)
-                        layout.showBufferingIndicator(buffering = false)
-                    }
-                    // initial state or player is stopped or playback failed
-                    Player.STATE_IDLE -> {
-                        // layout.hidePlayer(activity as Context)
-                        layout.showBufferingIndicator(buffering = false)
-                    }
-                }
             }
         }
+
         override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
             super.onPlayWhenReadyChanged(playWhenReady, reason)
 
-            if (!playWhenReady) {
-                if (controller?.mediaItemCount == 0) {
-                    // stopSelf()
-                }
-                when (reason) {
-                    Player.PLAY_WHEN_READY_CHANGE_REASON_END_OF_MEDIA_ITEM -> {
-                        // playback reached end: stop / end playback
-                    }
-                    else -> {
-                        // playback has been paused by user or OS: update media session and save state
-                        // PLAY_WHEN_READY_CHANGE_REASON_USER_REQUEST or
-                        // PLAY_WHEN_READY_CHANGE_REASON_AUDIO_FOCUS_LOSS or
-                        // PLAY_WHEN_READY_CHANGE_REASON_AUDIO_BECOMING_NOISY or
-                        // PLAY_WHEN_READY_CHANGE_REASON_REMOTE
-                        // handlePlaybackChange(PlaybackStateCompat.STATE_PAUSED)
-                    }
-                }
-            }
-        }
-
-        override fun onMetadata(metadata: Metadata) {
-            super.onMetadata(metadata)
-            // method is not called here (but in PlayerService)
+            playerState.sleepTimerRunning = false
         }
     }
     /*
      * End of declaration
      */
-
-
-
-//    /* Starts / pauses playback */
-//    private fun startPlayback(stationUuid: String) {
-//        playerState.stationUuid = stationUuid
-//        playerState.playbackState = playbackState // = current state BEFORE desired startPlayback action
-//
-//        when (stationUuid) {
-//            // CASE: Episode is already in player (playback is probably paused)
-//            controller?.getCurrentMediaId() -> {
-//                controller?.play()
-//            }
-//        }
-//
-//
-//        // setup ui
-//        var station: Station = CollectionHelper.getStation(collection, playerState.stationUuid)
-//        if (!station.isValid() && collection.stations.isNotEmpty()) station = collection.stations[0]
-//        layout.updatePlayerViews(activity as Context, station, playerState.playbackState)
-//        // start / stop playback
-//        when (startPlayback) {
-//            true -> playerController.play(station.uuid)
-//            false -> playerController.stop()
-//        }
-//    }
-
-
-
-    //    /*
-//     * Defines callbacks for media browser service connection
-//     */
-//    private val mediaBrowserConnectionCallback = object : MediaBrowserCompat.ConnectionCallback() {
-//        override fun onConnected() {
-//            // get the token for the MediaSession
-//            mediaBrowser.sessionToken.also { token ->
-//                // create a MediaControllerCompat
-//                val mediaController = MediaControllerCompat(activity as Context, token)
-//                // save the controller
-//                MediaControllerCompat.setMediaController(activity as Activity, mediaController)
-//                // initialize playerController
-//                playerController = PlayerController(mediaController)
-//            }
-//            playerServiceConnected = true
-//
-//            mediaBrowser.subscribe(Keys.MEDIA_BROWSER_ROOT, mediaBrowserSubscriptionCallback)
-//
-//            // finish building the UI
-//            buildPlaybackControls()
-//
-//            if (playerState.playbackState == PlaybackStateCompat.STATE_PLAYING) {
-//                // start requesting continuous progess updates
-//                handler.removeCallbacks(periodicProgressUpdateRequestRunnable)
-//                handler.postDelayed(periodicProgressUpdateRequestRunnable, 0)
-//            }
-//
-//            // begin looking for changes in collection
-//            observeCollectionViewModel()
-//        }
-//
-//        override fun onConnectionSuspended() {
-//            playerServiceConnected = false
-//            // service has crashed. Disable transport controls until it automatically reconnects
-//        }
-//
-//        override fun onConnectionFailed() {
-//            playerServiceConnected = false
-//            // service has refused our connection
-//        }
-//    }
-//    /*
-//     * End of callback
-//     */
-//
-//
-//    /*
-//     * Defines callbacks for media browser service subscription
-//     */
-//    private val mediaBrowserSubscriptionCallback = object : MediaBrowserCompat.SubscriptionCallback() {
-//        override fun onChildrenLoaded(parentId: String, children: MutableList<MediaBrowserCompat.MediaItem>) {
-//            super.onChildrenLoaded(parentId, children)
-//        }
-//
-//        override fun onError(parentId: String) {
-//            super.onError(parentId)
-//        }
-//    }
-//    /*
-//     * End of callback
-//     */
-//
-//
-//    /*
-//     * Defines callbacks for state changes of player service
-//     */
-//    private var mediaControllerCallback = object : MediaControllerCompat.Callback() {
-//
-//        override fun onSessionReady() {
-//            LogHelper.d(TAG, "Session ready. Update UI.")
-//        }
-//
-//        override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
-//            LogHelper.d(TAG, "Metadata changed. Update UI.")
-//        }
-//
-//        override fun onPlaybackStateChanged(playbackState: PlaybackStateCompat) {
-//            LogHelper.d(TAG, "Playback State changed. Update UI.")
-//            playerState.playbackState = playbackState.state
-//            layout.animatePlaybackButtonStateTransition(activity as Context, playbackState.state)
-//            togglePeriodicProgressUpdateRequest(playbackState)
-//        }
-//
-//        override fun onSessionDestroyed() {
-//            super.onSessionDestroyed()
-//            mediaBrowserConnectionCallback.onConnectionSuspended()
-//        }
-//    }
-//    /*
-//     * End of callback
-//     */
-
-
-
-//    /*
-//     * ResultReceiver: Handles results from commands send to player
-//     */
-//    var resultReceiver: ResultReceiver = object: ResultReceiver(Handler()) {
-//        override fun onReceiveResult(resultCode: Int, resultData: Bundle?) {
-//            when (resultCode) {
-//                Keys.RESULT_CODE_PERIODIC_PROGRESS_UPDATE -> {
-//                    if (resultData != null && resultData.containsKey(Keys.RESULT_DATA_METADATA)) {
-//                        layout.updateMetadata(resultData.getStringArrayList(Keys.RESULT_DATA_METADATA) ?: mutableListOf(), station.name, playerState.playbackState)
-//                    }
-//                    if (resultData != null && resultData.containsKey(Keys.RESULT_DATA_SLEEP_TIMER_REMAINING)) {
-//                        layout.updateSleepTimer(activity as Context, resultData.getLong(Keys.RESULT_DATA_SLEEP_TIMER_REMAINING, 0L))
-//                    }
-//                }
-//            }
-//        }
-//    }
-//    /*
-//     * End of ResultReceiver
-//     */
-
 }

@@ -14,6 +14,7 @@
 
 package com.jamal2367.urlradio.helpers
 
+import android.util.Log
 import com.jamal2367.urlradio.Keys
 import java.text.SimpleDateFormat
 import java.util.*
@@ -23,6 +24,11 @@ import java.util.*
  * DateTimeHelper object
  */
 object DateTimeHelper {
+
+
+    /* Define log tag */
+    private val TAG: String = DateTimeHelper::class.java.simpleName
+
 
     /* Main class variables */
     private const val pattern: String = "EEE, dd MMM yyyy HH:mm:ss Z"
@@ -35,7 +41,7 @@ object DateTimeHelper {
             // parse date string using standard pattern
             dateFormat.parse((dateString)) ?: Keys.DEFAULT_DATE
         } catch (e: Exception) {
-            LogHelper.w("Unable to parse. Trying an alternative Date format. $e")
+            Log.w(TAG, "Unable to parse. Trying an alternative Date format. $e")
             // try alternative parsing patterns
             tryAlternativeRfc2822Parsing(dateString)
         }
@@ -72,11 +78,11 @@ object DateTimeHelper {
             date = SimpleDateFormat("EEE, dd MMM yyyy HH:mm Z", Locale.ENGLISH).parse((dateString)) ?: Keys.DEFAULT_DATE
         } catch (e: Exception) {
             try {
-                LogHelper.w("Unable to parse. Trying an alternative Date format. $e")
+                Log.w(TAG, "Unable to parse. Trying an alternative Date format. $e")
                 // try to parse without time zone
                 date = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss", Locale.ENGLISH).parse((dateString)) ?: Keys.DEFAULT_DATE
             } catch (e: Exception) {
-                LogHelper.e("Unable to parse. Returning a default date. $e")
+                Log.e(TAG, "Unable to parse. Returning a default date. $e")
             }
         }
         return date

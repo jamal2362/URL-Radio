@@ -15,8 +15,8 @@
 package com.jamal2367.urlradio
 
 import android.app.Application
+import android.util.Log
 import com.jamal2367.urlradio.helpers.AppThemeHelper
-import com.jamal2367.urlradio.helpers.LogHelper
 import com.jamal2367.urlradio.helpers.PreferencesHelper
 import com.jamal2367.urlradio.helpers.PreferencesHelper.initPreferences
 
@@ -26,10 +26,13 @@ import com.jamal2367.urlradio.helpers.PreferencesHelper.initPreferences
  */
 class URLRadio: Application () {
 
+    /* Define log tag */
+    private val TAG: String = URLRadio::class.java.simpleName
+
     /* Implements onCreate */
     override fun onCreate() {
         super.onCreate()
-        LogHelper.v("URLRadio application started.")
+        Log.v(TAG, "URLRadio application started.")
         initPreferences()
         // set Dark / Light theme state
         AppThemeHelper.setTheme(PreferencesHelper.loadThemeSelection())
@@ -39,7 +42,7 @@ class URLRadio: Application () {
     /* Implements onTerminate */
     override fun onTerminate() {
         super.onTerminate()
-        LogHelper.v("URLRadio application terminated.")
+        Log.v(TAG, "URLRadio application terminated.")
     }
 
 }

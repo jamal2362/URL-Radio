@@ -19,6 +19,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -27,7 +28,6 @@ import kotlinx.coroutines.launch
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.core.Collection
 import com.jamal2367.urlradio.helpers.FileHelper
-import com.jamal2367.urlradio.helpers.LogHelper
 import java.util.*
 
 
@@ -35,6 +35,9 @@ import java.util.*
  * CollectionViewModel.class
  */
 class CollectionViewModel(application: Application) : AndroidViewModel(application) {
+
+    /* Define log tag */
+    private val TAG: String = CollectionViewModel::class.java.simpleName
 
     /* Main class variables */
     val collectionLiveData: MutableLiveData<Collection> = MutableLiveData<Collection>()
@@ -68,7 +71,7 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
                     val date = Date(intent.getLongExtra(Keys.EXTRA_COLLECTION_MODIFICATION_DATE, 0L))
                     // check if reload is necessary
                     if (date.after(modificationDateViewModel)) {
-                        LogHelper.v("CollectionViewModel - reload collection after broadcast received.")
+                        Log.v(TAG, "CollectionViewModel - reload collection after broadcast received.")
                         loadCollection()
                     }
                 }
@@ -79,7 +82,7 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
 
     /* Reads collection of radio stations from storage using GSON */
     private fun loadCollection() {
-        LogHelper.v("Loading collection of stations from storage")
+        Log.v(TAG, "Loading collection of stations from storage")
         viewModelScope.launch {
             // load collection on background thread
             val collection: Collection = FileHelper.readCollectionSuspended(getApplication())

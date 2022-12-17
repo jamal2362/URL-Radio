@@ -23,7 +23,7 @@ import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import com.jamal2367.urlradio.Keys
-import com.jamal2367.urlradio.PlayerServiceStarterActivity
+import com.jamal2367.urlradio.MainActivity
 import com.jamal2367.urlradio.R
 import com.jamal2367.urlradio.core.Station
 
@@ -53,8 +53,8 @@ object ShortcutHelper {
 
     /* Creates Intent for a station shortcut */
     private fun createShortcutIntent(context: Context, stationUuid: String): Intent {
-        val shortcutIntent = Intent(context, PlayerServiceStarterActivity::class.java)
-        shortcutIntent.action = Keys.ACTION_START_PLAYER_SERVICE
+        val shortcutIntent = Intent(context, MainActivity::class.java)
+        shortcutIntent.action = Keys.ACTION_START
         shortcutIntent.putExtra(Keys.EXTRA_STATION_UUID, stationUuid)
         shortcutIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         shortcutIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)

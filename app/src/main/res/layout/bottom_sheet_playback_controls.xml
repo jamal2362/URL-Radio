@@ -89,10 +89,11 @@
         android:layout_marginEnd="2dp"
         android:indeterminateTint="@color/player_button_buffering"
         android:indeterminateTintMode="src_in"
-        android:visibility="visible"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/station_icon"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/station_icon" />
+        app:layout_constraintTop_toTopOf="@+id/station_icon"
+        tools:visibility="visible" />
 
     <ImageView
         android:id="@+id/sheet_streaming_link_icon"

@@ -43,7 +43,6 @@ object Keys {
 
     // intent actions
     const val ACTION_SHOW_PLAYER: String = "com.jamal2367.urlradio.action.SHOW_PLAYER"
-    const val ACTION_START_PLAYER_SERVICE: String = "com.jamal2367.urlradio.action.START_PLAYER_SERVICE"
     const val ACTION_COLLECTION_CHANGED: String = "com.jamal2367.urlradio.action.COLLECTION_CHANGED"
     const val ACTION_START: String = "com.jamal2367.urlradio.action.START"
     const val ACTION_STOP: String = "com.jamal2367.urlradio.action.STOP"

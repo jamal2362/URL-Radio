@@ -17,6 +17,7 @@ package com.jamal2367.urlradio.helpers
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -39,6 +40,9 @@ import java.util.*
  * CollectionHelper object
  */
 object CollectionHelper {
+
+    /* Define log tag */
+    private val TAG: String = CollectionHelper::class.java.simpleName
 
     /* Checks if station is already in collection */
     private fun isNewStation(collection: Collection, station: Station): Boolean {
@@ -252,32 +256,33 @@ object CollectionHelper {
     }
 
 
-    /* Gets next station within collection */
-    fun getNextStation(collection: Collection, stationUuid: String): Station {
+    /* Gets MediaIem for next station within collection */
+    fun getNextMediaItem(collection: Collection, stationUuid: String): MediaItem {
         val currentStationPosition: Int = getStationPosition(collection, stationUuid)
-        LogHelper.d("Number of stations: ${collection.stations.size} | current position: $currentStationPosition") // todo remove
+        Log.d(TAG, "Number of stations: ${collection.stations.size} | current position: $currentStationPosition") // todo remove
         return if (collection.stations.isEmpty() || currentStationPosition == -1) {
-            Station()
+            buildMediaItem(Station())
         } else if (currentStationPosition < collection.stations.size -1) {
-            collection.stations[currentStationPosition + 1]
+            buildMediaItem(collection.stations[currentStationPosition + 1])
         } else {
-            collection.stations.first()
+            buildMediaItem(collection.stations.first())
         }
     }
 
 
-    /* Gets previous station within collection */
-    fun getPreviousStation(collection: Collection, stationUuid: String): Station {
+    /* Gets MediaIem for previous station within collection */
+    fun getPreviousMediaItem(collection: Collection, stationUuid: String): MediaItem {
         val currentStationPosition: Int = getStationPosition(collection, stationUuid)
-        LogHelper.d("Number of stations: ${collection.stations.size} | current position: $currentStationPosition") // todo remove
+        Log.d(TAG, "Number of stations: ${collection.stations.size} | current position: $currentStationPosition") // todo remove
         return if (collection.stations.isEmpty() || currentStationPosition == -1) {
-            Station()
+            buildMediaItem(Station())
         } else if (currentStationPosition > 0) {
-            collection.stations[currentStationPosition - 1]
+            buildMediaItem(collection.stations[currentStationPosition - 1])
         } else {
-            collection.stations.last()
+            buildMediaItem(collection.stations.last())
         }
     }
+
 
 
     /* Get the position from collection for given UUID */
@@ -313,6 +318,36 @@ object CollectionHelper {
     }
 
 
+    /* TODO */
+    fun getChildren(collection: Collection): List<MediaItem> {
+        val mediaItems: MutableList<MediaItem> = mutableListOf()
+        collection.stations.forEach { station ->
+            mediaItems.add(buildMediaItem(station))
+        }
+        return mediaItems
+    }
+
+
+    /* TODO */
+    fun getItem(collection: Collection, stationUuid: String): MediaItem {
+        return buildMediaItem(getStation(collection, stationUuid))
+    }
+
+
+    /* TODO */
+    fun getRootItem(): MediaItem {
+        val metadata: MediaMetadata = MediaMetadata.Builder()
+            .setTitle("Root Folder")
+            .setIsPlayable(false)
+            .setFolderType(MediaMetadata.FOLDER_TYPE_MIXED)
+            .build()
+        return MediaItem.Builder()
+            .setMediaId("[rootID]")
+            .setMediaMetadata(metadata)
+            .build()
+    }
+
+
     /* Saves the playback state of a given station */
     fun savePlaybackState(context: Context, collection: Collection, stationUuid: String, isPlaying: Boolean): Collection {
         collection.stations.forEach {
@@ -331,7 +366,7 @@ object CollectionHelper {
 
     /* Saves collection of radio stations */
     fun saveCollection(context: Context, collection: Collection, async: Boolean = true): Date {
-        LogHelper.v("Saving collection of radio stations to storage. Async = ${async}. Size = ${collection.stations.size}")
+        Log.v(TAG, "Saving collection of radio stations to storage. Async = ${async}. Size = ${collection.stations.size}")
         // get modification date
         val date: Date = Calendar.getInstance().time
         collection.modificationDate = date
@@ -359,7 +394,7 @@ object CollectionHelper {
 
     /* Export collection of stations as M3U */
     fun exportCollectionM3u(context: Context, collection: Collection) {
-        LogHelper.v("Exporting collection of stations as M3U")
+        Log.v(TAG, "Exporting collection of stations as M3U")
         // export collection as M3U - launch = fire & forget (no return value from save collection)
         if (collection.stations.size > 0) {
             CoroutineScope(IO).launch { FileHelper.backupCollectionAsM3uSuspended(context, collection) }
@@ -397,7 +432,7 @@ object CollectionHelper {
 
     /* Sends a broadcast containing the collection as parcel */
     fun sendCollectionBroadcast(context: Context, modificationDate: Date) {
-        LogHelper.v("Broadcasting that collection has changed.")
+        Log.v(TAG, "Broadcasting that collection has changed.")
         val collectionChangedIntent = Intent()
         collectionChangedIntent.action = Keys.ACTION_COLLECTION_CHANGED
         collectionChangedIntent.putExtra(Keys.EXTRA_COLLECTION_MODIFICATION_DATE, modificationDate.time)
@@ -455,9 +490,11 @@ object CollectionHelper {
         }.build()
         // build MediaMetadata
         val mediaMetadata = MediaMetadata.Builder().apply {
-            //setAlbumTitle()
-            setTitle(station.name)
+            setArtist(station.name)
+            //setTitle(station.name)
             setArtworkUri(station.image.toUri())
+            setFolderType(MediaMetadata.FOLDER_TYPE_NONE)
+            setIsPlayable(true)
         }.build()
         // build MediaItem and return it
         return MediaItem.Builder().apply {
@@ -493,7 +530,7 @@ object CollectionHelper {
             }
             faviconAddress = "http://$host/favicon.ico"
         } catch (e: Exception) {
-            LogHelper.e("Unable to get base URL from $urlString.\n$e ")
+            Log.e(TAG, "Unable to get base URL from $urlString.\n$e ")
         }
         return faviconAddress
     }

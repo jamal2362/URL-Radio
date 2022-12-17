@@ -17,6 +17,7 @@ package com.jamal2367.urlradio.helpers
 import android.app.Activity
 import android.content.Context
 import android.content.res.Configuration
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatDelegate
 import com.jamal2367.urlradio.Keys
@@ -28,6 +29,9 @@ import com.jamal2367.urlradio.R
  */
 object AppThemeHelper {
 
+    /* Define log tag */
+    private val TAG: String = AppThemeHelper::class.java.simpleName
+
     /* Sets app theme */
     fun setTheme(nightModeState: String) {
         when (nightModeState) {
@@ -35,27 +39,27 @@ object AppThemeHelper {
                 if (AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_YES) {
                     // turn on dark mode
                     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-                    LogHelper.i("Dark Mode activated.")
+                    Log.i(TAG, "Dark Mode activated.")
                 }
             }
             Keys.STATE_THEME_LIGHT_MODE -> {
                 if (AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_NO) {
                     // turn on light mode
                     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-                    LogHelper.i("Theme: Light Mode activated.")
+                    Log.i(TAG, "Theme: Light Mode activated.")
                 }
             }
             Keys.STATE_THEME_FOLLOW_SYSTEM -> {
                 if (AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM) {
                     // turn on mode "follow system"
                     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-                    LogHelper.i("Theme: Follow System Mode activated.")
+                    Log.i(TAG, "Theme: Follow System Mode activated.")
                 }
             }
             else -> {
                 // turn on mode "follow system"
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-                LogHelper.i("Theme: Follow System Mode activated.")
+                Log.i(TAG, "Theme: Follow System Mode activated.")
             }
         }
     }
@@ -92,8 +96,5 @@ object AppThemeHelper {
         val decorView = activity.window.decorView
         decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
     }
-
-
-
 
 }

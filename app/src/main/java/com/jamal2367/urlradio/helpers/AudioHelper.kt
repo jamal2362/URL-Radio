@@ -17,6 +17,7 @@ package com.jamal2367.urlradio.helpers
 import android.content.Context
 import android.media.MediaMetadataRetriever
 import android.net.Uri
+import android.util.Log
 import androidx.media3.common.Metadata
 import androidx.media3.extractor.metadata.icy.IcyHeaders
 import androidx.media3.extractor.metadata.icy.IcyInfo
@@ -29,6 +30,11 @@ import kotlin.math.min
  */
 object AudioHelper {
 
+
+    /* Define log tag */
+    private val TAG: String = AudioHelper::class.java.simpleName
+
+
     /* Extract duration metadata from audio file */
     fun getDuration(context: Context, audioFileUri: Uri): Long {
         val metadataRetriever = MediaMetadataRetriever()
@@ -38,7 +44,7 @@ object AudioHelper {
             val durationString = metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION) ?: String()
             duration = durationString.toLong()
         } catch (exception: Exception) {
-            LogHelper.e("Unable to extract duration metadata from audio file")
+            Log.e(TAG, "Unable to extract duration metadata from audio file")
         }
         return duration
     }
@@ -54,10 +60,10 @@ object AudioHelper {
                     metadataString = entry.title.toString()
                 }
                 is IcyHeaders -> {
-                    LogHelper.i("icyHeaders:" + entry.name + " - " + entry.genre)
+                    Log.i(TAG, "icyHeaders:" + entry.name + " - " + entry.genre)
                 }
                 else -> {
-                    LogHelper.w("Unsupported metadata received (type = ${entry.javaClass.simpleName})")
+                    Log.w(TAG, "Unsupported metadata received (type = ${entry.javaClass.simpleName})")
                 }
             }
             // TODO implement HLS metadata extraction (Id3Frame / PrivFrame)
