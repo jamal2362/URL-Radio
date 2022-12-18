@@ -97,6 +97,7 @@
     <string name="station_list_button_add_new_station">Neuen Sender hinzufügen</string>
 	
     <!-- Toast Alerts -->
+    <string name="toastalert_failed_picking_media">Bildauswahl fehlgeschlagen.</string>
     <string name="toastalert_no_image_picker">Bildauswahl nicht verfügbar. Installation einer Galerie-Anwendung notwendig.</string>
 	
     <!-- Toasts -->

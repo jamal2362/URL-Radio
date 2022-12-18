@@ -109,6 +109,7 @@
     <string name="station_list_button_add_new_station">Add new station</string>
 
     <!-- Toast Alerts -->
+    <string name="toastalert_failed_picking_media">Image selection failed.</string>
     <string name="toastalert_no_image_picker">No image picker available. Consider installing a Gallery application.</string>
 
     <!-- Toasts -->

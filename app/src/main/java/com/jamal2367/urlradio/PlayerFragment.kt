@@ -30,9 +30,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowInsetsController
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
@@ -83,6 +83,7 @@ class PlayerFragment: Fragment(),
     private lateinit var layout: LayoutHolder
     private lateinit var collectionAdapter: CollectionAdapter
     private lateinit var controllerFuture: ListenableFuture<MediaController>
+    private lateinit var pickSingleMediaLauncher: ActivityResultLauncher<Intent>
     private val controller: MediaController?
         get() = if (controllerFuture.isDone) controllerFuture.get() else null // defines the Getter for the MediaController
     private var collection: Collection = Collection()
@@ -116,6 +117,22 @@ class PlayerFragment: Fragment(),
         // create collection adapter
         collectionAdapter = CollectionAdapter(activity as Context, this as CollectionAdapter.CollectionAdapterListener)
 
+        // Initialize single media picker launcher
+        pickSingleMediaLauncher =
+            registerForActivityResult(StartActivityForResult()) {
+                if (it.resultCode != RESULT_OK) {
+                    Snackbar.make(requireView(), R.string.toastalert_failed_picking_media, Snackbar.LENGTH_LONG).show()
+                } else {
+                    if (it.data != null) {
+                        val imageUri: Uri? = it.data?.data
+                        if (imageUri != null) {
+                            collection = CollectionHelper.setStationImageWithStationUuid(activity as Context, collection, imageUri.toString(), tempStationUuid, imageManuallySet = true)
+                            tempStationUuid = String()
+                        }
+                    }
+
+                }
+            }
     }
 
 
@@ -490,17 +507,26 @@ class PlayerFragment: Fragment(),
 
     /* Check permissions and start image picker */
     private fun pickImage() {
-        if (ContextCompat.checkSelfPermission(activity as Context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            // permission READ_EXTERNAL_STORAGE not granted - request permission
-            requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            pickSingleMediaLauncher.launch(
+                Intent(MediaStore.ACTION_PICK_IMAGES)
+                    .apply {
+                        type = "image/*"
+                    }
+            )
         } else {
-            // permission READ_EXTERNAL_STORAGE granted - get system picker for images
-            val pickImageIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-            try {
-                requestLoadImageLauncher.launch(pickImageIntent)
-            } catch (e: Exception) {
-                Log.e(TAG, "Unable to select image. Probably no image picker available.")
-                Snackbar.make(requireView(), R.string.toastalert_no_image_picker, Snackbar.LENGTH_LONG).show()
+            if (ContextCompat.checkSelfPermission(activity as Context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                // permission READ_EXTERNAL_STORAGE not granted - request permission
+                requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+            } else {
+                // permission READ_EXTERNAL_STORAGE granted - get system picker for images
+                val pickImageIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                try {
+                    requestLoadImageLauncher.launch(pickImageIntent)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Unable to select image. Probably no image picker available.")
+                    Snackbar.make(requireView(), R.string.toastalert_no_image_picker, Snackbar.LENGTH_LONG).show()
+                }
             }
         }
     }
