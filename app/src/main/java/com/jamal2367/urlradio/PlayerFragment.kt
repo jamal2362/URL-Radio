@@ -103,7 +103,7 @@ class PlayerFragment: Fragment(),
                 // minimize player sheet - or if already minimized let activity handle back
                 if (isEnabled && this@PlayerFragment::layout.isInitialized && !layout.minimizePlayerIfExpanded()) {
                     isEnabled = false
-                    activity?.onBackPressed()
+                    activity?.onBackPressedDispatcher?.onBackPressed()
                 }
             }
         })
@@ -116,6 +116,9 @@ class PlayerFragment: Fragment(),
 
         // create collection adapter
         collectionAdapter = CollectionAdapter(activity as Context, this as CollectionAdapter.CollectionAdapterListener)
+
+        // restore state of station list
+        listLayoutState = savedInstanceState?.getParcelable(Keys.KEY_SAVE_INSTANCE_STATE_STATION_LIST)
 
         // Initialize single media picker launcher
         pickSingleMediaLauncher =
@@ -174,15 +177,6 @@ class PlayerFragment: Fragment(),
         }
         // always call the superclass so it can save the view hierarchy state
         super.onSaveInstanceState(outState)
-    }
-
-
-    /* Overrides onRestoreInstanceState from Activity */
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        // always call the superclass so it can restore the view hierarchy
-        super.onActivityCreated(savedInstanceState)
-        // restore state of station list
-        listLayoutState = savedInstanceState?.getParcelable(Keys.KEY_SAVE_INSTANCE_STATE_STATION_LIST)
     }
 
 
