@@ -123,17 +123,27 @@
         android:id="@+id/sheet_streaming_link"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:ellipsize="end"
+        android:ellipsize="marquee"
         android:fontFamily="@font/inter_medium"
         android:singleLine="true"
         android:textAppearance="@style/TextAppearance.Material3.BodySmall"
         android:textColor="@color/player_sheet_text_main"
         app:layout_constraintBottom_toBottomOf="@+id/sheet_streaming_link_icon"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/sheet_share_link_button"
         app:layout_constraintStart_toEndOf="@+id/sheet_streaming_link_icon"
         app:layout_constraintTop_toTopOf="@+id/sheet_streaming_link_icon"
         tools:text="@string/sample_text_steam_url" />
+
+    <ImageView
+        android:id="@+id/sheet_share_link_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@null"
+        android:padding="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/sheet_streaming_link_icon"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/sheet_streaming_link_icon"
+        app:srcCompat="@drawable/ic_share_24dp" />
 
     <ImageView
         android:id="@+id/sheet_previous_metadata_button"

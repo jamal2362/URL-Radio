@@ -17,6 +17,7 @@ package com.jamal2367.urlradio.ui
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
@@ -60,6 +61,7 @@ data class LayoutHolder(var rootView: View) {
     private var sheetMetadataHistoryView: TextView = rootView.findViewById(R.id.sheet_metadata_history)
     private var sheetNextMetadataView: ImageView = rootView.findViewById(R.id.sheet_next_metadata_button)
     private var sheetPreviousMetadataView: ImageView = rootView.findViewById(R.id.sheet_previous_metadata_button)
+    private var sheetShareLinkButtonView: ImageView = rootView.findViewById(R.id.sheet_share_link_button)
     var sheetSleepTimerStartButtonView: ImageView = rootView.findViewById(R.id.sleep_timer_start_button)
     var sheetSleepTimerCancelButtonView: ImageView = rootView.findViewById(R.id.sleep_timer_cancel_button)
     private var sheetSleepTimerRemainingTimeView: TextView = rootView.findViewById(R.id.sleep_timer_remaining_time)
@@ -148,7 +150,15 @@ data class LayoutHolder(var rootView: View) {
         sheetStreamingLinkView.setOnClickListener{ copyToClipboard(context, sheetStreamingLinkView.text) }
         sheetMetadataHistoryHeadline.setOnClickListener { copyToClipboard(context, sheetMetadataHistoryView.text) }
         sheetMetadataHistoryView.setOnClickListener { copyToClipboard(context, sheetMetadataHistoryView.text) }
-
+        sheetShareLinkButtonView.setOnClickListener {
+            val share = Intent.createChooser(Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_TITLE, stationNameView.text)
+                putExtra(Intent.EXTRA_TEXT, sheetStreamingLinkView.text)
+                type = "text/plain"
+            }, null)
+            context.startActivity(share)
+        }
     }
 
 
