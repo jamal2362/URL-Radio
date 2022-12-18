@@ -26,7 +26,7 @@
         android:largeHeap="true"
         android:theme="@style/AppTheme"
         android:dataExtractionRules="@xml/data_extraction_rules"
-        tools:targetApi="s">
+        tools:targetApi="tiramisu">
 
         <!-- ANDROID AUTO SUPPORT -->
         <!--  https://developer.android.com/training/auto/audio/ -->
