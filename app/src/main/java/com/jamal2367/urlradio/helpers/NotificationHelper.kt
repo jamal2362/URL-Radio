@@ -99,8 +99,8 @@ class NotificationHelper(private val context: Context) {
 
         // configure notification content
         builder.apply {
-            setContentTitle(metadata.artist)
-            setContentText(metadata.title)
+            setContentTitle(metadata.title)
+            setContentText(metadata.artist)
             setContentIntent(session.sessionActivity)
             setDeleteIntent(actionFactory.createMediaActionPendingIntent(session, Player.COMMAND_STOP.toLong()))
             setOnlyAlertOnce(true)
