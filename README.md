@@ -7,12 +7,17 @@
 
 
 ## Install URL Radio
-#### You can install URL-Radio via Google Play!
+#### You can install URL-Radio via Google Play or IzzyOnDroid repo, compatible with F-Droid!
 
-[<img src="https://www.skills4school.de/wp-content/uploads/2018/10/badge-googleplay.png" alt="Get it on Google Play" height="80">](https://play.google.com/store/apps/details?id=com.jamal2367.urlradio)
+[<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png"
+     alt="Get it on Google Play"
+     height="100">](https://play.google.com/store/apps/details?id=com.jamal2367.urlradio)
+[<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png"
+     alt="Get it on IzzyOnDroid"
+     height="100">](https://apt.izzysoft.de/fdroid/index/apk/com.jamal2367.urlradio)
 
 #### Or you can go and grab the latest APK on
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/jamal2362/URL-Radio)](https://github.com/jamal2362/URL-Radio/releases) [![GitHub all releases](https://img.shields.io/github/downloads/jamal2362/URL-Radio/total)](https://github.com/jamal2362/URL-Radio/releases)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/jamal2362/URL-Radio)](https://github.com/jamal2362/URL-Radio/releases/latest) [![GitHub all releases](https://img.shields.io/github/downloads/jamal2362/URL-Radio/total)](https://github.com/jamal2362/URL-Radio/releases/latest)
 
 
 ## Frequent Questions
