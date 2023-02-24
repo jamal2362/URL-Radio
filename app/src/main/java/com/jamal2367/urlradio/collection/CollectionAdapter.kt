@@ -22,6 +22,7 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -147,7 +148,13 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
                         stationViewHolder.playButtonView.isGone = true
                         stationViewHolder.stationStarredView.isGone = true
                         stationViewHolder.editViews.isVisible = true
-                        stationViewHolder.stationUriEditView.isGone = !editStationStreamsEnabled
+                        if (editStationStreamsEnabled) {
+                            stationViewHolder.stationUriEditView.isVisible = true
+                            stationViewHolder.stationUriEditView.imeOptions = EditorInfo.IME_ACTION_DONE
+                        } else {
+                            stationViewHolder.stationUriEditView.isGone = true
+                            stationViewHolder.stationNameEditView.imeOptions = EditorInfo.IME_ACTION_DONE
+                        }
                     }
                     // hide edit views
                     else -> {
