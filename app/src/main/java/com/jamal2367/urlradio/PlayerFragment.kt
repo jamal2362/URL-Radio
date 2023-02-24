@@ -63,6 +63,7 @@ import com.jamal2367.urlradio.ui.LayoutHolder
 import com.jamal2367.urlradio.ui.PlayerState
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
 import java.util.*
 
 
@@ -286,7 +287,7 @@ class PlayerFragment: Fragment(),
                 }
                 // CASE: invalid address
                 else {
-                    CoroutineScope(IO).launch {
+                    withContext(Main) {
                     Snackbar.make(requireView(), R.string.toastmessage_station_not_valid, Snackbar.LENGTH_LONG).show()
                     }
                 }
