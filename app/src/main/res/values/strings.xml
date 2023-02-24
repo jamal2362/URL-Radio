@@ -11,6 +11,9 @@
     <string name="descr_card_station_image_change">Change station image</string>
     <string name="descr_card_station_image">Station image</string>
     <string name="descr_dialog_edit_place_on_home_screen_icon">Place on Home screen</string>
+    <string name="descr_expanded_player_metadata_copy_button">Copy the now playing information</string>
+    <string name="descr_expanded_player_metadata_next_button">Next now playing metadata entry</string>
+    <string name="descr_expanded_player_metadata_previous_button">Previous now playing metadata entry</string>
     <string name="descr_expanded_player_sleep_timer_cancel_button">Cancel sleep timer</string>
     <string name="descr_expanded_player_sleep_timer_remaining_time">Time remaining on sleep timer</string>
     <string name="descr_expanded_player_sleep_timer_start_button">Start sleep timer</string>

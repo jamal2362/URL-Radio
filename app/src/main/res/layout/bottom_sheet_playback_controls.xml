@@ -145,13 +145,14 @@
         app:layout_constraintTop_toTopOf="@+id/sheet_streaming_link_icon"
         app:srcCompat="@drawable/ic_share_24dp" />
 
-    <ImageView
+    <ImageButton
         android:id="@+id/sheet_previous_metadata_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:contentDescription="@null"
         android:padding="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/descr_expanded_player_metadata_previous_button"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/sheet_streaming_link_icon"
         app:srcCompat="@drawable/ic_chevron_left_24dp" />
@@ -188,30 +189,43 @@
         tools:text="@string/sample_text_station_metadata" />
 
 
-    <ImageView
+    <ImageButton
         android:id="@+id/sheet_next_metadata_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:contentDescription="@null"
         android:padding="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/descr_expanded_player_metadata_next_button"
         app:layout_constraintBottom_toBottomOf="@+id/sheet_previous_metadata_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/sheet_previous_metadata_button"
         app:srcCompat="@drawable/ic_chevron_right_24dp" />
 
+    <ImageButton
+        android:id="@+id/copy_station_metadata_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="16dp"
+        android:padding="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/descr_expanded_player_metadata_copy_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sheet_previous_metadata_button"
+        app:srcCompat="@drawable/ic_copy_content_24dp" />
 
-    <ImageView
+    <ImageButton
         android:id="@+id/sleep_timer_start_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="16dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:clickable="true"
-        android:contentDescription="@string/descr_expanded_player_sleep_timer_start_button"
-        android:focusable="true"
         android:padding="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/descr_expanded_player_sleep_timer_start_button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/sheet_previous_metadata_button"
@@ -230,7 +244,7 @@
         app:layout_constraintTop_toTopOf="@+id/sleep_timer_start_button"
         tools:text="@string/sample_text_sleep_timer_remaining_time" />
 
-    <ImageView
+    <ImageButton
         android:id="@+id/sleep_timer_cancel_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

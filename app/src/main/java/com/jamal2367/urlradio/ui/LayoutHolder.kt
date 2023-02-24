@@ -60,11 +60,12 @@ data class LayoutHolder(var rootView: View) {
     private var sheetStreamingLinkView: TextView = rootView.findViewById(R.id.sheet_streaming_link)
     private var sheetMetadataHistoryHeadline: TextView = rootView.findViewById(R.id.sheet_metadata_headline)
     private var sheetMetadataHistoryView: TextView = rootView.findViewById(R.id.sheet_metadata_history)
-    private var sheetNextMetadataView: ImageView = rootView.findViewById(R.id.sheet_next_metadata_button)
-    private var sheetPreviousMetadataView: ImageView = rootView.findViewById(R.id.sheet_previous_metadata_button)
+    private var sheetNextMetadataView: ImageButton = rootView.findViewById(R.id.sheet_next_metadata_button)
+    private var sheetPreviousMetadataView: ImageButton = rootView.findViewById(R.id.sheet_previous_metadata_button)
+    private var sheetCopyMetadataButtonView: ImageButton = rootView.findViewById(R.id.copy_station_metadata_button)
     private var sheetShareLinkButtonView: ImageView = rootView.findViewById(R.id.sheet_share_link_button)
-    var sheetSleepTimerStartButtonView: ImageView = rootView.findViewById(R.id.sleep_timer_start_button)
-    var sheetSleepTimerCancelButtonView: ImageView = rootView.findViewById(R.id.sleep_timer_cancel_button)
+    var sheetSleepTimerStartButtonView: ImageButton = rootView.findViewById(R.id.sleep_timer_start_button)
+    var sheetSleepTimerCancelButtonView: ImageButton = rootView.findViewById(R.id.sleep_timer_cancel_button)
     private var sheetSleepTimerRemainingTimeView: TextView = rootView.findViewById(R.id.sleep_timer_remaining_time)
     private var onboardingLayout: ConstraintLayout = rootView.findViewById(R.id.onboarding_layout)
     private var onboardingQuoteViews: Group = rootView.findViewById(R.id.onboarding_quote_views)
@@ -151,6 +152,7 @@ data class LayoutHolder(var rootView: View) {
         sheetStreamingLinkView.setOnClickListener{ copyToClipboard(context, sheetStreamingLinkView.text) }
         sheetMetadataHistoryHeadline.setOnClickListener { copyToClipboard(context, sheetMetadataHistoryView.text) }
         sheetMetadataHistoryView.setOnClickListener { copyToClipboard(context, sheetMetadataHistoryView.text) }
+        sheetCopyMetadataButtonView.setOnClickListener { copyToClipboard(context, sheetMetadataHistoryView.text) }
         sheetShareLinkButtonView.setOnClickListener {
             val share = Intent.createChooser(Intent().apply {
                 action = Intent.ACTION_SEND

@@ -7,6 +7,9 @@
     <string name="descr_card_station_image_change">Senderbild ändern</string>
     <string name="descr_card_station_image">Senderbild</string>
     <string name="descr_dialog_edit_place_on_home_screen_icon">Auf dem Startbildschirm platzieren</string>
+    <string name="descr_expanded_player_metadata_copy_button">Informationen zur aktuellen Wiedergabe kopieren</string>
+    <string name="descr_expanded_player_metadata_next_button">Nächster jetzt abspielender Metadateneintrag</string>
+    <string name="descr_expanded_player_metadata_previous_button">Vorheriger abspielender Metadateneintrag</string>
     <string name="descr_expanded_player_sleep_timer_cancel_button">Schlaf-Timer abbrechen</string>
     <string name="descr_expanded_player_sleep_timer_remaining_time">Verbleibende Zeit des Schlaf-Timers</string>
     <string name="descr_expanded_player_sleep_timer_start_button">Schlaf-Timer starten</string>
