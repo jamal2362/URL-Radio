@@ -269,6 +269,21 @@ object PreferencesHelper {
     }
 
 
+    /* Loads value of the option: Buffer Size */
+    fun loadLargeBufferSize(): Boolean {
+        return sharedPreferences.getBoolean(Keys.PREF_LARGE_BUFFER_SIZE, false)
+    }
+
+
+    /* Loads a multiplier value for constructing the load control */
+    fun loadBufferSizeMultiplier(): Int {
+        if (sharedPreferences.getBoolean(Keys.PREF_LARGE_BUFFER_SIZE, false)) {
+            return 2
+        } else {
+            return 1
+        }
+    }
+
 
     /* Return whether to download over mobile */
     fun downloadOverMobile(): Boolean {

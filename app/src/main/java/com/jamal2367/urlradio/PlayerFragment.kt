@@ -653,7 +653,6 @@ class PlayerFragment: Fragment(),
     private val periodicSleepTimerUpdateRequestRunnable: Runnable = object : Runnable {
         override fun run() {
             // update sleep timer view
-            Log.e(TAG, "Requesting Sleep Time update") // todo remove
             requestSleepTimerUpdate()
             // use the handler to start runnable again after specified delay
             handler.postDelayed(this, 500)
