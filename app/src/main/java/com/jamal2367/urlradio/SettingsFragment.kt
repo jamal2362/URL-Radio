@@ -193,7 +193,10 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
             val clip: ClipData = ClipData.newPlainText("simple text", preferenceAppVersion.summary)
             val cm: ClipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             cm.setPrimaryClip(clip)
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                // since API 33 (TIRAMISU) the OS displays its own notification when content is copied to the clipboard
             Snackbar.make(requireView(), R.string.toastmessage_copied_to_clipboard, Snackbar.LENGTH_LONG).show()
+            }
             return@setOnPreferenceClickListener true
         }
 

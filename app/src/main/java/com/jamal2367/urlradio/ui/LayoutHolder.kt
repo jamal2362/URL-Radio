@@ -18,6 +18,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
@@ -167,7 +168,10 @@ data class LayoutHolder(var rootView: View) {
         val clip: ClipData = ClipData.newPlainText("simple text", clipString)
         val cm: ClipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         cm.setPrimaryClip(clip)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU){
+            // since API 33 (TIRAMISU) the OS displays its own notification when content is copied to the clipboard
         Snackbar.make(rootView, R.string.toastmessage_copied_to_clipboard, Snackbar.LENGTH_LONG).show()
+        }
     }
 
 
