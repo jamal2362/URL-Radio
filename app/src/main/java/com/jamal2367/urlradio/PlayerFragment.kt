@@ -286,7 +286,9 @@ class PlayerFragment: Fragment(),
                 }
                 // CASE: invalid address
                 else {
+                    CoroutineScope(IO).launch {
                     Snackbar.make(requireView(), R.string.toastmessage_station_not_valid, Snackbar.LENGTH_LONG).show()
+                    }
                 }
             }
         }
