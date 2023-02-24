@@ -16,9 +16,11 @@ package com.jamal2367.urlradio.core
 
 import android.os.Parcelable
 import androidx.annotation.Keep
+import androidx.media3.common.MimeTypes
 import com.google.gson.annotations.Expose
 import kotlinx.parcelize.Parcelize
 import com.jamal2367.urlradio.Keys
+import kotlinx.parcelize.IgnoredOnParcel
 import java.util.*
 
 
@@ -46,6 +48,10 @@ data class Station (@Expose val uuid: String = UUID.randomUUID().toString(),
                     @Expose var radioBrowserStationUuid: String = String(),
                     @Expose var radioBrowserChangeUuid: String = String()): Parcelable {
 
+    /* Define log tag */
+    @IgnoredOnParcel
+    private val TAG: String = Station::class.java.simpleName
+
 
     /* overrides toString method */
     override fun toString(): String {
@@ -70,6 +76,20 @@ data class Station (@Expose val uuid: String = UUID.randomUUID().toString(),
     /* Checks if a Station has the minimum required elements / data */
     fun isValid(): Boolean {
         return uuid.isNotEmpty() && name.isNotEmpty() && streamUris.isNotEmpty() && streamUris[stream].isNotEmpty() && modificationDate != Keys.DEFAULT_DATE && streamContent != Keys.MIME_TYPE_UNSUPPORTED
+    }
+
+
+    /* Get the correct Mime type - used for building a MediaItem  */
+    fun getMediaType(): String {
+        return if (Keys.MIME_TYPES_MPEG.contains(streamContent)) {
+            MimeTypes.AUDIO_MPEG
+        } else if (Keys.MIME_TYPES_AAC.contains(streamContent)) {
+            MimeTypes.AUDIO_AAC
+        } else if (Keys.MIME_TYPES_HLS.contains(streamContent)) {
+            MimeTypes.APPLICATION_M3U8
+        } else {
+            MimeTypes.AUDIO_UNKNOWN
+        }
     }
 
 

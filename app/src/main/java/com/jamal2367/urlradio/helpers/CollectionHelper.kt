@@ -505,6 +505,7 @@ object CollectionHelper {
             setMediaId(station.uuid)
             setRequestMetadata(requestMetadata)
             setMediaMetadata(mediaMetadata)
+            //setMimeType(station.getMediaType())
             setUri(station.getStreamUri().toUri())
         }.build()
     }
