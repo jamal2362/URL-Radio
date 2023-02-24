@@ -24,12 +24,15 @@ import android.media.audiofx.AudioEffect
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
+import android.widget.Toast
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.media.MediaBrowserServiceCompat.BrowserRoot.EXTRA_RECENT
 import androidx.media3.common.*
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.analytics.AnalyticsListener
+import androidx.media3.exoplayer.upstream.DefaultAllocator
 import androidx.media3.session.*
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.Futures
@@ -108,6 +111,7 @@ class PlayerService: MediaLibraryService() {
         val exoPlayer: ExoPlayer = ExoPlayer.Builder(this).apply {
             setAudioAttributes(AudioAttributes.DEFAULT, true)
             setHandleAudioBecomingNoisy(true)
+            setLoadControl(createDefaultLoadControl(10))
         }.build()
         exoPlayer.addAnalyticsListener(analyticsListener)
         exoPlayer.addListener(playerListener)
@@ -132,6 +136,14 @@ class PlayerService: MediaLibraryService() {
         mediaLibrarySession = MediaLibrarySession.Builder(this, player, librarySessionCallback).apply {
             setSessionActivity(pendingIntent)
         }.build()
+    }
+
+
+    /* Creates a LoadControl - increase buffer size by given factor */
+    private fun createDefaultLoadControl(factor: Int): DefaultLoadControl {
+        val builder = DefaultLoadControl.Builder()
+        builder.setAllocator(DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE * factor))
+        return builder.build()
     }
 
 
@@ -193,14 +205,17 @@ class PlayerService: MediaLibraryService() {
     }
 
 
-    /* Gets the most current metadata string */
-    private fun getCurrentMetadata(): String {
-        val metadataString: String = if (metadataHistory.isEmpty()) {
-            player.currentMediaItem?.mediaMetadata?.title.toString()
+    /* Try to restart Playback */
+    private fun tryToRestartPlayback() {
+        // restart playback for up to five times
+        Log.e(TAG, "playbackRestartCounter = $playbackRestartCounter") // todo remove
+        if (playbackRestartCounter < 5) {
+            playbackRestartCounter++
+            player.play()
         } else {
-            metadataHistory.last()
+            player.stop()
+            Toast.makeText(this, R.string.toastmessage_error_restart_playback_failed, Toast.LENGTH_LONG).show()
         }
-        return metadataString
     }
 
 
@@ -338,7 +353,6 @@ class PlayerService: MediaLibraryService() {
                     }
                 }
                 Player.COMMAND_PLAY_PAUSE -> {
-                    Log.e(TAG, "COMMAND_PLAY_PAUSE") // todo remove
                     return if (player.isPlaying) {
                         super.onPlayerCommandRequest(session, controller, playerCommand)
                     } else {
@@ -397,7 +411,7 @@ class PlayerService: MediaLibraryService() {
             PreferencesHelper.saveIsPlaying(isPlaying)
             PreferencesHelper.saveCurrentStationId(currentMediaId)
             // reset restart counter
-            //playbackRestartCounter = 0
+            playbackRestartCounter = 0
             // save collection and player state
 
             collection = CollectionHelper.savePlaybackState(this@PlayerService, collection, currentMediaId, isPlaying)
@@ -455,6 +469,15 @@ class PlayerService: MediaLibraryService() {
                 }
             }
         }
+
+
+        override fun onPlayerError(error: PlaybackException) {
+            super.onPlayerError(error)
+            if (error.errorCode == PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED)  {
+                tryToRestartPlayback()
+            }
+        }
+
 
         override fun onMetadata(metadata: Metadata) {
             super.onMetadata(metadata)
