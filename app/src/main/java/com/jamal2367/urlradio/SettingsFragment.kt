@@ -152,7 +152,7 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
 
 
         // set up "Buffer Size" preference
-        val preferenceBufferSize: SwitchPreferenceCompat = SwitchPreferenceCompat(activity as Context)
+        val preferenceBufferSize = SwitchPreferenceCompat(activity as Context)
         preferenceBufferSize.title = getString(R.string.pref_buffer_size_title)
         preferenceBufferSize.setIcon(R.drawable.ic_network_check_24dp)
         preferenceBufferSize.key = Keys.PREF_LARGE_BUFFER_SIZE
