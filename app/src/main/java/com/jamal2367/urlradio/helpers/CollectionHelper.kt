@@ -17,6 +17,8 @@ package com.jamal2367.urlradio.helpers
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.core.net.toUri
@@ -154,7 +156,9 @@ object CollectionHelper {
         // duplicate check
         else if (!isNewStation(collection, newStation)) {
             // update station
+            Handler(Looper.getMainLooper()).post {
             Toast.makeText(context, R.string.toastmessage_station_duplicate, Toast.LENGTH_LONG).show()
+            }
             return collection
         }
         // all clear -> add station

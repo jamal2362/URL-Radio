@@ -199,7 +199,7 @@ class PlayerService: MediaLibraryService() {
         }
         // remove duplicates
         if (metadataHistory.contains(metadataString)) {
-            metadataHistory.removeIf { it == metadataString }
+            metadataHistory.removeAll { it == metadataString }
         }
         // append metadata to metadata history
         metadataHistory.add(metadataString)
