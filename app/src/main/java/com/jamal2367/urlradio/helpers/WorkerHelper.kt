@@ -45,7 +45,8 @@ object WorkerHelper {
                 //.setConstraints(unmeteredConstraint)
                 .setInputData(requestData)
                 .build()
-        WorkManager.getInstance(context).enqueueUniquePeriodicWork(Keys.NAME_PERIODIC_COLLECTION_UPDATE_WORK,  ExistingPeriodicWorkPolicy.REPLACE, updateCollectionPeriodicWork)
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(Keys.NAME_PERIODIC_COLLECTION_UPDATE_WORK,
+            ExistingPeriodicWorkPolicy.UPDATE, updateCollectionPeriodicWork)
         return updateCollectionPeriodicWork.id
     }
 

@@ -208,7 +208,6 @@ object DownloadHelper {
 
 
     /* Reads station playlist file and adds it to collection */
-    @OptIn(DelicateCoroutinesApi::class)
     private fun addStation(context: Context, localFileUri: Uri, remoteFileLocation: String) {
         // read station playlist
         val station: Station = CollectionHelper.createStationFromPlaylistFile(context, localFileUri, remoteFileLocation)
@@ -228,7 +227,6 @@ object DownloadHelper {
 
 
     /* Reads station playlist file and updates it in collection */
-    @OptIn(DelicateCoroutinesApi::class)
     private fun updateStation(context: Context, localFileUri: Uri, remoteFileLocation: String) {
         // read station playlist
         val station: Station = CollectionHelper.createStationFromPlaylistFile(context, localFileUri, remoteFileLocation)

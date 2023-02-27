@@ -68,15 +68,17 @@ class RadioBrowserResultAdapter(private val listener: RadioBrowserResultAdapterL
         searchResultViewHolder.nameView.text = searchResult.name
         searchResultViewHolder.streamView.text = searchResult.url
         // mark selected if necessary
-        searchResultViewHolder.searchResultLayout.isSelected = selectedPosition == position
+        val isSelected = selectedPosition == holder.adapterPosition
+        searchResultViewHolder.searchResultLayout.isSelected = isSelected
         // toggle text scrolling (marquee) if necessary
-        searchResultViewHolder.nameView.isSelected = selectedPosition == position
-        searchResultViewHolder.streamView.isSelected = selectedPosition == position
+        searchResultViewHolder.nameView.isSelected = isSelected
+        searchResultViewHolder.streamView.isSelected = isSelected
         // attach touch listener
         searchResultViewHolder.searchResultLayout.setOnClickListener {
             // move marked position
-            notifyItemChanged(selectedPosition)
-            selectedPosition = position
+            val previousSelectedPosition = selectedPosition
+            selectedPosition = holder.adapterPosition
+            notifyItemChanged(previousSelectedPosition)
             notifyItemChanged(selectedPosition)
             // hand over station
             listener.onSearchResultTapped(searchResult)
@@ -97,7 +99,6 @@ class RadioBrowserResultAdapter(private val listener: RadioBrowserResultAdapterL
     }
 
 
-
     /*
      * Inner class: ViewHolder for a radio station search result
      */
@@ -105,8 +106,5 @@ class RadioBrowserResultAdapter(private val listener: RadioBrowserResultAdapterL
         val nameView: MaterialTextView = searchResultLayout.findViewById(R.id.station_name)
         val streamView: MaterialTextView = searchResultLayout.findViewById(R.id.station_url)
     }
-    /*
-     * End of inner class
-     */
 
 }

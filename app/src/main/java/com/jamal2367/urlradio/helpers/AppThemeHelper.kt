@@ -14,13 +14,10 @@
 
 package com.jamal2367.urlradio.helpers
 
-import android.app.Activity
 import android.content.Context
-import android.content.res.Configuration
 import android.content.res.TypedArray
 import android.util.Log
 import android.util.TypedValue
-import android.view.View
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatDelegate
@@ -71,13 +68,6 @@ object AppThemeHelper {
     }
 
 
-    /* Return weather Night Mode is on, or not  */
-    fun isDarkModeOn(context: Context): Boolean {
-        val nightMode = context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        return nightMode == Configuration.UI_MODE_NIGHT_YES
-    }
-
-
     /* Returns a readable String for currently selected App Theme */
     fun getCurrentTheme(context: Context): String {
         return when (PreferencesHelper.loadThemeSelection()) {
@@ -85,22 +75,6 @@ object AppThemeHelper {
             Keys.STATE_THEME_DARK_MODE -> context.getString(R.string.pref_theme_selection_mode_dark)
             else -> context.getString(R.string.pref_theme_selection_mode_device_default)
         }
-    }
-
-
-    /* Displays the default status bar */
-    @Suppress("DEPRECATION")
-    fun displayDefaultStatusBar(activity: Activity) {
-        val decorView = activity.window.decorView
-        decorView.systemUiVisibility = 0
-    }
-
-
-    /* Displays the light (inverted) status bar */
-    @Suppress("DEPRECATION")
-    fun displayLightStatusBar(activity: Activity) {
-        val decorView = activity.window.decorView
-        decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
     }
 
 

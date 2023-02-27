@@ -18,6 +18,7 @@ import android.app.PendingIntent
 import android.app.TaskStackBuilder
 import android.content.*
 import android.media.audiofx.AudioEffect
+import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
@@ -139,7 +140,7 @@ class PlayerService: MediaLibraryService() {
         val intent = Intent(this, MainActivity::class.java)
         val pendingIntent = TaskStackBuilder.create(this).run {
             addNextIntent(intent)
-            getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+            getPendingIntent(0, if (Build.VERSION.SDK_INT >= 31) PendingIntent.FLAG_IMMUTABLE else PendingIntent.FLAG_CANCEL_CURRENT)
         }
 
         mediaLibrarySession = MediaLibrarySession.Builder(this, player, librarySessionCallback).apply {
