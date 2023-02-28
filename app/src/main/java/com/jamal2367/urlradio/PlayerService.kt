@@ -119,7 +119,6 @@ class PlayerService: MediaLibraryService() {
             setLoadControl(createDefaultLoadControl(bufferSizeMultiplier))
             setMediaSourceFactory(DefaultMediaSourceFactory(this@PlayerService).setLoadErrorHandlingPolicy(loadErrorHandlingPolicy))
         }.build()
-        Toast.makeText(this, "Buffer size multiplier = $bufferSizeMultiplier" , Toast.LENGTH_LONG).show() // todo remove
         exoPlayer.addAnalyticsListener(analyticsListener)
         exoPlayer.addListener(playerListener)
 
@@ -127,6 +126,9 @@ class PlayerService: MediaLibraryService() {
         player = object : ForwardingPlayer(exoPlayer) {
             override fun getAvailableCommands(): Player.Commands {
                 return super.getAvailableCommands().buildUpon().add(COMMAND_SEEK_TO_NEXT).add(COMMAND_SEEK_TO_PREVIOUS).build()
+            }
+            override fun isCommandAvailable(command: Int): Boolean {
+                return availableCommands.contains(command)
             }
             override fun getDuration(): Long {
                 return C.TIME_UNSET // this will hide progress bar for HLS stations in the notification
@@ -208,9 +210,6 @@ class PlayerService: MediaLibraryService() {
         if (metadataHistory.size > Keys.DEFAULT_SIZE_OF_METADATA_HISTORY) {
             metadataHistory.removeAt(0)
         }
-        // update notification
-        // TODO implement
-        // this will hide the NotificationUtil.setNotification(applicationContext, Keys.NOW_PLAYING_NOTIFICATION_ID, null)
         // save history
         PreferencesHelper.saveMetadataHistory(metadataHistory)
     }
@@ -219,7 +218,6 @@ class PlayerService: MediaLibraryService() {
     /* Try to restart Playback */
     private fun tryToRestartPlayback() {
         // restart playback for up to five times
-        Log.e(TAG, "playbackRestartCounter = $playbackRestartCounter") // todo remove
         if (playbackRestartCounter < 5) {
             playbackRestartCounter++
             player.play()
@@ -339,14 +337,12 @@ class PlayerService: MediaLibraryService() {
             // prev: adb shell input keyevent 88
             when (playerCommand) {
                 Player.COMMAND_SEEK_TO_NEXT ->  {
-                    // todo implememt
                     player.addMediaItem(CollectionHelper.getNextMediaItem(collection, player.currentMediaItem?.mediaId ?: String()))
                     player.prepare()
                     player.play()
                     return SessionResult.RESULT_SUCCESS
                 }
                 Player.COMMAND_SEEK_TO_PREVIOUS ->  {
-                    // todo implememt
                     player.addMediaItem(CollectionHelper.getPreviousMediaItem(collection, player.currentMediaItem?.mediaId ?: String()))
                     player.prepare()
                     player.play()
@@ -394,21 +390,21 @@ class PlayerService: MediaLibraryService() {
     */
     private inner class CustomNotificationProvider: DefaultMediaNotificationProvider(this@PlayerService) {
         override fun getMediaButtons(session: MediaSession, playerCommands: Player.Commands, customLayout: ImmutableList<CommandButton>, showPauseButton: Boolean): ImmutableList<CommandButton> {
-            val seekToPreviousCommandButton = CommandButton.Builder()
-                .setPlayerCommand(Player.COMMAND_SEEK_TO_PREVIOUS)
-                .setIconResId(R.drawable.ic_notification_skip_to_previous_36dp)
-                .setEnabled(true)
-                .build()
-            val playCommandButton = CommandButton.Builder()
-                .setPlayerCommand(Player.COMMAND_PLAY_PAUSE)
-                .setIconResId(if (player.isPlaying) R.drawable.ic_notification_stop_36dp else R.drawable.ic_notification_play_36dp)
-                .setEnabled(true)
-                .build()
-            val seekToNextCommandButton = CommandButton.Builder()
-                .setPlayerCommand(Player.COMMAND_SEEK_TO_NEXT)
-                .setIconResId(R.drawable.ic_notification_skip_to_next_36dp)
-                .setEnabled(true)
-                .build()
+            val seekToPreviousCommandButton = CommandButton.Builder().apply {
+                setPlayerCommand(Player.COMMAND_SEEK_TO_PREVIOUS)
+                setIconResId(R.drawable.ic_notification_skip_to_previous_36dp)
+                setEnabled(true)
+            }.build()
+            val playCommandButton = CommandButton.Builder().apply {
+                setPlayerCommand(Player.COMMAND_PLAY_PAUSE)
+                setIconResId(if (player.isPlaying) R.drawable.ic_notification_stop_36dp else R.drawable.ic_notification_play_36dp)
+                setEnabled(true)
+            }.build()
+            val seekToNextCommandButton = CommandButton.Builder().apply {
+                setPlayerCommand(Player.COMMAND_SEEK_TO_NEXT)
+                setIconResId(R.drawable.ic_notification_skip_to_next_36dp)
+                setEnabled(true)
+            }.build()
             val commandButtons: MutableList<CommandButton> = mutableListOf(
                 seekToPreviousCommandButton,
                 playCommandButton,
@@ -493,9 +489,8 @@ class PlayerService: MediaLibraryService() {
 
         override fun onPlayerError(error: PlaybackException) {
             super.onPlayerError(error)
-            if (error.errorCode == PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED)  {
-                tryToRestartPlayback()
-            }
+            Log.d(TAG, "PlayerError occurred: ${error.errorCodeName}")
+            // todo: test if playback needs to be restarted
         }
 
 
@@ -512,13 +507,12 @@ class PlayerService: MediaLibraryService() {
      */
     private val loadErrorHandlingPolicy: DefaultLoadErrorHandlingPolicy = object: DefaultLoadErrorHandlingPolicy()  {
         override fun getRetryDelayMsFor(loadErrorInfo: LoadErrorHandlingPolicy.LoadErrorInfo): Long {
-            Log.e(TAG, "Network Error Handling / DefaultLoadErrorHandlingPolicy => ${loadErrorInfo.errorCount} ${loadErrorInfo.exception}") // todo remove
-            // try to reconnect every 5 seconds - up to 19 times
-            return if (loadErrorInfo.errorCount < 20 && loadErrorInfo.exception is HttpDataSource.HttpDataSourceException) {
-                5000 // 5 seconds
+            // try to reconnect every 5 seconds - up to 20 times
+            return if (loadErrorInfo.errorCount <= Keys.DEFAULT_MAX_RECONNECTION_COUNT && loadErrorInfo.exception is HttpDataSource.HttpDataSourceException) {
+                Keys.RECONNECTION_WAIT_INTERVAL
             } else {
+                player.pause()
                 C.TIME_UNSET
-                // todo check if playback needs to be stopped
             }
         }
 

@@ -33,6 +33,7 @@ object Keys {
     const val MINIMUM_TIME_BETWEEN_UPDATES: Long = 180000L  // 3 minutes in milliseconds
     const val SLEEP_TIMER_DURATION: Long = 300000L          // 5 minutes in  milliseconds
     const val SLEEP_TIMER_INTERVAL: Long = 1000L            // 1 second in milliseconds
+    const val RECONNECTION_WAIT_INTERVAL: Long = 500L       // 5 seconds in milliseconds
 
     // ranges
     val PLAYBACK_SPEEDS = arrayOf(1.0f, 1.2f, 1.4f, 1.6f, 1.8f, 2.0f)
@@ -106,6 +107,8 @@ object Keys {
     const val DEFAULT_MAX_LENGTH_OF_METADATA_ENTRY: Int = 127
     const val DEFAULT_DOWNLOAD_OVER_MOBILE: Boolean = false
     const val ACTIVE_DOWNLOADS_EMPTY: String = "zero"
+    const val DEFAULT_MAX_RECONNECTION_COUNT: Int = 20
+    const val LARGE_BUFFER_SIZE_MULTIPLIER: Int = 8
 
     // media browser
     const val MEDIA_BROWSER_ROOT = "__ROOT__"
