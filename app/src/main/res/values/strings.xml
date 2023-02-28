@@ -136,4 +136,10 @@
     <string name="toastmessage_station_not_valid">Station is not valid.</string>
     <string name="toastmessage_updating_collection">Updating collection of stations.</string>
     <string name="toastmessage_updating_station_images">Updating station images.</string>
+
+    <!-- Snackbars -->
+    <string name="snackbar_show">Show</string>
+    <string name="snackbar_update_available">is available!</string>
+    <string name="snackbar_url_app_home_page" translatable="false">https://github.com/jamal2362/URL-Radio/releases/latest</string>
+    <string name="snackbar_github_update_check_url" translatable="false">https://api.github.com/repos/jamal2362/URL-Radio/releases/latest</string>
 </resources>

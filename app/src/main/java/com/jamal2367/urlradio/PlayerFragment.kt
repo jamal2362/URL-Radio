@@ -48,9 +48,15 @@ import androidx.media3.session.SessionResult
 import androidx.media3.session.SessionToken
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.android.volley.Request
+import com.android.volley.RequestQueue
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
 import com.google.android.material.snackbar.Snackbar
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import com.jamal2367.urlradio.collection.CollectionAdapter
 import com.jamal2367.urlradio.collection.CollectionViewModel
 import com.jamal2367.urlradio.core.Collection
@@ -85,6 +91,7 @@ class PlayerFragment: Fragment(),
     private lateinit var collectionAdapter: CollectionAdapter
     private lateinit var controllerFuture: ListenableFuture<MediaController>
     private lateinit var pickSingleMediaLauncher: ActivityResultLauncher<Intent>
+    private lateinit var queue: RequestQueue
     private val controller: MediaController?
         get() = if (controllerFuture.isDone) controllerFuture.get() else null // defines the Getter for the MediaController
     private var collection: Collection = Collection()
@@ -108,6 +115,10 @@ class PlayerFragment: Fragment(),
                 }
             }
         })
+
+        queue = Volley.newRequestQueue(requireContext())
+
+        Handler(Looper.getMainLooper()).postDelayed({ checkForUpdates(requireContext()) }, 5000)
 
         // load player state
         playerState = PreferencesHelper.loadPlayerState()
@@ -220,6 +231,11 @@ class PlayerFragment: Fragment(),
         super.onStop()
         // release MediaController - cut connection to PlayerService
         releaseController()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        queue.cancelAll(TAG)
     }
 
 
@@ -705,4 +721,41 @@ class PlayerFragment: Fragment(),
     /*
      * End of declaration
      */
+
+
+    /**
+     * Check for update on github
+     */
+    private fun checkForUpdates(context: Context) {
+            val url = getString(R.string.snackbar_github_update_check_url)
+            val request = StringRequest(Request.Method.GET, url, { reply ->
+                val latestVersion =
+                    Gson().fromJson(reply, JsonObject::class.java).get("tag_name").asString
+                val current =
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        context.packageManager.getPackageInfo(context.packageName, PackageManager.PackageInfoFlags.of(0)).versionName
+                    } else {
+                        context.packageManager.getPackageInfo(context.packageName, 0).versionName
+                    }
+                if (latestVersion != current) {
+                    // We have an update available, tell our user about it
+                    Snackbar.make(requireView(), getString(R.string.app_name) + " " + latestVersion + " " + getString(R.string.snackbar_update_available), 10000)
+                        .setAction(R.string.snackbar_show) {
+                            val releaseurl = getString(R.string.snackbar_url_app_home_page)
+                            val i = Intent(Intent.ACTION_VIEW)
+                            i.data = Uri.parse(releaseurl)
+                            // Not sure that does anything
+                            i.putExtra("SOURCE", "SELF")
+                            startActivity(i)
+                        }
+                        .setActionTextColor(ContextCompat.getColor(requireContext(), R.color.player_play_pause_icon))
+                        .show()
+                }
+            }, { error ->
+                Log.w(TAG, "Update check failed", error)
+            })
+
+            request.tag = TAG
+            queue.add(request)
+    }
 }

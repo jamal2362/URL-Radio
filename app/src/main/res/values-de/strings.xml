@@ -124,4 +124,8 @@
     <string name="toastmessage_station_not_valid">Dieser Sender existiert nicht</string>
     <string name="toastmessage_updating_collection">Alle Sender werden aktualisiert</string>
     <string name="toastmessage_updating_station_images">Alle Senderbilder werden aktualisiert</string>
+
+    <!-- Snackbars -->
+    <string name="snackbar_show">Zeigen</string>
+    <string name="snackbar_update_available">ist verfügbar!</string>
 </resources>
