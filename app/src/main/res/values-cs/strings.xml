@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Name -->
+    <!-- Accessibility Descriptions -->
+    <string name="descr_card_small_play_button">Přehrát/zastavit</string>
+    <string name="descr_card_starred_station">Oblíbené stanice</string>
+    <string name="descr_card_station_image_change">Změnit obrázek stanice</string>
+    <string name="descr_card_station_image">Obrázek stanice</string>
+    <string name="descr_dialog_edit_place_on_home_screen_icon">Umístit na domovskou obrazovku</string>
+    <string name="descr_player_playback_button">Přehrát/pozastavit</string>
+    <string name="descr_player_station_image">Obrázek stanice</string>
+    <!-- Dialogs -->
+    <string name="dialog_edit_save_changes">Uložit</string>
+    <string name="dialog_edit_station_name">Název stanice</string>
+    <string name="dialog_error_message_default">Nastala chyba</string>
+    <string name="dialog_error_message_no_network">Připojte se k internetu.</string>
+    <string name="dialog_error_title_no_network">Offline</string>
+    <string name="dialog_find_station_button_add">Přidat</string>
+    <string name="dialog_find_station_no_results">Nebyly nalezeny žádné výsledky.</string>
+    <string name="dialog_find_station_title">Najít stanici</string>
+    <string name="dialog_generic_button_cancel">Zrušit</string>
+    <string name="dialog_generic_button_okay">OK</string>
+    <string name="dialog_generic_details_button">Zobrazit podrobnosti</string>
+    <string name="dialog_yes_no_message_remove_station">Odebrat tuto stanici?</string>
+    <string name="dialog_yes_no_negative_button_cancel">Zrušit</string>
+    <string name="dialog_yes_no_positive_button_default">Ano</string>
+    <string name="dialog_yes_no_positive_button_remove_station">Odstranit</string>
+    <string name="dialog_yes_no_positive_button_update_covers">Aktualizovat</string>
+    <!-- Fragment -->
+    <string name="fragment_settings_title">Nastavení</string>
+    <!-- Notification -->
+    <string name="notification_play">Přehrát</string>
+    <string name="notification_stop">Zastavit</string>
+    <string name="notification_skip_to_previous">Předchozí</string>
+    <string name="notification_skip_to_next">Následující</string>
+    <!-- Onboarding -->
+    <string name="onboarding_app_description">Aplikace Rádio</string>
+    <string name="onboarding_app_import_running">Importování stanic…</string>
+    <!-- Player -->
+    <string name="player_sheet_h2_station_metadata">Právě hraje</string>
+    <string name="player_sheet_h2_stream_url">Odkaz na stream</string>
+    <!-- Settings -->
+    <string name="pref_about_title">O aplikaci</string>
+    <string name="pref_advanced_title">Pokročilé</string>
+    <string name="pref_app_version_summary">Verze</string>
+    <string name="pref_app_version_title">Verze aplikace</string>
+    <string name="pref_backup_import_export_title">Importovat &amp; Exportovat</string>
+    <!-- Sample Text -->
+    <!-- App Shortcuts -->
+    <!-- Station List -->
+    <!-- Toast Alerts -->
+    <!-- Toasts -->
+    <string name="toastmessage_restored">Stanice byly úspěšně obnoveny.</string>
+    <string name="toastmessage_save_m3u">Ukládání rozhlasových stanic jako M3U…</string>
+    <string name="toastmessage_shortcut_created">Zástupce vytvořen.</string>
+    <string name="toastmessage_shortcut_not_created">Nelze vytvořit zástupce. Toto zařízení nepodporuje tvorbu zástupců.</string>
+    <string name="toastmessage_sleep_timer_unable_to_start">Nejprve spusťte přehrávání.</string>
+    <string name="toastmessage_station_duplicate">Duplicitní stanice.</string>
+    <string name="toastmessage_station_not_valid">Neplatná stanice.</string>
+    <string name="toastmessage_updating_collection">Akualizování kolekce stanic.</string>
+    <string name="toastmessage_updating_station_images">Akualizování obrázků stanic.</string>
+    <!-- Snackbars -->
+</resources>
