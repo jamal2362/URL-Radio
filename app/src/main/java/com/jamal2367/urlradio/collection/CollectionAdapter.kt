@@ -37,6 +37,7 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
@@ -561,8 +562,8 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
      * Inner class: ViewHolder for the Add New Station action
      */
     private inner class AddNewViewHolder (listItemAddNewLayout: View) : RecyclerView.ViewHolder(listItemAddNewLayout) {
-        val addNewStationView: MaterialButton = listItemAddNewLayout.findViewById(R.id.card_add_new_station)
-        val settingsButtonView: MaterialButton = listItemAddNewLayout.findViewById(R.id.card_settings)
+        val addNewStationView: ExtendedFloatingActionButton = listItemAddNewLayout.findViewById(R.id.card_add_new_station)
+        val settingsButtonView: ExtendedFloatingActionButton = listItemAddNewLayout.findViewById(R.id.card_settings)
     }
     /*
      * End of inner class
