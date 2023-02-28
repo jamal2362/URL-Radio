@@ -3,9 +3,9 @@
 
     <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Set AppCompat’s colors -->
-        <item name="colorPrimary">#FFF44336</item>
-        <item name="colorAccent">#FFF44336</item>
-        <item name="colorPrimaryContainer">#80F44336</item>
+        <item name="colorPrimary">#FF495D92</item>
+        <item name="colorAccent">#FF495D92</item>
+        <item name="colorPrimaryContainer">#80495D92</item>
 
         <!-- Do not use primary colored elevation overlays to present a visual hierarchy - TOO COLORFUL  -->
         <item name="elevationOverlayEnabled">false</item>

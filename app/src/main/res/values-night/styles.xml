@@ -3,11 +3,11 @@
     <!-- Base application theme -->
     <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Set AppCompat’s colors -->
-        <item name="colorPrimary">#FFE57373</item>
-        <item name="colorAccent">#FFE57373</item>
-        <item name="colorOnPrimary">#FFFFCDD2</item>
-        <item name="colorPrimaryContainer">#80E57373</item>
-        <item name="android:textColorHighlight">#FFE57373</item>
+        <item name="colorPrimary">#FFDAE2FF</item>
+        <item name="colorAccent">#FFDAE2FF</item>
+        <item name="colorOnPrimary">#FF182E60</item>
+        <item name="colorPrimaryContainer">#80DAE2FF</item>
+        <item name="android:textColorHighlight">#FFDAE2FF</item>
 
         <!-- Do not use primary colored elevation overlays to present a visual hierarchy - TOO COLORFUL  -->
         <item name="elevationOverlayEnabled">false</item>

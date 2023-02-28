@@ -2,10 +2,10 @@
 <resources>
     <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Set AppCompat’s colors -->
-        <item name="colorPrimary">#FFF44336</item>
-        <item name="colorAccent">#FFF44336</item>
-        <item name="colorPrimaryContainer">#80F44336</item>
-        <item name="android:textColorHighlight">#FFF44336</item>
+        <item name="colorPrimary">#FF495D92</item>
+        <item name="colorAccent">#FF495D92</item>
+        <item name="colorPrimaryContainer">#80495D92</item>
+        <item name="android:textColorHighlight">#FF495D92</item>
 
         <!-- Do not use primary colored elevation overlays to present a visual hierarchy - TOO COLORFUL  -->
         <item name="elevationOverlayEnabled">false</item>
@@ -28,13 +28,13 @@
 
     <style name="App.Widget.Material3.Button.TextButton" parent="@style/Widget.Material3.Button.TextButton">
         <item name="android:fontFamily">@font/inter_medium</item>
-        <item name="android:textColor">?attr/colorControlNormal</item>
+        <item name="android:textColor">@color/icon_default_add_new_station</item>
         <item name="textAllCaps">true</item>
     </style>
 
     <style name="App.Widget.Material3.Button.OutlinedButton.Icon" parent="@style/Widget.Material3.Button.OutlinedButton.Icon">
-        <item name="android:textColor">?attr/colorControlNormal</item>
-        <item name="iconTint">?attr/colorControlNormal</item>
+        <item name="android:textColor">@color/icon_default_add_new_station</item>
+        <item name="iconTint">@color/icon_default_add_new_station</item>
         <item name="strokeColor">@color/list_card_stroke_background</item>
         <item name="android:fontFamily">@font/inter_medium</item>
         <item name="strokeWidth">3dp</item>
