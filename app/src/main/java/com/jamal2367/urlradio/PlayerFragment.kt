@@ -118,8 +118,6 @@ class PlayerFragment: Fragment(),
 
         queue = Volley.newRequestQueue(requireActivity())
 
-        Handler(Looper.getMainLooper()).postDelayed({ checkForUpdates() }, 5000)
-
         // load player state
         playerState = PreferencesHelper.loadPlayerState()
 
@@ -148,6 +146,8 @@ class PlayerFragment: Fragment(),
 
                 }
             }
+
+        Handler(Looper.getMainLooper()).postDelayed({ context?.let { checkForUpdates(it) } }, 5000)
     }
 
 
@@ -726,7 +726,7 @@ class PlayerFragment: Fragment(),
     /**
      * Check for update on github
      */
-    private fun checkForUpdates() {
+    private fun checkForUpdates(context: Context) {
             val url = getString(R.string.snackbar_github_update_check_url)
             val request = StringRequest(Request.Method.GET, url, { reply ->
                 val latestVersion =
@@ -739,17 +739,19 @@ class PlayerFragment: Fragment(),
                     }
                 if (latestVersion != current) {
                     // We have an update available, tell our user about it
-                    Snackbar.make(requireView(), getString(R.string.app_name) + " " + latestVersion + " " + getString(R.string.snackbar_update_available), 10000)
-                        .setAction(R.string.snackbar_show) {
-                            val releaseurl = getString(R.string.snackbar_url_app_home_page)
-                            val i = Intent(Intent.ACTION_VIEW)
-                            i.data = Uri.parse(releaseurl)
-                            // Not sure that does anything
-                            i.putExtra("SOURCE", "SELF")
-                            startActivity(i)
-                        }
-                        .setActionTextColor(ContextCompat.getColor(requireActivity(), R.color.player_play_pause_icon))
-                        .show()
+                    view?.let {
+                        Snackbar.make(it, getString(R.string.app_name) + " " + latestVersion + " " + getString(R.string.snackbar_update_available), 10000)
+                            .setAction(R.string.snackbar_show) {
+                                val releaseurl = getString(R.string.snackbar_url_app_home_page)
+                                val i = Intent(Intent.ACTION_VIEW)
+                                i.data = Uri.parse(releaseurl)
+                                // Not sure that does anything
+                                i.putExtra("SOURCE", "SELF")
+                                startActivity(i)
+                            }
+                            .setActionTextColor(ContextCompat.getColor(requireActivity(), R.color.player_play_pause_icon))
+                            .show()
+                    }
                 }
             }, { error ->
                 Log.w(TAG, "Update check failed", error)
