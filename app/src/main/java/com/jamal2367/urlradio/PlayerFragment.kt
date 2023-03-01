@@ -116,9 +116,9 @@ class PlayerFragment: Fragment(),
             }
         })
 
-        queue = Volley.newRequestQueue(requireContext())
+        queue = Volley.newRequestQueue(requireActivity())
 
-        Handler(Looper.getMainLooper()).postDelayed({ checkForUpdates(requireContext()) }, 5000)
+        Handler(Looper.getMainLooper()).postDelayed({ checkForUpdates() }, 5000)
 
         // load player state
         playerState = PreferencesHelper.loadPlayerState()
@@ -166,7 +166,7 @@ class PlayerFragment: Fragment(),
         (activity as AppCompatActivity).supportActionBar?.hide()
 
         // set player sheet background
-        (activity as AppCompatActivity).window.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.player_sheet_background)
+        (activity as AppCompatActivity).window.navigationBarColor = ContextCompat.getColor(requireActivity(), R.color.player_sheet_background)
 
         return rootView
     }
@@ -726,16 +726,16 @@ class PlayerFragment: Fragment(),
     /**
      * Check for update on github
      */
-    private fun checkForUpdates(context: Context) {
+    private fun checkForUpdates() {
             val url = getString(R.string.snackbar_github_update_check_url)
             val request = StringRequest(Request.Method.GET, url, { reply ->
                 val latestVersion =
                     Gson().fromJson(reply, JsonObject::class.java).get("tag_name").asString
                 val current =
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        context.packageManager.getPackageInfo(context.packageName, PackageManager.PackageInfoFlags.of(0)).versionName
+                        activity?.packageManager?.getPackageInfo(requireActivity().packageName, PackageManager.PackageInfoFlags.of(0))?.versionName
                     } else {
-                        context.packageManager.getPackageInfo(context.packageName, 0).versionName
+                        activity?.packageManager?.getPackageInfo(requireActivity().packageName, 0)?.versionName
                     }
                 if (latestVersion != current) {
                     // We have an update available, tell our user about it
@@ -748,7 +748,7 @@ class PlayerFragment: Fragment(),
                             i.putExtra("SOURCE", "SELF")
                             startActivity(i)
                         }
-                        .setActionTextColor(ContextCompat.getColor(requireContext(), R.color.player_play_pause_icon))
+                        .setActionTextColor(ContextCompat.getColor(requireActivity(), R.color.player_play_pause_icon))
                         .show()
                 }
             }, { error ->
