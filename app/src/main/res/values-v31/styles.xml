@@ -19,6 +19,7 @@
 
         <!-- Material Alert Dialog Theming -->
         <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.App.AlertDialogTheme</item>
 
         <!-- Use "light" Status and Navigation Bar -->
         <item name="android:windowLightStatusBar">true</item>

@@ -17,6 +17,7 @@
 
         <!-- Material Alert Dialog Theming -->
         <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.App.AlertDialogTheme</item>
 
         <!-- Don't show light status bar -->
         <item name="android:statusBarColor">@android:color/transparent</item>

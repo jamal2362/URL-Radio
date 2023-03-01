@@ -13,6 +13,9 @@
         <!-- Switch Theming  -->
         <item name="switchStyle">@style/Widget.Material3.CompoundButton.MaterialSwitch</item>
 
+        <!-- Material Alert Dialog Theming -->
+        <item name="alertDialogTheme">@style/ThemeOverlay.App.AlertDialogTheme</item>
+
         <!-- Use "light" Status Bar -->
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
