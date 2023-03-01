@@ -489,7 +489,7 @@ object CollectionHelper {
 //    }
 
 
-    /* Creates a MediaItem with MediaMetadata for a single episode - used to prapare player */
+    /* Creates a MediaItem with MediaMetadata for a single radio station - used to prepare player */
     fun buildMediaItem(station: Station): MediaItem {
         // todo implement HLS MediaItems
         // put uri in RequestMetadata - credit: https://stackoverflow.com/a/70103460
