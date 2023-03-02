@@ -18,9 +18,9 @@ import android.os.Parcelable
 import androidx.annotation.Keep
 import androidx.media3.common.MimeTypes
 import com.google.gson.annotations.Expose
-import kotlinx.parcelize.Parcelize
 import com.jamal2367.urlradio.Keys
 import kotlinx.parcelize.IgnoredOnParcel
+import kotlinx.parcelize.Parcelize
 import java.util.*
 
 
@@ -29,24 +29,26 @@ import java.util.*
  */
 @Keep
 @Parcelize
-data class Station (@Expose val uuid: String = UUID.randomUUID().toString(),
-                    @Expose var starred: Boolean = false,
-                    @Expose var name: String = String(),
-                    @Expose var nameManuallySet: Boolean = false,
-                    @Expose var streamUris: MutableList<String> = mutableListOf(),
-                    @Expose var stream: Int = 0,
-                    @Expose var streamContent: String = Keys.MIME_TYPE_UNSUPPORTED,
-                    @Expose var homepage: String = String(),
-                    @Expose var image: String = Keys.LOCATION_DEFAULT_STATION_IMAGE,
-                    @Expose var smallImage: String = Keys.LOCATION_DEFAULT_STATION_IMAGE,
-                    @Expose var imageColor: Int = -1,
-                    @Expose var imageManuallySet: Boolean = false,
-                    @Expose var remoteImageLocation: String = String(),
-                    @Expose var remoteStationLocation: String = String(),
-                    @Expose var modificationDate: Date = Keys.DEFAULT_DATE,
-                    @Expose var isPlaying: Boolean = false,
-                    @Expose var radioBrowserStationUuid: String = String(),
-                    @Expose var radioBrowserChangeUuid: String = String()): Parcelable {
+data class Station(
+    @Expose val uuid: String = UUID.randomUUID().toString(),
+    @Expose var starred: Boolean = false,
+    @Expose var name: String = String(),
+    @Expose var nameManuallySet: Boolean = false,
+    @Expose var streamUris: MutableList<String> = mutableListOf(),
+    @Expose var stream: Int = 0,
+    @Expose var streamContent: String = Keys.MIME_TYPE_UNSUPPORTED,
+    @Expose var homepage: String = String(),
+    @Expose var image: String = Keys.LOCATION_DEFAULT_STATION_IMAGE,
+    @Expose var smallImage: String = Keys.LOCATION_DEFAULT_STATION_IMAGE,
+    @Expose var imageColor: Int = -1,
+    @Expose var imageManuallySet: Boolean = false,
+    @Expose var remoteImageLocation: String = String(),
+    @Expose var remoteStationLocation: String = String(),
+    @Expose var modificationDate: Date = Keys.DEFAULT_DATE,
+    @Expose var isPlaying: Boolean = false,
+    @Expose var radioBrowserStationUuid: String = String(),
+    @Expose var radioBrowserChangeUuid: String = String()
+) : Parcelable {
 
     /* Define log tag */
     @IgnoredOnParcel
@@ -95,7 +97,8 @@ data class Station (@Expose val uuid: String = UUID.randomUUID().toString(),
 
     /* Creates a deep copy of a Station */
     fun deepCopy(): Station {
-        return Station(uuid = uuid,
+        return Station(
+            uuid = uuid,
             starred = starred,
             name = name,
             nameManuallySet = nameManuallySet,
@@ -112,6 +115,7 @@ data class Station (@Expose val uuid: String = UUID.randomUUID().toString(),
             modificationDate = modificationDate,
             isPlaying = isPlaying,
             radioBrowserStationUuid = radioBrowserStationUuid,
-            radioBrowserChangeUuid = radioBrowserChangeUuid)
+            radioBrowserChangeUuid = radioBrowserChangeUuid
+        )
     }
 }

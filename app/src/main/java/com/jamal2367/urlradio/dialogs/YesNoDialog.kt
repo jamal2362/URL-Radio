@@ -24,7 +24,7 @@ import com.jamal2367.urlradio.R
 /*
  * YesNoDialog class
  */
-class YesNoDialog (private var yesNoDialogListener: YesNoDialogListener) {
+class YesNoDialog(private var yesNoDialogListener: YesNoDialogListener) {
 
     /* Interface used to communicate back to activity */
     interface YesNoDialogListener {
@@ -38,28 +38,41 @@ class YesNoDialog (private var yesNoDialogListener: YesNoDialogListener) {
 
 
     /* Construct and show dialog - variant: message from string  */
-    fun show(context: Context,
-             type: Int,
-             title: Int = Keys.EMPTY_STRING_RESOURCE,
-             message: Int,
-             yesButton: Int = R.string.dialog_yes_no_positive_button_default,
-             noButton: Int = R.string.dialog_generic_button_cancel,
-             payload: Int = Keys.DIALOG_EMPTY_PAYLOAD_INT,
-             payloadString: String = Keys.DIALOG_EMPTY_PAYLOAD_STRING) {
+    fun show(
+        context: Context,
+        type: Int,
+        title: Int = Keys.EMPTY_STRING_RESOURCE,
+        message: Int,
+        yesButton: Int = R.string.dialog_yes_no_positive_button_default,
+        noButton: Int = R.string.dialog_generic_button_cancel,
+        payload: Int = Keys.DIALOG_EMPTY_PAYLOAD_INT,
+        payloadString: String = Keys.DIALOG_EMPTY_PAYLOAD_STRING
+    ) {
         // extract string from message resource and feed into main show method
-        show(context, type, title, context.getString(message), yesButton, noButton, payload, payloadString)
+        show(
+            context,
+            type,
+            title,
+            context.getString(message),
+            yesButton,
+            noButton,
+            payload,
+            payloadString
+        )
     }
 
 
     /* Construct and show dialog */
-    fun show(context: Context,
-             type: Int,
-             title: Int = Keys.EMPTY_STRING_RESOURCE,
-             messageString: String,
-             yesButton: Int = R.string.dialog_yes_no_positive_button_default,
-             noButton: Int = R.string.dialog_generic_button_cancel,
-             payload: Int = Keys.DIALOG_EMPTY_PAYLOAD_INT,
-             payloadString: String = Keys.DIALOG_EMPTY_PAYLOAD_STRING) {
+    fun show(
+        context: Context,
+        type: Int,
+        title: Int = Keys.EMPTY_STRING_RESOURCE,
+        messageString: String,
+        yesButton: Int = R.string.dialog_yes_no_positive_button_default,
+        noButton: Int = R.string.dialog_generic_button_cancel,
+        payload: Int = Keys.DIALOG_EMPTY_PAYLOAD_INT,
+        payloadString: String = Keys.DIALOG_EMPTY_PAYLOAD_STRING
+    ) {
 
         // prepare dialog builder
         val builder = MaterialAlertDialogBuilder(context)

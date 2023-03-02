@@ -28,6 +28,9 @@ class DownloadFinishedReceiver : BroadcastReceiver() {
     /* Overrides onReceive */
     override fun onReceive(context: Context, intent: Intent) {
         // process the finished download
-        DownloadHelper.processDownload(context, intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1L))
+        DownloadHelper.processDownload(
+            context,
+            intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1L)
+        )
     }
 }

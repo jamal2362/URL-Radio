@@ -25,7 +25,10 @@ import com.jamal2367.urlradio.R
 /*
  * RadioBrowserResult class
  */
-class RadioBrowserResultAdapter(private val listener: RadioBrowserResultAdapterListener, var searchResults: Array<RadioBrowserResult>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class RadioBrowserResultAdapter(
+    private val listener: RadioBrowserResultAdapterListener,
+    var searchResults: Array<RadioBrowserResult>
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     /* Main class variables */
     private var selectedPosition: Int = RecyclerView.NO_POSITION
@@ -44,7 +47,8 @@ class RadioBrowserResultAdapter(private val listener: RadioBrowserResultAdapterL
 
     /* Overrides onCreateViewHolder from RecyclerView.Adapter */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        val v = LayoutInflater.from(parent.context).inflate(R.layout.element_search_result, parent, false)
+        val v = LayoutInflater.from(parent.context)
+            .inflate(R.layout.element_search_result, parent, false)
         return SearchResultViewHolder(v)
     }
 
@@ -102,7 +106,8 @@ class RadioBrowserResultAdapter(private val listener: RadioBrowserResultAdapterL
     /*
      * Inner class: ViewHolder for a radio station search result
      */
-    private inner class SearchResultViewHolder (var searchResultLayout: View): RecyclerView.ViewHolder(searchResultLayout) {
+    private inner class SearchResultViewHolder(var searchResultLayout: View) :
+        RecyclerView.ViewHolder(searchResultLayout) {
         val nameView: MaterialTextView = searchResultLayout.findViewById(R.id.station_name)
         val streamView: MaterialTextView = searchResultLayout.findViewById(R.id.station_url)
     }

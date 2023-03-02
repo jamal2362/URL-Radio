@@ -28,13 +28,12 @@ import android.os.Process
 import android.util.Base64
 import android.util.Log
 import androidx.annotation.XmlRes
-import org.xmlpull.v1.XmlPullParserException
 import com.jamal2367.urlradio.BuildConfig
+import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.util.*
-import kotlin.collections.LinkedHashMap
 
 /**
  * Validates that the calling package is authorized to browse a MediaBrowserServiceCompat.
@@ -96,7 +95,7 @@ class PackageValidator(context: Context, @XmlRes xmlResId: Int) {
 
         // Build the caller info for the rest of the checks here.
         val callerPackageInfo = buildCallerInfo(callingPackage)
-                ?: throw IllegalStateException("Caller wasn't found in the system?")
+            ?: throw IllegalStateException("Caller wasn't found in the system?")
 
         // Verify that things aren't ... broken. (This test should always pass.)
         if (callerPackageInfo.uid != callingUid) {
@@ -152,11 +151,12 @@ class PackageValidator(context: Context, @XmlRes xmlResId: Int) {
      */
     private fun logUnknownCaller(callerPackageInfo: CallerPackageInfo) {
         if (BuildConfig.DEBUG && callerPackageInfo.signature != null) {
-            val formattedLog: String = "Caller has a valid certificate, but its package doesn't match any expected package for the given certificate. To allow this caller, add the following to the allowed callers list:\n" +
-                    "<signature name=\"${callerPackageInfo.name}\" " +
-                    "package=\"${callerPackageInfo.packageName}\">\n" +
-                    "\t<key>${callerPackageInfo.signature}</key>\n" +
-                    "</signature>\n"
+            val formattedLog: String =
+                "Caller has a valid certificate, but its package doesn't match any expected package for the given certificate. To allow this caller, add the following to the allowed callers list:\n" +
+                        "<signature name=\"${callerPackageInfo.name}\" " +
+                        "package=\"${callerPackageInfo.packageName}\">\n" +
+                        "\t<key>${callerPackageInfo.signature}</key>\n" +
+                        "</signature>\n"
             Log.i(aTAG, formattedLog)
         }
     }
@@ -195,8 +195,10 @@ class PackageValidator(context: Context, @XmlRes xmlResId: Int) {
     @SuppressLint("PackageManagerGetSignatures")
     @Suppress("DEPRECATION")
     private fun getPackageInfo(callingPackage: String): PackageInfo? =
-            packageManager.getPackageInfo(callingPackage,
-                    PackageManager.GET_SIGNATURES or PackageManager.GET_PERMISSIONS)
+        packageManager.getPackageInfo(
+            callingPackage,
+            PackageManager.GET_SIGNATURES or PackageManager.GET_PERMISSIONS
+        )
 
     /**
      * Gets the signature of a given package's PackageInfo.
@@ -292,9 +294,9 @@ class PackageValidator(context: Context, @XmlRes xmlResId: Int) {
      * Finds the Android platform signing key signature. This key is never null.
      */
     private fun getSystemSignature(): String =
-            getPackageInfo(ANDROID_PLATFORM)?.let { platformInfo ->
-                getSignature(platformInfo)
-            } ?: throw IllegalStateException("Platform signature not found")
+        getPackageInfo(ANDROID_PLATFORM)?.let { platformInfo ->
+            getSignature(platformInfo)
+        } ?: throw IllegalStateException("Platform signature not found")
 
     /**
      * Creates a SHA-256 signature given a Base64 encoded certificate.
@@ -323,7 +325,11 @@ class PackageValidator(context: Context, @XmlRes xmlResId: Int) {
         return md.digest().joinToString(":") { String.format("%02x", it) }
     }
 
-    private data class KnownCallerInfo(val name: String, val packageName: String, val signatures: MutableSet<KnownSignature>)
+    private data class KnownCallerInfo(
+        val name: String,
+        val packageName: String,
+        val signatures: MutableSet<KnownSignature>
+    )
 
     private data class KnownSignature(val signature: String, val release: Boolean)
 
@@ -331,7 +337,13 @@ class PackageValidator(context: Context, @XmlRes xmlResId: Int) {
      * Convenience class to hold all of the information about an app that's being checked
      * to see if it's a known caller.
      */
-    private data class CallerPackageInfo(val name: String, val packageName: String, val uid: Int, val signature: String?, val permissions: Set<String>)
+    private data class CallerPackageInfo(
+        val name: String,
+        val packageName: String,
+        val uid: Int,
+        val signature: String?,
+        val permissions: Set<String>
+    )
 }
 
 const val aTAG = "PackageValidator"

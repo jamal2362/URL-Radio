@@ -79,7 +79,7 @@ object Keys {
     // preferences
     const val PREF_RADIO_BROWSER_API: String = "RADIO_BROWSER_API"
     const val PREF_ONE_TIME_HOUSEKEEPING_NECESSARY: String = "ONE_TIME_HOUSEKEEPING_NECESSARY_VERSIONCODE_72" // increment to current app version code to trigger housekeeping that runs only once
-    const val PREF_THEME_SELECTION: String= "THEME_SELECTION"
+    const val PREF_THEME_SELECTION: String = "THEME_SELECTION"
     const val PREF_LAST_UPDATE_COLLECTION: String = "LAST_UPDATE_COLLECTION"
     const val PREF_COLLECTION_SIZE: String = "COLLECTION_SIZE"
     const val PREF_COLLECTION_MODIFICATION_DATE: String = "COLLECTION_MODIFICATION_DATE"
@@ -145,8 +145,8 @@ object Keys {
     // file types
     const val FILE_TYPE_DEFAULT: Int = 0
     const val FILE_TYPE_PLAYLIST: Int = 10
-    const val FILE_TYPE_AUDIO: Int  = 20
-    const val FILE_TYPE_IMAGE: Int  = 3
+    const val FILE_TYPE_AUDIO: Int = 20
+    const val FILE_TYPE_IMAGE: Int = 3
 
     // mime types and charsets and file extensions
     const val CHARSET_UNDEFINDED = "undefined"
@@ -173,8 +173,8 @@ object Keys {
     // folder names
     const val FOLDER_COLLECTION: String = "collection"
     const val FOLDER_AUDIO: String = "audio"
-    const val FOLDER_IMAGES: String  = "images"
-    const val FOLDER_TEMP: String  = "temp"
+    const val FOLDER_IMAGES: String = "images"
+    const val FOLDER_TEMP: String = "temp"
     const val TRANSISTOR_LEGACY_FOLDER_COLLECTION: String = "Collection"
 
     // file names and extensions

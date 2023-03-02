@@ -24,10 +24,10 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import kotlinx.coroutines.launch
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.core.Collection
 import com.jamal2367.urlradio.helpers.FileHelper
+import kotlinx.coroutines.launch
 import java.util.*
 
 
@@ -52,14 +52,18 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
         loadCollection()
         // create and register collection changed receiver
         collectionChangedReceiver = createCollectionChangedReceiver()
-        LocalBroadcastManager.getInstance(application).registerReceiver(collectionChangedReceiver, IntentFilter(Keys.ACTION_COLLECTION_CHANGED))
+        LocalBroadcastManager.getInstance(application).registerReceiver(
+            collectionChangedReceiver,
+            IntentFilter(Keys.ACTION_COLLECTION_CHANGED)
+        )
     }
 
 
     /* Overrides onCleared */
     override fun onCleared() {
         super.onCleared()
-        LocalBroadcastManager.getInstance(getApplication()).unregisterReceiver(collectionChangedReceiver)
+        LocalBroadcastManager.getInstance(getApplication())
+            .unregisterReceiver(collectionChangedReceiver)
     }
 
 
@@ -68,10 +72,14 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
         return object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 if (intent.hasExtra(Keys.EXTRA_COLLECTION_MODIFICATION_DATE)) {
-                    val date = Date(intent.getLongExtra(Keys.EXTRA_COLLECTION_MODIFICATION_DATE, 0L))
+                    val date =
+                        Date(intent.getLongExtra(Keys.EXTRA_COLLECTION_MODIFICATION_DATE, 0L))
                     // check if reload is necessary
                     if (date.after(modificationDateViewModel)) {
-                        Log.v(TAG, "CollectionViewModel - reload collection after broadcast received.")
+                        Log.v(
+                            TAG,
+                            "CollectionViewModel - reload collection after broadcast received."
+                        )
                         loadCollection()
                     }
                 }

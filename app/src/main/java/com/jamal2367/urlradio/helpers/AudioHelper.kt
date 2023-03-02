@@ -41,7 +41,9 @@ object AudioHelper {
         var duration = 0L
         try {
             metadataRetriever.setDataSource(context, audioFileUri)
-            val durationString = metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION) ?: String()
+            val durationString =
+                metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+                    ?: String()
             duration = durationString.toLong()
         } catch (exception: Exception) {
             Log.e(TAG, "Unable to extract duration metadata from audio file")
@@ -63,7 +65,10 @@ object AudioHelper {
                     Log.i(TAG, "icyHeaders:" + entry.name + " - " + entry.genre)
                 }
                 else -> {
-                    Log.w(TAG, "Unsupported metadata received (type = ${entry.javaClass.simpleName})")
+                    Log.w(
+                        TAG,
+                        "Unsupported metadata received (type = ${entry.javaClass.simpleName})"
+                    )
                 }
             }
             // TODO implement HLS metadata extraction (Id3Frame / PrivFrame)
@@ -71,7 +76,10 @@ object AudioHelper {
         }
         // ensure a max length of the metadata string
         if (metadataString.isNotEmpty()) {
-            metadataString = metadataString.substring(0, min(metadataString.length, Keys.DEFAULT_MAX_LENGTH_OF_METADATA_ENTRY))
+            metadataString = metadataString.substring(
+                0,
+                min(metadataString.length, Keys.DEFAULT_MAX_LENGTH_OF_METADATA_ENTRY)
+            )
         }
         return metadataString
     }

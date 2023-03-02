@@ -39,21 +39,24 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.textfield.TextInputEditText
-import kotlinx.coroutines.*
-import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.Dispatchers.Main
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
 import com.jamal2367.urlradio.core.Collection
 import com.jamal2367.urlradio.core.Station
 import com.jamal2367.urlradio.helpers.*
+import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
 import java.util.*
 
 
 /*
  * CollectionAdapter class
  */
-class CollectionAdapter(private val context: Context, private val collectionAdapterListener: CollectionAdapterListener) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), UpdateHelper.UpdateHelperListener {
+class CollectionAdapter(
+    private val context: Context,
+    private val collectionAdapterListener: CollectionAdapterListener
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), UpdateHelper.UpdateHelperListener {
 
     /* Main class variables */
     private lateinit var collectionViewModel: CollectionViewModel
@@ -76,7 +79,8 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
         // create view model and observe changes in collection view model
-        collectionViewModel = ViewModelProvider(context as AppCompatActivity)[CollectionViewModel::class.java]
+        collectionViewModel =
+            ViewModelProvider(context as AppCompatActivity)[CollectionViewModel::class.java]
         observeCollectionViewModel(context as LifecycleOwner)
         // start listening for changes in shared preferences
         PreferencesHelper.registerPreferenceChangeListener(sharedPreferenceChangeListener)
@@ -96,12 +100,14 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
         return when (viewType) {
             Keys.VIEW_TYPE_ADD_NEW -> {
                 // get view, put view into holder and return
-                val v = LayoutInflater.from(parent.context).inflate(R.layout.card_add_new_station, parent, false)
+                val v = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.card_add_new_station, parent, false)
                 AddNewViewHolder(v)
             }
             else -> {
                 // get view, put view into holder and return
-                val v = LayoutInflater.from(parent.context).inflate(R.layout.card_station, parent, false)
+                val v = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.card_station, parent, false)
                 StationViewHolder(v)
             }
         }
@@ -151,10 +157,12 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
                         stationViewHolder.editViews.isVisible = true
                         if (editStationStreamsEnabled) {
                             stationViewHolder.stationUriEditView.isVisible = true
-                            stationViewHolder.stationUriEditView.imeOptions = EditorInfo.IME_ACTION_DONE
+                            stationViewHolder.stationUriEditView.imeOptions =
+                                EditorInfo.IME_ACTION_DONE
                         } else {
                             stationViewHolder.stationUriEditView.isGone = true
-                            stationViewHolder.stationNameEditView.imeOptions = EditorInfo.IME_ACTION_DONE
+                            stationViewHolder.stationNameEditView.imeOptions =
+                                EditorInfo.IME_ACTION_DONE
                         }
                     }
                     // hide edit views
@@ -172,7 +180,11 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
 
 
     /* Overrides onStationUpdated from UpdateHelperListener */
-    override fun onStationUpdated(collection: Collection, positionPriorUpdate: Int, positionAfterUpdate: Int) {
+    override fun onStationUpdated(
+        collection: Collection,
+        positionPriorUpdate: Int,
+        positionAfterUpdate: Int
+    ) {
         // check if position has changed after update and move stations around if necessary
         if (positionPriorUpdate != positionAfterUpdate && positionPriorUpdate != -1 && positionAfterUpdate != -1) {
             notifyItemMoved(positionPriorUpdate, positionAfterUpdate)
@@ -192,13 +204,17 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
     /* Sets the edit views */
     private fun setEditViews(stationViewHolder: StationViewHolder, station: Station) {
         stationViewHolder.stationNameEditView.setText(station.name, TextView.BufferType.EDITABLE)
-        stationViewHolder.stationUriEditView.setText(station.getStreamUri(), TextView.BufferType.EDITABLE)
+        stationViewHolder.stationUriEditView.setText(
+            station.getStreamUri(),
+            TextView.BufferType.EDITABLE
+        )
         stationViewHolder.stationUriEditView.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 handleStationUriInput(stationViewHolder, s, station.getStreamUri())
             }
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {  }
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {  }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
         stationViewHolder.cancelButton.setOnClickListener {
             val position: Int = stationViewHolder.adapterPosition
@@ -208,7 +224,12 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
         stationViewHolder.saveButton.setOnClickListener {
             val position: Int = stationViewHolder.adapterPosition
             toggleEditViews(position, station.uuid)
-            saveStation(station, position, stationViewHolder.stationNameEditView.text.toString(), stationViewHolder.stationUriEditView.text.toString())
+            saveStation(
+                station,
+                position,
+                stationViewHolder.stationNameEditView.text.toString(),
+                stationViewHolder.stationUriEditView.text.toString()
+            )
             UiHelper.hideSoftKeyboard(context, stationViewHolder.stationNameEditView)
         }
         stationViewHolder.placeOnHomeScreenButton.setOnClickListener {
@@ -242,7 +263,9 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
                 // remember previously expanded position
                 val previousExpandedStationPosition: Int = expandedStationPosition
                 // if station was expanded - collapse it
-                if (previousExpandedStationPosition > -1 && previousExpandedStationPosition < collection.stations.size) notifyItemChanged(previousExpandedStationPosition)
+                if (previousExpandedStationPosition > -1 && previousExpandedStationPosition < collection.stations.size) notifyItemChanged(
+                    previousExpandedStationPosition
+                )
                 // store current station as the expanded one
                 saveStationListExpandedState(position, stationUuid)
                 // update station view
@@ -272,8 +295,14 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
         if (station.imageColor != -1) {
             stationViewHolder.stationImageView.setBackgroundColor(station.imageColor)
         }
-        stationViewHolder.stationImageView.setImageBitmap(ImageHelper.getStationImage(context, station.smallImage))
-        stationViewHolder.stationImageView.contentDescription = "${context.getString(R.string.descr_player_station_image)}: ${station.name}"
+        stationViewHolder.stationImageView.setImageBitmap(
+            ImageHelper.getStationImage(
+                context,
+                station.smallImage
+            )
+        )
+        stationViewHolder.stationImageView.contentDescription =
+            "${context.getString(R.string.descr_player_station_image)}: ${station.name}"
     }
 
 
@@ -347,7 +376,11 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
 
 
     /* Checks if stream uri input is valid */
-    private fun handleStationUriInput(stationViewHolder: StationViewHolder, s: Editable?, streamUri: String) {
+    private fun handleStationUriInput(
+        stationViewHolder: StationViewHolder,
+        s: Editable?,
+        streamUri: String
+    ) {
         if (editStationStreamsEnabled) {
             val input: String = s.toString()
             if (input == streamUri) {
@@ -360,14 +393,19 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
                 if (input.startsWith("http")) {
                     // detect content type on background thread
                     CoroutineScope(IO).launch {
-                        val deferred: Deferred<NetworkHelper.ContentType> = async(Dispatchers.Default) { NetworkHelper.detectContentTypeSuspended(input) }
+                        val deferred: Deferred<NetworkHelper.ContentType> =
+                            async(Dispatchers.Default) {
+                                NetworkHelper.detectContentTypeSuspended(input)
+                            }
                         // wait for result
-                        val contentType: String = deferred.await().type.lowercase(Locale.getDefault())
+                        val contentType: String =
+                            deferred.await().type.lowercase(Locale.getDefault())
                         // CASE: stream address detected
                         if (Keys.MIME_TYPES_MPEG.contains(contentType) or
-                                Keys.MIME_TYPES_OGG.contains(contentType) or
-                                Keys.MIME_TYPES_AAC.contains(contentType) or
-                                Keys.MIME_TYPES_HLS.contains(contentType)) {
+                            Keys.MIME_TYPES_OGG.contains(contentType) or
+                            Keys.MIME_TYPES_AAC.contains(contentType) or
+                            Keys.MIME_TYPES_HLS.contains(contentType)
+                        ) {
                             // re-enable save button
                             withContext(Main) {
                                 stationViewHolder.saveButton.isEnabled = true
@@ -381,7 +419,11 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
 
 
     /* Overrides onBindViewHolder */
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int, payloads: List<Any>) {
+    override fun onBindViewHolder(
+        holder: RecyclerView.ViewHolder,
+        position: Int,
+        payloads: List<Any>
+    ) {
 
         if (payloads.isEmpty()) {
             // call regular onBindViewHolder method
@@ -389,10 +431,7 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
 
         } else if (holder is StationViewHolder) {
             // get station from position
-            val station = collection.stations[holder.getAdapterPosition()]
-
-            // get reference to StationViewHolder
-            val stationViewHolder = holder
+            collection.stations[holder.getAdapterPosition()]
 
             for (data in payloads) {
                 when (data as Int) {
@@ -465,7 +504,12 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
 
 
     /* Saves edited station */
-    private fun saveStation(station: Station, position: Int, stationName:String, streamUri: String) {
+    private fun saveStation(
+        station: Station,
+        position: Int,
+        stationName: String,
+        streamUri: String
+    ) {
         // update station name and stream uri
         collection.stations.forEach {
             if (it.uuid == station.uuid) {
@@ -506,7 +550,6 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
 //    }
 
 
-
     /* Determines if position is last */
     private fun isPositionFooter(position: Int): Boolean {
         return position == collection.stations.size
@@ -522,14 +565,18 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
             notifyDataSetChanged()
         } else {
             // calculate differences between current collection and new collection - and inform this adapter about the changes
-            val diffResult = DiffUtil.calculateDiff(CollectionDiffCallback(oldCollection, newCollection), true)
+            val diffResult =
+                DiffUtil.calculateDiff(CollectionDiffCallback(oldCollection, newCollection), true)
             diffResult.dispatchUpdatesTo(this@CollectionAdapter)
         }
     }
 
 
     /* Updates and saves state of expanded station edit view in list */
-    private fun saveStationListExpandedState(position: Int = -1, stationStreamUri: String = String()) {
+    private fun saveStationListExpandedState(
+        position: Int = -1,
+        stationStreamUri: String = String()
+    ) {
         expandedStationUuid = stationStreamUri
         expandedStationPosition = position
         PreferencesHelper.saveStationListStreamUuid(expandedStationUuid)
@@ -547,12 +594,15 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
     /*
      * Defines the listener for changes in shared preferences
      */
-    private val sharedPreferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-        when (key) {
-            Keys.PREF_EDIT_STATIONS -> editStationsEnabled = PreferencesHelper.loadEditStationsEnabled()
-            Keys.PREF_EDIT_STREAMS_URIS -> editStationStreamsEnabled = PreferencesHelper.loadEditStreamUrisEnabled()
+    private val sharedPreferenceChangeListener =
+        SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            when (key) {
+                Keys.PREF_EDIT_STATIONS -> editStationsEnabled =
+                    PreferencesHelper.loadEditStationsEnabled()
+                Keys.PREF_EDIT_STREAMS_URIS -> editStationStreamsEnabled =
+                    PreferencesHelper.loadEditStreamUrisEnabled()
+            }
         }
-    }
     /*
      * End of declaration
      */
@@ -561,9 +611,12 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
     /*
      * Inner class: ViewHolder for the Add New Station action
      */
-    private inner class AddNewViewHolder (listItemAddNewLayout: View) : RecyclerView.ViewHolder(listItemAddNewLayout) {
-        val addNewStationView: ExtendedFloatingActionButton = listItemAddNewLayout.findViewById(R.id.card_add_new_station)
-        val settingsButtonView: ExtendedFloatingActionButton = listItemAddNewLayout.findViewById(R.id.card_settings)
+    private inner class AddNewViewHolder(listItemAddNewLayout: View) :
+        RecyclerView.ViewHolder(listItemAddNewLayout) {
+        val addNewStationView: ExtendedFloatingActionButton =
+            listItemAddNewLayout.findViewById(R.id.card_add_new_station)
+        val settingsButtonView: ExtendedFloatingActionButton =
+            listItemAddNewLayout.findViewById(R.id.card_settings)
     }
     /*
      * End of inner class
@@ -573,18 +626,24 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
     /*
      * Inner class: ViewHolder for a station
      */
-    private inner class StationViewHolder (stationCardLayout: View): RecyclerView.ViewHolder(stationCardLayout) {
+    private inner class StationViewHolder(stationCardLayout: View) :
+        RecyclerView.ViewHolder(stationCardLayout) {
         val stationCardView: CardView = stationCardLayout.findViewById(R.id.station_card)
         val stationImageView: ImageView = stationCardLayout.findViewById(R.id.station_icon)
         val stationNameView: TextView = stationCardLayout.findViewById(R.id.station_name)
         val stationStarredView: ImageView = stationCardLayout.findViewById(R.id.starred_icon)
-//        val menuButtonView: ImageView = stationCardLayout.findViewById(R.id.menu_button)
+
+        //        val menuButtonView: ImageView = stationCardLayout.findViewById(R.id.menu_button)
         val playButtonView: ImageView = stationCardLayout.findViewById(R.id.playback_button)
         val editViews: Group = stationCardLayout.findViewById(R.id.default_edit_views)
-        val stationImageChangeView: ImageView = stationCardLayout.findViewById(R.id.change_image_view)
-        val stationNameEditView: TextInputEditText = stationCardLayout.findViewById(R.id.edit_station_name)
-        val stationUriEditView: TextInputEditText = stationCardLayout.findViewById(R.id.edit_stream_uri)
-        val placeOnHomeScreenButton: MaterialButton = stationCardLayout.findViewById(R.id.place_on_home_screen_button)
+        val stationImageChangeView: ImageView =
+            stationCardLayout.findViewById(R.id.change_image_view)
+        val stationNameEditView: TextInputEditText =
+            stationCardLayout.findViewById(R.id.edit_station_name)
+        val stationUriEditView: TextInputEditText =
+            stationCardLayout.findViewById(R.id.edit_stream_uri)
+        val placeOnHomeScreenButton: MaterialButton =
+            stationCardLayout.findViewById(R.id.place_on_home_screen_button)
         val cancelButton: MaterialButton = stationCardLayout.findViewById(R.id.cancel_button)
         val saveButton: MaterialButton = stationCardLayout.findViewById(R.id.save_button)
     }
@@ -596,7 +655,10 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
     /*
      * Inner class: DiffUtil.Callback that determines changes in data - improves list performance
      */
-    private inner class CollectionDiffCallback(val oldCollection: Collection, val newCollection: Collection): DiffUtil.Callback() {
+    private inner class CollectionDiffCallback(
+        val oldCollection: Collection,
+        val newCollection: Collection
+    ) : DiffUtil.Callback() {
 
         override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
             val oldStation: Station = oldCollection.stations[oldItemPosition]
@@ -626,8 +688,16 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
             if (oldStation.remoteStationLocation != newStation.remoteStationLocation) return false
             if (!oldStation.streamUris.containsAll(newStation.streamUris)) return false
             if (oldStation.imageColor != newStation.imageColor) return false
-            if (FileHelper.getFileSize(context, oldStation.image.toUri()) != FileHelper.getFileSize(context, newStation.image.toUri())) return false
-            if (FileHelper.getFileSize(context, oldStation.smallImage.toUri()) != FileHelper.getFileSize(context, newStation.smallImage.toUri())) return false
+            if (FileHelper.getFileSize(context, oldStation.image.toUri()) != FileHelper.getFileSize(
+                    context,
+                    newStation.image.toUri()
+                )
+            ) return false
+            if (FileHelper.getFileSize(
+                    context,
+                    oldStation.smallImage.toUri()
+                ) != FileHelper.getFileSize(context, newStation.smallImage.toUri())
+            ) return false
 
             // none of the above -> contents are the same
             return true

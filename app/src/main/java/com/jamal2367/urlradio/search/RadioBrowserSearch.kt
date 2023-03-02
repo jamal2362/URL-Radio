@@ -86,9 +86,11 @@ class RadioBrowserSearch(private var radioBrowserSearchListener: RadioBrowserSea
             override fun getCurrentTimeout(): Int {
                 return 30000
             }
+
             override fun getCurrentRetryCount(): Int {
                 return 30000
             }
+
             @Throws(VolleyError::class)
             override fun retry(error: VolleyError) {
                 Log.w(TAG, "Error: $error")
@@ -132,6 +134,7 @@ class RadioBrowserSearch(private var radioBrowserSearchListener: RadioBrowserSea
             radioBrowserSearchListener.onRadioBrowserSearchResults(createRadioBrowserResult(response.toString()))
         }
     }
+
 
     /* Listens for error response from server */
     private val errorListener: Response.ErrorListener = Response.ErrorListener { error ->

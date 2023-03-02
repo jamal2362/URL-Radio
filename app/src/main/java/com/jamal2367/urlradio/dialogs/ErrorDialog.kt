@@ -31,7 +31,12 @@ import com.jamal2367.urlradio.R
 class ErrorDialog {
 
     /* Construct and show dialog */
-    fun show(context: Context, errorTitle: Int, errorMessage: Int, errorDetails: String = String()) {
+    fun show(
+        context: Context,
+        errorTitle: Int,
+        errorMessage: Int,
+        errorDetails: String = String()
+    ) {
         // prepare dialog builder
         val builder = MaterialAlertDialogBuilder(context)
 

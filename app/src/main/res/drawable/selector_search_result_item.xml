@@ -2,8 +2,7 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- View is "selected" -->
-    <item android:state_selected="true"
-        android:drawable="@drawable/shape_search_result_item_selected" />
+    <item android:drawable="@drawable/shape_search_result_item_selected" android:state_selected="true" />
 
     <!-- Default state. -->
     <item android:drawable="@drawable/shape_search_result_item" />

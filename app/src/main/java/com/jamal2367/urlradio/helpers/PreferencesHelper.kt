@@ -46,7 +46,10 @@ object PreferencesHelper {
 
     /* Loads address of radio-browser.info API from shared preferences */
     fun loadRadioBrowserApiAddress(): String {
-        return sharedPreferences.getString(Keys.PREF_RADIO_BROWSER_API, Keys.RADIO_BROWSER_API_DEFAULT) ?: Keys.RADIO_BROWSER_API_DEFAULT
+        return sharedPreferences.getString(
+            Keys.PREF_RADIO_BROWSER_API,
+            Keys.RADIO_BROWSER_API_DEFAULT
+        ) ?: Keys.RADIO_BROWSER_API_DEFAULT
     }
 
 
@@ -82,7 +85,8 @@ object PreferencesHelper {
 
     /* Load uuid of the station in the station list which is currently expanded */
     fun loadStationListStreamUuid(): String {
-        return sharedPreferences.getString(Keys.PREF_STATION_LIST_EXPANDED_UUID, String()) ?: String()
+        return sharedPreferences.getString(Keys.PREF_STATION_LIST_EXPANDED_UUID, String())
+            ?: String()
     }
 
 
@@ -96,7 +100,8 @@ object PreferencesHelper {
 
     /* Loads last update from shared preferences */
     fun loadLastUpdateCollection(): Date {
-        val lastSaveString: String = sharedPreferences.getString(Keys.PREF_LAST_UPDATE_COLLECTION, "") ?: String()
+        val lastSaveString: String =
+            sharedPreferences.getString(Keys.PREF_LAST_UPDATE_COLLECTION, "") ?: String()
         return DateTimeHelper.convertFromRfc2822(lastSaveString)
     }
 
@@ -133,7 +138,8 @@ object PreferencesHelper {
 
     /* Loads date of last save operation from shared preferences */
     fun loadCollectionModificationDate(): Date {
-        val modificationDateString: String = sharedPreferences.getString(Keys.PREF_COLLECTION_MODIFICATION_DATE, "") ?: String()
+        val modificationDateString: String =
+            sharedPreferences.getString(Keys.PREF_COLLECTION_MODIFICATION_DATE, "") ?: String()
         return DateTimeHelper.convertFromRfc2822(modificationDateString)
     }
 
@@ -141,14 +147,19 @@ object PreferencesHelper {
     /* Saves date of last save operation to shared preferences */
     fun saveCollectionModificationDate(lastSave: Date = Calendar.getInstance().time) {
         sharedPreferences.edit {
-            putString(Keys.PREF_COLLECTION_MODIFICATION_DATE, DateTimeHelper.convertToRfc2822(lastSave))
+            putString(
+                Keys.PREF_COLLECTION_MODIFICATION_DATE,
+                DateTimeHelper.convertToRfc2822(lastSave)
+            )
         }
     }
 
 
     /* Loads active downloads from shared preferences */
     fun loadActiveDownloads(): String {
-        val activeDownloadsString: String = sharedPreferences.getString(Keys.PREF_ACTIVE_DOWNLOADS, Keys.ACTIVE_DOWNLOADS_EMPTY) ?: Keys.ACTIVE_DOWNLOADS_EMPTY
+        val activeDownloadsString: String =
+            sharedPreferences.getString(Keys.PREF_ACTIVE_DOWNLOADS, Keys.ACTIVE_DOWNLOADS_EMPTY)
+                ?: Keys.ACTIVE_DOWNLOADS_EMPTY
         Log.v(TAG, "IDs of active downloads: $activeDownloadsString")
         return activeDownloadsString
     }
@@ -165,9 +176,11 @@ object PreferencesHelper {
     /* Loads state of player user interface from shared preferences */
     fun loadPlayerState(): PlayerState {
         return PlayerState().apply {
-            stationUuid = sharedPreferences.getString(Keys.PREF_PLAYER_STATE_STATION_UUID, String()) ?: String()
+            stationUuid = sharedPreferences.getString(Keys.PREF_PLAYER_STATE_STATION_UUID, String())
+                ?: String()
             isPlaying = sharedPreferences.getBoolean(Keys.PREF_PLAYER_STATE_IS_PLAYING, false)
-            sleepTimerRunning = sharedPreferences.getBoolean(Keys.PREF_PLAYER_STATE_SLEEP_TIMER_RUNNING, false)
+            sleepTimerRunning =
+                sharedPreferences.getBoolean(Keys.PREF_PLAYER_STATE_SLEEP_TIMER_RUNNING, false)
         }
     }
 
@@ -191,7 +204,8 @@ object PreferencesHelper {
 
     /* Loads uuid of last played station from shared preferences */
     fun loadLastPlayedStationUuid(): String {
-        return sharedPreferences.getString(Keys.PREF_PLAYER_STATE_STATION_UUID, String()) ?: String()
+        return sharedPreferences.getString(Keys.PREF_PLAYER_STATE_STATION_UUID, String())
+            ?: String()
     }
 
 
@@ -208,7 +222,8 @@ object PreferencesHelper {
     /* Loads history of metadata from shared preferences */
     fun loadMetadataHistory(): MutableList<String> {
         var metadataHistory: MutableList<String> = mutableListOf()
-        val json: String = sharedPreferences.getString(Keys.PREF_PLAYER_METADATA_HISTORY, String()) ?: String()
+        val json: String =
+            sharedPreferences.getString(Keys.PREF_PLAYER_METADATA_HISTORY, String()) ?: String()
         if (json.isNotEmpty()) {
             val gson = Gson()
             metadataHistory = gson.fromJson(json, metadataHistory::class.java)
@@ -245,7 +260,10 @@ object PreferencesHelper {
 
     /* Load currently selected app theme */
     fun loadThemeSelection(): String {
-        return sharedPreferences.getString(Keys.PREF_THEME_SELECTION, Keys.STATE_THEME_FOLLOW_SYSTEM) ?: Keys.STATE_THEME_FOLLOW_SYSTEM
+        return sharedPreferences.getString(
+            Keys.PREF_THEME_SELECTION,
+            Keys.STATE_THEME_FOLLOW_SYSTEM
+        ) ?: Keys.STATE_THEME_FOLLOW_SYSTEM
     }
 
 
@@ -287,7 +305,10 @@ object PreferencesHelper {
 
     /* Return whether to download over mobile */
     fun downloadOverMobile(): Boolean {
-        return sharedPreferences.getBoolean(Keys.PREF_DOWNLOAD_OVER_MOBILE, Keys.DEFAULT_DOWNLOAD_OVER_MOBILE)
+        return sharedPreferences.getBoolean(
+            Keys.PREF_DOWNLOAD_OVER_MOBILE,
+            Keys.DEFAULT_DOWNLOAD_OVER_MOBILE
+        )
     }
 
 }

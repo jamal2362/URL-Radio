@@ -61,7 +61,8 @@ object DateTimeHelper {
         // convert milliseconds to minutes and seconds
         val minutes: Long = milliseconds / 1000 / 60
         val seconds: Long = milliseconds / 1000 % 60
-        var timeString = "${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
+        var timeString =
+            "${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
         if (negativeValue) {
             // add a minus sign if a negative values was requested
             timeString = "-$timeString"
@@ -75,12 +76,16 @@ object DateTimeHelper {
         var date: Date = Keys.DEFAULT_DATE
         try {
             // try to parse without seconds
-            date = SimpleDateFormat("EEE, dd MMM yyyy HH:mm Z", Locale.ENGLISH).parse((dateString)) ?: Keys.DEFAULT_DATE
+            date = SimpleDateFormat("EEE, dd MMM yyyy HH:mm Z", Locale.ENGLISH).parse((dateString))
+                ?: Keys.DEFAULT_DATE
         } catch (e: Exception) {
             try {
                 Log.w(TAG, "Unable to parse. Trying an alternative Date format. $e")
                 // try to parse without time zone
-                date = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss", Locale.ENGLISH).parse((dateString)) ?: Keys.DEFAULT_DATE
+                date = SimpleDateFormat(
+                    "EEE, dd MMM yyyy HH:mm:ss",
+                    Locale.ENGLISH
+                ).parse((dateString)) ?: Keys.DEFAULT_DATE
             } catch (e: Exception) {
                 Log.e(TAG, "Unable to parse. Returning a default date. $e")
             }

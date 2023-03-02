@@ -38,7 +38,16 @@ object BackupHelper {
     fun backup(view: View, context: Context, destinationUri: Uri) {
         val sourceFolder: File? = context.getExternalFilesDir("")
         if (sourceFolder != null && sourceFolder.isDirectory) {
-            Snackbar.make(view, "${FileHelper.getFileName(context, destinationUri)} ${context.getString(R.string.toastmessage_backed_up)}", Snackbar.LENGTH_LONG).show()
+            Snackbar.make(
+                view,
+                "${
+                    FileHelper.getFileName(
+                        context,
+                        destinationUri
+                    )
+                } ${context.getString(R.string.toastmessage_backed_up)}",
+                Snackbar.LENGTH_LONG
+            ).show()
             val resolver: ContentResolver = context.contentResolver
             val outputStream: OutputStream? = resolver.openOutputStream(destinationUri)
             ZipOutputStream(BufferedOutputStream(outputStream)).use { zipOutputStream ->
@@ -72,7 +81,7 @@ object BackupHelper {
                     true -> {
                         // create folder if new file is just a file
                         if (!newFile.isDirectory && !newFile.mkdirs()) {
-                            Log.w(TAG,"Failed to create directory $newFile")
+                            Log.w(TAG, "Failed to create directory $newFile")
                         }
                     }
                     // CASE: Files
@@ -101,7 +110,10 @@ object BackupHelper {
         zipInputStream.close()
 
         // notify CollectionViewModel that collection has changed
-        CollectionHelper.sendCollectionBroadcast(context, modificationDate = Calendar.getInstance().time)
+        CollectionHelper.sendCollectionBroadcast(
+            context,
+            modificationDate = Calendar.getInstance().time
+        )
     }
 
 

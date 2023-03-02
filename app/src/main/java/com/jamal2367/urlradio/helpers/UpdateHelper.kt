@@ -16,12 +16,12 @@ package com.jamal2367.urlradio.helpers
 
 import android.content.Context
 import android.util.Log
-import kotlinx.coroutines.*
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.core.Collection
 import com.jamal2367.urlradio.core.Station
 import com.jamal2367.urlradio.search.RadioBrowserResult
 import com.jamal2367.urlradio.search.RadioBrowserSearch
+import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 
@@ -29,7 +29,11 @@ import kotlinx.coroutines.Dispatchers.Main
 /*
  * UpdateHelper class
  */
-class UpdateHelper(private val context: Context, private val updateHelperListener: UpdateHelperListener, private var collection: Collection): RadioBrowserSearch.RadioBrowserSearchListener {
+class UpdateHelper(
+    private val context: Context,
+    private val updateHelperListener: UpdateHelperListener,
+    private var collection: Collection
+) : RadioBrowserSearch.RadioBrowserSearchListener {
 
 
     /* Define log tag */
@@ -43,38 +47,58 @@ class UpdateHelper(private val context: Context, private val updateHelperListene
 
     /* Listener Interface */
     interface UpdateHelperListener {
-        fun onStationUpdated(collection: Collection, positionPriorUpdate: Int, positionAfterUpdate: Int)
+        fun onStationUpdated(
+            collection: Collection,
+            positionPriorUpdate: Int,
+            positionAfterUpdate: Int
+        )
     }
 
 
     /* Overrides onRadioBrowserSearchResults from RadioBrowserSearchListener */
     override fun onRadioBrowserSearchResults(results: Array<RadioBrowserResult>) {
-        if (results.isNotEmpty()){
+        if (results.isNotEmpty()) {
             CoroutineScope(IO).launch {
                 // get station from results
                 val station: Station = results[0].toStation()
                 // detect content type
-                val deferred: Deferred<NetworkHelper.ContentType> = async(Dispatchers.Default) { NetworkHelper.detectContentTypeSuspended(station.getStreamUri()) }
+                val deferred: Deferred<NetworkHelper.ContentType> =
+                    async(Dispatchers.Default) { NetworkHelper.detectContentTypeSuspended(station.getStreamUri()) }
                 // wait for result
                 val contentType: NetworkHelper.ContentType = deferred.await()
                 // update content type
                 station.streamContent = contentType.type
                 // get position
-                val positionPriorUpdate = CollectionHelper.getStationPositionFromRadioBrowserStationUuid(collection, station.radioBrowserStationUuid)
+                val positionPriorUpdate =
+                    CollectionHelper.getStationPositionFromRadioBrowserStationUuid(
+                        collection,
+                        station.radioBrowserStationUuid
+                    )
                 // update (and sort) collection
                 collection = CollectionHelper.updateStation(context, collection, station)
                 // get new position
-                val positionAfterUpdate: Int = CollectionHelper.getStationPositionFromRadioBrowserStationUuid(collection, station.radioBrowserStationUuid)
+                val positionAfterUpdate: Int =
+                    CollectionHelper.getStationPositionFromRadioBrowserStationUuid(
+                        collection,
+                        station.radioBrowserStationUuid
+                    )
                 // hand over results
                 withContext(Main) {
-                    updateHelperListener.onStationUpdated(collection, positionPriorUpdate, positionAfterUpdate)
+                    updateHelperListener.onStationUpdated(
+                        collection,
+                        positionPriorUpdate,
+                        positionAfterUpdate
+                    )
                 }
                 // decrease counter
                 radioBrowserSearchCounter--
                 // all downloads from radio browser succeeded
                 if (radioBrowserSearchCounter == 0 && remoteStationLocationsList.isNotEmpty()) {
                     // direct download of playlists
-                    DownloadHelper.downloadPlaylists(context, remoteStationLocationsList.toTypedArray())
+                    DownloadHelper.downloadPlaylists(
+                        context,
+                        remoteStationLocationsList.toTypedArray()
+                    )
                 }
             }
         }
@@ -84,7 +108,7 @@ class UpdateHelper(private val context: Context, private val updateHelperListene
     /* Updates the whole collection of stations */
     fun updateCollection() {
         PreferencesHelper.saveLastUpdateCollection()
-        collection.stations.forEach {station ->
+        collection.stations.forEach { station ->
             when {
                 station.radioBrowserStationUuid.isNotEmpty() -> {
                     // increase counter

@@ -4,38 +4,38 @@
     <!-- NIGHT THEME COLORS -->
 
     <!-- app colors -->
-    <color name="app_onboarding_icons">@android:color/system_neutral1_100</color> <!-- colorOnBackground / colorOnSurface-->
+    <color name="app_onboarding_icons">@android:color/system_neutral1_100</color>
 
     <!-- text & icons -->
-    <color name="text_default">@android:color/system_neutral1_100</color> <!-- colorOnBackground / colorOnSurface-->
-    <color name="text_lightweight">@android:color/system_neutral2_200</color> <!-- colorOnSurfaceVariant -->
-    <color name="text_link">@android:color/system_accent1_600</color> <!-- colorPrimaryInverse -->
-    <color name="text_link_separator">@android:color/system_accent1_600</color> <!-- colorPrimaryInverse -->
-    <color name="icon_default">@android:color/system_accent1_100</color> <!-- colorOnBackground / colorOnSurface-->
-    <color name="icon_default_add_new_station">@android:color/system_accent1_100</color> <!-- colorOnBackground / colorOnSurface-->
-    <color name="icon_lightweight">@android:color/system_neutral2_200</color> <!-- colorOnSurfaceVariant -->
-    <color name="icon_lightweight_background">@android:color/system_neutral2_700</color> <!-- colorSurfaceVariant -->
+    <color name="text_default">@android:color/system_neutral1_100</color>
+    <color name="text_lightweight">@android:color/system_neutral2_200</color>
+    <color name="text_link">@android:color/system_accent1_600</color>
+    <color name="text_link_separator">@android:color/system_accent1_600</color>
+    <color name="icon_default">@android:color/system_accent1_100</color>
+    <color name="icon_default_add_new_station">@android:color/system_accent1_100</color>
+    <color name="icon_lightweight">@android:color/system_neutral2_200</color>
+    <color name="icon_lightweight_background">@android:color/system_neutral2_700</color>
 
     <!-- list -->
-    <color name="list_card_background">@android:color/system_neutral1_900</color> <!-- android:colorBackground / colorSurface -->
-    <color name="list_card_stroke_background">@android:color/system_accent2_600</color> <!-- android:colorBackground / colorSurface -->
-    <color name="list_card_stroke1_background">@android:color/system_accent2_600</color> <!-- android:colorBackground / colorSurface -->
-    <color name="list_card_cover_background">@android:color/system_neutral2_700</color> <!-- colorSurfaceVariant -->
+    <color name="list_card_background">@android:color/system_neutral1_900</color>
+    <color name="list_card_stroke_background">@android:color/system_accent2_600</color>
+    <color name="list_card_stroke1_background">@android:color/system_accent2_600</color>
+    <color name="list_card_cover_background">@android:color/system_neutral2_700</color>
     <color name="list_card_delete_background">#FFF2B8B5</color> <!-- colorError -->
     <color name="list_card_delete_icon">#FF601410</color> <!-- colorOnError -->
-    <color name="list_card_mark_starred_background">@android:color/system_accent1_100</color> <!-- colorPrimary -->
-    <color name="list_card_mark_starred_star">@android:color/system_accent1_800</color> <!-- colorOnPrimary -->
-    <color name="search_result_background">@android:color/system_neutral2_700</color> <!-- android:colorBackground / colorSurface -->
-    <color name="search_result_background_selected">@android:color/system_accent2_600</color> <!-- colorSurfaceVariant -->
+    <color name="list_card_mark_starred_background">@android:color/system_accent1_100</color>
+    <color name="list_card_mark_starred_star">@android:color/system_accent1_800</color>
+    <color name="search_result_background">@android:color/system_neutral2_700</color>
+    <color name="search_result_background_selected">@android:color/system_accent2_600</color>
 
     <!-- player sheet -->
-    <color name="player_play_pause_icon">@android:color/system_accent1_800</color> <!-- colorOnPrimary (dark theme) -->
-    <color name="player_button_background">@android:color/system_accent1_100</color> <!-- colorPrimary (dark theme) -->
-    <color name="player_button_buffering">@android:color/system_accent1_600</color> <!-- colorPrimaryInverse (dark theme) -->
-    <color name="player_sheet_background">@android:color/system_neutral2_800</color> <!-- colorSurfaceInverse (dark theme) -->
-    <color name="player_sheet_text_main">@android:color/system_neutral1_50</color> <!-- colorOnSurfaceInverse (light theme) -->
-    <color name="player_sheet_text_details">@android:color/system_neutral1_50</color> <!-- colorOnSurfaceInverse (dark theme) -->
-    <color name="player_sheet_icon">@android:color/system_neutral1_50</color> <!-- colorOnSurfaceInverse (light theme) -->
+    <color name="player_play_pause_icon">@android:color/system_accent1_800</color>
+    <color name="player_button_background">@android:color/system_accent1_100</color>
+    <color name="player_button_buffering">@android:color/system_accent1_600</color>
+    <color name="player_sheet_background">@android:color/system_neutral2_800</color>
+    <color name="player_sheet_text_main">@android:color/system_neutral1_50</color>
+    <color name="player_sheet_text_details">@android:color/system_neutral1_50</color>
+    <color name="player_sheet_icon">@android:color/system_neutral1_50</color>
 
     <!-- default colors -->
     <color name="default_neutral_white">#FF601410</color>

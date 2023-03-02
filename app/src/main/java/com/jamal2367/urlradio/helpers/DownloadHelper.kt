@@ -21,12 +21,12 @@ import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import androidx.core.net.toUri
-import kotlinx.coroutines.*
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
 import com.jamal2367.urlradio.core.Collection
 import com.jamal2367.urlradio.core.Station
 import com.jamal2367.urlradio.extensions.copy
+import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import java.util.*
@@ -54,7 +54,8 @@ object DownloadHelper {
         // initialize main class variables, if necessary
         initialize(context)
         // convert array
-        val uris: Array<Uri> = Array(playlistUrlStrings.size) { index -> playlistUrlStrings[index].toUri() }
+        val uris: Array<Uri> =
+            Array(playlistUrlStrings.size) { index -> playlistUrlStrings[index].toUri() }
         // enqueue playlists
         enqueueDownload(context, uris, Keys.FILE_TYPE_PLAYLIST)
     }
@@ -100,8 +101,15 @@ object DownloadHelper {
         if (downloadResult == null) {
             val downloadErrorCode: Int = getDownloadError(downloadId)
             val downloadErrorFileName: String = getDownloadFileName(downloadManager, downloadId)
-            Toast.makeText(context, "${context.getString(R.string.toastmessage_error_download_error)}: $downloadErrorFileName ($downloadErrorCode)", Toast.LENGTH_LONG).show()
-            Log.w(TAG, "Download not successful: File name = $downloadErrorFileName Error code = $downloadErrorCode")
+            Toast.makeText(
+                context,
+                "${context.getString(R.string.toastmessage_error_download_error)}: $downloadErrorFileName ($downloadErrorCode)",
+                Toast.LENGTH_LONG
+            ).show()
+            Log.w(
+                TAG,
+                "Download not successful: File name = $downloadErrorFileName Error code = $downloadErrorCode"
+            )
             removeFromActiveDownloads(arrayOf(downloadId), deleteDownload = true)
             return
         } else {
@@ -110,14 +118,34 @@ object DownloadHelper {
             val remoteFileLocation: String = getRemoteFileLocation(downloadManager, downloadId)
             // determine what to do
             val fileType = FileHelper.getContentType(context, localFileUri)
-            if ((fileType in Keys.MIME_TYPES_M3U || fileType in Keys.MIME_TYPES_PLS) && CollectionHelper.isNewStation(collection, remoteFileLocation)) {
+            if ((fileType in Keys.MIME_TYPES_M3U || fileType in Keys.MIME_TYPES_PLS) && CollectionHelper.isNewStation(
+                    collection,
+                    remoteFileLocation
+                )
+            ) {
                 addStation(context, localFileUri, remoteFileLocation)
-            } else if ((fileType in Keys.MIME_TYPES_M3U || fileType in Keys.MIME_TYPES_PLS) && !CollectionHelper.isNewStation(collection, remoteFileLocation)) {
+            } else if ((fileType in Keys.MIME_TYPES_M3U || fileType in Keys.MIME_TYPES_PLS) && !CollectionHelper.isNewStation(
+                    collection,
+                    remoteFileLocation
+                )
+            ) {
                 updateStation(context, localFileUri, remoteFileLocation)
             } else if (fileType in Keys.MIME_TYPES_IMAGE) {
-                collection = CollectionHelper.setStationImageWithRemoteLocation(context, collection, localFileUri.toString(), remoteFileLocation, false)
+                collection = CollectionHelper.setStationImageWithRemoteLocation(
+                    context,
+                    collection,
+                    localFileUri.toString(),
+                    remoteFileLocation,
+                    false
+                )
             } else if (fileType in Keys.MIME_TYPES_FAVICON) {
-                collection = CollectionHelper.setStationImageWithRemoteLocation(context, collection, localFileUri.toString(), remoteFileLocation, false)
+                collection = CollectionHelper.setStationImageWithRemoteLocation(
+                    context,
+                    collection,
+                    localFileUri.toString(),
+                    remoteFileLocation,
+                    false
+                )
             }
             // remove ID from active downloads
             removeFromActiveDownloads(arrayOf(downloadId))
@@ -130,7 +158,10 @@ object DownloadHelper {
         if (!this::modificationDate.isInitialized) {
             modificationDate = PreferencesHelper.loadCollectionModificationDate()
         }
-        if (!this::collection.isInitialized || CollectionHelper.isNewerCollectionAvailable(modificationDate)) {
+        if (!this::collection.isInitialized || CollectionHelper.isNewerCollectionAvailable(
+                modificationDate
+            )
+        ) {
             collection = FileHelper.readCollection(context)
             modificationDate = PreferencesHelper.loadCollectionModificationDate()
         }
@@ -145,7 +176,12 @@ object DownloadHelper {
 
 
     /* Enqueues an Array of files in DownloadManager */
-    private fun enqueueDownload(context: Context, uris: Array<Uri>, type: Int, ignoreWifiRestriction: Boolean = false) {
+    private fun enqueueDownload(
+        context: Context,
+        uris: Array<Uri>,
+        type: Int,
+        ignoreWifiRestriction: Boolean = false
+    ) {
         // determine allowed network types
         val allowedNetworkTypes: Int = determineAllowedNetworkTypes(type, ignoreWifiRestriction)
         // enqueue downloads
@@ -159,10 +195,10 @@ object DownloadHelper {
             if (scheme.startsWith("http") && isNotInDownloadQueue(uri.toString()) && pathSegments.isNotEmpty()) {
                 val fileName: String = pathSegments.last()
                 val request: DownloadManager.Request = DownloadManager.Request(uri)
-                        .setAllowedNetworkTypes(allowedNetworkTypes)
-                        .setTitle(fileName)
-                        .setDestinationInExternalFilesDir(context, Keys.FOLDER_TEMP, fileName)
-                        .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
+                    .setAllowedNetworkTypes(allowedNetworkTypes)
+                    .setTitle(fileName)
+                    .setDestinationInExternalFilesDir(context, Keys.FOLDER_TEMP, fileName)
+                    .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
                 newIds[i] = downloadManager.enqueue(request)
                 activeDownloads.add(newIds[i])
             }
@@ -186,9 +222,13 @@ object DownloadHelper {
 
 
     /* Safely remove given download IDs from activeDownloads and delete download if requested */
-    private fun removeFromActiveDownloads(downloadIds: Array<Long>, deleteDownload: Boolean = false): Boolean {
+    private fun removeFromActiveDownloads(
+        downloadIds: Array<Long>,
+        deleteDownload: Boolean = false
+    ): Boolean {
         // remove download ids from activeDownloads
-        val success: Boolean = activeDownloads.removeAll { downloadId -> downloadIds.contains(downloadId) }
+        val success: Boolean =
+            activeDownloads.removeAll { downloadId -> downloadIds.contains(downloadId) }
         if (success) {
             setActiveDownloads(activeDownloads)
         }
@@ -210,10 +250,15 @@ object DownloadHelper {
     /* Reads station playlist file and adds it to collection */
     private fun addStation(context: Context, localFileUri: Uri, remoteFileLocation: String) {
         // read station playlist
-        val station: Station = CollectionHelper.createStationFromPlaylistFile(context, localFileUri, remoteFileLocation)
+        val station: Station = CollectionHelper.createStationFromPlaylistFile(
+            context,
+            localFileUri,
+            remoteFileLocation
+        )
         // detect content type on background thread
         CoroutineScope(IO).launch {
-            val deferred: Deferred<NetworkHelper.ContentType> = async(Dispatchers.Default) { NetworkHelper.detectContentTypeSuspended(station.getStreamUri()) }
+            val deferred: Deferred<NetworkHelper.ContentType> =
+                async(Dispatchers.Default) { NetworkHelper.detectContentTypeSuspended(station.getStreamUri()) }
             // wait for result
             val contentType: NetworkHelper.ContentType = deferred.await()
             // set content type
@@ -229,10 +274,15 @@ object DownloadHelper {
     /* Reads station playlist file and updates it in collection */
     private fun updateStation(context: Context, localFileUri: Uri, remoteFileLocation: String) {
         // read station playlist
-        val station: Station = CollectionHelper.createStationFromPlaylistFile(context, localFileUri, remoteFileLocation)
+        val station: Station = CollectionHelper.createStationFromPlaylistFile(
+            context,
+            localFileUri,
+            remoteFileLocation
+        )
         // detect content type on background thread
         CoroutineScope(IO).launch {
-            val deferred: Deferred<NetworkHelper.ContentType> = async(Dispatchers.Default) { NetworkHelper.detectContentTypeSuspended(station.getStreamUri()) }
+            val deferred: Deferred<NetworkHelper.ContentType> =
+                async(Dispatchers.Default) { NetworkHelper.detectContentTypeSuspended(station.getStreamUri()) }
             // wait for result
             val contentType: NetworkHelper.ContentType = deferred.await()
             // update content type
@@ -281,10 +331,12 @@ object DownloadHelper {
     /* Determines the remote file location (the original URL) */
     private fun getRemoteFileLocation(downloadManager: DownloadManager, downloadId: Long): String {
         var remoteFileLocation = ""
-        val cursor: Cursor = downloadManager.query(DownloadManager.Query().setFilterById(downloadId))
+        val cursor: Cursor =
+            downloadManager.query(DownloadManager.Query().setFilterById(downloadId))
         if (cursor.count > 0) {
             cursor.moveToFirst()
-            remoteFileLocation = cursor.getString(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_URI))
+            remoteFileLocation =
+                cursor.getString(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_URI))
         }
         return remoteFileLocation
     }
@@ -293,10 +345,12 @@ object DownloadHelper {
     /* Determines the file name for given download id (the original URL) */
     private fun getDownloadFileName(downloadManager: DownloadManager, downloadId: Long): String {
         var remoteFileLocation = ""
-        val cursor: Cursor = downloadManager.query(DownloadManager.Query().setFilterById(downloadId))
+        val cursor: Cursor =
+            downloadManager.query(DownloadManager.Query().setFilterById(downloadId))
         if (cursor.count > 0) {
             cursor.moveToFirst()
-            remoteFileLocation = cursor.getString(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TITLE))
+            remoteFileLocation =
+                cursor.getString(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TITLE))
         }
         return remoteFileLocation
     }
@@ -305,10 +359,12 @@ object DownloadHelper {
     /* Checks if a given download ID represents a finished download */
     private fun isDownloadFinished(downloadId: Long): Boolean {
         var downloadStatus: Int = -1
-        val cursor: Cursor = downloadManager.query(DownloadManager.Query().setFilterById(downloadId))
+        val cursor: Cursor =
+            downloadManager.query(DownloadManager.Query().setFilterById(downloadId))
         if (cursor.count > 0) {
             cursor.moveToFirst()
-            downloadStatus = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
+            downloadStatus =
+                cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
         }
         return (downloadStatus == DownloadManager.STATUS_SUCCESSFUL)
     }
@@ -317,10 +373,12 @@ object DownloadHelper {
     /* Checks if a given download ID represents a finished download */
     private fun isDownloadActive(downloadId: Long): Boolean {
         var downloadStatus: Int = -1
-        val cursor: Cursor = downloadManager.query(DownloadManager.Query().setFilterById(downloadId))
+        val cursor: Cursor =
+            downloadManager.query(DownloadManager.Query().setFilterById(downloadId))
         if (cursor.count > 0) {
             cursor.moveToFirst()
-            downloadStatus = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
+            downloadStatus =
+                cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
         }
         return downloadStatus == DownloadManager.STATUS_RUNNING
     }
@@ -329,10 +387,12 @@ object DownloadHelper {
     /* Retrieves reason of download error - returns http error codes plus error codes found here check: https://developer.android.com/reference/android/app/DownloadManager */
     private fun getDownloadError(downloadId: Long): Int {
         var reason: Int = -1
-        val cursor: Cursor = downloadManager.query(DownloadManager.Query().setFilterById(downloadId))
+        val cursor: Cursor =
+            downloadManager.query(DownloadManager.Query().setFilterById(downloadId))
         if (cursor.count > 0) {
             cursor.moveToFirst()
-            val downloadStatus = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
+            val downloadStatus =
+                cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
             if (downloadStatus == DownloadManager.STATUS_FAILED) {
                 reason = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_REASON))
             }
@@ -343,7 +403,8 @@ object DownloadHelper {
 
     /* Determine allowed network type */
     private fun determineAllowedNetworkTypes(type: Int, ignoreWifiRestriction: Boolean): Int {
-        var allowedNetworkTypes: Int =  (DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
+        var allowedNetworkTypes: Int =
+            (DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
         // restrict download of audio files to WiFi if necessary
         if (type == Keys.FILE_TYPE_AUDIO) {
             if (!ignoreWifiRestriction && !PreferencesHelper.downloadOverMobile()) {

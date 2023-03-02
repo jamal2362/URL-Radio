@@ -76,7 +76,7 @@ import java.util.*
 /*
  * PlayerFragment class
  */
-class PlayerFragment: Fragment(),
+class PlayerFragment : Fragment(),
     SharedPreferences.OnSharedPreferenceChangeListener,
     FindStationDialog.FindFindStationDialogListener,
     CollectionAdapter.CollectionAdapterListener,
@@ -106,15 +106,17 @@ class PlayerFragment: Fragment(),
         super.onCreate(savedInstanceState)
 
         // handle back tap/gesture
-        requireActivity().onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                // minimize player sheet - or if already minimized let activity handle back
-                if (isEnabled && this@PlayerFragment::layout.isInitialized && !layout.minimizePlayerIfExpanded()) {
-                    isEnabled = false
-                    activity?.onBackPressedDispatcher?.onBackPressed()
+        requireActivity().onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    // minimize player sheet - or if already minimized let activity handle back
+                    if (isEnabled && this@PlayerFragment::layout.isInitialized && !layout.minimizePlayerIfExpanded()) {
+                        isEnabled = false
+                        activity?.onBackPressedDispatcher?.onBackPressed()
+                    }
                 }
-            }
-        })
+            })
 
         queue = Volley.newRequestQueue(requireActivity())
 
@@ -125,7 +127,10 @@ class PlayerFragment: Fragment(),
         collectionViewModel = ViewModelProvider(this)[CollectionViewModel::class.java]
 
         // create collection adapter
-        collectionAdapter = CollectionAdapter(activity as Context, this as CollectionAdapter.CollectionAdapterListener)
+        collectionAdapter = CollectionAdapter(
+            activity as Context,
+            this as CollectionAdapter.CollectionAdapterListener
+        )
 
         // restore state of station list
         listLayoutState = savedInstanceState?.getParcelable(Keys.KEY_SAVE_INSTANCE_STATE_STATION_LIST)
@@ -139,7 +144,13 @@ class PlayerFragment: Fragment(),
                     if (it.data != null) {
                         val imageUri: Uri? = it.data?.data
                         if (imageUri != null) {
-                            collection = CollectionHelper.setStationImageWithStationUuid(activity as Context, collection, imageUri.toString(), tempStationUuid, imageManuallySet = true)
+                            collection = CollectionHelper.setStationImageWithStationUuid(
+                                activity as Context,
+                                collection,
+                                imageUri.toString(),
+                                tempStationUuid,
+                                imageManuallySet = true
+                            )
                             tempStationUuid = String()
                         }
                     }
@@ -147,12 +158,16 @@ class PlayerFragment: Fragment(),
                 }
             }
 
-        Handler(Looper.getMainLooper()).postDelayed({ context?.let { checkForUpdates(it) } }, 5000)
+        Handler(Looper.getMainLooper()).postDelayed({ context?.let { checkForUpdates() } }, 5000)
     }
 
 
     /* Overrides onCreate from Fragment*/
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         // find views and set them up
         val rootView: View = inflater.inflate(R.layout.fragment_player, container, false)
         layout = LayoutHolder(rootView)
@@ -248,22 +263,29 @@ class PlayerFragment: Fragment(),
         if (result.resultCode == RESULT_OK && result.data != null) {
             val imageUri: Uri? = result.data?.data
             if (imageUri != null) {
-                collection = CollectionHelper.setStationImageWithStationUuid(activity as Context, collection, imageUri.toString(), tempStationUuid, imageManuallySet = true)
+                collection = CollectionHelper.setStationImageWithStationUuid(
+                    activity as Context,
+                    collection,
+                    imageUri.toString(),
+                    tempStationUuid,
+                    imageManuallySet = true
+                )
                 tempStationUuid = String()
             }
         }
     }
 
     /* Register permission launcher */
-    private val requestPermissionLauncher = registerForActivityResult(RequestPermission()) { isGranted: Boolean ->
-        if (isGranted) {
-            // permission granted
-            pickImage()
-        } else {
-            // permission denied
-            Snackbar.make(requireView(), R.string.toastmessage_error_missing_storage_permission, Snackbar.LENGTH_LONG).show()
+    private val requestPermissionLauncher =
+        registerForActivityResult(RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                // permission granted
+                pickImage()
+            } else {
+                // permission denied
+                Snackbar.make(requireView(), R.string.toastmessage_error_missing_storage_permission, Snackbar.LENGTH_LONG).show()
+            }
         }
-    }
 
 
     /* Overrides onSharedPreferenceChanged from OnSharedPreferenceChangeListener */
@@ -283,28 +305,42 @@ class PlayerFragment: Fragment(),
         if (remoteStationLocation.isNotEmpty()) {
             // detect content type on background thread
             CoroutineScope(IO).launch {
-                val deferred: Deferred<NetworkHelper.ContentType> = async(Dispatchers.Default) { NetworkHelper.detectContentTypeSuspended(remoteStationLocation) }
+                val deferred: Deferred<NetworkHelper.ContentType> = async(Dispatchers.Default) {
+                    NetworkHelper.detectContentTypeSuspended(remoteStationLocation)
+                }
                 // wait for result
                 val contentType: String = deferred.await().type.lowercase(Locale.getDefault())
                 // CASE: playlist detected
                 if (Keys.MIME_TYPES_M3U.contains(contentType) or
-                    Keys.MIME_TYPES_PLS.contains(contentType)) {
+                    Keys.MIME_TYPES_PLS.contains(contentType)
+                ) {
                     // download playlist
-                    DownloadHelper.downloadPlaylists(activity as Context, arrayOf(remoteStationLocation))
+                    DownloadHelper.downloadPlaylists(
+                        activity as Context,
+                        arrayOf(remoteStationLocation)
+                    )
                 }
                 // CASE: stream address detected
                 else if (Keys.MIME_TYPES_MPEG.contains(contentType) or
                     Keys.MIME_TYPES_OGG.contains(contentType) or
                     Keys.MIME_TYPES_AAC.contains(contentType) or
-                    Keys.MIME_TYPES_HLS.contains(contentType)) {
+                    Keys.MIME_TYPES_HLS.contains(contentType)
+                ) {
                     // create station and add to collection
-                    val newStation = Station(name = remoteStationLocation, streamUris = mutableListOf(remoteStationLocation), streamContent = contentType, modificationDate = GregorianCalendar.getInstance().time)
-                    collection = CollectionHelper.addStation(activity as Context, collection, newStation)
+                    val newStation = Station(
+                        name = remoteStationLocation,
+                        streamUris = mutableListOf(remoteStationLocation),
+                        streamContent = contentType,
+                        modificationDate = GregorianCalendar.getInstance().time
+                    )
+                    collection =
+                        CollectionHelper.addStation(activity as Context, collection, newStation)
                 }
                 // CASE: invalid address
                 else {
                     withContext(Main) {
-                    Snackbar.make(requireView(), R.string.toastmessage_station_not_valid, Snackbar.LENGTH_LONG).show()
+                        Snackbar.make(requireView(), R.string.toastmessage_station_not_valid, Snackbar.LENGTH_LONG
+                        ).show()
                     }
                 }
             }
@@ -342,7 +378,10 @@ class PlayerFragment: Fragment(),
 
     /* Overrides onAddNewButtonTapped from CollectionAdapterListener */
     override fun onAddNewButtonTapped() {
-        FindStationDialog(activity as Activity, this as FindStationDialog.FindFindStationDialogListener).show()
+        FindStationDialog(
+            activity as Activity,
+            this as FindStationDialog.FindFindStationDialogListener
+        ).show()
     }
 
 
@@ -354,7 +393,12 @@ class PlayerFragment: Fragment(),
 
 
     /* Overrides onYesNoDialog from YesNoDialogListener */
-    override fun onYesNoDialog(type: Int, dialogResult: Boolean, payload: Int, payloadString: String) {
+    override fun onYesNoDialog(
+        type: Int,
+        dialogResult: Boolean,
+        payload: Int,
+        payloadString: String
+    ) {
         super.onYesNoDialog(type, dialogResult, payload, payloadString)
         when (type) {
             // handle result of remove dialog
@@ -372,7 +416,9 @@ class PlayerFragment: Fragment(),
                     // user tapped restore
                     true -> BackupHelper.restore(requireView(), activity as Context, payloadString.toUri())
                     // user tapped cancel
-                    false -> { /* do nothing */ }
+                    false -> {
+                    /* do nothing */
+                    }
                 }
             }
         }
@@ -381,7 +427,13 @@ class PlayerFragment: Fragment(),
 
     /* Initializes the MediaController - handles connection to PlayerService under the hood */
     private fun initializeController() {
-        controllerFuture = MediaController.Builder(activity as Context, SessionToken(activity as Context, ComponentName(activity as Context, PlayerService::class.java))).buildAsync()
+        controllerFuture = MediaController.Builder(
+            activity as Context,
+            SessionToken(
+                activity as Context,
+                ComponentName(activity as Context, PlayerService::class.java)
+            )
+        ).buildAsync()
         controllerFuture.addListener({ setupController() }, MoreExecutors.directExecutor())
     }
 
@@ -412,21 +464,29 @@ class PlayerFragment: Fragment(),
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 // ask user
                 val adapterPosition: Int = viewHolder.adapterPosition
-                val dialogMessage = "${getString(R.string.dialog_yes_no_message_remove_station)}\n\n- ${collection.stations[adapterPosition].name}"
-                YesNoDialog(this@PlayerFragment as YesNoDialog.YesNoDialogListener).show(context = activity as Context, type = Keys.DIALOG_REMOVE_STATION, messageString = dialogMessage, yesButton = R.string.dialog_yes_no_positive_button_remove_station, payload = adapterPosition)
+                val dialogMessage =
+                    "${getString(R.string.dialog_yes_no_message_remove_station)}\n\n- ${collection.stations[adapterPosition].name}"
+                YesNoDialog(this@PlayerFragment as YesNoDialog.YesNoDialogListener).show(
+                    context = activity as Context,
+                    type = Keys.DIALOG_REMOVE_STATION,
+                    messageString = dialogMessage,
+                    yesButton = R.string.dialog_yes_no_positive_button_remove_station,
+                    payload = adapterPosition
+                )
             }
         }
         val swipeToDeleteItemTouchHelper = ItemTouchHelper(swipeToDeleteHandler)
         swipeToDeleteItemTouchHelper.attachToRecyclerView(layout.recyclerView)
 
         // enable swipe to mark starred
-        val swipeToMarkStarredHandler = object : UiHelper.SwipeToMarkStarredCallback(activity as Context) {
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                // mark card starred
-                val adapterPosition: Int = viewHolder.adapterPosition
-                collectionAdapter.toggleStarredStation(activity as Context, adapterPosition)
+        val swipeToMarkStarredHandler =
+            object : UiHelper.SwipeToMarkStarredCallback(activity as Context) {
+                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                    // mark card starred
+                    val adapterPosition: Int = viewHolder.adapterPosition
+                    collectionAdapter.toggleStarredStation(activity as Context, adapterPosition)
+                }
             }
-        }
         val swipeToMarkStarredItemTouchHelper = ItemTouchHelper(swipeToMarkStarredHandler)
         swipeToMarkStarredItemTouchHelper.attachToRecyclerView(layout.recyclerView)
 
@@ -438,7 +498,11 @@ class PlayerFragment: Fragment(),
                     controller?.startSleepTimer()
                     togglePeriodicSleepTimerUpdateRequest()
                 }
-                else -> Snackbar.make(requireView(), R.string.toastmessage_sleep_timer_unable_to_start, Snackbar.LENGTH_LONG).show()
+                else -> Snackbar.make(
+                    requireView(),
+                    R.string.toastmessage_sleep_timer_unable_to_start,
+                    Snackbar.LENGTH_LONG
+                ).show()
             }
         }
 
@@ -500,11 +564,12 @@ class PlayerFragment: Fragment(),
 
     /* Requests an update of the sleep timer from the player service */
     private fun requestSleepTimerUpdate() {
-        val resultFuture: ListenableFuture<SessionResult>? = controller?.requestSleepTimerRemaining()
+        val resultFuture: ListenableFuture<SessionResult>? =
+            controller?.requestSleepTimerRemaining()
         resultFuture?.addListener(Runnable {
             val timeRemaining: Long = resultFuture.get().extras.getLong(Keys.EXTRA_SLEEP_TIMER_REMAINING)
             layout.updateSleepTimer(activity as Context, timeRemaining)
-        } , MoreExecutors.directExecutor())
+        }, MoreExecutors.directExecutor())
     }
 
 
@@ -514,7 +579,7 @@ class PlayerFragment: Fragment(),
         resultFuture?.addListener(Runnable {
             val metadata: ArrayList<String>? = resultFuture.get().extras.getStringArrayList(Keys.EXTRA_METADATA_HISTORY)
             layout.updateMetadata(metadata?.toMutableList())
-        } , MoreExecutors.directExecutor())
+        }, MoreExecutors.directExecutor())
     }
 
 
@@ -533,12 +598,17 @@ class PlayerFragment: Fragment(),
                 requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
             } else {
                 // permission READ_EXTERNAL_STORAGE granted - get system picker for images
-                val pickImageIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                val pickImageIntent =
+                    Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
                 try {
                     requestLoadImageLauncher.launch(pickImageIntent)
                 } catch (e: Exception) {
                     Log.e(TAG, "Unable to select image. Probably no image picker available.")
-                    Snackbar.make(requireView(), R.string.toastalert_no_image_picker, Snackbar.LENGTH_LONG).show()
+                    Snackbar.make(
+                        requireView(),
+                        R.string.toastalert_no_image_picker,
+                        Snackbar.LENGTH_LONG
+                    ).show()
                 }
             }
         }
@@ -571,7 +641,10 @@ class PlayerFragment: Fragment(),
         val contentUri: Uri? = (activity as Activity).intent.data
         if (contentUri != null) {
             val scheme: String = contentUri.scheme ?: String()
-            if (scheme.startsWith("http")) DownloadHelper.downloadPlaylists(activity as Context, arrayOf(contentUri.toString()))
+            if (scheme.startsWith("http")) DownloadHelper.downloadPlaylists(
+                activity as Context,
+                arrayOf(contentUri.toString())
+            )
         }
     }
 
@@ -630,8 +703,10 @@ class PlayerFragment: Fragment(),
     /* Handles arguments handed over by navigation (from SettingsFragment) */
     private fun handleNavigationArguments() {
         // get arguments
-        val updateCollection: Boolean = arguments?.getBoolean(Keys.ARG_UPDATE_COLLECTION, false) ?: false
-        val updateStationImages: Boolean = arguments?.getBoolean(Keys.ARG_UPDATE_IMAGES, false) ?: false
+        val updateCollection: Boolean =
+            arguments?.getBoolean(Keys.ARG_UPDATE_COLLECTION, false) ?: false
+        val updateStationImages: Boolean =
+            arguments?.getBoolean(Keys.ARG_UPDATE_IMAGES, false) ?: false
         val restoreCollectionFileString: String? = arguments?.getString(Keys.ARG_RESTORE_COLLECTION)
 
         if (updateCollection) {
@@ -655,13 +730,15 @@ class PlayerFragment: Fragment(),
                     )
                 }
                 false -> {
-                    BackupHelper.restore(requireView(), activity as Context, restoreCollectionFileString.toUri())
+                    BackupHelper.restore(
+                        requireView(),
+                        activity as Context,
+                        restoreCollectionFileString.toUri()
+                    )
                 }
             }
         }
     }
-
-
 
 
     /*
@@ -726,38 +803,39 @@ class PlayerFragment: Fragment(),
     /**
      * Check for update on github
      */
-    private fun checkForUpdates(context: Context) {
-            val url = getString(R.string.snackbar_github_update_check_url)
-            val request = StringRequest(Request.Method.GET, url, { reply ->
-                val latestVersion =
-                    Gson().fromJson(reply, JsonObject::class.java).get("tag_name").asString
-                val current =
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        activity?.packageManager?.getPackageInfo(requireActivity().packageName, PackageManager.PackageInfoFlags.of(0))?.versionName
-                    } else {
-                        activity?.packageManager?.getPackageInfo(requireActivity().packageName, 0)?.versionName
-                    }
-                if (latestVersion != current) {
-                    // We have an update available, tell our user about it
-                    view?.let {
-                        Snackbar.make(it, getString(R.string.app_name) + " " + latestVersion + " " + getString(R.string.snackbar_update_available), 10000)
-                            .setAction(R.string.snackbar_show) {
-                                val releaseurl = getString(R.string.snackbar_url_app_home_page)
-                                val i = Intent(Intent.ACTION_VIEW)
-                                i.data = Uri.parse(releaseurl)
-                                // Not sure that does anything
-                                i.putExtra("SOURCE", "SELF")
-                                startActivity(i)
-                            }
-                            .setActionTextColor(ContextCompat.getColor(requireActivity(), R.color.player_play_pause_icon))
-                            .show()
-                    }
+    private fun checkForUpdates() {
+        val url = getString(R.string.snackbar_github_update_check_url)
+        val request = StringRequest(Request.Method.GET, url, { reply ->
+            val latestVersion = Gson().fromJson(reply, JsonObject::class.java).get("tag_name").asString
+            val current = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    activity?.packageManager?.getPackageInfo(requireActivity().packageName, PackageManager.PackageInfoFlags.of(0))?.versionName
+                } else {
+                    activity?.packageManager?.getPackageInfo(requireActivity().packageName, 0)?.versionName
                 }
-            }, { error ->
-                Log.w(TAG, "Update check failed", error)
-            })
+            if (latestVersion != current) {
+                // We have an update available, tell our user about it
+                view?.let {
+                    Snackbar.make(it, getString(R.string.app_name) + " " + latestVersion + " " + getString(R.string.snackbar_update_available), 10000)
+                        .setAction(R.string.snackbar_show) {
+                            val releaseurl = getString(R.string.snackbar_url_app_home_page)
+                            val i = Intent(Intent.ACTION_VIEW)
+                            i.data = Uri.parse(releaseurl)
+                            // Not sure that does anything
+                            i.putExtra("SOURCE", "SELF")
+                            startActivity(i)
+                        }
+                        .setActionTextColor(
+                            ContextCompat.getColor(
+                                requireActivity(),
+                                R.color.player_play_pause_icon))
+                        .show()
+                }
+            }
+        }, { error ->
+            Log.w(TAG, "Update check failed", error)
+        })
 
-            request.tag = TAG
-            queue.add(request)
+        request.tag = TAG
+        queue.add(request)
     }
 }

@@ -24,7 +24,7 @@ import com.jamal2367.urlradio.helpers.PreferencesHelper.initPreferences
 /**
  * URLRadio.class
  */
-class URLRadio: Application () {
+class URLRadio : Application() {
 
     /* Define log tag */
     private val TAG: String = URLRadio::class.java.simpleName

@@ -30,7 +30,7 @@ import com.jamal2367.urlradio.helpers.PreferencesHelper
 /*
  * MainActivity class
  */
-class MainActivity: AppCompatActivity() {
+class MainActivity : AppCompatActivity() {
 
     /* Main class variables */
     private lateinit var appBarConfiguration: AppBarConfiguration
@@ -86,13 +86,14 @@ class MainActivity: AppCompatActivity() {
     /*
      * Defines the listener for changes in shared preferences
      */
-    private val sharedPreferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-        when (key) {
-            Keys.PREF_THEME_SELECTION -> {
-                AppThemeHelper.setTheme(PreferencesHelper.loadThemeSelection())
+    private val sharedPreferenceChangeListener =
+        SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            when (key) {
+                Keys.PREF_THEME_SELECTION -> {
+                    AppThemeHelper.setTheme(PreferencesHelper.loadThemeSelection())
+                }
             }
         }
-    }
     /*
      * End of declaration
      */

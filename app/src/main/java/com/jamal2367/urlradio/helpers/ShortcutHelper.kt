@@ -38,15 +38,17 @@ object ShortcutHelper {
         // credit: https://medium.com/@BladeCoder/using-support-library-26-0-0-you-can-do-bb75911e01e8
         if (ShortcutManagerCompat.isRequestPinShortcutSupported(context)) {
             val shortcut: ShortcutInfoCompat = ShortcutInfoCompat.Builder(context, station.name)
-                    .setShortLabel(station.name)
-                    .setLongLabel(station.name)
-                    .setIcon(createShortcutIcon(context, station.image, station.imageColor))
-                    .setIntent(createShortcutIntent(context, station.uuid))
-                    .build()
+                .setShortLabel(station.name)
+                .setLongLabel(station.name)
+                .setIcon(createShortcutIcon(context, station.image, station.imageColor))
+                .setIntent(createShortcutIntent(context, station.uuid))
+                .build()
             ShortcutManagerCompat.requestPinShortcut(context, shortcut, null)
-            Toast.makeText(context, R.string.toastmessage_shortcut_created, Toast.LENGTH_LONG).show()
+            Toast.makeText(context, R.string.toastmessage_shortcut_created, Toast.LENGTH_LONG)
+                .show()
         } else {
-            Toast.makeText(context, R.string.toastmessage_shortcut_not_created, Toast.LENGTH_LONG).show()
+            Toast.makeText(context, R.string.toastmessage_shortcut_not_created, Toast.LENGTH_LONG)
+                .show()
         }
     }
 
@@ -63,12 +65,33 @@ object ShortcutHelper {
 
 
     /* Create shortcut icon */
-    private fun createShortcutIcon(context: Context, stationImage: String, stationImageColor: Int): IconCompat {
-        val stationImageBitmap: Bitmap = ImageHelper.getScaledStationImage(context, stationImage,192)
+    private fun createShortcutIcon(
+        context: Context,
+        stationImage: String,
+        stationImageColor: Int
+    ): IconCompat {
+        val stationImageBitmap: Bitmap =
+            ImageHelper.getScaledStationImage(context, stationImage, 192)
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            IconCompat.createWithAdaptiveBitmap(ImageHelper.createSquareImage(context, stationImageBitmap, stationImageColor, 192, true))
+            IconCompat.createWithAdaptiveBitmap(
+                ImageHelper.createSquareImage(
+                    context,
+                    stationImageBitmap,
+                    stationImageColor,
+                    192,
+                    true
+                )
+            )
         } else {
-            IconCompat.createWithAdaptiveBitmap(ImageHelper.createSquareImage(context, stationImageBitmap, stationImageColor, 192, false))
+            IconCompat.createWithAdaptiveBitmap(
+                ImageHelper.createSquareImage(
+                    context,
+                    stationImageBitmap,
+                    stationImageColor,
+                    192,
+                    false
+                )
+            )
         }
     }
 

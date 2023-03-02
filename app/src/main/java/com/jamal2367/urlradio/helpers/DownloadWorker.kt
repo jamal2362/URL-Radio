@@ -23,12 +23,12 @@ import com.jamal2367.urlradio.Keys
 /*
  * DownloadWorker class
  */
-class DownloadWorker(context : Context, params : WorkerParameters): Worker(context, params) {
+class DownloadWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
 
     /* Overrides doWork */
     override fun doWork(): Result {
         // determine what type of download is requested
-        when(inputData.getInt(Keys.KEY_DOWNLOAD_WORK_REQUEST,0)) {
+        when (inputData.getInt(Keys.KEY_DOWNLOAD_WORK_REQUEST, 0)) {
             // CASE: update collection
             Keys.REQUEST_UPDATE_COLLECTION -> {
                 doOneTimeHousekeeping()

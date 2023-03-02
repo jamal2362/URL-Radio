@@ -45,7 +45,7 @@ import kotlinx.coroutines.launch
 /*
  * SettingsFragment class
  */
-class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListener {
+class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListener {
 
 
     /* Define log tag */
@@ -74,20 +74,30 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
         val context = preferenceManager.context
         val screen = preferenceManager.createPreferenceScreen(context)
 
-
         // set up "App Theme" preference
         val preferenceThemeSelection = ListPreference(activity as Context)
         preferenceThemeSelection.title = getString(R.string.pref_theme_selection_title)
         preferenceThemeSelection.setIcon(R.drawable.ic_brush_24dp)
         preferenceThemeSelection.key = Keys.PREF_THEME_SELECTION
-        preferenceThemeSelection.summary = "${getString(R.string.pref_theme_selection_summary)} ${AppThemeHelper.getCurrentTheme(activity as Context)}"
-        preferenceThemeSelection.entries = arrayOf(getString(R.string.pref_theme_selection_mode_device_default), getString(R.string.pref_theme_selection_mode_light), getString(R.string.pref_theme_selection_mode_dark))
-        preferenceThemeSelection.entryValues = arrayOf(Keys.STATE_THEME_FOLLOW_SYSTEM, Keys.STATE_THEME_LIGHT_MODE, Keys.STATE_THEME_DARK_MODE)
+        preferenceThemeSelection.summary = "${getString(R.string.pref_theme_selection_summary)} ${
+            AppThemeHelper.getCurrentTheme(activity as Context)
+        }"
+        preferenceThemeSelection.entries = arrayOf(
+            getString(R.string.pref_theme_selection_mode_device_default),
+            getString(R.string.pref_theme_selection_mode_light),
+            getString(R.string.pref_theme_selection_mode_dark)
+        )
+        preferenceThemeSelection.entryValues = arrayOf(
+            Keys.STATE_THEME_FOLLOW_SYSTEM,
+            Keys.STATE_THEME_LIGHT_MODE,
+            Keys.STATE_THEME_DARK_MODE
+        )
         preferenceThemeSelection.setDefaultValue(Keys.STATE_THEME_FOLLOW_SYSTEM)
         preferenceThemeSelection.setOnPreferenceChangeListener { preference, newValue ->
             if (preference is ListPreference) {
                 val index: Int = preference.entryValues.indexOf(newValue)
-                preferenceThemeSelection.summary = "${getString(R.string.pref_theme_selection_summary)} ${preference.entries[index]}"
+                preferenceThemeSelection.summary =
+                    "${getString(R.string.pref_theme_selection_summary)} ${preference.entries[index]}"
                 return@setOnPreferenceChangeListener true
             } else {
                 return@setOnPreferenceChangeListener false
@@ -101,7 +111,12 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
         preferenceUpdateStationImages.summary = getString(R.string.pref_update_station_images_summary)
         preferenceUpdateStationImages.setOnPreferenceClickListener {
             // show dialog
-            YesNoDialog(this).show(context = activity as Context, type = Keys.DIALOG_UPDATE_STATION_IMAGES, message = R.string.dialog_yes_no_message_update_station_images, yesButton = R.string.dialog_yes_no_positive_button_update_covers)
+            YesNoDialog(this).show(
+                context = activity as Context,
+                type = Keys.DIALOG_UPDATE_STATION_IMAGES,
+                message = R.string.dialog_yes_no_message_update_station_images,
+                yesButton = R.string.dialog_yes_no_positive_button_update_covers
+            )
             return@setOnPreferenceClickListener true
         }
 
@@ -205,7 +220,7 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
             cm.setPrimaryClip(clip)
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
                 // since API 33 (TIRAMISU) the OS displays its own notification when content is copied to the clipboard
-            Snackbar.make(requireView(), R.string.toastmessage_copied_to_clipboard, Snackbar.LENGTH_LONG).show()
+                Snackbar.make(requireView(), R.string.toastmessage_copied_to_clipboard, Snackbar.LENGTH_LONG).show()
             }
             return@setOnPreferenceClickListener true
         }
@@ -276,9 +291,13 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
     }
 
 
-
     /* Overrides onYesNoDialog from YesNoDialogListener */
-    override fun onYesNoDialog(type: Int, dialogResult: Boolean, payload: Int, payloadString: String) {
+    override fun onYesNoDialog(
+        type: Int,
+        dialogResult: Boolean,
+        payload: Int,
+        payloadString: String
+    ) {
         super.onYesNoDialog(type, dialogResult, payload, payloadString)
 
         when (type) {
@@ -300,15 +319,18 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
 
 
     /* Register the ActivityResultLauncher for the save m3u dialog */
-    private val requestSaveM3uLauncher = registerForActivityResult(StartActivityForResult(), this::requestSaveM3uResult)
+    private val requestSaveM3uLauncher =
+        registerForActivityResult(StartActivityForResult(), this::requestSaveM3uResult)
 
 
     /* Register the ActivityResultLauncher for the backup dialog */
-    private val requestBackupCollectionLauncher = registerForActivityResult(StartActivityForResult(), this::requestBackupCollectionResult)
+    private val requestBackupCollectionLauncher =
+        registerForActivityResult(StartActivityForResult(), this::requestBackupCollectionResult)
 
 
     /* Register the ActivityResultLauncher for the restore dialog */
-    private val requestRestoreCollectionLauncher = registerForActivityResult(StartActivityForResult(), this::requestRestoreCollectionResult)
+    private val requestRestoreCollectionLauncher =
+        registerForActivityResult(StartActivityForResult(), this::requestRestoreCollectionResult)
 
 
     /* Pass the activity result for the save m3u dialog */
@@ -322,7 +344,7 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
                 CoroutineScope(IO).launch {
                     FileHelper.saveCopyOfFileSuspended(activity as Context, sourceUri, targetUri)
                 }
-                Snackbar.make(requireView(),R.string.toastmessage_save_m3u, Snackbar.LENGTH_LONG).show()
+                Snackbar.make(requireView(), R.string.toastmessage_save_m3u, Snackbar.LENGTH_LONG).show()
             } else {
                 Log.w(TAG, "M3U export failed.")
             }
@@ -364,12 +386,20 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
     /* Updates collection */
     private fun updateCollection() {
         if (NetworkHelper.isConnectedToNetwork(activity as Context)) {
-            Snackbar.make(requireView(), R.string.toastmessage_updating_collection, Snackbar.LENGTH_LONG).show()
+            Snackbar.make(
+                requireView(),
+                R.string.toastmessage_updating_collection,
+                Snackbar.LENGTH_LONG
+            ).show()
             // update collection in player screen
             val bundle: Bundle = bundleOf(Keys.ARG_UPDATE_COLLECTION to true)
             this.findNavController().navigate(R.id.player_destination, bundle)
         } else {
-            ErrorDialog().show(activity as Context, R.string.dialog_error_title_no_network, R.string.dialog_error_message_no_network)
+            ErrorDialog().show(
+                activity as Context,
+                R.string.dialog_error_title_no_network,
+                R.string.dialog_error_message_no_network
+            )
         }
     }
 
@@ -377,14 +407,22 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
     /* Updates station images */
     private fun updateStationImages() {
         if (NetworkHelper.isConnectedToNetwork(activity as Context)) {
-            Snackbar.make(requireView(), R.string.toastmessage_updating_station_images, Snackbar.LENGTH_LONG).show()
+            Snackbar.make(
+                requireView(),
+                R.string.toastmessage_updating_station_images,
+                Snackbar.LENGTH_LONG
+            ).show()
             // update collection in player screen
             val bundle: Bundle = bundleOf(
-                    Keys.ARG_UPDATE_IMAGES to true
+                Keys.ARG_UPDATE_IMAGES to true
             )
             this.findNavController().navigate(R.id.player_destination, bundle)
         } else {
-            ErrorDialog().show(activity as Context, R.string.dialog_error_title_no_network, R.string.dialog_error_message_no_network)
+            ErrorDialog().show(
+                activity as Context,
+                R.string.dialog_error_title_no_network,
+                R.string.dialog_error_message_no_network
+            )
         }
     }
 

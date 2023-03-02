@@ -4,48 +4,47 @@
     <!-- DAY THEME COLORS -->
 
     <!-- app colors -->
-    <color name="app_onboarding_icons">#FF313131</color> <!-- colorOnBackground / colorOnSurface-->
+    <color name="app_onboarding_icons">#FF313131</color>
 
     <!-- text & icons -->
-    <color name="text_default">#FF595959</color> <!-- colorOnBackground / colorOnSurface-->
-    <color name="text_lightweight">#FF595959</color> <!-- colorOnSurfaceVariant -->
-    <color name="text_link">#FFD0BCFF</color> <!-- colorPrimaryInverse -->
-    <color name="text_link_separator">#FFD0BCFF</color> <!-- colorPrimaryInverse -->
-    <color name="icon_default">#FF495D92</color> <!-- colorOnBackground / colorOnSurface-->
-    <color name="icon_default_add_new_station">#FF495D92</color> <!-- android:colorBackground / colorSurface -->
-    <color name="icon_lightweight">#FF45464F</color> <!-- colorOnSurfaceVariant -->
-    <color name="icon_lightweight_background">#FFC5C6D0</color> <!-- colorSurfaceVariant -->
+    <color name="text_default">#FF595959</color>
+    <color name="text_lightweight">#FF595959</color>
+    <color name="text_link">#FFD0BCFF</color>
+    <color name="text_link_separator">#FFD0BCFF</color>
+    <color name="icon_default">#FF495D92</color>
+    <color name="icon_default_add_new_station">#FF495D92</color>
+    <color name="icon_lightweight">#FF45464F</color>
+    <color name="icon_lightweight_background">#FFC5C6D0</color>
 
     <!-- list -->
-    <color name="list_card_background">#FFFEFBFF</color> <!-- android:colorBackground / colorSurface -->
-    <color name="list_card_stroke_background">#FFC0C6DD</color> <!-- android:colorBackground / colorSurface -->
-    <color name="list_card_stroke1_background">#FFC0C6DD</color> <!-- android:colorBackground / colorSurface -->
-    <color name="list_card_cover_background">#FFE7E0EC</color> <!-- colorSurfaceVariant -->
-    <color name="list_card_delete_background">#FFB3261E</color> <!-- colorError -->
-    <color name="list_card_delete_icon">#FFFFFFFF</color> <!-- colorOnError (white) -->
-    <color name="list_card_mark_starred_background">#FF495D92</color> <!-- colorPrimary -->
-    <color name="list_card_mark_starred_star">#FFFFFFFF</color> <!-- colorOnPrimary -->
-    <color name="search_result_background">#FFCFCFCF</color> <!-- android:colorBackground / colorSurface -->
-    <color name="search_result_background_selected">#FFA1A1A1</color> <!-- colorSurfaceVariant -->
+    <color name="list_card_background">#FFFEFBFF</color>
+    <color name="list_card_stroke_background">#FFC0C6DD</color>
+    <color name="list_card_stroke1_background">#FFC0C6DD</color>
+    <color name="list_card_cover_background">#FFE7E0EC</color>
+    <color name="list_card_delete_background">#FFB3261E</color>
+    <color name="list_card_delete_icon">#FFFFFFFF</color>
+    <color name="list_card_mark_starred_background">#FF495D92</color>
+    <color name="list_card_mark_starred_star">#FFFFFFFF</color>
+    <color name="search_result_background">#FFCFCFCF</color>
+    <color name="search_result_background_selected">#FFA1A1A1</color>
 
     <!-- player sheet -->
-    <color name="player_play_pause_icon">#FFFFFFFF</color> <!-- colorOnPrimary-->
-    <color name="player_button_background">#FF495D92</color> <!-- colorPrimary -->
-    <color name="player_button_buffering">#FFE57373</color> <!-- colorPrimaryInverse -->
-    <color name="player_sheet_background">#FF2E3038</color> <!-- colorSurfaceInverse -->
-    <color name="player_sheet_text_main">#FFF4EFF4</color> <!-- colorOnSurfaceInverse -->
-    <color name="player_sheet_text_details">#FFF4EFF4</color> <!-- colorOnSurfaceInverse -->
-    <color name="player_sheet_icon">#FFF4EFF4</color> <!-- colorOnSurfaceInverse -->
-
+    <color name="player_play_pause_icon">#FFFFFFFF</color>
+    <color name="player_button_background">#FF495D92</color>
+    <color name="player_button_buffering">#FFE57373</color>
+    <color name="player_sheet_background">#FF2E3038</color>
+    <color name="player_sheet_text_main">#FFF4EFF4</color>
+    <color name="player_sheet_text_details">#FFF4EFF4</color>
+    <color name="player_sheet_icon">#FFF4EFF4</color>
 
     <!-- default colors -->
-    <color name="default_neutral_white">#FFFFFFFF</color> <!-- system_accent1_0 -->
-    <color name="default_neutral_lighter">#FFE6E1E5</color> <!-- system_neutral1_100 -->
-    <color name="default_neutral_medium_light">#FF7D7D7D</color> <!-- system_neutral1_300 -->
-    <color name="default_neutral_dark">#FF595959</color> <!-- system_neutral1_600 -->
-    <color name="default_neutral_darker">#FF1C1B1F</color> <!-- system_neutral1_900-->
+    <color name="default_neutral_white">#FFFFFFFF</color>
+    <color name="default_neutral_lighter">#FFE6E1E5</color>
+    <color name="default_neutral_medium_light">#FF7D7D7D</color>
+    <color name="default_neutral_dark">#FF595959</color>
+    <color name="default_neutral_darker">#FF1C1B1F</color>
 
-    <color name="default_neutral_85percent">#D9313033</color> <!-- 85% system_neutral1_800 -->
+    <color name="default_neutral_85percent">#D9313033</color>
     <color name="default_transparent">#00FFFFFF</color>
 
     <color name="colorPrimaryContainer">#FFE57373</color>

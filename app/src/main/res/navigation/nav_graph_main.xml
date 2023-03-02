@@ -19,6 +19,6 @@
     <fragment
         android:id="@+id/settings_destination"
         android:name="com.jamal2367.urlradio.SettingsFragment"
-        android:label="Settings"/>
+        android:label="Settings" />
 
 </navigation>

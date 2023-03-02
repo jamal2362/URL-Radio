@@ -135,9 +135,13 @@ object NetworkHelper {
             // special treatment for octet-stream - try to get content type from file extension
             if (contentType.type.contains(Keys.MIME_TYPE_OCTET_STREAM)) {
                 Log.w(TAG, "Special case \"application/octet-stream\"")
-                val headerFieldContentDisposition: String? = connection.getHeaderField("Content-Disposition")
+                val headerFieldContentDisposition: String? =
+                    connection.getHeaderField("Content-Disposition")
                 if (headerFieldContentDisposition != null) {
-                    val fileName: String = headerFieldContentDisposition.split("=")[1].replace("\"", "") //getting value after '=' & stripping any "s
+                    val fileName: String = headerFieldContentDisposition.split("=")[1].replace(
+                        "\"",
+                        ""
+                    ) //getting value after '=' & stripping any "s
                     contentType.type = FileHelper.getContentTypeFromExtension(fileName)
                 } else {
                     Log.i(TAG, "Unable to get file name from \"Content-Disposition\" header field.")
@@ -164,7 +168,8 @@ object NetworkHelper {
         return suspendCoroutine { cont ->
             val serverAddress: String = try {
                 // get all available radio browser servers
-                val serverAddressList: Array<InetAddress> = InetAddress.getAllByName(Keys.RADIO_BROWSER_API_BASE)
+                val serverAddressList: Array<InetAddress> =
+                    InetAddress.getAllByName(Keys.RADIO_BROWSER_API_BASE)
                 // select a random address
                 serverAddressList[Random().nextInt(serverAddressList.size)].canonicalHostName
             } catch (e: UnknownHostException) {

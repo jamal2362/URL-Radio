@@ -39,13 +39,19 @@ fun MediaController.cancelSleepTimer() {
 
 /* Request sleep timer remaining */
 fun MediaController.requestSleepTimerRemaining(): ListenableFuture<SessionResult> {
-    return sendCustomCommand(SessionCommand(Keys.CMD_REQUEST_SLEEP_TIMER_REMAINING, Bundle.EMPTY), Bundle.EMPTY)
+    return sendCustomCommand(
+        SessionCommand(Keys.CMD_REQUEST_SLEEP_TIMER_REMAINING, Bundle.EMPTY),
+        Bundle.EMPTY
+    )
 }
 
 
 /* Request sleep timer remaining */
 fun MediaController.requestMetadataHistory(): ListenableFuture<SessionResult> {
-    return sendCustomCommand(SessionCommand(Keys.CMD_REQUEST_METADATA_HISTORY, Bundle.EMPTY), Bundle.EMPTY)
+    return sendCustomCommand(
+        SessionCommand(Keys.CMD_REQUEST_METADATA_HISTORY, Bundle.EMPTY),
+        Bundle.EMPTY
+    )
 }
 
 
@@ -61,9 +67,11 @@ fun MediaController.play(station: Station) {
 
 /* Starts playback with of a stream url */
 fun MediaController.playStreamDirectly(streamUri: String) {
-    sendCustomCommand(SessionCommand(Keys.CMD_PLAY_STREAM, Bundle.EMPTY), bundleOf(Pair(Keys.KEY_STREAM_URI, streamUri)))
+    sendCustomCommand(
+        SessionCommand(Keys.CMD_PLAY_STREAM, Bundle.EMPTY),
+        bundleOf(Pair(Keys.KEY_STREAM_URI, streamUri))
+    )
 }
-
 
 
 /* Returns mediaId of currently active media item */

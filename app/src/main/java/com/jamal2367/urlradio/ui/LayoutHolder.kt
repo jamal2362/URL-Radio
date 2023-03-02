@@ -22,7 +22,10 @@ import android.os.Build
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.widget.*
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.Group
 import androidx.core.view.isGone
@@ -35,7 +38,10 @@ import com.google.android.material.snackbar.Snackbar
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
 import com.jamal2367.urlradio.core.Station
-import com.jamal2367.urlradio.helpers.*
+import com.jamal2367.urlradio.helpers.DateTimeHelper
+import com.jamal2367.urlradio.helpers.ImageHelper
+import com.jamal2367.urlradio.helpers.PreferencesHelper
+import com.jamal2367.urlradio.helpers.UiHelper
 
 
 /*
@@ -148,11 +154,36 @@ data class LayoutHolder(var rootView: View) {
         sheetStreamingLinkView.text = station.getStreamUri()
 
         // update click listeners
-        sheetStreamingLinkHeadline.setOnClickListener{ copyToClipboard(context, sheetStreamingLinkView.text) }
-        sheetStreamingLinkView.setOnClickListener{ copyToClipboard(context, sheetStreamingLinkView.text) }
-        sheetMetadataHistoryHeadline.setOnClickListener { copyToClipboard(context, sheetMetadataHistoryView.text) }
-        sheetMetadataHistoryView.setOnClickListener { copyToClipboard(context, sheetMetadataHistoryView.text) }
-        sheetCopyMetadataButtonView.setOnClickListener { copyToClipboard(context, sheetMetadataHistoryView.text) }
+        sheetStreamingLinkHeadline.setOnClickListener {
+            copyToClipboard(
+                context,
+                sheetStreamingLinkView.text
+            )
+        }
+        sheetStreamingLinkView.setOnClickListener {
+            copyToClipboard(
+                context,
+                sheetStreamingLinkView.text
+            )
+        }
+        sheetMetadataHistoryHeadline.setOnClickListener {
+            copyToClipboard(
+                context,
+                sheetMetadataHistoryView.text
+            )
+        }
+        sheetMetadataHistoryView.setOnClickListener {
+            copyToClipboard(
+                context,
+                sheetMetadataHistoryView.text
+            )
+        }
+        sheetCopyMetadataButtonView.setOnClickListener {
+            copyToClipboard(
+                context,
+                sheetMetadataHistoryView.text
+            )
+        }
         sheetShareLinkButtonView.setOnClickListener {
             val share = Intent.createChooser(Intent().apply {
                 action = Intent.ACTION_SEND
@@ -170,9 +201,9 @@ data class LayoutHolder(var rootView: View) {
         val clip: ClipData = ClipData.newPlainText("simple text", clipString)
         val cm: ClipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         cm.setPrimaryClip(clip)
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU){
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             // since API 33 (TIRAMISU) the OS displays its own notification when content is copied to the clipboard
-        Snackbar.make(rootView, R.string.toastmessage_copied_to_clipboard, Snackbar.LENGTH_LONG).show()
+            Snackbar.make(rootView, R.string.toastmessage_copied_to_clipboard, Snackbar.LENGTH_LONG).show()
         }
     }
 
@@ -181,7 +212,7 @@ data class LayoutHolder(var rootView: View) {
     private fun copyMetadataHistoryToClipboard() {
         val metadataHistory: MutableList<String> = PreferencesHelper.loadMetadataHistory()
         val stringBuilder: StringBuilder = StringBuilder()
-        metadataHistory.forEach { stringBuilder.append("${it.trim()}\n")}
+        metadataHistory.forEach { stringBuilder.append("${it.trim()}\n") }
         copyToClipboard(rootView.context, stringBuilder.toString())
     }
 
@@ -211,7 +242,8 @@ data class LayoutHolder(var rootView: View) {
                 sleepTimerRunningViews.isVisible = true
                 val sleepTimerTimeRemaining = DateTimeHelper.convertToMinutesAndSeconds(timeRemaining)
                 sheetSleepTimerRemainingTimeView.text = sleepTimerTimeRemaining
-                sheetSleepTimerRemainingTimeView.contentDescription = "${context.getString(R.string.descr_expanded_player_sleep_timer_remaining_time)}: $sleepTimerTimeRemaining"            }
+                sheetSleepTimerRemainingTimeView.contentDescription = "${context.getString(R.string.descr_expanded_player_sleep_timer_remaining_time)}: $sleepTimerTimeRemaining"
+            }
         }
     }
 
@@ -281,7 +313,6 @@ data class LayoutHolder(var rootView: View) {
     }
 
 
-
     /* Initiates the rotation animation of the play button  */
     fun animatePlaybackButtonStateTransition(context: Context, isPlaying: Boolean) {
         when (isPlaying) {
@@ -303,7 +334,7 @@ data class LayoutHolder(var rootView: View) {
 
     /* Shows player */
     fun showPlayer(context: Context): Boolean {
-        UiHelper.setViewMargins(context, recyclerView, 0,0,0, Keys.BOTTOM_SHEET_PEEK_HEIGHT)
+        UiHelper.setViewMargins(context, recyclerView, 0, 0, 0, Keys.BOTTOM_SHEET_PEEK_HEIGHT)
         if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_HIDDEN && onboardingLayout.visibility == View.GONE) {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
         }
@@ -313,7 +344,7 @@ data class LayoutHolder(var rootView: View) {
 
     /* Hides player */
     private fun hidePlayer(context: Context): Boolean {
-        UiHelper.setViewMargins(context, recyclerView, 0,0,0, 0)
+        UiHelper.setViewMargins(context, recyclerView, 0, 0, 0, 0)
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
         return true
     }
@@ -338,6 +369,7 @@ data class LayoutHolder(var rootView: View) {
                 // set up button symbol and playback indicator afterwards
                 togglePlayButton(isPlaying)
             }
+
             override fun onAnimationRepeat(animation: Animation) {}
         }
     }
@@ -347,7 +379,8 @@ data class LayoutHolder(var rootView: View) {
     private fun setupBottomSheet() {
         // show / hide the small player
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-        bottomSheetBehavior.addBottomSheetCallback(object: BottomSheetBehavior.BottomSheetCallback() {
+        bottomSheetBehavior.addBottomSheetCallback(object :
+            BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(view: View, slideOffset: Float) {
                 if (slideOffset < 0.25f) {
                     // showPlayerViews()
@@ -355,12 +388,13 @@ data class LayoutHolder(var rootView: View) {
                     // hidePlayerViews()
                 }
             }
+
             override fun onStateChanged(view: View, state: Int) {
                 when (state) {
                     BottomSheetBehavior.STATE_COLLAPSED -> Unit // do nothing
                     BottomSheetBehavior.STATE_DRAGGING -> Unit // do nothing
                     BottomSheetBehavior.STATE_EXPANDED -> Unit // do nothing
-                    BottomSheetBehavior.STATE_HALF_EXPANDED ->  Unit // do nothing
+                    BottomSheetBehavior.STATE_HALF_EXPANDED -> Unit // do nothing
                     BottomSheetBehavior.STATE_SETTLING -> Unit // do nothing
                     BottomSheetBehavior.STATE_HIDDEN -> showPlayer(rootView.context)
                 }
@@ -377,7 +411,8 @@ data class LayoutHolder(var rootView: View) {
     /* Toggle expanded/collapsed state of bottom sheet */
     private fun toggleBottomSheetState() {
         when (bottomSheetBehavior.state) {
-            BottomSheetBehavior.STATE_COLLAPSED -> bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+            BottomSheetBehavior.STATE_COLLAPSED -> bottomSheetBehavior.state =
+                BottomSheetBehavior.STATE_EXPANDED
             else -> bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
         }
     }
@@ -386,7 +421,8 @@ data class LayoutHolder(var rootView: View) {
     /*
      * Inner class: Custom LinearLayoutManager
      */
-    private inner class CustomLayoutManager(context: Context): LinearLayoutManager(context, VERTICAL, false) {
+    private inner class CustomLayoutManager(context: Context) :
+        LinearLayoutManager(context, VERTICAL, false) {
         override fun supportsPredictiveItemAnimations(): Boolean {
             return true
         }

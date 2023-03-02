@@ -23,13 +23,15 @@ import java.util.*
 /*
  * RadioBrowserResult class
  */
-data class RadioBrowserResult (@Expose val changeuuid: String,
-                               @Expose val stationuuid: String,
-                               @Expose val name: String,
-                               @Expose val url: String,
-                               @Expose val url_resolved: String,
-                               @Expose val homepage: String,
-                               @Expose val favicon: String) {
+data class RadioBrowserResult(
+    @Expose val changeuuid: String,
+    @Expose val stationuuid: String,
+    @Expose val name: String,
+    @Expose val url: String,
+    @Expose val url_resolved: String,
+    @Expose val homepage: String,
+    @Expose val favicon: String
+) {
 
     /* Converts RadioBrowserResult to Station  */
     fun toStation(): Station = Station(
@@ -49,7 +51,8 @@ data class RadioBrowserResult (@Expose val changeuuid: String,
         modificationDate = GregorianCalendar.getInstance().time,
         isPlaying = false,
         radioBrowserStationUuid = stationuuid,
-        radioBrowserChangeUuid = changeuuid)
+        radioBrowserChangeUuid = changeuuid
+    )
 
 }
 

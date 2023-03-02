@@ -3,39 +3,39 @@
     <!-- NIGHT THEME COLORS -->
 
     <!-- app colors -->
-    <color name="app_onboarding_icons">#FFFFFFFF</color> <!-- colorOnBackground / colorOnSurface-->
+    <color name="app_onboarding_icons">#FFFFFFFF</color>
 
     <!-- text & icons -->
-    <color name="text_default">#FFFFFFFF</color> <!-- colorOnBackground / colorOnSurface-->
-    <color name="text_lightweight">#FFF2F2F2</color> <!-- colorOnSurfaceVariant -->
-    <color name="text_link">#FF6750A4</color> <!-- colorPrimaryInverse -->
-    <color name="text_link_separator">#FF6750A4</color> <!-- colorPrimaryInverse -->
-    <color name="icon_default">#FFDAE2FF</color> <!-- colorOnBackground / colorOnSurface-->
-    <color name="icon_default_add_new_station">#FFDAE2FF</color> <!-- android:colorBackground / colorSurface -->
-    <color name="icon_lightweight">#FFC5C6D0</color> <!-- colorOnSurfaceVariant -->
-    <color name="icon_lightweight_background">#FF45464F</color> <!-- colorSurfaceVariant -->
+    <color name="text_default">#FFFFFFFF</color>
+    <color name="text_lightweight">#FFF2F2F2</color>
+    <color name="text_link">#FF6750A4</color>
+    <color name="text_link_separator">#FF6750A4</color>
+    <color name="icon_default">#FFDAE2FF</color>
+    <color name="icon_default_add_new_station">#FFDAE2FF</color>
+    <color name="icon_lightweight">#FFC5C6D0</color>
+    <color name="icon_lightweight_background">#FF45464F</color>
 
     <!-- list -->
-    <color name="list_card_background">#FF1B1B1F</color> <!-- android:colorBackground / colorSurface -->
-    <color name="list_card_stroke_background">#FF585E71</color> <!-- android:colorBackground / colorSurface -->
-    <color name="list_card_stroke1_background">#FF585E71</color> <!-- android:colorBackground / colorSurface -->
-    <color name="list_card_cover_background">#FF49454f</color> <!-- colorSurfaceVariant -->
-    <color name="list_card_delete_background">#FFF2B8B5</color> <!-- colorError -->
-    <color name="list_card_delete_icon">#FF601410</color> <!-- colorOnError -->
-    <color name="list_card_mark_starred_background">#FFDAE2FF</color> <!-- colorPrimary -->
-    <color name="list_card_mark_starred_star">#FF182E60</color> <!-- colorOnPrimary -->
-    <color name="search_result_background">#FF3C3B3E</color> <!-- android:colorBackground / colorSurface -->
-    <color name="search_result_background_selected">#FF595959</color> <!-- colorSurfaceVariant -->
+    <color name="list_card_background">#FF1B1B1F</color>
+    <color name="list_card_stroke_background">#FF585E71</color>
+    <color name="list_card_stroke1_background">#FF585E71</color>
+    <color name="list_card_cover_background">#FF49454f</color>
+    <color name="list_card_delete_background">#FFF2B8B5</color>
+    <color name="list_card_delete_icon">#FF601410</color>
+    <color name="list_card_mark_starred_background">#FFDAE2FF</color>
+    <color name="list_card_mark_starred_star">#FF182E60</color>
+    <color name="search_result_background">#FF3C3B3E</color>
+    <color name="search_result_background_selected">#FF595959</color>
 
     <!-- player sheet -->
-    <color name="player_play_pause_icon">#FF182E60</color> <!-- colorOnPrimary (light theme) -->
-    <color name="player_button_background">#FFDAE2FF</color> <!-- colorPrimary (light theme) -->
-    <color name="player_button_buffering">#FFEF5350</color> <!-- colorPrimaryInverse (light theme) -->
-    <color name="player_sheet_background">#FF2E3038</color> <!-- colorSurfaceInverse (light theme) -->
-    <color name="player_sheet_text_main">#FFFFFFFF</color> <!-- colorOnSurfaceInverse (light theme) -->
-    <color name="player_sheet_text_details">#FFFFFFFF</color> <!-- colorOnSurfaceInverse (light theme) -->
-    <color name="player_sheet_icon">#FFFFFFFF</color> <!-- colorOnSurfaceInverse (light theme) -->
+    <color name="player_play_pause_icon">#FF182E60</color>
+    <color name="player_button_background">#FFDAE2FF</color>
+    <color name="player_button_buffering">#FFEF5350</color>
+    <color name="player_sheet_background">#FF2E3038</color>
+    <color name="player_sheet_text_main">#FFFFFFFF</color>
+    <color name="player_sheet_text_details">#FFFFFFFF</color>
+    <color name="player_sheet_icon">#FFFFFFFF</color>
 
-    <color name="default_neutral_white">#FF601410</color> <!-- system_accent1_0 -->
+    <color name="default_neutral_white">#FF601410</color>
     <color name="colorPrimaryContainer">#FFF44336</color>
 </resources>

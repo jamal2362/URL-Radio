@@ -61,7 +61,8 @@ object ImageHelper {
 
         // get default image
         if (bitmap == null) {
-            bitmap = ContextCompat.getDrawable(context, R.drawable.ic_default_station_image_72dp)!!.toBitmap()
+            bitmap = ContextCompat.getDrawable(context, R.drawable.ic_default_station_image_72dp)!!
+                .toBitmap()
         }
 
         return bitmap
@@ -69,17 +70,38 @@ object ImageHelper {
 
 
     /* Composes foreground bitmap onto background bitmap */
-    private fun composeImages(foreground: Bitmap, background: Bitmap, size: Int, yOffset: Int): Bitmap {
+    private fun composeImages(
+        foreground: Bitmap,
+        background: Bitmap,
+        size: Int,
+        yOffset: Int
+    ): Bitmap {
         val outputImage = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(outputImage)
         canvas.drawBitmap(background, 0f, 0f, null)
-        canvas.drawBitmap(foreground, createTransformationMatrix(size, yOffset, foreground.height.toFloat(), foreground.width.toFloat(), true), null)
+        canvas.drawBitmap(
+            foreground,
+            createTransformationMatrix(
+                size,
+                yOffset,
+                foreground.height.toFloat(),
+                foreground.width.toFloat(),
+                true
+            ),
+            null
+        )
         return outputImage
     }
 
 
     /* Creates station image on a square background with the main station image color and option padding for adaptive icons */
-    fun createSquareImage(context: Context, bitmap: Bitmap, backgroundColor: Int, size: Int, adaptivePadding: Boolean): Bitmap {
+    fun createSquareImage(
+        context: Context,
+        bitmap: Bitmap,
+        backgroundColor: Int,
+        size: Int,
+        adaptivePadding: Boolean
+    ): Bitmap {
 
         // create background
         val background = Paint()
@@ -102,7 +124,17 @@ object ImageHelper {
         // draw input image onto canvas using transformation matrix
         val paint = Paint()
         paint.isFilterBitmap = true
-        imageCanvas.drawBitmap(bitmap, createTransformationMatrix(size, 0, bitmap.height.toFloat(), bitmap.width.toFloat(), adaptivePadding), paint)
+        imageCanvas.drawBitmap(
+            bitmap,
+            createTransformationMatrix(
+                size,
+                0,
+                bitmap.height.toFloat(),
+                bitmap.width.toFloat(),
+                adaptivePadding
+            ),
+            paint
+        )
         return outputImage
     }
 
@@ -110,7 +142,8 @@ object ImageHelper {
     /* Extracts color from an image */
     fun getMainColor(context: Context, imageUri: String): Int {
         // extract color palette from station image
-        val palette: Palette = Palette.from(decodeSampledBitmapFromUri(context, imageUri, 72, 72)).generate()
+        val palette: Palette =
+            Palette.from(decodeSampledBitmapFromUri(context, imageUri, 72, 72)).generate()
         // get muted and vibrant swatches
         val vibrantSwatch = palette.vibrantSwatch
         val mutedSwatch = palette.mutedSwatch
@@ -139,7 +172,12 @@ object ImageHelper {
 
 
     /* Return sampled down image for given Uri */
-    private fun decodeSampledBitmapFromUri(context: Context, imageUriString: String, reqWidth: Int, reqHeight: Int): Bitmap {
+    private fun decodeSampledBitmapFromUri(
+        context: Context,
+        imageUriString: String,
+        reqWidth: Int,
+        reqHeight: Int
+    ): Bitmap {
         var bitmap: Bitmap? = null
         if (imageUriString != Keys.LOCATION_DEFAULT_STATION_IMAGE) {
             try {
@@ -167,7 +205,8 @@ object ImageHelper {
 
         // get default image
         if (bitmap == null) {
-            bitmap = ContextCompat.getDrawable(context, R.drawable.ic_default_station_image_72dp)!!.toBitmap()
+            bitmap = ContextCompat.getDrawable(context, R.drawable.ic_default_station_image_72dp)!!
+                .toBitmap()
         }
 
         return bitmap
@@ -175,7 +214,11 @@ object ImageHelper {
 
 
     /* Calculates parameter needed to scale image down */
-    private fun calculateSampleParameter(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
+    private fun calculateSampleParameter(
+        options: BitmapFactory.Options,
+        reqWidth: Int,
+        reqHeight: Int
+    ): Int {
         // get size of original image
         val height = options.outHeight
         val width = options.outWidth
@@ -197,7 +240,13 @@ object ImageHelper {
 
 
     /* Creates a transformation matrix with the given size and optional padding  */
-    private fun createTransformationMatrix(size: Int, yOffset: Int, inputImageHeight: Float, inputImageWidth: Float, scaled: Boolean): Matrix {
+    private fun createTransformationMatrix(
+        size: Int,
+        yOffset: Int,
+        inputImageHeight: Float,
+        inputImageWidth: Float,
+        scaled: Boolean
+    ): Matrix {
         val matrix = Matrix()
 
         // calculate padding

@@ -26,12 +26,12 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import com.google.gson.GsonBuilder
-import kotlinx.coroutines.*
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
 import com.jamal2367.urlradio.core.Collection
 import com.jamal2367.urlradio.core.Station
 import com.jamal2367.urlradio.search.RadioBrowserResult
+import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import java.io.File
 import java.net.URL
@@ -68,7 +68,7 @@ object CollectionHelper {
     fun hasEnoughTimePassedSinceLastUpdate(): Boolean {
         val lastUpdate: Date = PreferencesHelper.loadLastUpdateCollection()
         val currentDate: Date = Calendar.getInstance().time
-        return currentDate.time - lastUpdate.time  > Keys.MINIMUM_TIME_BETWEEN_UPDATES
+        return currentDate.time - lastUpdate.time > Keys.MINIMUM_TIME_BETWEEN_UPDATES
     }
 
 
@@ -84,9 +84,14 @@ object CollectionHelper {
 
 
     /* Creates station from previously downloaded playlist file */
-    fun createStationFromPlaylistFile(context: Context, localFileUri: Uri, remoteFileLocation: String): Station {
+    fun createStationFromPlaylistFile(
+        context: Context,
+        localFileUri: Uri,
+        remoteFileLocation: String
+    ): Station {
         // read station playlist
-        val station: Station = FileHelper.readStationPlaylist(context.contentResolver.openInputStream(localFileUri))
+        val station: Station =
+            FileHelper.readStationPlaylist(context.contentResolver.openInputStream(localFileUri))
         if (station.name.isEmpty()) {
             // construct name from file name - strips file extension
             station.name = FileHelper.getFileName(context, localFileUri).substringBeforeLast(".")
@@ -115,7 +120,10 @@ object CollectionHelper {
                     // update name - if not changed previously by user
                     if (!it.nameManuallySet) it.name = station.name
                     // re-download station image - if new URL and not changed previously by user
-                    if (!it.imageManuallySet && it.remoteImageLocation != station.remoteImageLocation) DownloadHelper.updateStationImage(context, it)
+                    if (!it.imageManuallySet && it.remoteImageLocation != station.remoteImageLocation) DownloadHelper.updateStationImage(
+                        context,
+                        it
+                    )
                 }
             }
             // sort and save collection
@@ -150,14 +158,16 @@ object CollectionHelper {
     fun addStation(context: Context, collection: Collection, newStation: Station): Collection {
         // check validity
         if (!newStation.isValid()) {
-            Toast.makeText(context, R.string.toastmessage_station_not_valid, Toast.LENGTH_LONG).show()
+            Toast.makeText(context, R.string.toastmessage_station_not_valid, Toast.LENGTH_LONG)
+                .show()
             return collection
         }
         // duplicate check
         else if (!isNewStation(collection, newStation)) {
             // update station
             Handler(Looper.getMainLooper()).post {
-            Toast.makeText(context, R.string.toastmessage_station_duplicate, Toast.LENGTH_LONG).show()
+                Toast.makeText(context, R.string.toastmessage_station_duplicate, Toast.LENGTH_LONG)
+                    .show()
             }
             return collection
         }
@@ -180,12 +190,33 @@ object CollectionHelper {
 
 
     /* Sets station image - determines station by remote image file location */
-    fun setStationImageWithRemoteLocation(context: Context, collection: Collection, tempImageFileUri: String, remoteFileLocation: String, imageManuallySet: Boolean = false): Collection {
+    fun setStationImageWithRemoteLocation(
+        context: Context,
+        collection: Collection,
+        tempImageFileUri: String,
+        remoteFileLocation: String,
+        imageManuallySet: Boolean = false
+    ): Collection {
         collection.stations.forEach { station ->
             // compare image location protocol-agnostic (= without http / https)
-            if (station.remoteImageLocation.substringAfter(":") == remoteFileLocation.substringAfter(":")) {
-                station.smallImage = FileHelper.saveStationImage(context, station.uuid, tempImageFileUri, Keys.SIZE_STATION_IMAGE_CARD, Keys.STATION_IMAGE_FILE).toString()
-                station.image = FileHelper.saveStationImage(context, station.uuid, tempImageFileUri, Keys.SIZE_STATION_IMAGE_MAXIMUM, Keys.STATION_IMAGE_FILE).toString()
+            if (station.remoteImageLocation.substringAfter(":") == remoteFileLocation.substringAfter(
+                    ":"
+                )
+            ) {
+                station.smallImage = FileHelper.saveStationImage(
+                    context,
+                    station.uuid,
+                    tempImageFileUri,
+                    Keys.SIZE_STATION_IMAGE_CARD,
+                    Keys.STATION_IMAGE_FILE
+                ).toString()
+                station.image = FileHelper.saveStationImage(
+                    context,
+                    station.uuid,
+                    tempImageFileUri,
+                    Keys.SIZE_STATION_IMAGE_MAXIMUM,
+                    Keys.STATION_IMAGE_FILE
+                ).toString()
                 station.imageColor = ImageHelper.getMainColor(context, tempImageFileUri)
                 station.imageManuallySet = imageManuallySet
             }
@@ -197,12 +228,30 @@ object CollectionHelper {
 
 
     /* Sets station image - determines station by remote image file location */
-    fun setStationImageWithStationUuid(context: Context, collection: Collection, tempImageFileUri: String, stationUuid: String, imageManuallySet: Boolean = false): Collection {
+    fun setStationImageWithStationUuid(
+        context: Context,
+        collection: Collection,
+        tempImageFileUri: String,
+        stationUuid: String,
+        imageManuallySet: Boolean = false
+    ): Collection {
         collection.stations.forEach { station ->
             // find station by uuid
             if (station.uuid == stationUuid) {
-                station.smallImage = FileHelper.saveStationImage(context, station.uuid, tempImageFileUri, Keys.SIZE_STATION_IMAGE_CARD, Keys.STATION_IMAGE_FILE).toString()
-                station.image = FileHelper.saveStationImage(context, station.uuid, tempImageFileUri, Keys.SIZE_STATION_IMAGE_MAXIMUM, Keys.STATION_IMAGE_FILE).toString()
+                station.smallImage = FileHelper.saveStationImage(
+                    context,
+                    station.uuid,
+                    tempImageFileUri,
+                    Keys.SIZE_STATION_IMAGE_CARD,
+                    Keys.STATION_IMAGE_FILE
+                ).toString()
+                station.image = FileHelper.saveStationImage(
+                    context,
+                    station.uuid,
+                    tempImageFileUri,
+                    Keys.SIZE_STATION_IMAGE_MAXIMUM,
+                    Keys.STATION_IMAGE_FILE
+                ).toString()
                 station.imageColor = ImageHelper.getMainColor(context, tempImageFileUri)
                 station.imageManuallySet = imageManuallySet
             }
@@ -216,14 +265,20 @@ object CollectionHelper {
     /* Clears an image folder for a given station */
     fun clearImagesFolder(context: Context, station: Station) {
         // clear image folder
-        val imagesFolder = File(context.getExternalFilesDir(""), FileHelper.determineDestinationFolderPath(Keys.FILE_TYPE_IMAGE, station.uuid))
+        val imagesFolder = File(
+            context.getExternalFilesDir(""),
+            FileHelper.determineDestinationFolderPath(Keys.FILE_TYPE_IMAGE, station.uuid)
+        )
         FileHelper.clearFolder(imagesFolder, 0)
     }
 
 
     /* Deletes Images of a given station */
     fun deleteStationImages(context: Context, station: Station) {
-        val imagesFolder = File(context.getExternalFilesDir(""), FileHelper.determineDestinationFolderPath(Keys.FILE_TYPE_IMAGE, station.uuid))
+        val imagesFolder = File(
+            context.getExternalFilesDir(""),
+            FileHelper.determineDestinationFolderPath(Keys.FILE_TYPE_IMAGE, station.uuid)
+        )
         FileHelper.clearFolder(imagesFolder, 0, true)
     }
 
@@ -231,9 +286,9 @@ object CollectionHelper {
     /* Get station from collection for given UUID */
     fun getStation(collection: Collection, stationUuid: String): Station {
         collection.stations.forEach { station ->
-                if (station.uuid == stationUuid) {
-                    return station
-                }
+            if (station.uuid == stationUuid) {
+                return station
+            }
         }
         // fallback: return first station
         return if (collection.stations.isNotEmpty()) {
@@ -265,7 +320,7 @@ object CollectionHelper {
         val currentStationPosition: Int = getStationPosition(collection, stationUuid)
         return if (collection.stations.isEmpty() || currentStationPosition == -1) {
             buildMediaItem(Station())
-        } else if (currentStationPosition < collection.stations.size -1) {
+        } else if (currentStationPosition < collection.stations.size - 1) {
             buildMediaItem(collection.stations[currentStationPosition + 1])
         } else {
             buildMediaItem(collection.stations.first())
@@ -286,7 +341,6 @@ object CollectionHelper {
     }
 
 
-
     /* Get the position from collection for given UUID */
     fun getStationPosition(collection: Collection, stationUuid: String): Int {
         collection.stations.forEachIndexed { stationId, station ->
@@ -299,7 +353,10 @@ object CollectionHelper {
 
 
     /* Get the position from collection for given radioBrowserStationUuid */
-    fun getStationPositionFromRadioBrowserStationUuid(collection: Collection, radioBrowserStationUuid: String): Int {
+    fun getStationPositionFromRadioBrowserStationUuid(
+        collection: Collection,
+        radioBrowserStationUuid: String
+    ): Int {
         collection.stations.forEachIndexed { stationId, station ->
             if (station.radioBrowserStationUuid == radioBrowserStationUuid) {
                 return stationId
@@ -357,7 +414,12 @@ object CollectionHelper {
 
 
     /* Saves the playback state of a given station */
-    fun savePlaybackState(context: Context, collection: Collection, stationUuid: String, isPlaying: Boolean): Collection {
+    fun savePlaybackState(
+        context: Context,
+        collection: Collection,
+        stationUuid: String,
+        isPlaying: Boolean
+    ): Collection {
         collection.stations.forEach {
             // reset playback state everywhere
             it.isPlaying = false
@@ -374,7 +436,10 @@ object CollectionHelper {
 
     /* Saves collection of radio stations */
     fun saveCollection(context: Context, collection: Collection, async: Boolean = true): Date {
-        Log.v(TAG, "Saving collection of radio stations to storage. Async = ${async}. Size = ${collection.stations.size}")
+        Log.v(
+            TAG,
+            "Saving collection of radio stations to storage. Async = ${async}. Size = ${collection.stations.size}"
+        )
         // get modification date
         val date: Date = Calendar.getInstance().time
         collection.modificationDate = date
@@ -405,7 +470,12 @@ object CollectionHelper {
         Log.v(TAG, "Exporting collection of stations as M3U")
         // export collection as M3U - launch = fire & forget (no return value from save collection)
         if (collection.stations.size > 0) {
-            CoroutineScope(IO).launch { FileHelper.backupCollectionAsM3uSuspended(context, collection) }
+            CoroutineScope(IO).launch {
+                FileHelper.backupCollectionAsM3uSuspended(
+                    context,
+                    collection
+                )
+            }
         }
     }
 
@@ -437,13 +507,15 @@ object CollectionHelper {
     }
 
 
-
     /* Sends a broadcast containing the collection as parcel */
     fun sendCollectionBroadcast(context: Context, modificationDate: Date) {
         Log.v(TAG, "Broadcasting that collection has changed.")
         val collectionChangedIntent = Intent()
         collectionChangedIntent.action = Keys.ACTION_COLLECTION_CHANGED
-        collectionChangedIntent.putExtra(Keys.EXTRA_COLLECTION_MODIFICATION_DATE, modificationDate.time)
+        collectionChangedIntent.putExtra(
+            Keys.EXTRA_COLLECTION_MODIFICATION_DATE,
+            modificationDate.time
+        )
         LocalBroadcastManager.getInstance(context).sendBroadcast(collectionChangedIntent)
     }
 
@@ -517,13 +589,20 @@ object CollectionHelper {
 
     /* Creates a fallback station - stupid hack for Android Auto compatibility :-/ */
     fun createFallbackStation(): Station {
-        return Station(name = "KCSB", streamUris = mutableListOf("http://live.kcsb.org:80/KCSB_128"), streamContent = Keys.MIME_TYPE_MPEG)
+        return Station(
+            name = "KCSB",
+            streamUris = mutableListOf("http://live.kcsb.org:80/KCSB_128"),
+            streamContent = Keys.MIME_TYPE_MPEG
+        )
     }
 
 
     /* Sorts radio stations by name */
     fun sortCollection(collection: Collection): Collection {
-        collection.stations = collection.stations.sortedWith(compareByDescending<Station> { it.starred }.thenBy { it.name.lowercase(Locale.getDefault()) }) as MutableList<Station>
+        collection.stations =
+            collection.stations.sortedWith(compareByDescending<Station> { it.starred }.thenBy {
+                it.name.lowercase(Locale.getDefault())
+            }) as MutableList<Station>
         return collection
     }
 

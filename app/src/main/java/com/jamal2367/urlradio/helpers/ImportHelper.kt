@@ -33,7 +33,8 @@ object ImportHelper {
     /* Converts older station of type .m3u  */
     fun convertOldStations(context: Context): Boolean {
         val oldStations: ArrayList<Station> = arrayListOf()
-        val oldCollectionFolder: File? = context.getExternalFilesDir(Keys.TRANSISTOR_LEGACY_FOLDER_COLLECTION)
+        val oldCollectionFolder: File? =
+            context.getExternalFilesDir(Keys.TRANSISTOR_LEGACY_FOLDER_COLLECTION)
         if (oldCollectionFolder != null && shouldStartImport(oldCollectionFolder)) {
             CoroutineScope(IO).launch {
                 var success = false
@@ -45,13 +46,26 @@ object ImportHelper {
                         val station: Station = FileHelper.readStationPlaylist(file.inputStream())
                         station.nameManuallySet = true
                         // detect stream content
-                        station.streamContent = NetworkHelper.detectContentType(station.getStreamUri()).type
+                        station.streamContent =
+                            NetworkHelper.detectContentType(station.getStreamUri()).type
                         // try to also import station image
                         val sourceImageUri: String = getLegacyStationImageFileUri(context, station)
                         if (sourceImageUri != Keys.LOCATION_DEFAULT_STATION_IMAGE) {
                             // create and add image and small image + get main color
-                            station.image = FileHelper.saveStationImage(context, station.uuid, sourceImageUri, Keys.SIZE_STATION_IMAGE_CARD, Keys.STATION_IMAGE_FILE).toString()
-                            station.smallImage = FileHelper.saveStationImage(context, station.uuid, sourceImageUri, Keys.SIZE_STATION_IMAGE_MAXIMUM, Keys.STATION_IMAGE_FILE).toString()
+                            station.image = FileHelper.saveStationImage(
+                                context,
+                                station.uuid,
+                                sourceImageUri,
+                                Keys.SIZE_STATION_IMAGE_CARD,
+                                Keys.STATION_IMAGE_FILE
+                            ).toString()
+                            station.smallImage = FileHelper.saveStationImage(
+                                context,
+                                station.uuid,
+                                sourceImageUri,
+                                Keys.SIZE_STATION_IMAGE_MAXIMUM,
+                                Keys.STATION_IMAGE_FILE
+                            ).toString()
                             station.imageColor = ImageHelper.getMainColor(context, sourceImageUri)
                             station.imageManuallySet = true
                         }
@@ -71,7 +85,8 @@ object ImportHelper {
                     // delete files from URLRadio v3
                     oldCollectionFolder.deleteRecursively()
                     // sort and save collection
-                    val newCollection: Collection = CollectionHelper.sortCollection(Collection(stations = oldStations))
+                    val newCollection: Collection =
+                        CollectionHelper.sortCollection(Collection(stations = oldStations))
                     CollectionHelper.saveCollection(context, newCollection)
                 }
             }
@@ -96,7 +111,8 @@ object ImportHelper {
 
     /* Gets Uri for station images created by older URLRadio versions */
     private fun getLegacyStationImageFileUri(context: Context, station: Station): String {
-        val collectionFolder: File? = context.getExternalFilesDir(Keys.TRANSISTOR_LEGACY_FOLDER_COLLECTION)
+        val collectionFolder: File? =
+            context.getExternalFilesDir(Keys.TRANSISTOR_LEGACY_FOLDER_COLLECTION)
         return if (collectionFolder != null && collectionFolder.exists() && collectionFolder.isDirectory) {
             val stationNameCleaned: String = station.name.replace(Regex("[:/]"), "_")
             val legacyStationImage = File("$collectionFolder/$stationNameCleaned.png")

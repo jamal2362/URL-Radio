@@ -36,17 +36,24 @@ object WorkerHelper {
     fun schedulePeriodicUpdateWorker(context: Context): UUID {
         Log.v(TAG, "Starting / Updating periodic work: update collection")
         val requestData: Data = Data.Builder()
-                .putInt(Keys.KEY_DOWNLOAD_WORK_REQUEST, Keys.REQUEST_UPDATE_COLLECTION)
-                .build()
+            .putInt(Keys.KEY_DOWNLOAD_WORK_REQUEST, Keys.REQUEST_UPDATE_COLLECTION)
+            .build()
         Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.UNMETERED)
-                .build()
-        val updateCollectionPeriodicWork = PeriodicWorkRequestBuilder<DownloadWorker>(Keys.UPDATE_REPEAT_INTERVAL, TimeUnit.HOURS, 30, TimeUnit.MINUTES)
-                //.setConstraints(unmeteredConstraint)
-                .setInputData(requestData)
-                .build()
-        WorkManager.getInstance(context).enqueueUniquePeriodicWork(Keys.NAME_PERIODIC_COLLECTION_UPDATE_WORK,
-            ExistingPeriodicWorkPolicy.UPDATE, updateCollectionPeriodicWork)
+            .setRequiredNetworkType(NetworkType.UNMETERED)
+            .build()
+        val updateCollectionPeriodicWork = PeriodicWorkRequestBuilder<DownloadWorker>(
+            Keys.UPDATE_REPEAT_INTERVAL,
+            TimeUnit.HOURS,
+            30,
+            TimeUnit.MINUTES
+        )
+            //.setConstraints(unmeteredConstraint)
+            .setInputData(requestData)
+            .build()
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+            Keys.NAME_PERIODIC_COLLECTION_UPDATE_WORK,
+            ExistingPeriodicWorkPolicy.UPDATE, updateCollectionPeriodicWork
+        )
         return updateCollectionPeriodicWork.id
     }
 

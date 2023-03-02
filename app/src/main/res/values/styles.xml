@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Set AppCompat’s colors -->
         <item name="colorPrimary">#FF495D92</item>
@@ -63,7 +64,7 @@
         <item name="android:textAppearance">@style/TextAppearance.Material3.TitleMedium</item>
     </style>
 
-	<style name="RoundedCorners">
+    <style name="RoundedCorners">
         <item name="cornerSizeTopLeft">16dp</item>
         <item name="cornerFamilyTopLeft">rounded</item>
         <item name="cornerSizeTopRight">16dp</item>

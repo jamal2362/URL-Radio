@@ -38,11 +38,15 @@ class NotificationHelper(private val context: Context) {
 
 
     /* Main class variables */
-    private val notificationManager: NotificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    private val notificationManager: NotificationManager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
 
     /* Builds a notification for given media session and controller */
-    fun getNotification(session: MediaSession, actionFactory: MediaNotification.ActionFactory): Notification {
+    fun getNotification(
+        session: MediaSession,
+        actionFactory: MediaNotification.ActionFactory
+    ): Notification {
         ensureNotificationChannel()
         val player: Player = session.player
         val metadata = player.mediaMetadata
@@ -52,7 +56,10 @@ class NotificationHelper(private val context: Context) {
         builder.addAction(
             actionFactory.createMediaAction(
                 session,
-                IconCompat.createWithResource(context, R.drawable.ic_notification_skip_to_previous_36dp),
+                IconCompat.createWithResource(
+                    context,
+                    R.drawable.ic_notification_skip_to_previous_36dp
+                ),
                 context.getString(R.string.notification_skip_to_previous),
                 Player.COMMAND_SEEK_TO_PREVIOUS
             )
@@ -92,17 +99,23 @@ class NotificationHelper(private val context: Context) {
         )
 
         // define media style properties for notification
-        val mediaStyle: MediaStyleNotificationHelper.MediaStyle = MediaStyleNotificationHelper.MediaStyle(session)
+        val mediaStyle: MediaStyleNotificationHelper.MediaStyle =
+            MediaStyleNotificationHelper.MediaStyle(session)
 //            .setShowCancelButton(true) // only necessary for pre-Lollipop (SDK < 21)
 //            .setCancelButtonIntent(actionFactory.createMediaActionPendingIntent(session, Player.COMMAND_STOP)) // only necessary for pre-Lollipop (SDK < 21)
-            .setShowActionsInCompactView(1 /* Show play/pause button only in compact view */)
+                .setShowActionsInCompactView(1 /* Show play/pause button only in compact view */)
 
         // configure notification content
         builder.apply {
             setContentTitle(metadata.title)
             setContentText(metadata.artist)
             setContentIntent(session.sessionActivity)
-            setDeleteIntent(actionFactory.createMediaActionPendingIntent(session, Player.COMMAND_STOP.toLong()))
+            setDeleteIntent(
+                actionFactory.createMediaActionPendingIntent(
+                    session,
+                    Player.COMMAND_STOP.toLong()
+                )
+            )
             setOnlyAlertOnce(true)
             setSmallIcon(R.drawable.ic_notification_app_icon_white_24dp)
             setLargeIcon(ImageHelper.getStationImage(context, metadata.artworkUri.toString()))
@@ -115,12 +128,14 @@ class NotificationHelper(private val context: Context) {
     }
 
 
-
-
     /* Creates a notification channel if necessary */
     private fun ensureNotificationChannel() {
         if (Util.SDK_INT < 26 || notificationManager.getNotificationChannel(Keys.NOW_PLAYING_NOTIFICATION_CHANNEL_ID) != null) return
-        val channel = NotificationChannel(Keys.NOW_PLAYING_NOTIFICATION_CHANNEL_ID, context.getString(R.string.notification_now_playing_channel_name), NotificationManager.IMPORTANCE_LOW)
+        val channel = NotificationChannel(
+            Keys.NOW_PLAYING_NOTIFICATION_CHANNEL_ID,
+            context.getString(R.string.notification_now_playing_channel_name),
+            NotificationManager.IMPORTANCE_LOW
+        )
         notificationManager.createNotificationChannel(channel)
     }
 

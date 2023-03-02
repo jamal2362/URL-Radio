@@ -42,7 +42,11 @@ import com.jamal2367.urlradio.search.RadioBrowserSearch
 /*
  * FindStationDialog class
  */
-class FindStationDialog (private var context: Context, private var listener: FindFindStationDialogListener): RadioBrowserResultAdapter.RadioBrowserResultAdapterListener, RadioBrowserSearch.RadioBrowserSearchListener {
+class FindStationDialog(
+    private var context: Context,
+    private var listener: FindFindStationDialogListener
+) : RadioBrowserResultAdapter.RadioBrowserResultAdapterListener,
+    RadioBrowserSearch.RadioBrowserSearchListener {
 
     /* Interface used to communicate back to activity */
     interface FindFindStationDialogListener {
@@ -69,7 +73,8 @@ class FindStationDialog (private var context: Context, private var listener: Fin
     override fun onSearchResultTapped(radioBrowserResult: RadioBrowserResult) {
         station = radioBrowserResult.toStation()
         // hide keyboard
-        val imm: InputMethodManager = context.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        val imm: InputMethodManager =
+            context.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(stationSearchBoxView.windowToken, 0)
         // make add button clickable
         activateAddButton()
@@ -133,6 +138,7 @@ class FindStationDialog (private var context: Context, private var listener: Fin
                 handleSearchBoxLiveInput(context, query)
                 return true
             }
+
             override fun onQueryTextSubmit(query: String): Boolean {
                 handleSearchBoxInput(context, query)
                 return true
@@ -158,7 +164,7 @@ class FindStationDialog (private var context: Context, private var listener: Fin
     private fun setupRecyclerView(context: Context) {
         searchResultAdapter = RadioBrowserResultAdapter(this, arrayOf())
         stationSearchResultList.adapter = searchResultAdapter
-        val layoutManager: LinearLayoutManager = object: LinearLayoutManager(context) {
+        val layoutManager: LinearLayoutManager = object : LinearLayoutManager(context) {
             override fun supportsPredictiveItemAnimations(): Boolean {
                 return true
             }
@@ -196,13 +202,17 @@ class FindStationDialog (private var context: Context, private var listener: Fin
             // handle direct URL input
             remoteStationLocation = query
             activateAddButton()
-        } else if (query.contains(" ") || query.length > 1 ) {
+        } else if (query.contains(" ") || query.length > 1) {
             // show progress indicator
             showProgressIndicator()
             // handle search string input - delay request to manage server load (not sure if necessary)
             handler.postDelayed({
                 // only start search if query is the same as one second ago
-                if (currentSearchString == query) radioBrowserSearch.searchStation(context, query, Keys.SEARCH_TYPE_BY_KEYWORD)
+                if (currentSearchString == query) radioBrowserSearch.searchStation(
+                    context,
+                    query,
+                    Keys.SEARCH_TYPE_BY_KEYWORD
+                )
             }, 100)
         } else if (query.isEmpty()) {
             resetLayout(clearAdapter = true)
