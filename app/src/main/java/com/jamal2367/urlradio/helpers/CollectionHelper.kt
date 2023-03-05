@@ -206,18 +206,18 @@ object CollectionHelper {
                 station.smallImage = FileHelper.saveStationImage(
                     context,
                     station.uuid,
-                    tempImageFileUri,
+                    tempImageFileUri.toUri(),
                     Keys.SIZE_STATION_IMAGE_CARD,
                     Keys.STATION_IMAGE_FILE
                 ).toString()
                 station.image = FileHelper.saveStationImage(
                     context,
                     station.uuid,
-                    tempImageFileUri,
+                    tempImageFileUri.toUri(),
                     Keys.SIZE_STATION_IMAGE_MAXIMUM,
                     Keys.STATION_IMAGE_FILE
                 ).toString()
-                station.imageColor = ImageHelper.getMainColor(context, tempImageFileUri)
+                station.imageColor = ImageHelper.getMainColor(context, tempImageFileUri.toUri())
                 station.imageManuallySet = imageManuallySet
             }
         }
@@ -231,7 +231,7 @@ object CollectionHelper {
     fun setStationImageWithStationUuid(
         context: Context,
         collection: Collection,
-        tempImageFileUri: String,
+        tempImageFileUri: Uri,
         stationUuid: String,
         imageManuallySet: Boolean = false
     ): Collection {

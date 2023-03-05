@@ -52,6 +52,7 @@ dependencies {
     // Google Stuff //
     implementation 'com.google.android.material:material:1.9.0-alpha02'
     implementation 'com.google.code.gson:gson:2.9.0'
+    implementation 'androidx.activity:activity-ktx:1.6.1'
 
     // AndroidX Stuff //
     implementation 'androidx.palette:palette-ktx:1.0.0'

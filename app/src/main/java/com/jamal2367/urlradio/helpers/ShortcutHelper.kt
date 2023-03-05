@@ -22,6 +22,7 @@ import android.widget.Toast
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
+import androidx.core.net.toUri
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.MainActivity
 import com.jamal2367.urlradio.R
@@ -71,7 +72,7 @@ object ShortcutHelper {
         stationImageColor: Int
     ): IconCompat {
         val stationImageBitmap: Bitmap =
-            ImageHelper.getScaledStationImage(context, stationImage, 192)
+            ImageHelper.getScaledStationImage(context, stationImage.toUri(), 192)
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             IconCompat.createWithAdaptiveBitmap(
                 ImageHelper.createSquareImage(

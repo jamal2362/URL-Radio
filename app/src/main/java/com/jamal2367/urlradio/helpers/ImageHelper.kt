@@ -40,9 +40,9 @@ object ImageHelper {
 
 
     /* Get a scaled version of the station image */
-    fun getScaledStationImage(context: Context, imageUriString: String, imageSize: Int): Bitmap {
+    fun getScaledStationImage(context: Context, imageUri: Uri, imageSize: Int): Bitmap {
         val size: Int = (imageSize * getDensityScalingFactor(context)).toInt()
-        return decodeSampledBitmapFromUri(context, imageUriString, size, size)
+        return decodeSampledBitmapFromUri(context, imageUri, size, size)
     }
 
 
@@ -140,7 +140,7 @@ object ImageHelper {
 
 
     /* Extracts color from an image */
-    fun getMainColor(context: Context, imageUri: String): Int {
+    fun getMainColor(context: Context, imageUri: Uri): Int {
         // extract color palette from station image
         val palette: Palette =
             Palette.from(decodeSampledBitmapFromUri(context, imageUri, 72, 72)).generate()
@@ -174,15 +174,13 @@ object ImageHelper {
     /* Return sampled down image for given Uri */
     private fun decodeSampledBitmapFromUri(
         context: Context,
-        imageUriString: String,
+        imageUri: Uri,
         reqWidth: Int,
         reqHeight: Int
     ): Bitmap {
         var bitmap: Bitmap? = null
-        if (imageUriString != Keys.LOCATION_DEFAULT_STATION_IMAGE) {
+        if (imageUri.toString() != Keys.LOCATION_DEFAULT_STATION_IMAGE) {
             try {
-                val imageUri: Uri = imageUriString.toUri()
-
                 // first decode with inJustDecodeBounds=true to check dimensions
                 var stream: InputStream? = context.contentResolver.openInputStream(imageUri)
                 val options = BitmapFactory.Options()
