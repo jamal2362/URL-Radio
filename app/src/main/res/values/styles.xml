@@ -12,7 +12,7 @@
         <item name="elevationOverlayEnabled">false</item>
 
         <!-- Switch Theming  -->
-        <item name="switchStyle">@style/Widget.Material3.CompoundButton.MaterialSwitch</item>
+        <item name="switchPreferenceCompatStyle">@style/Preference.SwitchPreferenceCompat.Material3</item>
 
         <!-- Material Alert Dialog Theming -->
         <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog</item>
@@ -20,6 +20,10 @@
 
         <!-- Use "light" Status Bar -->
         <item name="android:statusBarColor">@android:color/black</item>
+    </style>
+
+    <style name="Preference.SwitchPreferenceCompat.Material3" parent="@style/Preference.SwitchPreferenceCompat.Material">
+        <item name="widgetLayout">@layout/preference_switch</item>
     </style>
 
     <style name="ThemeOverlay.App.MaterialAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
