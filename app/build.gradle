@@ -14,7 +14,7 @@ android {
         targetSdkVersion 33
         versionCode 94
         versionName '9.4'
-        resConfigs 'en', 'ar', 'cs', 'fr', 'de', 'it', 'ru', 'tr'
+        resConfigs 'en', 'ar', 'cs', 'fr', 'de', 'it', 'pt', 'ru', 'tr'
         setProperty('archivesBaseName', 'URL_Radio_' + versionName)
     }
 
