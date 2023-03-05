@@ -15,6 +15,7 @@
 package com.jamal2367.urlradio.helpers
 
 import android.content.Context
+import androidx.core.net.toUri
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.core.Collection
 import com.jamal2367.urlradio.core.Station
@@ -55,18 +56,18 @@ object ImportHelper {
                             station.image = FileHelper.saveStationImage(
                                 context,
                                 station.uuid,
-                                sourceImageUri,
+                                sourceImageUri.toUri(),
                                 Keys.SIZE_STATION_IMAGE_CARD,
                                 Keys.STATION_IMAGE_FILE
                             ).toString()
                             station.smallImage = FileHelper.saveStationImage(
                                 context,
                                 station.uuid,
-                                sourceImageUri,
+                                sourceImageUri.toUri(),
                                 Keys.SIZE_STATION_IMAGE_MAXIMUM,
                                 Keys.STATION_IMAGE_FILE
                             ).toString()
-                            station.imageColor = ImageHelper.getMainColor(context, sourceImageUri)
+                            station.imageColor = ImageHelper.getMainColor(context, sourceImageUri.toUri())
                             station.imageManuallySet = true
                         }
                         // improvise a name if empty

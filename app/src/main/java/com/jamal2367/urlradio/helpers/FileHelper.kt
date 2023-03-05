@@ -190,7 +190,7 @@ object FileHelper {
     fun saveStationImage(
         context: Context,
         stationUuid: String,
-        sourceImageUri: String,
+        sourceImageUri: Uri,
         size: Int,
         fileName: String
     ): Uri {

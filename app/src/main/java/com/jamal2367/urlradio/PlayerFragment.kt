@@ -33,6 +33,8 @@ import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
@@ -90,7 +92,7 @@ class PlayerFragment : Fragment(),
     private lateinit var layout: LayoutHolder
     private lateinit var collectionAdapter: CollectionAdapter
     private lateinit var controllerFuture: ListenableFuture<MediaController>
-    private lateinit var pickSingleMediaLauncher: ActivityResultLauncher<Intent>
+    private lateinit var pickSingleMediaLauncher: ActivityResultLauncher<PickVisualMediaRequest>
     private lateinit var queue: RequestQueue
     private val controller: MediaController?
         get() = if (controllerFuture.isDone) controllerFuture.get() else null // defines the Getter for the MediaController
@@ -137,24 +139,18 @@ class PlayerFragment : Fragment(),
 
         // Initialize single media picker launcher
         pickSingleMediaLauncher =
-            registerForActivityResult(StartActivityForResult()) {
-                if (it.resultCode != RESULT_OK) {
+            registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { imageUri ->
+                if (imageUri == null) {
                     Snackbar.make(requireView(), R.string.toastalert_failed_picking_media, Snackbar.LENGTH_LONG).show()
                 } else {
-                    if (it.data != null) {
-                        val imageUri: Uri? = it.data?.data
-                        if (imageUri != null) {
-                            collection = CollectionHelper.setStationImageWithStationUuid(
-                                activity as Context,
-                                collection,
-                                imageUri.toString(),
-                                tempStationUuid,
-                                imageManuallySet = true
-                            )
-                            tempStationUuid = String()
-                        }
-                    }
-
+                    collection = CollectionHelper.setStationImageWithStationUuid(
+                        activity as Context,
+                        collection,
+                        imageUri,
+                        tempStationUuid,
+                        imageManuallySet = true
+                    )
+                    tempStationUuid = String()
                 }
             }
 
@@ -252,41 +248,6 @@ class PlayerFragment : Fragment(),
         super.onDestroy()
         queue.cancelAll(TAG)
     }
-
-
-    /* Register the ActivityResultLauncher */
-    private val requestLoadImageLauncher = registerForActivityResult(StartActivityForResult(), this::requestLoadImageResult)
-
-
-    /* Pass the activity result */
-    private fun requestLoadImageResult(result: ActivityResult) {
-        if (result.resultCode == RESULT_OK && result.data != null) {
-            val imageUri: Uri? = result.data?.data
-            if (imageUri != null) {
-                collection = CollectionHelper.setStationImageWithStationUuid(
-                    activity as Context,
-                    collection,
-                    imageUri.toString(),
-                    tempStationUuid,
-                    imageManuallySet = true
-                )
-                tempStationUuid = String()
-            }
-        }
-    }
-
-    /* Register permission launcher */
-    private val requestPermissionLauncher =
-        registerForActivityResult(RequestPermission()) { isGranted: Boolean ->
-            if (isGranted) {
-                // permission granted
-                pickImage()
-            } else {
-                // permission denied
-                Snackbar.make(requireView(), R.string.toastmessage_error_missing_storage_permission, Snackbar.LENGTH_LONG).show()
-            }
-        }
-
 
     /* Overrides onSharedPreferenceChanged from OnSharedPreferenceChangeListener */
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
@@ -583,37 +544,10 @@ class PlayerFragment : Fragment(),
     }
 
 
-    /* Check permissions and start image picker */
+    /* Start image picker */
     private fun pickImage() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            pickSingleMediaLauncher.launch(
-                Intent(MediaStore.ACTION_PICK_IMAGES)
-                    .apply {
-                        type = "image/*"
-                    }
-            )
-        } else {
-            if (ContextCompat.checkSelfPermission(activity as Context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                // permission READ_EXTERNAL_STORAGE not granted - request permission
-                requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
-            } else {
-                // permission READ_EXTERNAL_STORAGE granted - get system picker for images
-                val pickImageIntent =
-                    Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-                try {
-                    requestLoadImageLauncher.launch(pickImageIntent)
-                } catch (e: Exception) {
-                    Log.e(TAG, "Unable to select image. Probably no image picker available.")
-                    Snackbar.make(
-                        requireView(),
-                        R.string.toastalert_no_image_picker,
-                        Snackbar.LENGTH_LONG
-                    ).show()
-                }
-            }
-        }
+        pickSingleMediaLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
     }
-
 
     /* Handles this activity's start intent */
     private fun handleStartIntent() {
