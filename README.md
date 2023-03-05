@@ -1,17 +1,20 @@
 # URL Radio a fork from Transistor
 [![GitHub license](https://img.shields.io/github/license/jamal2362/URL-Radio)](https://github.com/jamal2362/URL-Radio/blob/master/LICENSE.md) [![GitHub issues](https://img.shields.io/github/issues/jamal2362/URL-Radio)](https://github.com/jamal2362/URL-Radio/issues) [![Crowdin](https://badges.crowdin.net/url-radio/localized.svg)](https://crowdin.com/project/url-radio)
 
+
+<details>
+<summary>📜️Credit</summary>
+<sub>Base app from [y20k](https://codeberg.org/y20k/transistor)</sub>
+</details>
+
+
 #### URL Radio is an app with a minimalistic approach for listening to radio programs over the internet, which may not be to everyone's liking. It has no radio station discovery feature.
 #### URL Radio only offers a very simple search option and it imports audio streaming links when you tap them in a web browser.
 #### URL Radio is free software. It is published under the [MIT open source license](https://opensource.org/licenses/MIT).
 
 
 ## Install URL Radio
-#### You can install URL-Radio via Google Play or IzzyOnDroid repo, compatible with F-Droid!
-
-[<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png"
-     alt="Get it on Google Play"
-     height="100">](https://play.google.com/store/apps/details?id=com.jamal2367.urlradio)
+#### You can install URL-Radio via GitHub Releases or IzzyOnDroid repo, compatible with F-Droid!
 [<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png"
      alt="Get it on IzzyOnDroid"
      height="100">](https://apt.izzysoft.de/fdroid/index/apk/com.jamal2367.urlradio)
@@ -33,6 +36,8 @@ URL Radio searches the [radio-browser.info](http://www.radio-browser.info/) onli
 #### Which audio formats are supported?
 URL Radio can play back streams encoded in MP3, AAC and Ogg/Opus. It also has experimental support for HLS streams.
 
-
-## Credits goes to @y20k
-#### [GitHub](https://github.com/y20k/transistor)
+<div align="right">
+<table><td>
+<a href="#start-of-content">↥ Scroll to top</a>
+</td></table>
+</div>
