@@ -24,6 +24,7 @@ import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.navigateUp
 import com.jamal2367.urlradio.helpers.AppThemeHelper
 import com.jamal2367.urlradio.helpers.FileHelper
+import com.jamal2367.urlradio.helpers.ImportHelper
 import com.jamal2367.urlradio.helpers.PreferencesHelper
 
 
@@ -41,9 +42,15 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         // house-keeping: determine if edit stations is enabled by default todo: remove in 2023
-        if (PreferencesHelper.loadCollectionSize() != -1) {
-            // existing user detected - enable Edit Stations by default
-            PreferencesHelper.saveEditStationsEnabled(true)
+        if (PreferencesHelper.isHouseKeepingNecessary()) {
+            // house-keeping 1: remove hard coded default image
+            ImportHelper.removeDefaultStationImageUris(this)
+            // house-keeping 2: if existing user detected, enable Edit Stations by default
+            if (PreferencesHelper.loadCollectionSize() != -1) {
+                // existing user detected - enable Edit Stations by default
+                PreferencesHelper.saveEditStationsEnabled(true)
+            }
+            PreferencesHelper.saveHouseKeepingNecessaryState()
         }
 
         // set up views

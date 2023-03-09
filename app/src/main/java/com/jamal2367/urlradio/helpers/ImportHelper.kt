@@ -31,8 +31,24 @@ import java.util.*
  */
 object ImportHelper {
 
+
+    /* */
+    fun removeDefaultStationImageUris(context: Context) {
+        val collection: Collection = FileHelper.readCollection(context)
+        collection.stations.forEach { station ->
+            if (station.image == Keys.LOCATION_DEFAULT_STATION_IMAGE) {
+                station.image = String()
+            }
+            if (station.smallImage == Keys.LOCATION_DEFAULT_STATION_IMAGE) {
+                station.smallImage = String()
+            }
+        }
+        CollectionHelper.saveCollection(context, collection, async = false)
+    }
+
+
     /* Converts older station of type .m3u  */
-    fun convertOldStations(context: Context): Boolean {
+    fun convertOldStations(context: Context): Any {
         val oldStations: ArrayList<Station> = arrayListOf()
         val oldCollectionFolder: File? =
             context.getExternalFilesDir(Keys.TRANSISTOR_LEGACY_FOLDER_COLLECTION)
@@ -51,7 +67,7 @@ object ImportHelper {
                             NetworkHelper.detectContentType(station.getStreamUri()).type
                         // try to also import station image
                         val sourceImageUri: String = getLegacyStationImageFileUri(context, station)
-                        if (sourceImageUri != Keys.LOCATION_DEFAULT_STATION_IMAGE) {
+                        if (sourceImageUri.isNotEmpty()) {
                             // create and add image and small image + get main color
                             station.image = FileHelper.saveStationImage(
                                 context,
@@ -92,11 +108,11 @@ object ImportHelper {
                 }
             }
             // import has been started
-            return true
+            return String()
+
         } else {
             // import has NOT been started
-            return false
-
+            return String()
         }
     }
 

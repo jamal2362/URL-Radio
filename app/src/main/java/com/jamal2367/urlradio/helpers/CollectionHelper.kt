@@ -572,7 +572,11 @@ object CollectionHelper {
         val mediaMetadata = MediaMetadata.Builder().apply {
             setArtist(station.name)
             //setTitle(station.name)
-            setArtworkUri(station.image.toUri())
+            if (station.image.isEmpty()) {
+                setArtworkUri(Uri.parse(Keys.LOCATION_RESOURCES + R.raw.ic_default_station_image))
+            } else {
+                setArtworkUri(station.image.toUri())
+            }
             setFolderType(MediaMetadata.FOLDER_TYPE_NONE)
             setIsPlayable(true)
         }.build()

@@ -22,8 +22,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.net.toUri
 import androidx.palette.graphics.Palette
-import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
+import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
 
@@ -50,7 +50,7 @@ object ImageHelper {
     fun getStationImage(context: Context, imageUriString: String): Bitmap {
         var bitmap: Bitmap? = null
 
-        if (imageUriString != Keys.LOCATION_DEFAULT_STATION_IMAGE) {
+        if (imageUriString.isNotEmpty()) {
             try {
                 // just decode the file
                 bitmap = BitmapFactory.decodeFile(imageUriString.toUri().path)
@@ -66,6 +66,25 @@ object ImageHelper {
         }
 
         return bitmap
+    }
+
+
+    /* Returns a byte array for given image uri */
+    fun getStationImageByteArray(context: Context, imageUri: Uri): ByteArray {
+        val byteArray: ByteArray
+        val stream: InputStream? = context.contentResolver.openInputStream(imageUri)
+        val byteBuffer = ByteArrayOutputStream()
+        val bufferSize = 1024
+        val buffer = ByteArray(bufferSize)
+        var len: Int
+        if (stream != null) {
+            while (stream.read(buffer).also { len = it } != -1) {
+                byteBuffer.write(buffer, 0, len)
+            }
+            stream.close()
+        }
+        byteArray = byteBuffer.toByteArray()
+        return byteArray
     }
 
 
@@ -179,7 +198,7 @@ object ImageHelper {
         reqHeight: Int
     ): Bitmap {
         var bitmap: Bitmap? = null
-        if (imageUri.toString() != Keys.LOCATION_DEFAULT_STATION_IMAGE) {
+        if (imageUri.toString().isNotEmpty()) {
             try {
                 // first decode with inJustDecodeBounds=true to check dimensions
                 var stream: InputStream? = context.contentResolver.openInputStream(imageUri)

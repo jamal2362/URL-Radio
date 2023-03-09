@@ -134,6 +134,17 @@ object FileHelper {
     }
 
 
+    /* Get an Uri for a given resource id */
+    fun getAndroidResourceUri(context: Context, resourceId: Int): Uri {
+        return Uri.Builder().apply {
+            scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+            authority(context.resources.getResourcePackageName(resourceId))
+            appendPath(context.resources.getResourceTypeName(resourceId))
+            appendPath(context.resources.getResourceEntryName(resourceId))
+        }.build()
+    }
+
+
     /* Clears given folder - keeps given number of files */
     fun clearFolder(folder: File?, keep: Int, deleteFolder: Boolean = false) {
         if (folder != null && folder.exists()) {
