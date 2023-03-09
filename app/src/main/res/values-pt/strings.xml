@@ -59,10 +59,43 @@
     <string name="pref_app_version_summary">Versão</string>
     <string name="pref_app_version_title">Versão da aplicação</string>
     <string name="pref_backup_import_export_title">Importar e exportar</string>
+    <string name="pref_edit_station_title">Editar estações</string>
+    <string name="pref_general_title">Geral</string>
+    <string name="pref_m3u_export_summary">Guarde as suas estações de rádio num ficheiro M3U, que pode ser importado para outros reprodutores.</string>
+    <string name="pref_m3u_export_title">Exportar M3U</string>
+    <string name="pref_maintenance_title">Manutenção</string>
+    <string name="pref_report_issue_summary">Reporte erros ou sugestões em GitHub.</string>
+    <string name="pref_report_issue_title">Reportar problemas</string>
+    <string name="pref_station_export_summary">Guardar coleção de estações de rádio, incluindo imagens, no armazenamento do dispositivo.</string>
+    <string name="pref_station_export_title">Exportar estação</string>
+    <string name="pref_station_restore_summary">Restaurar coleção de estações de rádio de um backup. As estações existentes serão substituídas.</string>
+    <string name="pref_station_restore_title">Restaurar estações</string>
+    <string name="pref_theme_selection_mode_dark">Modo escuro</string>
+    <string name="pref_theme_selection_mode_device_default">Igual ao do dispositivo</string>
+    <string name="pref_theme_selection_mode_light">Modo claro</string>
+    <string name="pref_theme_selection_summary">Tema atual:</string>
+    <string name="pref_theme_selection_title">Tema da aplicação</string>
+    <string name="pref_update_station_images_summary">Descarregar última versão da imagem das estações.</string>
+    <string name="pref_update_station_images_title">Atualizar imagens das estações</string>
     <!-- Sample Text -->
     <!-- App Shortcuts -->
+    <string name="shortcut_last_station_long_label">Reproduzir última estação</string>
+    <string name="shortcut_last_station_short_label">Última estação</string>
     <!-- Station List -->
+    <string name="station_list_button_add_new_station">Adicionar nova estação</string>
     <!-- Toast Alerts -->
+    <string name="toastalert_failed_picking_media">Falha ao selecionar imagem.</string>
     <!-- Toasts -->
+    <string name="toastmessage_copied_to_clipboard">Copiado para a área de transferência.</string>
+    <string name="toastmessage_error_download_error">Erro ao descarregar</string>
+    <string name="toastmessage_error_missing_storage_permission">Conceda a permissão \"Read Storage\" para abrir este ficheiro.</string>
+    <string name="toastmessage_error_no_station_found">Não foi possível iniciar a reprodução. Por favor, adicione uma estação de rádio primeiro.</string>
+    <string name="toastmessage_error_no_station_matches_search">Incapaz de encontrar uma estação que corresponda com a sua pesquisa.</string>
+    <string name="toastmessage_error_restart_playback_failed">Não foi possível reiniciar a reprodução.</string>
+    <string name="toastmessage_install_file_helper">Instale um gestor de ficheiros.</string>
+    <string name="toastmessage_restored">Estações restauradas com sucesso.</string>
+    <string name="toastmessage_save_m3u">Guardar estações de rádio para M3U…</string>
+    <string name="toastmessage_shortcut_created">Atalho criado.</string>
+    <string name="toastmessage_shortcut_not_created">Atalho não criado. Este dispositivo não permite a criação de atalhos.</string>
     <!-- Snackbars -->
 </resources>
