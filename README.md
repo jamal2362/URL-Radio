@@ -28,6 +28,21 @@ Total number of downloads:
 ----------------------------------------
 
 <details>
+<summary>🚗 Enable URL Radio in Android Auto</summary>
+<br>
+It is possible to use URL Radio on Android Auto if you have enabled unknown sources in Android Auto developer settings.
+
+To enable:
+- Go to Android Auto settings and tap Version about 10 times to enable developer settings.
+- Tap on the hamburger menu on the top right and tap on Developer Settings.
+- Enable unknown sources.
+
+URL Radio should be available in Android Auto the next time you launch it.
+</details>
+
+----------------------------------------
+
+<details>
 <summary>🔠 Help to Translate</summary>
 <br>
 
