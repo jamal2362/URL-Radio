@@ -116,16 +116,13 @@ You can help out the radio-browser.info community by [adding the missing station
 <img src="https://user-images.githubusercontent.com/15986930/225977309-9bf131ff-9e53-4492-856f-26ba013e691d.png" alt="Screenshot 5" height="600">  
   <br>
   <br>
-<img src="https://user-images.githubusercontent.com/15986930/225977312-29c164a1-de21-4269-886d-846712b7f598.png" alt="Screenshot 6" height="600">  
+<img src="https://user-images.githubusercontent.com/15986930/225977316-5132c64a-692f-4293-91cc-d006cafe1ceb.png" alt="Screenshot 6" height="600">  
   <br>
   <br>
-<img src="https://user-images.githubusercontent.com/15986930/225977315-3a976578-aa49-43ac-bcbd-5253c4d758b1.png" alt="Screenshot 7" height="600"> 
+<img src="https://user-images.githubusercontent.com/15986930/225977312-29c164a1-de21-4269-886d-846712b7f598.png" alt="Screenshot 7" height="600">   
   <br>
   <br>
-<img src="https://user-images.githubusercontent.com/15986930/225977316-5132c64a-692f-4293-91cc-d006cafe1ceb.png" alt="Screenshot 8" height="600">  
-  <br>
-  <br>
-<img src="https://user-images.githubusercontent.com/15986930/225977319-f3bde476-0c55-4d1e-a380-11d3b2d8a5d8.png" alt="Screenshot 9" height="600">  
+<img src="https://user-images.githubusercontent.com/15986930/225977319-f3bde476-0c55-4d1e-a380-11d3b2d8a5d8.png" alt="Screenshot 8" height="600">  
   
 </details>
 
