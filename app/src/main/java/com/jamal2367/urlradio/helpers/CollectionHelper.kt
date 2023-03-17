@@ -21,6 +21,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.widget.Toast
+import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.media3.common.MediaItem
@@ -573,11 +574,11 @@ object CollectionHelper {
             setArtist(station.name)
             //setTitle(station.name)
             if (station.image.isNotEmpty()) {
-                setArtworkUri(station.image.toUri())
-//                setArtworkUri(Uri.parse(Keys.LOCATION_RESOURCES + R.raw.ic_default_station_image))
-//                setArtworkUri(FileHelper.getContentUriForFile(context, station.image.toUri().toFile()))
+                //setArtworkUri(station.image.toUri())
+                setArtworkData(station.image.toUri().toFile().readBytes(), MediaMetadata.PICTURE_TYPE_FRONT_COVER)
             } else {
-                setArtworkUri(Uri.parse(Keys.LOCATION_RESOURCES + R.raw.ic_default_station_image))
+                //setArtworkUri(Uri.parse(Keys.LOCATION_RESOURCES + R.raw.ic_default_station_image))
+                setArtworkData(ImageHelper.getStationImageAsByteArray(context), MediaMetadata.PICTURE_TYPE_FRONT_COVER)
             }
             setFolderType(MediaMetadata.FOLDER_TYPE_NONE)
             setIsPlayable(true)
