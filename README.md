@@ -58,7 +58,7 @@ We would be very happy if you help us with the translation.
 
 <details>
 <summary>💡 Frequent Questions</summary>
-<br>
+
 Q: How can I add a radio station  
 A: There are three ways to add a radio station to URL Radio: Use Search, add playlist file address (M3U, PLS), enter a raw stream address. The last way will not support the update feature.
 
