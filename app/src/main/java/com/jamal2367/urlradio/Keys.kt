@@ -107,7 +107,7 @@ object Keys {
     const val DEFAULT_MAX_LENGTH_OF_METADATA_ENTRY: Int = 127
     const val DEFAULT_DOWNLOAD_OVER_MOBILE: Boolean = false
     const val ACTIVE_DOWNLOADS_EMPTY: String = "zero"
-    const val DEFAULT_MAX_RECONNECTION_COUNT: Int = 20
+    const val DEFAULT_MAX_RECONNECTION_COUNT: Int = 30
     const val LARGE_BUFFER_SIZE_MULTIPLIER: Int = 8
 
     // media browser

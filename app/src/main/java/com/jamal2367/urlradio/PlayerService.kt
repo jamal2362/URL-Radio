@@ -21,6 +21,7 @@ import android.media.audiofx.AudioEffect
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.os.Handler
 import android.util.Log
 import android.widget.Toast
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -597,17 +598,25 @@ class PlayerService : MediaLibraryService() {
     }
 
 
+    fun pausePlayback() {
+        Handler(player.applicationLooper).post {
+            player.pause()
+            Toast.makeText(this, R.string.toastmessage_error_restart_playback_failed, Toast.LENGTH_LONG).show()
+        }
+    }
+
+
     /*
      * Custom LoadErrorHandlingPolicy that network drop outs
      */
     private val loadErrorHandlingPolicy: DefaultLoadErrorHandlingPolicy =
         object : DefaultLoadErrorHandlingPolicy() {
             override fun getRetryDelayMsFor(loadErrorInfo: LoadErrorHandlingPolicy.LoadErrorInfo): Long {
-                // try to reconnect every 5 seconds - up to 20 times
+                // try to reconnect every 5 seconds - up to 30 times
                 return if (loadErrorInfo.errorCount <= Keys.DEFAULT_MAX_RECONNECTION_COUNT && loadErrorInfo.exception is HttpDataSource.HttpDataSourceException) {
                     Keys.RECONNECTION_WAIT_INTERVAL
                 } else {
-                    player.pause()
+                    pausePlayback()
                     C.TIME_UNSET
                 }
             }
