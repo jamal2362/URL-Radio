@@ -98,7 +98,6 @@
     <string name="toastmessage_error_missing_storage_permission">Accordez la permission \"Lire le stockage\" pour ouvrir ce fichier.</string>
     <string name="toastmessage_error_no_station_found">Impossible de lancer la lecture. Veuillez d\'abord ajouter une station.</string>
     <string name="toastmessage_error_no_station_matches_search">Impossible de trouver une station qui correspond à votre recherche.</string>
-    <string name="toastmessage_error_restart_playback_failed">Impossible de relancer la lecture.</string>
     <string name="toastmessage_install_file_helper">Veuillez installer un gestionnaire de fichiers.</string>
     <string name="toastmessage_restored">Les stations ont été restaurées avec succès.</string>
     <string name="toastmessage_save_m3u">Enregistrement des stations radio en M3U…</string>

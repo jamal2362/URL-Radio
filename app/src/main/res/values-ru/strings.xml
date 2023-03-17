@@ -98,7 +98,6 @@
     <string name="toastmessage_error_missing_storage_permission">Предоставьте разрешение \"читать хранилище\" для открытия этого файла.</string>
     <string name="toastmessage_error_no_station_found">Не удаётся запустить воспроизведение. Пожалуйста, добавьте сперва радиостанцию.</string>
     <string name="toastmessage_error_no_station_matches_search">Не удаётся найти станцию, соответствующую вашему поиску.</string>
-    <string name="toastmessage_error_restart_playback_failed">Невозможно перезапустить воспроизведение.</string>
     <string name="toastmessage_install_file_helper">Пожалуйста, установите файловый менеджер.</string>
     <string name="toastmessage_restored">Станции были успешно восстановлены.</string>
     <string name="toastmessage_save_m3u">Сохранение радиостанций как M3U…</string>

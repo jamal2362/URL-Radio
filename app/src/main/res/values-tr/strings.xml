@@ -104,7 +104,6 @@
     <string name="toastmessage_error_missing_storage_permission">Bu dosyayı açmak için \"Depolamayı Oku\" izni verin.</string>
     <string name="toastmessage_error_no_station_found">Oynatma başlatılamadı. Lütfen önce bir radyo istasyonu ekleyin.</string>
     <string name="toastmessage_error_no_station_matches_search">Aramanızla eşleşen bir istasyon bulunamadı.</string>
-    <string name="toastmessage_error_restart_playback_failed">Oynatma yeniden başlatılamadı.</string>
     <string name="toastmessage_install_file_helper">Lütfen bir dosya yöneticisi kurun.</string>
     <string name="toastmessage_restored">Yedekleme başarıyla geri yüklendi.</string>
     <string name="toastmessage_save_m3u">Radyo istasyonları M3U formatında kaydediliyor…</string>

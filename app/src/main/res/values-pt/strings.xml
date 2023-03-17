@@ -91,7 +91,6 @@
     <string name="toastmessage_error_missing_storage_permission">Conceda a permissão \"Read Storage\" para abrir este ficheiro.</string>
     <string name="toastmessage_error_no_station_found">Não foi possível iniciar a reprodução. Por favor, adicione uma estação de rádio primeiro.</string>
     <string name="toastmessage_error_no_station_matches_search">Incapaz de encontrar uma estação que corresponda com a sua pesquisa.</string>
-    <string name="toastmessage_error_restart_playback_failed">Não foi possível reiniciar a reprodução.</string>
     <string name="toastmessage_install_file_helper">Instale um gestor de ficheiros.</string>
     <string name="toastmessage_restored">Estações restauradas com sucesso.</string>
     <string name="toastmessage_save_m3u">Guardar estações de rádio para M3U…</string>

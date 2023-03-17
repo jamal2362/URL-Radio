@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- App Name -->
     <!-- Accessibility Descriptions -->
     <string name="descr_app_icon">App-Symbol in der Form eines alten Radios</string>
     <string name="descr_card_small_play_button">Start/Stopp</string>
@@ -15,7 +16,6 @@
     <string name="descr_expanded_player_sleep_timer_start_button">Schlaf-Timer starten</string>
     <string name="descr_player_playback_button">Start/Pause</string>
     <string name="descr_player_station_image">Senderbild</string>
-	
     <!-- Dialogs -->
     <string name="dialog_edit_save_changes">Speichern</string>
     <string name="dialog_edit_station_name">Sendername</string>
@@ -38,10 +38,8 @@
     <string name="dialog_yes_no_positive_button_default">Ja</string>
     <string name="dialog_yes_no_positive_button_remove_station">Entfernen</string>
     <string name="dialog_yes_no_positive_button_update_covers">Aktualisieren</string>
-	
     <!-- Fragment -->
     <string name="fragment_settings_title">Einstellungen</string>
-	
     <!-- Notification -->
     <string name="notification_now_playing_channel_description">Wiedergabesteuerungen, Sendername und Bild.</string>
     <string name="notification_now_playing_channel_name">Wiedergabesteuerung</string>
@@ -50,17 +48,13 @@
     <string name="notification_playing">Spielen</string>
     <string name="notification_skip_to_previous">Zurück</string>
     <string name="notification_skip_to_next">Nächste</string>
-
-
     <!-- Onboarding -->
     <string name="onboarding_app_description">Radio App</string>
     <string name="onboarding_app_get_started">Jetzt starten</string>
     <string name="onboarding_app_import_running">Importiere deine Sender. Bitte warten…</string>
-	
     <!-- Player -->
     <string name="player_sheet_h2_station_metadata">Momentan läuft</string>
     <string name="player_sheet_h2_stream_url">Streaming-Adresse</string>
-	
     <!-- Settings -->
     <string name="pref_about_title">Über</string>
     <string name="pref_advanced_title">Erweitert</string>
@@ -93,19 +87,16 @@
     <string name="pref_theme_selection_title">App-Design</string>
     <string name="pref_update_station_images_summary">Die neueste Version aller Senderbilder herunterladen.</string>
     <string name="pref_update_station_images_title">Senderbilder aktualisieren</string>
-	
+    <!-- Sample Text -->
     <!-- App Shortcuts -->
     <string name="shortcut_last_station_disabled_message">Verknüpfung für Wiedergabe des letzten Senders deaktiviert.</string>
     <string name="shortcut_last_station_long_label">Letzten Sender wiedergeben</string>
     <string name="shortcut_last_station_short_label">Letzter Sender</string>
-	
     <!-- Station List -->
     <string name="station_list_button_add_new_station">Neuen Sender hinzufügen</string>
-	
     <!-- Toast Alerts -->
     <string name="toastalert_failed_picking_media">Bildauswahl fehlgeschlagen.</string>
     <string name="toastalert_no_image_picker">Bildauswahl nicht verfügbar. Installation einer Galerie-Anwendung notwendig.</string>
-	
     <!-- Toasts -->
     <string name="toastmessage_backed_up">wurde erfolgreich gesichert.</string>
     <string name="toastmessage_copied_to_clipboard">In die Zwischenablage kopiert</string>
@@ -124,7 +115,6 @@
     <string name="toastmessage_station_not_valid">Dieser Sender existiert nicht</string>
     <string name="toastmessage_updating_collection">Alle Sender werden aktualisiert</string>
     <string name="toastmessage_updating_station_images">Alle Senderbilder werden aktualisiert</string>
-
     <!-- Snackbars -->
     <string name="snackbar_show">Zeigen</string>
     <string name="snackbar_update_available">ist verfügbar!</string>

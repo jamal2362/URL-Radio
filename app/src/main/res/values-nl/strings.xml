@@ -104,7 +104,6 @@
     <string name="toastmessage_error_missing_storage_permission">Verleen \"Opslag Uitlezen\" toestemming om dit bestand te openen.</string>
     <string name="toastmessage_error_no_station_found">Kan afspelen niet starten. Voeg alstublieft eerst een radiozender toe.</string>
     <string name="toastmessage_error_no_station_matches_search">Kan geen radiozender vinden die aan de zoekopdracht voldoet.</string>
-    <string name="toastmessage_error_restart_playback_failed">Kan het afspelen niet herstarten.</string>
     <string name="toastmessage_install_file_helper">Installeer alstublieft een bestandsbeheer applicatie.</string>
     <string name="toastmessage_restored">Zenders zijn succesvol hersteld.</string>
     <string name="toastmessage_save_m3u">Radiozenders opslaan als M3U…</string>
