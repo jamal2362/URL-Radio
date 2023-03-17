@@ -125,7 +125,7 @@
     <string name="toastmessage_error_missing_storage_permission">Grant \"Read Storage\" permission to open this file.</string>
     <string name="toastmessage_error_no_station_found">Unable to start playback. Please add a radio station first.</string>
     <string name="toastmessage_error_no_station_matches_search">Unable to find a station that matches your search.</string>
-    <string name="toastmessage_error_restart_playback_failed">Unable to restart playback.</string>
+    <string name="toastmessage_error_restart_playback_failed">Unable to start or restart playback.</string>
     <string name="toastmessage_install_file_helper">Please install a file manager.</string>
     <string name="toastmessage_restored">Stations has been successfully restored.</string>
     <string name="toastmessage_save_m3u">Saving radio stations as M3U…</string>

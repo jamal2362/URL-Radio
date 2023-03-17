@@ -113,7 +113,7 @@
     <string name="toastmessage_error_missing_storage_permission">Erteile die Berechtigung „Speicher lesen“, um diese Datei zu öffnen</string>
     <string name="toastmessage_error_no_station_found">Die Wiedergabe konnte nicht gestartet werden. Bitte füge zuerst einen Radiosender hinzu.</string>
     <string name="toastmessage_error_no_station_matches_search">Es konnte kein Sender gefunden werden, der deiner Suche entspricht</string>
-    <string name="toastmessage_error_restart_playback_failed">Die Wiedergabe konnte nicht neu gestartet werden</string>
+    <string name="toastmessage_error_restart_playback_failed">Die Wiedergabe konnte nicht gestartet oder neu gestartet werden</string>
     <string name="toastmessage_install_file_helper">Bitte installiere einen Dateimanager</string>
     <string name="toastmessage_restored">Stationen wurden erfolgreich wiederhergestellt.</string>
     <string name="toastmessage_save_m3u">Radiosender als M3U gespeichert…</string>
