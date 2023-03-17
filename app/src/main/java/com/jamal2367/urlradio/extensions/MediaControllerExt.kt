@@ -14,6 +14,7 @@
 
 package com.jamal2367.urlradio.extensions
 
+import android.content.Context
 import android.os.Bundle
 import androidx.core.os.bundleOf
 import androidx.media3.session.MediaController
@@ -56,10 +57,10 @@ fun MediaController.requestMetadataHistory(): ListenableFuture<SessionResult> {
 
 
 /* Starts playback with a new media item */
-fun MediaController.play(station: Station) {
+fun MediaController.play(context: Context, station: Station) {
     if (isPlaying) pause()
     // set media item, prepare and play
-    setMediaItem(CollectionHelper.buildMediaItem(station))
+    setMediaItem(CollectionHelper.buildMediaItem(context, station))
     prepare()
     play()
 }

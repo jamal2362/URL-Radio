@@ -280,7 +280,7 @@ class PlayerService : MediaLibraryService() {
         ): ListenableFuture<List<MediaItem>> {
             val updatedMediaItems: List<MediaItem> =
                 mediaItems.map { mediaItem ->
-                    CollectionHelper.getItem(collection, mediaItem.mediaId)
+                    CollectionHelper.getItem(this@PlayerService, collection, mediaItem.mediaId)
 //                    if (mediaItem.requestMetadata.searchQuery != null)
 //                        getMediaItemFromSearchQuery(mediaItem.requestMetadata.searchQuery!!)
 //                    else MediaItemTree.getItem(mediaItem.mediaId) ?: mediaItem
@@ -317,7 +317,7 @@ class PlayerService : MediaLibraryService() {
             parentId: String,
             params: LibraryParams?
         ): ListenableFuture<LibraryResult<Void>> {
-            val children: List<MediaItem> = CollectionHelper.getChildren(collection)
+            val children: List<MediaItem> = CollectionHelper.getChildren(this@PlayerService, collection)
             session.notifyChildrenChanged(browser, parentId, children.size, params)
             return Futures.immediateFuture(LibraryResult.ofVoid())
         }
@@ -330,7 +330,7 @@ class PlayerService : MediaLibraryService() {
             pageSize: Int,
             params: LibraryParams?
         ): ListenableFuture<LibraryResult<ImmutableList<MediaItem>>> {
-            val children: List<MediaItem> = CollectionHelper.getChildren(collection)
+            val children: List<MediaItem> = CollectionHelper.getChildren(this@PlayerService, collection)
             return Futures.immediateFuture(LibraryResult.ofItemList(children, params))
         }
 
@@ -342,19 +342,9 @@ class PlayerService : MediaLibraryService() {
             return if (params?.extras?.containsKey(EXTRA_RECENT) == true) {
                 // special case: system requested media resumption via EXTRA_RECENT
                 playLastStation = true
-                Futures.immediateFuture(
-                    LibraryResult.ofItem(
-                        CollectionHelper.getRecent(collection),
-                        params
-                    )
-                )
+                Futures.immediateFuture(LibraryResult.ofItem(CollectionHelper.getRecent(this@PlayerService, collection), params))
             } else {
-                Futures.immediateFuture(
-                    LibraryResult.ofItem(
-                        CollectionHelper.getRootItem(),
-                        params
-                    )
-                )
+                Futures.immediateFuture(LibraryResult.ofItem(CollectionHelper.getRootItem(), params))
             }
         }
 
@@ -363,7 +353,7 @@ class PlayerService : MediaLibraryService() {
             browser: MediaSession.ControllerInfo,
             mediaId: String
         ): ListenableFuture<LibraryResult<MediaItem>> {
-            val item: MediaItem = CollectionHelper.getItem(collection, mediaId)
+            val item: MediaItem = CollectionHelper.getItem(this@PlayerService, collection, mediaId)
             return Futures.immediateFuture(LibraryResult.ofItem(item, /* params = */ null))
         }
 
@@ -421,6 +411,7 @@ class PlayerService : MediaLibraryService() {
                 Player.COMMAND_SEEK_TO_NEXT -> {
                     player.addMediaItem(
                         CollectionHelper.getNextMediaItem(
+                            this@PlayerService,
                             collection,
                             player.currentMediaItem?.mediaId ?: String()
                         )
@@ -432,6 +423,7 @@ class PlayerService : MediaLibraryService() {
                 Player.COMMAND_SEEK_TO_PREVIOUS -> {
                     player.addMediaItem(
                         CollectionHelper.getPreviousMediaItem(
+                            this@PlayerService,
                             collection,
                             player.currentMediaItem?.mediaId ?: String()
                         )
@@ -443,7 +435,7 @@ class PlayerService : MediaLibraryService() {
                 Player.COMMAND_PREPARE -> {
                     return if (playLastStation) {
                         // special case: system requested media resumption (see also onGetLibraryRoot)
-                        player.addMediaItem(CollectionHelper.getRecent(collection))
+                        player.addMediaItem(CollectionHelper.getRecent(this@PlayerService, collection))
                         player.prepare()
                         playLastStation = false
                         SessionResult.RESULT_SUCCESS

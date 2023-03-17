@@ -323,7 +323,7 @@ class PlayerFragment : Fragment(),
         // CASE: the selected station is not playing (another station might be playing)
         else {
             // start playback
-            controller?.play(CollectionHelper.getStation(collection, stationUuid))
+            controller?.play(activity as Context, CollectionHelper.getStation(collection, stationUuid))
         }
     }
 
@@ -577,10 +577,10 @@ class PlayerFragment : Fragment(),
     private fun handleStartPlayer() {
         val intent: Intent = (activity as Activity).intent
         if (intent.hasExtra(Keys.EXTRA_START_LAST_PLAYED_STATION)) {
-            controller?.play(CollectionHelper.getStation(collection, playerState.stationUuid))
+            controller?.play(activity as Context, CollectionHelper.getStation(collection, playerState.stationUuid))
         } else if (intent.hasExtra(Keys.EXTRA_STATION_UUID)) {
             val uuid: String = intent.getStringExtra(Keys.EXTRA_STATION_UUID) ?: String()
-            controller?.play(CollectionHelper.getStation(collection, uuid))
+            controller?.play(activity as Context, CollectionHelper.getStation(collection, uuid))
         } else if (intent.hasExtra(Keys.EXTRA_STREAM_URI)) {
             val streamUri: String = intent.getStringExtra(Keys.EXTRA_STREAM_URI) ?: String()
             controller?.playStreamDirectly(streamUri)

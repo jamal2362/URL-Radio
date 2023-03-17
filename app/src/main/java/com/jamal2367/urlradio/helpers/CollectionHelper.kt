@@ -316,27 +316,27 @@ object CollectionHelper {
 
 
     /* Gets MediaIem for next station within collection */
-    fun getNextMediaItem(collection: Collection, stationUuid: String): MediaItem {
+    fun getNextMediaItem(context: Context, collection: Collection, stationUuid: String): MediaItem {
         val currentStationPosition: Int = getStationPosition(collection, stationUuid)
         return if (collection.stations.isEmpty() || currentStationPosition == -1) {
-            buildMediaItem(Station())
-        } else if (currentStationPosition < collection.stations.size - 1) {
-            buildMediaItem(collection.stations[currentStationPosition + 1])
+            buildMediaItem(context, Station())
+        } else if (currentStationPosition < collection.stations.size -1) {
+            buildMediaItem(context, collection.stations[currentStationPosition + 1])
         } else {
-            buildMediaItem(collection.stations.first())
+            buildMediaItem(context, collection.stations.first())
         }
     }
 
 
     /* Gets MediaIem for previous station within collection */
-    fun getPreviousMediaItem(collection: Collection, stationUuid: String): MediaItem {
+    fun getPreviousMediaItem(context: Context, collection: Collection, stationUuid: String): MediaItem {
         val currentStationPosition: Int = getStationPosition(collection, stationUuid)
         return if (collection.stations.isEmpty() || currentStationPosition == -1) {
-            buildMediaItem(Station())
+            buildMediaItem(context, Station())
         } else if (currentStationPosition > 0) {
-            buildMediaItem(collection.stations[currentStationPosition - 1])
+            buildMediaItem(context, collection.stations[currentStationPosition - 1])
         } else {
-            buildMediaItem(collection.stations.last())
+            buildMediaItem(context, collection.stations.last())
         }
     }
 
@@ -378,24 +378,24 @@ object CollectionHelper {
 
 
     /* Returns the children stations under under root (simple media library structure: root > stations) */
-    fun getChildren(collection: Collection): List<MediaItem> {
+    fun getChildren(context: Context, collection: Collection): List<MediaItem> {
         val mediaItems: MutableList<MediaItem> = mutableListOf()
         collection.stations.forEach { station ->
-            mediaItems.add(buildMediaItem(station))
+            mediaItems.add(buildMediaItem(context, station))
         }
         return mediaItems
     }
 
 
     /* Returns media item for given station id */
-    fun getItem(collection: Collection, stationUuid: String): MediaItem {
-        return buildMediaItem(getStation(collection, stationUuid))
+    fun getItem(context: Context, collection: Collection, stationUuid: String): MediaItem {
+        return buildMediaItem(context, getStation(collection, stationUuid))
     }
 
 
     /* Returns media item for last played station */
-    fun getRecent(collection: Collection): MediaItem {
-        return buildMediaItem(getStation(collection, PreferencesHelper.loadLastPlayedStationUuid()))
+    fun getRecent(context: Context, collection: Collection): MediaItem {
+        return buildMediaItem(context, getStation(collection, PreferencesHelper.loadLastPlayedStationUuid()))
     }
 
 
@@ -562,7 +562,7 @@ object CollectionHelper {
 
 
     /* Creates a MediaItem with MediaMetadata for a single radio station - used to prepare player */
-    fun buildMediaItem(station: Station): MediaItem {
+    fun buildMediaItem(context: Context, station: Station): MediaItem {
         // todo implement HLS MediaItems
         // put uri in RequestMetadata - credit: https://stackoverflow.com/a/70103460
         val requestMetadata = MediaItem.RequestMetadata.Builder().apply {
@@ -572,10 +572,12 @@ object CollectionHelper {
         val mediaMetadata = MediaMetadata.Builder().apply {
             setArtist(station.name)
             //setTitle(station.name)
-            if (station.image.isEmpty()) {
-                setArtworkUri(Uri.parse(Keys.LOCATION_RESOURCES + R.raw.ic_default_station_image))
-            } else {
+            if (station.image.isNotEmpty()) {
                 setArtworkUri(station.image.toUri())
+//                setArtworkUri(Uri.parse(Keys.LOCATION_RESOURCES + R.raw.ic_default_station_image))
+//                setArtworkUri(FileHelper.getContentUriForFile(context, station.image.toUri().toFile()))
+            } else {
+                setArtworkUri(Uri.parse(Keys.LOCATION_RESOURCES + R.raw.ic_default_station_image))
             }
             setFolderType(MediaMetadata.FOLDER_TYPE_NONE)
             setIsPlayable(true)

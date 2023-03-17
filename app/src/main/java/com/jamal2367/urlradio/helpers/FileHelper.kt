@@ -362,6 +362,12 @@ object FileHelper {
     }
 
 
+    /* Returns content:// Uri for given file:// path */
+    fun getContentUriForFile(context: Context, file: File): Uri {
+        return FileProvider.getUriForFile(context, "${context.applicationContext.packageName}.provider", file)
+    }
+
+
     /* Suspend function: Wrapper for saveCollection */
     suspend fun saveCollectionSuspended(
         context: Context,
