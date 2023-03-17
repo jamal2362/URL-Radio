@@ -58,7 +58,7 @@ We would be very happy if you help us with the translation.
 
 <details>
 <summary>💡 Frequent Questions</summary>
-
+<br>
 Q: How can I add a radio station  
 A: There are three ways to add a radio station to URL Radio: Use Search, add playlist file address (M3U, PLS), enter a raw stream address. The last way will not support the update feature.
 
@@ -91,6 +91,42 @@ You can help out the radio-browser.info community by [adding the missing station
 | OPUS               | ✅ |
 | PLS                | ✅ |
 | HLS (Experimental) | ⚠️ |
+</details>
+
+----------------------------------------
+
+<details>
+<summary>📱 Screenshots</summary>
+  <br>
+<img src="https://user-images.githubusercontent.com/15986930/225977291-a47b1126-b9d5-44c2-acff-582def3605c4.png" alt="Screenshot" height="600"> 
+  <br> 
+  <br>
+<img src="https://user-images.githubusercontent.com/15986930/225977296-2d15495e-6bdc-486c-ab63-560aec77db28.png" alt="Screenshot 1" height="600">  
+  <br>
+  <br>
+<img src="https://user-images.githubusercontent.com/15986930/225977299-06c88ff6-bc2a-45ce-9401-7f2d4af6f103.png" alt="Screenshot 2" height="600">  
+  <br>
+  <br>
+<img src="https://user-images.githubusercontent.com/15986930/225977303-c9020998-7945-4897-9d29-3a639770a953.png" alt="Screenshot 3" height="600">  
+  <br>
+  <br>
+<img src="https://user-images.githubusercontent.com/15986930/225977307-569475a4-0d99-47b7-b88d-f837c7247f3b.png" alt="Screenshot 4" height="600">  
+  <br>
+  <br>
+<img src="https://user-images.githubusercontent.com/15986930/225977309-9bf131ff-9e53-4492-856f-26ba013e691d.png" alt="Screenshot 5" height="600">  
+  <br>
+  <br>
+<img src="https://user-images.githubusercontent.com/15986930/225977312-29c164a1-de21-4269-886d-846712b7f598.png" alt="Screenshot 6" height="600">  
+  <br>
+  <br>
+<img src="https://user-images.githubusercontent.com/15986930/225977315-3a976578-aa49-43ac-bcbd-5253c4d758b1.png" alt="Screenshot 7" height="600"> 
+  <br>
+  <br>
+<img src="https://user-images.githubusercontent.com/15986930/225977316-5132c64a-692f-4293-91cc-d006cafe1ceb.png" alt="Screenshot 8" height="600">  
+  <br>
+  <br>
+<img src="https://user-images.githubusercontent.com/15986930/225977319-f3bde476-0c55-4d1e-a380-11d3b2d8a5d8.png" alt="Screenshot 9" height="600">  
+  
 </details>
 
 ----------------------------------------
