@@ -14,15 +14,15 @@
 <summary>⚙️ Install URL Radio</summary>
 <br>
 
-[![Izzy](https://abload.de/img/1dmebg.png)](https://apt.izzysoft.de/fdroid/index/apk/com.jamal2367.urlradio)
-
-or get the latest APK from GitHub
+Get the latest APK from GitHub
 
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/jamal2362/URL-Radio)](https://github.com/jamal2362/URL-Radio/releases/latest) 
 
-Total number of downloads:
-
 [![GitHub all releases](https://img.shields.io/github/downloads/jamal2362/URL-Radio/total)](https://github.com/jamal2362/URL-Radio/releases/latest)
+
+or
+
+[![Izzy](https://abload.de/img/1dmebg.png)](https://apt.izzysoft.de/fdroid/index/apk/com.jamal2367.urlradio)
 </details>
 
 ----------------------------------------
