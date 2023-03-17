@@ -131,7 +131,7 @@ You can help out the radio-browser.info community by [adding the missing station
 <details>
 <summary>📜️ Credit</summary>
 
-Base app from [![y20k]()](https://codeberg.org/y20k/transistor) - (Transistor)
+Base app [Transistor ❤️](https://codeberg.org/y20k/transistor)
 </details>
 
 <div align="right">
