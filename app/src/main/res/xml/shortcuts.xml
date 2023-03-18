@@ -10,7 +10,7 @@
         android:shortcutShortLabel="@string/shortcut_last_station_short_label">
 
         <intent
-            android:action="org.y20k.transistor.action.START"
+            android:action="com.jamal2367.urlradio.action.START"
             android:targetClass="com.jamal2367.urlradio.MainActivity"
             android:targetPackage="com.jamal2367.urlradio">
             <extra

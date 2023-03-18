@@ -346,7 +346,7 @@ object FileHelper {
             File(activity.getExternalFilesDir(Keys.FOLDER_COLLECTION), Keys.COLLECTION_M3U_FILE)
         if (!m3uFile.exists()) {
             m3uFile = File(
-                activity.getExternalFilesDir(Keys.TRANSISTOR_LEGACY_FOLDER_COLLECTION),
+                activity.getExternalFilesDir(Keys.URLRADIO_LEGACY_FOLDER_COLLECTION),
                 Keys.COLLECTION_M3U_FILE
             )
         }

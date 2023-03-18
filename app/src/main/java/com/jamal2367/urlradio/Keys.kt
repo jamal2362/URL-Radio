@@ -175,7 +175,7 @@ object Keys {
     const val FOLDER_AUDIO: String = "audio"
     const val FOLDER_IMAGES: String = "images"
     const val FOLDER_TEMP: String = "temp"
-    const val TRANSISTOR_LEGACY_FOLDER_COLLECTION: String = "Collection"
+    const val URLRADIO_LEGACY_FOLDER_COLLECTION: String = "Collection"
 
     // file names and extensions
     const val COLLECTION_FILE: String = "collection.json"
@@ -183,7 +183,7 @@ object Keys {
     const val COLLECTION_BACKUP_FILE: String = "URL_Radio-Backup.zip"
     const val STATION_IMAGE_FILE: String = "station-image.jpg"
     const val DEBUG_LOG_FILE: String = "log-can-be-deleted.txt"
-    const val TRANSISTOR_LEGACY_STATION_FILE_EXTENSION: String = ".m3u"
+    const val URLRADIO_LEGACY_STATION_FILE_EXTENSION: String = ".m3u"
 
     // server addresses
     const val RADIO_BROWSER_API_BASE: String = "all.api.radio-browser.info"

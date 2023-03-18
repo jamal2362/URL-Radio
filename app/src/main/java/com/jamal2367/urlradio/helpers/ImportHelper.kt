@@ -51,14 +51,14 @@ object ImportHelper {
     fun convertOldStations(context: Context): Any {
         val oldStations: ArrayList<Station> = arrayListOf()
         val oldCollectionFolder: File? =
-            context.getExternalFilesDir(Keys.TRANSISTOR_LEGACY_FOLDER_COLLECTION)
+            context.getExternalFilesDir(Keys.URLRADIO_LEGACY_FOLDER_COLLECTION)
         if (oldCollectionFolder != null && shouldStartImport(oldCollectionFolder)) {
             CoroutineScope(IO).launch {
                 var success = false
                 // start import
                 oldCollectionFolder.listFiles()?.forEach { file ->
                     // look for station files from URLRadio v3
-                    if (file.name.endsWith(Keys.TRANSISTOR_LEGACY_STATION_FILE_EXTENSION)) {
+                    if (file.name.endsWith(Keys.URLRADIO_LEGACY_STATION_FILE_EXTENSION)) {
                         // read stream uri and name
                         val station: Station = FileHelper.readStationPlaylist(file.inputStream())
                         station.nameManuallySet = true
@@ -129,7 +129,7 @@ object ImportHelper {
     /* Gets Uri for station images created by older URLRadio versions */
     private fun getLegacyStationImageFileUri(context: Context, station: Station): String {
         val collectionFolder: File? =
-            context.getExternalFilesDir(Keys.TRANSISTOR_LEGACY_FOLDER_COLLECTION)
+            context.getExternalFilesDir(Keys.URLRADIO_LEGACY_FOLDER_COLLECTION)
         return if (collectionFolder != null && collectionFolder.exists() && collectionFolder.isDirectory) {
             val stationNameCleaned: String = station.name.replace(Regex("[:/]"), "_")
             val legacyStationImage = File("$collectionFolder/$stationNameCleaned.png")
