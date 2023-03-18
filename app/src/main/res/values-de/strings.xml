@@ -111,7 +111,7 @@
     <string name="toastmessage_shortcut_created">Sender auf Startbildschirm platzieren</string>
     <string name="toastmessage_shortcut_not_created">Sender konnte nicht auf dem Startbildschirm platziert werden. Das Gerät unterbindet das Platzieren von Verknüpfungen.</string>
     <string name="toastmessage_sleep_timer_unable_to_start">Bitte zuerst die Wiedergabe starten</string>
-    <string name="toastmessage_station_duplicate">Sender duplizieren</string>
+    <string name="toastmessage_station_duplicate">Dieser Sender ist ein Duplikat</string>
     <string name="toastmessage_station_not_valid">Dieser Sender existiert nicht</string>
     <string name="toastmessage_updating_collection">Alle Sender werden aktualisiert</string>
     <string name="toastmessage_updating_station_images">Alle Senderbilder werden aktualisiert</string>

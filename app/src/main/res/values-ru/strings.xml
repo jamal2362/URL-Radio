@@ -104,7 +104,6 @@
     <string name="toastmessage_shortcut_created">Ярлык создан.</string>
     <string name="toastmessage_shortcut_not_created">Ярлык не создан. Устройство не позволяет создавать ярлыки.</string>
     <string name="toastmessage_sleep_timer_unable_to_start">Пожалуйста, запустите сперва воспроизведение.</string>
-    <string name="toastmessage_station_duplicate">Дубликат станции.</string>
     <string name="toastmessage_station_not_valid">Станция не действительна.</string>
     <string name="toastmessage_updating_collection">Обновление коллекции станций.</string>
     <string name="toastmessage_updating_station_images">Обновление изображений станций.</string>

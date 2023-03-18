@@ -55,7 +55,6 @@
     <string name="toastmessage_shortcut_created">Zástupce vytvořen.</string>
     <string name="toastmessage_shortcut_not_created">Nelze vytvořit zástupce. Toto zařízení nepodporuje tvorbu zástupců.</string>
     <string name="toastmessage_sleep_timer_unable_to_start">Nejprve spusťte přehrávání.</string>
-    <string name="toastmessage_station_duplicate">Duplicitní stanice.</string>
     <string name="toastmessage_station_not_valid">Neplatná stanice.</string>
     <string name="toastmessage_updating_collection">Akualizování kolekce stanic.</string>
     <string name="toastmessage_updating_station_images">Akualizování obrázků stanic.</string>

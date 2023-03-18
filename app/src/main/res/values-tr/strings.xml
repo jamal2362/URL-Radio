@@ -110,7 +110,6 @@
     <string name="toastmessage_shortcut_created">Kısayol oluşturuldu.</string>
     <string name="toastmessage_shortcut_not_created">Kısayol oluşturulamadı. Bu cihaz kısayolların oluşturulmasına izin vermiyor.</string>
     <string name="toastmessage_sleep_timer_unable_to_start">Lütfen önce bir şeyler oynat.</string>
-    <string name="toastmessage_station_duplicate">Bu istasyon zaten eklendi.</string>
     <string name="toastmessage_station_not_valid">İstasyon geçerli değil.</string>
     <string name="toastmessage_updating_collection">İstasyon koleksiyonu güncelleniyor.</string>
     <string name="toastmessage_updating_station_images">İstasyon görüntüleri güncelleniyor.</string>

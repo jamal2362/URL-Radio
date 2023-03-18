@@ -132,7 +132,7 @@
     <string name="toastmessage_shortcut_created">Shortcut created.</string>
     <string name="toastmessage_shortcut_not_created">Shortcut not created. This device does not allow the creation of shortcuts.</string>
     <string name="toastmessage_sleep_timer_unable_to_start">Please start playback first.</string>
-    <string name="toastmessage_station_duplicate">Duplicate station.</string>
+    <string name="toastmessage_station_duplicate">This station is a duplicate.</string>
     <string name="toastmessage_station_not_valid">Station is not valid.</string>
     <string name="toastmessage_updating_collection">Updating collection of stations.</string>
     <string name="toastmessage_updating_station_images">Updating station images.</string>

@@ -104,7 +104,6 @@
     <string name="toastmessage_shortcut_created">Raccourci créé.</string>
     <string name="toastmessage_shortcut_not_created">Raccourci non créé. Cet appareil ne permet pas la création de raccourcis.</string>
     <string name="toastmessage_sleep_timer_unable_to_start">Veuillez d\'abord lancer la lecture.</string>
-    <string name="toastmessage_station_duplicate">Station en doublon.</string>
     <string name="toastmessage_station_not_valid">La station n\'est pas valide.</string>
     <string name="toastmessage_updating_collection">Mise à jour de la collection des stations.</string>
     <string name="toastmessage_updating_station_images">Mise à jour des images de la station.</string>

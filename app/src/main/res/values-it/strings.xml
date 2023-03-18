@@ -104,7 +104,6 @@
     <string name="toastmessage_shortcut_created">Scorciatoia creata.</string>
     <string name="toastmessage_shortcut_not_created">Scorciatoia non creata. Questo dispositivo non consente la creazione di scorciatoie.</string>
     <string name="toastmessage_sleep_timer_unable_to_start">Avvia prima la riproduzione.</string>
-    <string name="toastmessage_station_duplicate">Stazione già presente.</string>
     <string name="toastmessage_station_not_valid">Stazione non valida.</string>
     <string name="toastmessage_updating_collection">Aggiornamento raccolta stazioni.</string>
     <string name="toastmessage_updating_station_images">Aggiornamento immagini stazione.</string>

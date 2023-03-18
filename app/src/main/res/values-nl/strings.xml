@@ -110,7 +110,6 @@
     <string name="toastmessage_shortcut_created">Snelkoppeling gemaakt.</string>
     <string name="toastmessage_shortcut_not_created">Snelkoppeling niet gemaakt. Dit apparaat staat het niet toe snelkoppelingen aan te maken.</string>
     <string name="toastmessage_sleep_timer_unable_to_start">Start alstublieft eerst het afspelen.</string>
-    <string name="toastmessage_station_duplicate">Dubbele zender.</string>
     <string name="toastmessage_station_not_valid">Zender is ongeldig.</string>
     <string name="toastmessage_updating_collection">Verzameling van zenders bijwerken.</string>
     <string name="toastmessage_updating_station_images">Zenderafbeeldingen bijwerken.</string>
