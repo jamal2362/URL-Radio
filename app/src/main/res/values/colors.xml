@@ -31,7 +31,7 @@
     <!-- player sheet -->
     <color name="player_play_pause_icon">#FFFFFFFF</color>
     <color name="player_button_background">#FF495D92</color>
-    <color name="player_button_buffering">#FFE57373</color>
+    <color name="player_button_buffering">#FFDAE2FF</color>
     <color name="player_sheet_background">#FF2E3038</color>
     <color name="player_sheet_text_main">#FFF4EFF4</color>
     <color name="player_sheet_text_details">#FFF4EFF4</color>

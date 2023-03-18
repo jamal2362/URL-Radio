@@ -717,7 +717,9 @@ class PlayerFragment : Fragment(),
         override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
             super.onPlayWhenReadyChanged(playWhenReady, reason)
 
-            playerState.sleepTimerRunning = false
+            if (playWhenReady && controller?.isPlaying == false) {
+                layout.showBufferingIndicator(buffering = true)
+            }
         }
     }
     /*
