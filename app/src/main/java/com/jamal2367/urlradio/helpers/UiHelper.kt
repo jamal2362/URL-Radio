@@ -200,7 +200,7 @@ object UiHelper {
             // draw red delete background
             background.color = backgroundColor
             background.setBounds(
-                itemView.right + dX.toInt(),
+                itemView.left + 75,
                 itemView.top,
                 itemView.right,
                 itemView.bottom
@@ -307,7 +307,7 @@ object UiHelper {
             background.setBounds(
                 itemView.left,
                 itemView.top,
-                itemView.left + dX.toInt(),
+                itemView.right + -75,
                 itemView.bottom
             ) // left - top - right - bottom
             background.draw(c)
