@@ -1,28 +1,23 @@
-# URL Radio a fork from Transistor
+<div align="center">
+<img src="https://user-images.githubusercontent.com/15986930/229205087-1f4f420e-fa4d-4fc8-b88f-5a996b8985cf.png" alt="URL Radio Banner">
 
 ### ℹ️ About URL Radio
+**URL Radio is a fork from Transistor.** <br>
+**URL Radio is an application with a minimalist approach to listening to radio over the Internet.** <br>
+**URL Radio only offers a very basic search option, and it imports audio streaming links when you tap them in a web browser.** <br>
+**Pull request are welcome at any time.**<br>
 
-#### URL Radio is an application with a minimalist approach to listening to radio over the Internet.  
-#### URL Radio only offers a very basic search option, and it imports audio streaming links when you tap them in a web browser.  
-#### URL Radio is free software. It is released under the [MIT open source license](https://opensource.org/licenses/MIT).
-
-[![GitHub license](https://img.shields.io/github/license/jamal2362/URL-Radio)](https://github.com/jamal2362/URL-Radio/blob/master/LICENSE.md) 
+**URL Radio is free software. It is released under the [MIT open source license](https://opensource.org/licenses/MIT).**
+</div>
 
 ----------------------------------------
 
 <details>
 <summary>⚙️ Install URL Radio</summary>
 <br>
-
-Get the latest APK from GitHub
-
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/jamal2362/URL-Radio)](https://github.com/jamal2362/URL-Radio/releases/latest) 
-
-[![GitHub all releases](https://img.shields.io/github/downloads/jamal2362/URL-Radio/total)](https://github.com/jamal2362/URL-Radio/releases/latest)
-
-or
-
-[![Izzy](https://abload.de/img/1dmebg.png)](https://apt.izzysoft.de/fdroid/index/apk/com.jamal2367.urlradio)
+<a href="https://github.com/jamal2362/URL-Radio/releases/latest"><img src="https://user-images.githubusercontent.com/15986930/229208526-e5a63be5-0d0b-48ab-a222-9f2f2faf0ee4.png" height="80px"></a>
+<a href="https://apt.izzysoft.de/fdroid/index/apk/com.jamal2367.urlradio"><img src="https://user-images.githubusercontent.com/15986930/229206676-6dcb5180-68d6-4339-aa0c-b9a0a4eed71c.png" height="80px"></a>
+<a href="https://play.google.com/store/apps/details?id=com.jamal2367.urlradio"><img src="https://user-images.githubusercontent.com/15986930/229209473-c7ab4c54-5fec-4955-b8e8-2cbdfbdcc991.png" height="80px"></a>
 </details>
 
 ----------------------------------------
