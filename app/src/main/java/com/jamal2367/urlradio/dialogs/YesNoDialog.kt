@@ -104,8 +104,5 @@ class YesNoDialog(private var yesNoDialogListener: YesNoDialogListener) {
         // display dialog
         dialog = builder.create()
         dialog.show()
-
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).isAllCaps = true
-        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).isAllCaps = true
     }
 }
