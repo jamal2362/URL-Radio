@@ -7,7 +7,6 @@
     <string name="descr_card_starred_station">已加星的电台</string>
     <string name="descr_card_station_image_change">更改电台图标</string>
     <string name="descr_card_station_image">电台图标</string>
-    <string name="descr_dialog_edit_place_on_home_screen_icon">置于主屏幕</string>
     <string name="descr_expanded_player_metadata_copy_button">复制“正在播放”信息</string>
     <string name="descr_expanded_player_metadata_next_button">下一个“正在播放”元数据条目</string>
     <string name="descr_expanded_player_metadata_previous_button">上一个“正在播放”元数据条目</string>
@@ -17,7 +16,6 @@
     <string name="descr_player_playback_button">播放/暂停</string>
     <string name="descr_player_station_image">电台图标</string>
     <!-- Dialogs -->
-    <string name="dialog_edit_save_changes">保存</string>
     <string name="dialog_edit_station_name">电台名称</string>
     <string name="dialog_edit_stream_uri">串流地址</string>
     <string name="dialog_error_message_default">发生了错误</string>
@@ -34,7 +32,6 @@
     <string name="dialog_yes_no_message_remove_station">删除这个电台？</string>
     <string name="dialog_yes_no_message_restore_collection">使用备份替换当前的电台合集？</string>
     <string name="dialog_yes_no_message_update_station_images">为所有电台下载最新版本的图标？</string>
-    <string name="dialog_yes_no_negative_button_cancel">取消</string>
     <string name="dialog_yes_no_positive_button_default">是的</string>
     <string name="dialog_yes_no_positive_button_remove_station">移除</string>
     <string name="dialog_yes_no_positive_button_update_covers">更新</string>

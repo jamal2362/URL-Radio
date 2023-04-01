@@ -7,14 +7,12 @@
     <string name="descr_card_starred_station">Избранная станция</string>
     <string name="descr_card_station_image_change">Изменить изображение станции</string>
     <string name="descr_card_station_image">Изображение станции</string>
-    <string name="descr_dialog_edit_place_on_home_screen_icon">Поместить на домашний экран</string>
     <string name="descr_expanded_player_sleep_timer_cancel_button">Отменить таймер сна</string>
     <string name="descr_expanded_player_sleep_timer_remaining_time">Время, оставшееся в таймере сна</string>
     <string name="descr_expanded_player_sleep_timer_start_button">Запустить таймер сна</string>
     <string name="descr_player_playback_button">Играть/пауза</string>
     <string name="descr_player_station_image">Изображение станции</string>
     <!-- Dialogs -->
-    <string name="dialog_edit_save_changes">Сохранить</string>
     <string name="dialog_edit_station_name">Имя станции</string>
     <string name="dialog_edit_stream_uri">Адрес потока</string>
     <string name="dialog_error_message_default">Произошла ошибка</string>
@@ -31,7 +29,6 @@
     <string name="dialog_yes_no_message_remove_station">Удалить эту станцию?</string>
     <string name="dialog_yes_no_message_restore_collection">Заменить текущие радиостанции станциями из резервного копирования?</string>
     <string name="dialog_yes_no_message_update_station_images">Скачать последнюю версию всех изображений станций?</string>
-    <string name="dialog_yes_no_negative_button_cancel">Отмена</string>
     <string name="dialog_yes_no_positive_button_default">Да</string>
     <string name="dialog_yes_no_positive_button_remove_station">Удалить</string>
     <string name="dialog_yes_no_positive_button_update_covers">Обновить</string>

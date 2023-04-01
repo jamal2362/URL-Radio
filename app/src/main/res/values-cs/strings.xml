@@ -6,11 +6,9 @@
     <string name="descr_card_starred_station">Oblíbené stanice</string>
     <string name="descr_card_station_image_change">Změnit obrázek stanice</string>
     <string name="descr_card_station_image">Obrázek stanice</string>
-    <string name="descr_dialog_edit_place_on_home_screen_icon">Umístit na domovskou obrazovku</string>
     <string name="descr_player_playback_button">Přehrát/pozastavit</string>
     <string name="descr_player_station_image">Obrázek stanice</string>
     <!-- Dialogs -->
-    <string name="dialog_edit_save_changes">Uložit</string>
     <string name="dialog_edit_station_name">Název stanice</string>
     <string name="dialog_error_message_default">Nastala chyba</string>
     <string name="dialog_error_message_no_network">Připojte se k internetu.</string>
@@ -22,7 +20,6 @@
     <string name="dialog_generic_button_okay">OK</string>
     <string name="dialog_generic_details_button">Zobrazit podrobnosti</string>
     <string name="dialog_yes_no_message_remove_station">Odebrat tuto stanici?</string>
-    <string name="dialog_yes_no_negative_button_cancel">Zrušit</string>
     <string name="dialog_yes_no_positive_button_default">Ano</string>
     <string name="dialog_yes_no_positive_button_remove_station">Odstranit</string>
     <string name="dialog_yes_no_positive_button_update_covers">Aktualizovat</string>

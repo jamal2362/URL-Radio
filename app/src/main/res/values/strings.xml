@@ -10,7 +10,6 @@
     <string name="descr_card_starred_station">Starred station</string>
     <string name="descr_card_station_image_change">Change station image</string>
     <string name="descr_card_station_image">Station image</string>
-    <string name="descr_dialog_edit_place_on_home_screen_icon">Place on Home screen</string>
     <string name="descr_expanded_player_metadata_copy_button">Copy the now playing information</string>
     <string name="descr_expanded_player_metadata_next_button">Next now playing metadata entry</string>
     <string name="descr_expanded_player_metadata_previous_button">Previous now playing metadata entry</string>
@@ -21,7 +20,6 @@
     <string name="descr_player_station_image">Station image</string>
 
     <!-- Dialogs -->
-    <string name="dialog_edit_save_changes">Save</string>
     <string name="dialog_edit_station_name">Station name</string>
     <string name="dialog_edit_stream_uri">Stream address</string>
     <string name="dialog_error_message_default">An error occurred</string>
@@ -38,7 +36,6 @@
     <string name="dialog_yes_no_message_remove_station">Remove this station?</string>
     <string name="dialog_yes_no_message_restore_collection">Replace current collection radio stations with the radio station from backup?</string>
     <string name="dialog_yes_no_message_update_station_images">Download latest version of all station images?</string>
-    <string name="dialog_yes_no_negative_button_cancel">Cancel</string>
     <string name="dialog_yes_no_positive_button_default">Yes</string>
     <string name="dialog_yes_no_positive_button_remove_station">Remove</string>
     <string name="dialog_yes_no_positive_button_update_covers">Update</string>

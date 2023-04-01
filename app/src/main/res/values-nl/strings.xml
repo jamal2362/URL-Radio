@@ -7,7 +7,6 @@
     <string name="descr_card_starred_station">Zender met ster</string>
     <string name="descr_card_station_image_change">Wijzig zenderafbeelding</string>
     <string name="descr_card_station_image">Zenderafbeelding</string>
-    <string name="descr_dialog_edit_place_on_home_screen_icon">Plaats op Startscherm</string>
     <string name="descr_expanded_player_metadata_copy_button">Kopieer de \'Nu spelende\' informatie</string>
     <string name="descr_expanded_player_metadata_next_button">Volgende \'Nu spelende\' metadata invoer</string>
     <string name="descr_expanded_player_metadata_previous_button">Vorige \'Nu spelende\' metadata invoer</string>
@@ -17,7 +16,6 @@
     <string name="descr_player_playback_button">Afspelen/pauzeren</string>
     <string name="descr_player_station_image">Zenderafbeelding</string>
     <!-- Dialogs -->
-    <string name="dialog_edit_save_changes">Opslaan</string>
     <string name="dialog_edit_station_name">Zendernaam</string>
     <string name="dialog_edit_stream_uri">Stream adres</string>
     <string name="dialog_error_message_default">Er is een fout opgetreden</string>
@@ -34,7 +32,6 @@
     <string name="dialog_yes_no_message_remove_station">Verwijder deze zender?</string>
     <string name="dialog_yes_no_message_restore_collection">Huidige collectie radiozenders vervangen door de radiozenders van de back-up?</string>
     <string name="dialog_yes_no_message_update_station_images">Laatste versie van alle zenderafbeeldingen downloaden?</string>
-    <string name="dialog_yes_no_negative_button_cancel">Annuleer</string>
     <string name="dialog_yes_no_positive_button_default">Ja</string>
     <string name="dialog_yes_no_positive_button_remove_station">Verwijder</string>
     <string name="dialog_yes_no_positive_button_update_covers">Bijwerken</string>

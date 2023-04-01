@@ -7,7 +7,6 @@
     <string name="descr_card_starred_station">Favori istasyon</string>
     <string name="descr_card_station_image_change">İstasyon görüntüsünü değiştir</string>
     <string name="descr_card_station_image">İstasyon resmi</string>
-    <string name="descr_dialog_edit_place_on_home_screen_icon">Ana ekrana ekle</string>
     <string name="descr_expanded_player_metadata_copy_button">Şu an çalınan parçanın bilgilerini kopyala</string>
     <string name="descr_expanded_player_metadata_next_button">Sonraki meta veri girişi şimdi oynatılıyor</string>
     <string name="descr_expanded_player_metadata_previous_button">Önceki meta veri girişi şimdi oynatılıyor</string>
@@ -17,7 +16,6 @@
     <string name="descr_player_playback_button">Oynat/duraklat</string>
     <string name="descr_player_station_image">İstasyon resmi</string>
     <!-- Dialogs -->
-    <string name="dialog_edit_save_changes">Kaydet</string>
     <string name="dialog_edit_station_name">İstasyon adı</string>
     <string name="dialog_edit_stream_uri">Yayın adresi</string>
     <string name="dialog_error_message_default">Bir hata oluştu</string>
@@ -34,7 +32,6 @@
     <string name="dialog_yes_no_message_remove_station">Bu istasyon kaldırılsın mı?</string>
     <string name="dialog_yes_no_message_restore_collection">Mevcut radyo istasyonları, yedekteki radyo istasyonlarıyla değiştirilsin mi?</string>
     <string name="dialog_yes_no_message_update_station_images">Tüm istasyon görüntülerinin son sürümü indirilsin mi?</string>
-    <string name="dialog_yes_no_negative_button_cancel">İptal et</string>
     <string name="dialog_yes_no_positive_button_default">Evet</string>
     <string name="dialog_yes_no_positive_button_remove_station">Kaldır</string>
     <string name="dialog_yes_no_positive_button_update_covers">Güncelle</string>

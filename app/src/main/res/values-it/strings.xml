@@ -7,14 +7,12 @@
     <string name="descr_card_starred_station">Stazioni preferite</string>
     <string name="descr_card_station_image_change">Cambia immagine stazione</string>
     <string name="descr_card_station_image">Immagine stazione</string>
-    <string name="descr_dialog_edit_place_on_home_screen_icon">Scorciatoia nella schermata iniziale</string>
     <string name="descr_expanded_player_sleep_timer_cancel_button">Annulla timer interruzione</string>
     <string name="descr_expanded_player_sleep_timer_remaining_time">Tempo rimanente prima della sospensione</string>
     <string name="descr_expanded_player_sleep_timer_start_button">Avvia timer sospensione</string>
     <string name="descr_player_playback_button">Riproduci/Pausa</string>
     <string name="descr_player_station_image">Immagine stazione</string>
     <!-- Dialogs -->
-    <string name="dialog_edit_save_changes">Salva</string>
     <string name="dialog_edit_station_name">Nome stazione</string>
     <string name="dialog_edit_stream_uri">Indirizzo flusso</string>
     <string name="dialog_error_message_default">Si è verificato un errore</string>
@@ -31,7 +29,6 @@
     <string name="dialog_yes_no_message_remove_station">Eliminare questa stazione?</string>
     <string name="dialog_yes_no_message_restore_collection">Sostituisci le stazioni radio della collezione attuale con quelle del backup?</string>
     <string name="dialog_yes_no_message_update_station_images">Scarica l\'ultima versione di tutte le immagini delle stazioni?</string>
-    <string name="dialog_yes_no_negative_button_cancel">Annulla</string>
     <string name="dialog_yes_no_positive_button_default">Sì</string>
     <string name="dialog_yes_no_positive_button_remove_station">Rimuovi</string>
     <string name="dialog_yes_no_positive_button_update_covers">Aggiorna</string>

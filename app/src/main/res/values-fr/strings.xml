@@ -7,14 +7,12 @@
     <string name="descr_card_starred_station">Station favorite</string>
     <string name="descr_card_station_image_change">Modifier l\'image de la station</string>
     <string name="descr_card_station_image">Image de la station</string>
-    <string name="descr_dialog_edit_place_on_home_screen_icon">Ajouter sur l\'écran d\'accueil</string>
     <string name="descr_expanded_player_sleep_timer_cancel_button">Annuler la minuterie de sommeil</string>
     <string name="descr_expanded_player_sleep_timer_remaining_time">Temps restant sur la minuterie de sommeil</string>
     <string name="descr_expanded_player_sleep_timer_start_button">Lancer la minuterie de sommeil</string>
     <string name="descr_player_playback_button">Lecture/Pause</string>
     <string name="descr_player_station_image">Image de la station</string>
     <!-- Dialogs -->
-    <string name="dialog_edit_save_changes">Sauvegarder</string>
     <string name="dialog_edit_station_name">Nom de la station</string>
     <string name="dialog_edit_stream_uri">Adresse du flux</string>
     <string name="dialog_error_message_default">Une erreur est survenue</string>
@@ -31,7 +29,6 @@
     <string name="dialog_yes_no_message_remove_station">Retirer cette station ?</string>
     <string name="dialog_yes_no_message_restore_collection">Remplacer la collection de stations actuelle par celle de sauvegarde?</string>
     <string name="dialog_yes_no_message_update_station_images">Télécharger la dernière version de toutes les images de station ?</string>
-    <string name="dialog_yes_no_negative_button_cancel">Annuler</string>
     <string name="dialog_yes_no_positive_button_default">Oui</string>
     <string name="dialog_yes_no_positive_button_remove_station">Retirer</string>
     <string name="dialog_yes_no_positive_button_update_covers">Mettre à jour</string>

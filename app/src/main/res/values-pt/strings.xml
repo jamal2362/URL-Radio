@@ -7,7 +7,6 @@
     <string name="descr_card_starred_station">Estação favorita</string>
     <string name="descr_card_station_image_change">Alterar imagem da estação</string>
     <string name="descr_card_station_image">Imagem da estação</string>
-    <string name="descr_dialog_edit_place_on_home_screen_icon">Colocar no ecrã inicial</string>
     <string name="descr_expanded_player_metadata_copy_button">Copiar informações de reprodução</string>
     <string name="descr_expanded_player_sleep_timer_cancel_button">Cancelar temporizador</string>
     <string name="descr_expanded_player_sleep_timer_remaining_time">Tempo restante até ativar o temporizador</string>
@@ -15,7 +14,6 @@
     <string name="descr_player_playback_button">Reproduzir/parar</string>
     <string name="descr_player_station_image">Imagem da estação</string>
     <!-- Dialogs -->
-    <string name="dialog_edit_save_changes">Guardar</string>
     <string name="dialog_edit_station_name">Nome da estação</string>
     <string name="dialog_edit_stream_uri">Endereço da estação</string>
     <string name="dialog_error_message_default">Ocorreu um erro</string>
@@ -32,7 +30,6 @@
     <string name="dialog_yes_no_message_remove_station">Remover esta estação?</string>
     <string name="dialog_yes_no_message_restore_collection">Substituir estações de rádio de coleção atual com a estação de rádio do backup?</string>
     <string name="dialog_yes_no_message_update_station_images">Descarregar última versão da imagem das estações?</string>
-    <string name="dialog_yes_no_negative_button_cancel">Cancelar</string>
     <string name="dialog_yes_no_positive_button_default">Sim</string>
     <string name="dialog_yes_no_positive_button_remove_station">Remover</string>
     <string name="dialog_yes_no_positive_button_update_covers">Atualizar</string>

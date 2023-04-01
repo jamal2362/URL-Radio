@@ -7,14 +7,12 @@
     <string name="descr_card_starred_station">محطة نجمية</string>
     <string name="descr_card_station_image_change">تغيير الصورة المصغرة</string>
     <string name="descr_card_station_image">صورة المحطة</string>
-    <string name="descr_dialog_edit_place_on_home_screen_icon">تم الوضع على الشاشة الرئيسية</string>
     <string name="descr_expanded_player_sleep_timer_cancel_button">إلغاء مؤقت السكون</string>
     <string name="descr_expanded_player_sleep_timer_remaining_time">الوقت المتبقي على مؤقت النوم</string>
     <string name="descr_expanded_player_sleep_timer_start_button">بدء تشغيل مؤقت النوم</string>
     <string name="descr_player_playback_button">تشغيل / إيقاف مؤقت</string>
     <string name="descr_player_station_image">صورة المحطة</string>
     <!-- Dialogs -->
-    <string name="dialog_edit_save_changes">حفظ</string>
     <string name="dialog_edit_station_name">اسم المحطة</string>
     <string name="dialog_edit_stream_uri">عنوان البث</string>
     <string name="dialog_error_message_default">حدث خطأ</string>
@@ -31,7 +29,6 @@
     <string name="dialog_yes_no_message_remove_station">إزالة المحطة</string>
     <string name="dialog_yes_no_message_restore_collection">هل تريد استبدال محطات الإذاعة الحالية بالمحطة الإذاعية من النسخة الاحتياطية؟</string>
     <string name="dialog_yes_no_message_update_station_images">تحميل أحدث إصدار من جميع صور المحطة؟</string>
-    <string name="dialog_yes_no_negative_button_cancel">إلغاء</string>
     <string name="dialog_yes_no_positive_button_default">نعم</string>
     <string name="dialog_yes_no_positive_button_remove_station">إزالة</string>
     <string name="dialog_yes_no_positive_button_update_covers">تحديث</string>

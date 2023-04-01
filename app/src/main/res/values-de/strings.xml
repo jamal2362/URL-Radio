@@ -7,7 +7,6 @@
     <string name="descr_card_starred_station">Markierter Sender</string>
     <string name="descr_card_station_image_change">Senderbild ändern</string>
     <string name="descr_card_station_image">Senderbild</string>
-    <string name="descr_dialog_edit_place_on_home_screen_icon">Auf dem Startbildschirm platzieren</string>
     <string name="descr_expanded_player_metadata_copy_button">Informationen zur aktuellen Wiedergabe kopieren</string>
     <string name="descr_expanded_player_metadata_next_button">Nächster jetzt abspielender Metadateneintrag</string>
     <string name="descr_expanded_player_metadata_previous_button">Vorheriger abspielender Metadateneintrag</string>
@@ -17,7 +16,6 @@
     <string name="descr_player_playback_button">Start/Pause</string>
     <string name="descr_player_station_image">Senderbild</string>
     <!-- Dialogs -->
-    <string name="dialog_edit_save_changes">Speichern</string>
     <string name="dialog_edit_station_name">Sendername</string>
     <string name="dialog_edit_stream_uri">Stream-Adresse</string>
     <string name="dialog_error_message_default">Ein Fehler ist aufgetreten</string>
@@ -34,7 +32,6 @@
     <string name="dialog_yes_no_message_remove_station">Diesen Sender entfernen?</string>
     <string name="dialog_yes_no_message_restore_collection">Aktuelle Radiosender der Sammlung durch die Radiosender aus der Sicherung ersetzen?</string>
     <string name="dialog_yes_no_message_update_station_images">Neueste Version aller Senderbilder herunterladen\?</string>
-    <string name="dialog_yes_no_negative_button_cancel">Abbrechen</string>
     <string name="dialog_yes_no_positive_button_default">Ja</string>
     <string name="dialog_yes_no_positive_button_remove_station">Entfernen</string>
     <string name="dialog_yes_no_positive_button_update_covers">Aktualisieren</string>
