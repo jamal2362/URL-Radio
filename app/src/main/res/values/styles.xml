@@ -43,13 +43,13 @@
 
     <style name="App.Widget.Material3.Button.TextButton" parent="@style/Widget.Material3.Button.TextButton">
         <item name="android:fontFamily">@font/outfit_medium</item>
-        <item name="android:textColor">@color/icon_default_add_new_station</item>
+        <item name="android:textColor">@color/icon_default</item>
         <item name="textAllCaps">true</item>
     </style>
 
     <style name="App.Widget.Material3.Button.OutlinedButton.Icon" parent="@style/Widget.Material3.Button.OutlinedButton.Icon">
-        <item name="android:textColor">@color/icon_default_add_new_station</item>
-        <item name="iconTint">@color/icon_default_add_new_station</item>
+        <item name="android:textColor">@color/icon_default</item>
+        <item name="iconTint">@color/icon_default</item>
         <item name="strokeColor">@color/list_card_stroke_background</item>
         <item name="android:fontFamily">@font/outfit_medium</item>
         <item name="strokeWidth">3dp</item>

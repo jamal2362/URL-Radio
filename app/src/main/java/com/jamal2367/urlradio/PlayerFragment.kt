@@ -754,7 +754,7 @@ class PlayerFragment : Fragment(),
                         .setActionTextColor(
                             ContextCompat.getColor(
                                 requireActivity(),
-                                R.color.player_play_pause_icon))
+                                R.color.default_neutral_white))
                         .show()
                 }
             }

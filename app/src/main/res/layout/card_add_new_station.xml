@@ -14,9 +14,9 @@
         android:layout_marginBottom="24dp"
         app:backgroundTint="@color/list_card_background"
         app:icon="@drawable/ic_add_24"
-        app:iconTint="@color/icon_default_add_new_station"
-        app:rippleColor="@color/list_card_stroke1_background"
-        app:strokeColor="@color/list_card_stroke1_background"
+        app:iconTint="@color/icon_default"
+        app:rippleColor="@color/list_card_stroke_background"
+        app:strokeColor="@color/list_card_stroke_background"
         app:strokeWidth="3dp" />
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
@@ -29,9 +29,9 @@
         android:layout_marginBottom="24dp"
         app:backgroundTint="@color/list_card_background"
         app:icon="@drawable/ic_settings_24dp"
-        app:iconTint="@color/icon_default_add_new_station"
-        app:rippleColor="@color/list_card_stroke1_background"
-        app:strokeColor="@color/list_card_stroke1_background"
+        app:iconTint="@color/icon_default"
+        app:rippleColor="@color/list_card_stroke_background"
+        app:strokeColor="@color/list_card_stroke_background"
         app:strokeWidth="3dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <resources>
     <!-- NIGHT THEME COLORS -->
 
@@ -8,17 +9,13 @@
     <!-- text & icons -->
     <color name="text_default">#FFFFFFFF</color>
     <color name="text_lightweight">#FFF2F2F2</color>
-    <color name="text_link">#FF6750A4</color>
-    <color name="text_link_separator">#FF6750A4</color>
     <color name="icon_default">#FFDAE2FF</color>
-    <color name="icon_default_add_new_station">#FFDAE2FF</color>
     <color name="icon_lightweight">#FFC5C6D0</color>
     <color name="icon_lightweight_background">#FF45464F</color>
 
     <!-- list -->
     <color name="list_card_background">#FF1B1B1F</color>
     <color name="list_card_stroke_background">#FF585E71</color>
-    <color name="list_card_stroke1_background">#FF585E71</color>
     <color name="list_card_cover_background">#FF49454f</color>
     <color name="list_card_delete_background">#FFF2B8B5</color>
     <color name="list_card_delete_icon">#FF601410</color>
@@ -28,14 +25,11 @@
     <color name="search_result_background_selected">#FF595959</color>
 
     <!-- player sheet -->
-    <color name="player_play_pause_icon">#FF182E60</color>
+    <color name="default_neutral_white">#FF182E60</color>
     <color name="player_button_background">#FFDAE2FF</color>
     <color name="player_button_buffering">#FF4A5F97</color>
     <color name="player_sheet_background">#FF2E3038</color>
     <color name="player_sheet_text_main">#FFFFFFFF</color>
-    <color name="player_sheet_text_details">#FFFFFFFF</color>
     <color name="player_sheet_icon">#FFFFFFFF</color>
 
-    <color name="default_neutral_white">#FF601410</color>
-    <color name="colorPrimaryContainer">#FFF44336</color>
 </resources>

@@ -14,7 +14,7 @@
                 android:topRightRadius="28dp" />
             <stroke
                 android:width="3dp"
-                android:color="@color/list_card_stroke1_background" />
+                android:color="@color/list_card_stroke_background" />
 
         </shape>
 
