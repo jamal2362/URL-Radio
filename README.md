@@ -17,7 +17,6 @@
 <br>
 <a href="https://github.com/jamal2362/URL-Radio/releases/latest"><img src="https://user-images.githubusercontent.com/15986930/229208526-e5a63be5-0d0b-48ab-a222-9f2f2faf0ee4.png" height="80px"></a>
 <a href="https://apt.izzysoft.de/fdroid/index/apk/com.jamal2367.urlradio"><img src="https://user-images.githubusercontent.com/15986930/229206676-6dcb5180-68d6-4339-aa0c-b9a0a4eed71c.png" height="80px"></a>
-<a href="https://play.google.com/store/apps/details?id=com.jamal2367.urlradio"><img src="https://user-images.githubusercontent.com/15986930/229209473-c7ab4c54-5fec-4955-b8e8-2cbdfbdcc991.png" height="80px"></a>
 </details>
 
 ----------------------------------------
