@@ -573,7 +573,8 @@ object CollectionHelper {
         val mediaMetadata = MediaMetadata.Builder().apply {
             setArtist(station.name)
             //setTitle(station.name)
-            if (station.image.isNotEmpty()) {
+            /* check for "file://" prevents a crash when an old backup was restored */
+            if (station.image.isNotEmpty() && station.image.startsWith("file://")) {
                 //setArtworkUri(station.image.toUri())
                 setArtworkData(station.image.toUri().toFile().readBytes(), MediaMetadata.PICTURE_TYPE_FRONT_COVER)
             } else {
