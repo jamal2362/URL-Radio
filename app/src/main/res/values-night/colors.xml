@@ -8,10 +8,10 @@
 
     <!-- text & icons -->
     <color name="text_default">#FFFFFFFF</color>
-    <color name="text_lightweight">#FFF2F2F2</color>
+    <color name="text_lightweight">#FFC5C6D0</color>
     <color name="icon_default">#FFDAE2FF</color>
     <color name="icon_lightweight">#FFC5C6D0</color>
-    <color name="icon_lightweight_background">#FF45464F</color>
+    <color name="icon_lightweight_background">#FF585E71</color>
 
     <!-- list -->
     <color name="list_card_background">#FF1B1B1F</color>

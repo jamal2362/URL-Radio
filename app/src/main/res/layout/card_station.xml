@@ -69,6 +69,7 @@
             android:fontFamily="@font/outfit_medium"
             android:singleLine="true"
             android:visibility="visible"
+            android:textColor="@color/text_lightweight"
             app:layout_constraintBottom_toBottomOf="@+id/station_icon"
             app:layout_constraintEnd_toStartOf="@+id/playback_button"
             app:layout_constraintStart_toEndOf="@+id/starred_icon"
