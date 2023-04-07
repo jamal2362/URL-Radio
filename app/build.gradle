@@ -14,7 +14,7 @@ android {
         targetSdkVersion 33
         versionCode 101
         versionName '10.1'
-        resConfigs 'en', 'ar', 'cs', 'fr', 'de', 'it', 'nl', 'pt', 'ru', 'tr', "zh-rCN"
+        resConfigs 'en', 'ar', 'bg', 'cs', 'fr', 'de', 'it', 'nl', 'pt', 'ru', 'tr', "zh-rCN"
         setProperty('archivesBaseName', 'URL_Radio_' + versionName)
     }
 
