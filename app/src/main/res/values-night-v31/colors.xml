@@ -21,8 +21,8 @@
     <color name="list_card_delete_icon">#FF601410</color>
     <color name="list_card_mark_starred_background">@android:color/system_accent1_100</color>
     <color name="list_card_mark_starred_star">@android:color/system_accent1_800</color>
-    <color name="search_result_background">@android:color/system_neutral2_700</color>
-    <color name="search_result_background_selected">@android:color/system_accent2_600</color>
+    <color name="search_result_background">@android:color/system_neutral2_800</color>
+    <color name="search_result_background_selected">@android:color/system_accent2_700</color>
 
     <!-- player sheet -->
     <color name="default_neutral_white">@android:color/system_accent1_800</color>
