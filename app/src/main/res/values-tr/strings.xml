@@ -30,7 +30,6 @@
     <string name="dialog_generic_details_button">Ayrıntıları göster</string>
     <string name="dialog_opml_import_details_default">Herhangi bir ayrıntı yok</string>
     <string name="dialog_yes_no_message_remove_station">Bu istasyon kaldırılsın mı?</string>
-    <string name="dialog_yes_no_message_restore_collection">Mevcut radyo istasyonları, yedekteki radyo istasyonlarıyla değiştirilsin mi?</string>
     <string name="dialog_yes_no_message_update_station_images">Tüm istasyon görüntülerinin son sürümü indirilsin mi?</string>
     <string name="dialog_yes_no_positive_button_default">Evet</string>
     <string name="dialog_yes_no_positive_button_remove_station">Kaldır</string>
@@ -38,11 +37,9 @@
     <!-- Fragment -->
     <string name="fragment_settings_title">Ayarlar</string>
     <!-- Notification -->
-    <string name="notification_now_playing_channel_description">Oynatma denetimleri, istasyon adı ve görüntüsü.</string>
     <string name="notification_now_playing_channel_name">Oynatma Denetimleri</string>
     <string name="notification_play">Oynat</string>
     <string name="notification_stop">Durdur</string>
-    <string name="notification_playing">Oynatılıyor</string>
     <string name="notification_skip_to_previous">Önceki</string>
     <string name="notification_skip_to_next">Sonraki</string>
     <!-- Onboarding -->
@@ -89,18 +86,12 @@
     <string name="shortcut_last_station_disabled_message">Son istasyonun oynatılma kısayolu devre dışı bırakıldı.</string>
     <string name="shortcut_last_station_long_label">Son istasyonu oynat</string>
     <string name="shortcut_last_station_short_label">Son istasyon</string>
-    <!-- Station List -->
-    <string name="station_list_button_add_new_station">Yeni istasyon ekle</string>
     <!-- Toast Alerts -->
     <string name="toastalert_failed_picking_media">Resim seçimi başarısız oldu.</string>
-    <string name="toastalert_no_image_picker">Kullanılabilir görüntü seçici yok. Bir Galeri uygulaması yükleyin.</string>
     <!-- Toasts -->
     <string name="toastmessage_backed_up">başarıyla yedeklendi.</string>
     <string name="toastmessage_copied_to_clipboard">Bağlantı panoya kopyalandı.</string>
     <string name="toastmessage_error_download_error">İndirme hatası</string>
-    <string name="toastmessage_error_missing_storage_permission">Bu dosyayı açmak için \"Depolamayı Oku\" izni verin.</string>
-    <string name="toastmessage_error_no_station_found">Oynatma başlatılamadı. Lütfen önce bir radyo istasyonu ekleyin.</string>
-    <string name="toastmessage_error_no_station_matches_search">Aramanızla eşleşen bir istasyon bulunamadı.</string>
     <string name="toastmessage_install_file_helper">Lütfen bir dosya yöneticisi kurun.</string>
     <string name="toastmessage_restored">Yedekleme başarıyla geri yüklendi.</string>
     <string name="toastmessage_save_m3u">Radyo istasyonları M3U formatında kaydediliyor…</string>

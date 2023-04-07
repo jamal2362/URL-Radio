@@ -27,7 +27,6 @@
     <string name="dialog_generic_details_button">Voir les détails</string>
     <string name="dialog_opml_import_details_default">Aucune information disponible</string>
     <string name="dialog_yes_no_message_remove_station">Retirer cette station ?</string>
-    <string name="dialog_yes_no_message_restore_collection">Remplacer la collection de stations actuelle par celle de sauvegarde?</string>
     <string name="dialog_yes_no_message_update_station_images">Télécharger la dernière version de toutes les images de station ?</string>
     <string name="dialog_yes_no_positive_button_default">Oui</string>
     <string name="dialog_yes_no_positive_button_remove_station">Retirer</string>
@@ -35,11 +34,9 @@
     <!-- Fragment -->
     <string name="fragment_settings_title">Paramètres</string>
     <!-- Notification -->
-    <string name="notification_now_playing_channel_description">Contrôles de lecture, nom et image de la station.</string>
     <string name="notification_now_playing_channel_name">Contrôles de lecture</string>
     <string name="notification_play">Lecture</string>
     <string name="notification_stop">Arrêt</string>
-    <string name="notification_playing">Lecture en cours</string>
     <string name="notification_skip_to_previous">Précédent</string>
     <string name="notification_skip_to_next">Suivant</string>
     <!-- Onboarding -->
@@ -83,18 +80,12 @@
     <string name="shortcut_last_station_disabled_message">Raccourci pour la lecture de la dernière station désactivé.</string>
     <string name="shortcut_last_station_long_label">Lire la dernière station</string>
     <string name="shortcut_last_station_short_label">Dernière station</string>
-    <!-- Station List -->
-    <string name="station_list_button_add_new_station">Ajouter une nouvelle station</string>
     <!-- Toast Alerts -->
     <string name="toastalert_failed_picking_media">La sélection de l’image a échoué.</string>
-    <string name="toastalert_no_image_picker">Aucun sélecteur d\'image disponible. Envisagez l\'installation d\'une application Galerie.</string>
     <!-- Toasts -->
     <string name="toastmessage_backed_up">a été sauvegardé avec succès.</string>
     <string name="toastmessage_copied_to_clipboard">Copié dans le presse-papier.</string>
     <string name="toastmessage_error_download_error">Erreur de téléchargement</string>
-    <string name="toastmessage_error_missing_storage_permission">Accordez la permission \"Lire le stockage\" pour ouvrir ce fichier.</string>
-    <string name="toastmessage_error_no_station_found">Impossible de lancer la lecture. Veuillez d\'abord ajouter une station.</string>
-    <string name="toastmessage_error_no_station_matches_search">Impossible de trouver une station qui correspond à votre recherche.</string>
     <string name="toastmessage_install_file_helper">Veuillez installer un gestionnaire de fichiers.</string>
     <string name="toastmessage_restored">Les stations ont été restaurées avec succès.</string>
     <string name="toastmessage_save_m3u">Enregistrement des stations radio en M3U…</string>

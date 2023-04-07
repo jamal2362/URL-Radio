@@ -30,7 +30,6 @@
     <string name="dialog_generic_details_button">Details anzeigen</string>
     <string name="dialog_opml_import_details_default">Keine Details verfügbar</string>
     <string name="dialog_yes_no_message_remove_station">Diesen Sender entfernen?</string>
-    <string name="dialog_yes_no_message_restore_collection">Aktuelle Radiosender der Sammlung durch die Radiosender aus der Sicherung ersetzen?</string>
     <string name="dialog_yes_no_message_update_station_images">Neueste Version aller Senderbilder herunterladen\?</string>
     <string name="dialog_yes_no_positive_button_default">Ja</string>
     <string name="dialog_yes_no_positive_button_remove_station">Entfernen</string>
@@ -38,11 +37,9 @@
     <!-- Fragment -->
     <string name="fragment_settings_title">Einstellungen</string>
     <!-- Notification -->
-    <string name="notification_now_playing_channel_description">Wiedergabesteuerungen, Sendername und Bild.</string>
     <string name="notification_now_playing_channel_name">Wiedergabesteuerung</string>
     <string name="notification_play">Wiedergabe</string>
     <string name="notification_stop">Stopp</string>
-    <string name="notification_playing">Spielen</string>
     <string name="notification_skip_to_previous">Zurück</string>
     <string name="notification_skip_to_next">Nächste</string>
     <!-- Onboarding -->
@@ -89,18 +86,12 @@
     <string name="shortcut_last_station_disabled_message">Verknüpfung für Wiedergabe des letzten Senders deaktiviert.</string>
     <string name="shortcut_last_station_long_label">Letzten Sender wiedergeben</string>
     <string name="shortcut_last_station_short_label">Letzter Sender</string>
-    <!-- Station List -->
-    <string name="station_list_button_add_new_station">Neuen Sender hinzufügen</string>
     <!-- Toast Alerts -->
     <string name="toastalert_failed_picking_media">Bildauswahl fehlgeschlagen.</string>
-    <string name="toastalert_no_image_picker">Bildauswahl nicht verfügbar. Installation einer Galerie-Anwendung notwendig.</string>
     <!-- Toasts -->
     <string name="toastmessage_backed_up">wurde erfolgreich gesichert.</string>
     <string name="toastmessage_copied_to_clipboard">In die Zwischenablage kopiert</string>
     <string name="toastmessage_error_download_error">Fehler beim Herunterladen</string>
-    <string name="toastmessage_error_missing_storage_permission">Erteile die Berechtigung „Speicher lesen“, um diese Datei zu öffnen</string>
-    <string name="toastmessage_error_no_station_found">Die Wiedergabe konnte nicht gestartet werden. Bitte füge zuerst einen Radiosender hinzu.</string>
-    <string name="toastmessage_error_no_station_matches_search">Es konnte kein Sender gefunden werden, der deiner Suche entspricht</string>
     <string name="toastmessage_error_restart_playback_failed">Die Wiedergabe konnte nicht gestartet oder neu gestartet werden</string>
     <string name="toastmessage_install_file_helper">Bitte installiere einen Dateimanager</string>
     <string name="toastmessage_restored">Stationen wurden erfolgreich wiederhergestellt.</string>

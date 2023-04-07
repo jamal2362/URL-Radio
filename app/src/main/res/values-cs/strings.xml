@@ -44,7 +44,6 @@
     <string name="pref_backup_import_export_title">Importovat &amp; Exportovat</string>
     <!-- Sample Text -->
     <!-- App Shortcuts -->
-    <!-- Station List -->
     <!-- Toast Alerts -->
     <!-- Toasts -->
     <string name="toastmessage_restored">Stanice byly úspěšně obnoveny.</string>

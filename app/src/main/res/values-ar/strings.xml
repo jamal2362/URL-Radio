@@ -27,7 +27,6 @@
     <string name="dialog_generic_details_button">عرض التفاصيل</string>
     <string name="dialog_opml_import_details_default">لا تتوفر تفاصيل.</string>
     <string name="dialog_yes_no_message_remove_station">إزالة المحطة</string>
-    <string name="dialog_yes_no_message_restore_collection">هل تريد استبدال محطات الإذاعة الحالية بالمحطة الإذاعية من النسخة الاحتياطية؟</string>
     <string name="dialog_yes_no_message_update_station_images">تحميل أحدث إصدار من جميع صور المحطة؟</string>
     <string name="dialog_yes_no_positive_button_default">نعم</string>
     <string name="dialog_yes_no_positive_button_remove_station">إزالة</string>
@@ -35,11 +34,9 @@
     <!-- Fragment -->
     <string name="fragment_settings_title">الإعدادات</string>
     <!-- Notification -->
-    <string name="notification_now_playing_channel_description">التحكم بتشغيل المحطة واسم المحطة والصورة.</string>
     <string name="notification_now_playing_channel_name">عناصر التحكم في التشغيل</string>
     <string name="notification_play">تشغيل</string>
     <string name="notification_stop">إيقاف</string>
-    <string name="notification_playing">في وضع التشغيل </string>
     <string name="notification_skip_to_previous">السابق</string>
     <string name="notification_skip_to_next">التالي</string>
     <!-- Onboarding -->
@@ -73,7 +70,6 @@
     <string name="pref_station_restore_title">استعادة محطات</string>
     <!-- Sample Text -->
     <!-- App Shortcuts -->
-    <!-- Station List -->
     <!-- Toast Alerts -->
     <!-- Toasts -->
     <!-- Snackbars -->

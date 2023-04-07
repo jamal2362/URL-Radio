@@ -30,7 +30,6 @@
     <string name="dialog_generic_details_button">Toon details</string>
     <string name="dialog_opml_import_details_default">Geen details beschikbaar</string>
     <string name="dialog_yes_no_message_remove_station">Verwijder deze zender?</string>
-    <string name="dialog_yes_no_message_restore_collection">Huidige collectie radiozenders vervangen door de radiozenders van de back-up?</string>
     <string name="dialog_yes_no_message_update_station_images">Laatste versie van alle zenderafbeeldingen downloaden?</string>
     <string name="dialog_yes_no_positive_button_default">Ja</string>
     <string name="dialog_yes_no_positive_button_remove_station">Verwijder</string>
@@ -38,11 +37,9 @@
     <!-- Fragment -->
     <string name="fragment_settings_title">Instellingen</string>
     <!-- Notification -->
-    <string name="notification_now_playing_channel_description">Afspeelbediening, zendernaam en afbeelding.</string>
     <string name="notification_now_playing_channel_name">Afspeelbediening</string>
     <string name="notification_play">Afspelen</string>
     <string name="notification_stop">Stoppen</string>
-    <string name="notification_playing">Spelend</string>
     <string name="notification_skip_to_previous">Vorige</string>
     <string name="notification_skip_to_next">Volgende</string>
     <!-- Onboarding -->
@@ -89,18 +86,12 @@
     <string name="shortcut_last_station_disabled_message">Snelkoppeling voor het afspelen van de laatste zender uitgeschakeld.</string>
     <string name="shortcut_last_station_long_label">Laatste zender afspelen</string>
     <string name="shortcut_last_station_short_label">Laatste zender</string>
-    <!-- Station List -->
-    <string name="station_list_button_add_new_station">Voeg nieuwe zender toe</string>
     <!-- Toast Alerts -->
     <string name="toastalert_failed_picking_media">Afbeeldingsselectie mislukt.</string>
-    <string name="toastalert_no_image_picker">Geen afbeeldingskiezer beschikbaar. Overweeg een galerijapplicatie te installeren.</string>
     <!-- Toasts -->
     <string name="toastmessage_backed_up">back-up is succesvol gemaakt.</string>
     <string name="toastmessage_copied_to_clipboard">Gekopieerd naar het klembord.</string>
     <string name="toastmessage_error_download_error">Download fout</string>
-    <string name="toastmessage_error_missing_storage_permission">Verleen \"Opslag Uitlezen\" toestemming om dit bestand te openen.</string>
-    <string name="toastmessage_error_no_station_found">Kan afspelen niet starten. Voeg alstublieft eerst een radiozender toe.</string>
-    <string name="toastmessage_error_no_station_matches_search">Kan geen radiozender vinden die aan de zoekopdracht voldoet.</string>
     <string name="toastmessage_install_file_helper">Installeer alstublieft een bestandsbeheer applicatie.</string>
     <string name="toastmessage_restored">Zenders zijn succesvol hersteld.</string>
     <string name="toastmessage_save_m3u">Radiozenders opslaan als M3U…</string>

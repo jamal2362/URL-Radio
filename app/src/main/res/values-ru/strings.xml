@@ -27,7 +27,6 @@
     <string name="dialog_generic_details_button">Показать детали</string>
     <string name="dialog_opml_import_details_default">Детали недоступны</string>
     <string name="dialog_yes_no_message_remove_station">Удалить эту станцию?</string>
-    <string name="dialog_yes_no_message_restore_collection">Заменить текущие радиостанции станциями из резервного копирования?</string>
     <string name="dialog_yes_no_message_update_station_images">Скачать последнюю версию всех изображений станций?</string>
     <string name="dialog_yes_no_positive_button_default">Да</string>
     <string name="dialog_yes_no_positive_button_remove_station">Удалить</string>
@@ -35,11 +34,9 @@
     <!-- Fragment -->
     <string name="fragment_settings_title">Настройки</string>
     <!-- Notification -->
-    <string name="notification_now_playing_channel_description">Управление воспроизведением, именами станций и их изображениями.</string>
     <string name="notification_now_playing_channel_name">Управление воспроизведением</string>
     <string name="notification_play">Воспроизвести</string>
     <string name="notification_stop">Остановить</string>
-    <string name="notification_playing">Воспроизводится</string>
     <string name="notification_skip_to_previous">Предыдущий</string>
     <string name="notification_skip_to_next">Следующий</string>
     <!-- Onboarding -->
@@ -83,18 +80,12 @@
     <string name="shortcut_last_station_disabled_message">Ярлык для воспроизведения последней станции отключён.</string>
     <string name="shortcut_last_station_long_label">Воспроизвести последнюю станцию</string>
     <string name="shortcut_last_station_short_label">Последняя станция</string>
-    <!-- Station List -->
-    <string name="station_list_button_add_new_station">Добавить новую станцию</string>
     <!-- Toast Alerts -->
     <string name="toastalert_failed_picking_media">Не удалось выбрать изображение.</string>
-    <string name="toastalert_no_image_picker">Нет приложения для выбора изображений. Установите приложение для Галереи.</string>
     <!-- Toasts -->
     <string name="toastmessage_backed_up">резервная копия создана.</string>
     <string name="toastmessage_copied_to_clipboard">Скопировано в буфер обмена.</string>
     <string name="toastmessage_error_download_error">Ошибка загрузки</string>
-    <string name="toastmessage_error_missing_storage_permission">Предоставьте разрешение \"читать хранилище\" для открытия этого файла.</string>
-    <string name="toastmessage_error_no_station_found">Не удаётся запустить воспроизведение. Пожалуйста, добавьте сперва радиостанцию.</string>
-    <string name="toastmessage_error_no_station_matches_search">Не удаётся найти станцию, соответствующую вашему поиску.</string>
     <string name="toastmessage_install_file_helper">Пожалуйста, установите файловый менеджер.</string>
     <string name="toastmessage_restored">Станции были успешно восстановлены.</string>
     <string name="toastmessage_save_m3u">Сохранение радиостанций как M3U…</string>

@@ -34,7 +34,6 @@
     <string name="dialog_generic_details_button">Show details</string>
     <string name="dialog_opml_import_details_default">No details available</string>
     <string name="dialog_yes_no_message_remove_station">Remove this station?</string>
-    <string name="dialog_yes_no_message_restore_collection">Replace current collection radio stations with the radio station from backup?</string>
     <string name="dialog_yes_no_message_update_station_images">Download latest version of all station images?</string>
     <string name="dialog_yes_no_positive_button_default">Yes</string>
     <string name="dialog_yes_no_positive_button_remove_station">Remove</string>
@@ -44,11 +43,9 @@
     <string name="fragment_settings_title">Settings</string>
 
     <!-- Notification -->
-    <string name="notification_now_playing_channel_description">Playback controls, station name and image.</string>
     <string name="notification_now_playing_channel_name">Playback Controls</string>
     <string name="notification_play">Play</string>
     <string name="notification_stop">Stop</string>
-    <string name="notification_playing">Playing</string>
     <string name="notification_skip_to_previous">Previous</string>
     <string name="notification_skip_to_next">Next</string>
 
@@ -108,20 +105,13 @@
     <string name="shortcut_last_station_long_label">Play last station</string>
     <string name="shortcut_last_station_short_label">Last station</string>
 
-    <!-- Station List -->
-    <string name="station_list_button_add_new_station">Add new station</string>
-
     <!-- Toast Alerts -->
     <string name="toastalert_failed_picking_media">Image selection failed.</string>
-    <string name="toastalert_no_image_picker">No image picker available. Consider installing a Gallery application.</string>
 
     <!-- Toasts -->
     <string name="toastmessage_backed_up">has been successfully backed up.</string>
     <string name="toastmessage_copied_to_clipboard">Copied to clipboard.</string>
     <string name="toastmessage_error_download_error">Download error</string>
-    <string name="toastmessage_error_missing_storage_permission">Grant \"Read Storage\" permission to open this file.</string>
-    <string name="toastmessage_error_no_station_found">Unable to start playback. Please add a radio station first.</string>
-    <string name="toastmessage_error_no_station_matches_search">Unable to find a station that matches your search.</string>
     <string name="toastmessage_error_restart_playback_failed">Unable to start or restart playback.</string>
     <string name="toastmessage_install_file_helper">Please install a file manager.</string>
     <string name="toastmessage_restored">Stations has been successfully restored.</string>

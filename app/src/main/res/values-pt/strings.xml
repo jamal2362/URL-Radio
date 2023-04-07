@@ -28,7 +28,6 @@
     <string name="dialog_generic_details_button">Mostrar detalhes</string>
     <string name="dialog_opml_import_details_default">Não existem detalhes</string>
     <string name="dialog_yes_no_message_remove_station">Remover esta estação?</string>
-    <string name="dialog_yes_no_message_restore_collection">Substituir estações de rádio de coleção atual com a estação de rádio do backup?</string>
     <string name="dialog_yes_no_message_update_station_images">Descarregar última versão da imagem das estações?</string>
     <string name="dialog_yes_no_positive_button_default">Sim</string>
     <string name="dialog_yes_no_positive_button_remove_station">Remover</string>
@@ -36,11 +35,9 @@
     <!-- Fragment -->
     <string name="fragment_settings_title">Definições</string>
     <!-- Notification -->
-    <string name="notification_now_playing_channel_description">Controlos de reprodução, nome da estação e imagem.</string>
     <string name="notification_now_playing_channel_name">Controlos de reprodução</string>
     <string name="notification_play">Reproduzir</string>
     <string name="notification_stop">Parar</string>
-    <string name="notification_playing">Em reprodução</string>
     <string name="notification_skip_to_previous">Anterior</string>
     <string name="notification_skip_to_next">Seguinte</string>
     <!-- Onboarding -->
@@ -78,16 +75,11 @@
     <!-- App Shortcuts -->
     <string name="shortcut_last_station_long_label">Reproduzir última estação</string>
     <string name="shortcut_last_station_short_label">Última estação</string>
-    <!-- Station List -->
-    <string name="station_list_button_add_new_station">Adicionar nova estação</string>
     <!-- Toast Alerts -->
     <string name="toastalert_failed_picking_media">Falha ao selecionar imagem.</string>
     <!-- Toasts -->
     <string name="toastmessage_copied_to_clipboard">Copiado para a área de transferência.</string>
     <string name="toastmessage_error_download_error">Erro ao descarregar</string>
-    <string name="toastmessage_error_missing_storage_permission">Conceda a permissão \"Read Storage\" para abrir este ficheiro.</string>
-    <string name="toastmessage_error_no_station_found">Não foi possível iniciar a reprodução. Por favor, adicione uma estação de rádio primeiro.</string>
-    <string name="toastmessage_error_no_station_matches_search">Incapaz de encontrar uma estação que corresponda com a sua pesquisa.</string>
     <string name="toastmessage_install_file_helper">Instale um gestor de ficheiros.</string>
     <string name="toastmessage_restored">Estações restauradas com sucesso.</string>
     <string name="toastmessage_save_m3u">Guardar estações de rádio para M3U…</string>

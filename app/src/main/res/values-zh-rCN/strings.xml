@@ -30,7 +30,6 @@
     <string name="dialog_generic_details_button">显示详情</string>
     <string name="dialog_opml_import_details_default">没有可用详情</string>
     <string name="dialog_yes_no_message_remove_station">删除这个电台？</string>
-    <string name="dialog_yes_no_message_restore_collection">使用备份替换当前的电台合集？</string>
     <string name="dialog_yes_no_message_update_station_images">为所有电台下载最新版本的图标？</string>
     <string name="dialog_yes_no_positive_button_default">是的</string>
     <string name="dialog_yes_no_positive_button_remove_station">移除</string>
@@ -38,11 +37,9 @@
     <!-- Fragment -->
     <string name="fragment_settings_title">设置</string>
     <!-- Notification -->
-    <string name="notification_now_playing_channel_description">播放控制、电台名称与图标</string>
     <string name="notification_now_playing_channel_name">播放控制</string>
     <string name="notification_play">播放</string>
     <string name="notification_stop">停止</string>
-    <string name="notification_playing">正在播放</string>
     <string name="notification_skip_to_previous">上一个</string>
     <string name="notification_skip_to_next">下一个</string>
     <!-- Onboarding -->
@@ -89,18 +86,12 @@
     <string name="shortcut_last_station_disabled_message">已禁用播放最近电台的快捷方式。</string>
     <string name="shortcut_last_station_long_label">播放最近电台</string>
     <string name="shortcut_last_station_short_label">最近电台</string>
-    <!-- Station List -->
-    <string name="station_list_button_add_new_station">添加新电台</string>
     <!-- Toast Alerts -->
     <string name="toastalert_failed_picking_media">图像选择失败。</string>
-    <string name="toastalert_no_image_picker">没有可用的图像选择器。请考虑安装相册应用。</string>
     <!-- Toasts -->
     <string name="toastmessage_backed_up">已成功备份。</string>
     <string name="toastmessage_copied_to_clipboard">已复制到剪贴板。</string>
     <string name="toastmessage_error_download_error">下载发生错误</string>
-    <string name="toastmessage_error_missing_storage_permission">授予“读取存储”权限以打开此文件。</string>
-    <string name="toastmessage_error_no_station_found">无法开始播放。请先添加一个电台。</string>
-    <string name="toastmessage_error_no_station_matches_search">无法找到符合搜索条件的电台。</string>
     <string name="toastmessage_error_restart_playback_failed">无法开始或重启播放。</string>
     <string name="toastmessage_install_file_helper">请安装文件管理器。</string>
     <string name="toastmessage_restored">电台已成功还原。</string>
