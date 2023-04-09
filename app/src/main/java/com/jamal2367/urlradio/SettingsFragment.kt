@@ -233,7 +233,7 @@ class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogList
         // set up "GitHub" preference
         val preferenceGitHub = Preference(context)
         preferenceGitHub.title = getString(R.string.pref_github_title)
-        preferenceGitHub.setIcon(R.drawable.ic_bug_report_24dp)
+        preferenceGitHub.setIcon(R.drawable.ic_github_24dp)
         preferenceGitHub.summary = getString(R.string.pref_github_summary)
         preferenceGitHub.setOnPreferenceClickListener {
             // open web browser
