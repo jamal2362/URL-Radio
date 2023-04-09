@@ -1,5 +1,5 @@
 <div align="center">
-<img src="https://user-images.githubusercontent.com/15986930/229205087-1f4f420e-fa4d-4fc8-b88f-5a996b8985cf.png" alt="URL Radio Banner">
+<img src="https://user-images.githubusercontent.com/15986930/230761898-a43b46df-39de-40f2-80d2-5b411f36f87c.png" alt="URL Radio Banner">
 
 ### ℹ️ About URL Radio
 **URL Radio is a fork from Transistor.** <br>
