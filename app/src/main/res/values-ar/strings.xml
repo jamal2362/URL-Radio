@@ -62,8 +62,6 @@
     <string name="pref_m3u_export_summary">احفظ محطات الراديو الخاصة بك إلى ملف قائمة تشغيل M3U الذي يمكن استيراده إلى مشغلين آخرين.</string>
     <string name="pref_m3u_export_title">تصدير M3U</string>
     <string name="pref_maintenance_title">الصيانة</string>
-    <string name="pref_report_issue_summary">الإبلاغ عن الأخطاء واقتراح تحسينات على GitHub.</string>
-    <string name="pref_report_issue_title">الإبلاغ عن مشكلة</string>
     <string name="pref_station_export_summary">حفظ جميع محطات الراديو بما في ذلك الصور إلى تخزين الجهاز.</string>
     <string name="pref_station_export_title">تصدير المحطة</string>
     <string name="pref_station_restore_summary">إعادة جمع المحطات الإذاعية من النسخة الاحتياطية، وسيتم استبدال المحطات الحالية.</string>

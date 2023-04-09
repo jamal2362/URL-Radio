@@ -58,8 +58,6 @@
     <string name="pref_m3u_export_summary">Guarde as suas estações de rádio num ficheiro M3U, que pode ser importado para outros reprodutores.</string>
     <string name="pref_m3u_export_title">Exportar M3U</string>
     <string name="pref_maintenance_title">Manutenção</string>
-    <string name="pref_report_issue_summary">Reporte erros ou sugestões em GitHub.</string>
-    <string name="pref_report_issue_title">Reportar problemas</string>
     <string name="pref_station_export_summary">Guardar coleção de estações de rádio, incluindo imagens, no armazenamento do dispositivo.</string>
     <string name="pref_station_export_title">Exportar estação</string>
     <string name="pref_station_restore_summary">Restaurar coleção de estações de rádio de um backup. As estações existentes serão substituídas.</string>

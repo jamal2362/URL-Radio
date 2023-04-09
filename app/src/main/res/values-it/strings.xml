@@ -62,8 +62,6 @@
     <string name="pref_m3u_export_summary">Salva le stazioni radio in un file playlist M3U che può essere importato da altri lettori.</string>
     <string name="pref_m3u_export_title">Esporta M3U</string>
     <string name="pref_maintenance_title">Manutenzione</string>
-    <string name="pref_report_issue_summary">Segnala bug e consiglia miglioramenti su GitHub.</string>
-    <string name="pref_report_issue_title">Segnala un Problema</string>
     <string name="pref_station_export_summary">Salva tutta la raccolta di stazioni radio, incluse le immagini, sul dispositivo.</string>
     <string name="pref_station_export_title">Esporta Stazione</string>
     <string name="pref_station_restore_summary">Ripristina la raccolta di stazioni radio dal backup. Le stazioni esistenti saranno sostituite.</string>

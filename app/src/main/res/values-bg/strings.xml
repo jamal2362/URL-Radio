@@ -68,8 +68,6 @@
     <string name="pref_m3u_export_summary">Запишете списъка станции като M3U файл, който може да бъде импортиран в други плеъри.</string>
     <string name="pref_m3u_export_title">Експорт на M3U</string>
     <string name="pref_maintenance_title">Поддръжка</string>
-    <string name="pref_report_issue_summary">Докладвайте бъгове и предложете подобрения в GitHub.</string>
-    <string name="pref_report_issue_title">Докладване на проблем</string>
     <string name="pref_station_export_summary">Запазете цялата колекция станции вкл. изображенията в паметта на устройството.</string>
     <string name="pref_station_export_title">Експорт на станция</string>
     <string name="pref_station_restore_summary">Възстановете колекция станции от бекъп. Съществуващите станции ще бъдат заменени.</string>

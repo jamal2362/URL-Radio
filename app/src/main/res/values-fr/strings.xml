@@ -62,8 +62,6 @@
     <string name="pref_m3u_export_summary">Enregistrez vos stations de radio dans un fichier de playlist M3U qui peut être importé dans d\'autres lecteurs.</string>
     <string name="pref_m3u_export_title">Exporter M3U</string>
     <string name="pref_maintenance_title">Maintenance</string>
-    <string name="pref_report_issue_summary">Signalez des problèmes et proposez des améliorations sur GitHub.</string>
-    <string name="pref_report_issue_title">Signaler un problème</string>
     <string name="pref_station_export_summary">Enregistrez toute la collection de stations de radio, y compris les images sur le stockage de l\'appareil.</string>
     <string name="pref_station_export_title">Exporter la station</string>
     <string name="pref_station_restore_summary">Restaurer la collection des stations radio à partir de la sauvegarde. Les stations existantes seront remplacées.</string>

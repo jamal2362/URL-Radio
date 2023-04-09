@@ -62,8 +62,6 @@
     <string name="pref_m3u_export_summary">Сохраните ваши радиостанции в файл плейлиста M3U, который можно импортировать в другие проигрыватели.</string>
     <string name="pref_m3u_export_title">Экспорт M3U</string>
     <string name="pref_maintenance_title">Обслуживание</string>
-    <string name="pref_report_issue_summary">Сообщайте об ошибках и предлагайте улучшения на GitHub.</string>
-    <string name="pref_report_issue_title">Сообщить о проблеме</string>
     <string name="pref_station_export_summary">Сохраните всю коллекцию радиостанций, включая изображения на устройство.</string>
     <string name="pref_station_export_title">Экспорт станции</string>
     <string name="pref_station_restore_summary">Восстановление коллекции радиостанций из резервной копии. Существующие станции будут заменены.</string>

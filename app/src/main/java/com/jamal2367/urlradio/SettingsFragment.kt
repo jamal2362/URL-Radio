@@ -230,16 +230,16 @@ class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogList
         }
 
 
-        // set up "Report Issue" preference
-        val preferenceReportIssue = Preference(context)
-        preferenceReportIssue.title = getString(R.string.pref_report_issue_title)
-        preferenceReportIssue.setIcon(R.drawable.ic_bug_report_24dp)
-        preferenceReportIssue.summary = getString(R.string.pref_report_issue_summary)
-        preferenceReportIssue.setOnPreferenceClickListener {
+        // set up "GitHub" preference
+        val preferenceGitHub = Preference(context)
+        preferenceGitHub.title = getString(R.string.pref_github_title)
+        preferenceGitHub.setIcon(R.drawable.ic_bug_report_24dp)
+        preferenceGitHub.summary = getString(R.string.pref_github_summary)
+        preferenceGitHub.setOnPreferenceClickListener {
             // open web browser
             val intent = Intent().apply {
                 action = Intent.ACTION_VIEW
-                data = "https://github.com/jamal2362/URL-Radio/issues".toUri()
+                data = "https://github.com/jamal2362/URL-Radio".toUri()
             }
             startActivity(intent)
             return@setOnPreferenceClickListener true
@@ -271,7 +271,7 @@ class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogList
         val preferenceCategoryAbout = PreferenceCategory(context)
         preferenceCategoryAbout.title = getString(R.string.pref_about_title)
         preferenceCategoryAbout.contains(preferenceAppVersion)
-        preferenceCategoryAbout.contains(preferenceReportIssue)
+        preferenceCategoryAbout.contains(preferenceGitHub)
 
 
         // setup preference screen
@@ -290,7 +290,7 @@ class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogList
         screen.addPreference(preferenceEnableEditingStreamUri)
         screen.addPreference(preferenceCategoryAbout)
         screen.addPreference(preferenceAppVersion)
-        screen.addPreference(preferenceReportIssue)
+        screen.addPreference(preferenceGitHub)
         preferenceScreen = screen
     }
 

@@ -68,8 +68,6 @@
     <string name="pref_m3u_export_summary">Radyo istasyonlarınızı diğer oynatıcılara aktarılabilen bir M3U çalma listesi dosyasına kaydedin.</string>
     <string name="pref_m3u_export_title">M3U\'yu dışa aktar</string>
     <string name="pref_maintenance_title">Bakım</string>
-    <string name="pref_report_issue_summary">Hataları bildirin ve GitHub\'da iyileştirmeler önerin.</string>
-    <string name="pref_report_issue_title">Sorun Bildir</string>
     <string name="pref_station_export_summary">Resimler de dahil olmak üzere tüm radyo istasyonlarını cihaz belleğine kaydet.</string>
     <string name="pref_station_export_title">İstasyonları Yedekle</string>
     <string name="pref_station_restore_summary">Radyo istasyonlarını yedekten geri yükle. Mevcut istasyonlar değiştirilecek.</string>

@@ -68,8 +68,6 @@
     <string name="pref_m3u_export_summary">Sla je radiozenders op in een M3U afspeellijstbestand dat in andere spelers kan worden geïmporteerd.</string>
     <string name="pref_m3u_export_title">Exporteer M3U</string>
     <string name="pref_maintenance_title">Onderhoud</string>
-    <string name="pref_report_issue_summary">Meld fouten en stel verbeteringen voor op GitHub.</string>
-    <string name="pref_report_issue_title">Probleem Melden</string>
     <string name="pref_station_export_summary">Sla de gehele collectie radiozenders, inclusief afbeeldingen, in de apparaatopslag op.</string>
     <string name="pref_station_export_title">Exporteer Zender</string>
     <string name="pref_station_restore_summary">Herstel verzameling van radiozenders van back-up. Bestaande zenders zullen worden vervangen.</string>
