@@ -12,8 +12,8 @@ android {
         applicationId 'com.jamal2367.urlradio'
         minSdkVersion 21
         targetSdkVersion 33
-        versionCode 102
-        versionName '10.2'
+        versionCode 103
+        versionName '10.3'
         resConfigs 'en', 'ar', 'bg', 'cs', 'de', 'fr', 'it', 'nl', 'pl', 'pt', 'ru', 'tr', "zh-rCN"
         setProperty('archivesBaseName', 'URL_Radio_' + versionName)
     }
