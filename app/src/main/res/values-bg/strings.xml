@@ -50,7 +50,6 @@
     <string name="player_sheet_h2_station_metadata">В момента се възпроизвежда</string>
     <string name="player_sheet_h2_stream_url">Връзка към стрийма</string>
     <!-- Settings -->
-    <string name="pref_about_title">За приложението</string>
     <string name="pref_advanced_title">Разширени</string>
     <string name="pref_app_version_summary">Версия</string>
     <string name="pref_app_version_title">Версия на приложението</string>

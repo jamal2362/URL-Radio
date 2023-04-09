@@ -65,6 +65,9 @@
     <string name="pref_edit_station_summary_enabled">Die Bearbeitung von Senderinformationen ist aktiviert. Drücke lange, um den Bearbeitungsmodus aufzurufen.</string>
     <string name="pref_edit_station_title">Sender bearbeiten</string>
     <string name="pref_general_title">Allgemein</string>
+    <string name="pref_license_title">Diese Anwendung ist Open Source</string>
+    <string name="pref_license_summary">Lizenziert unter der MIT License</string>
+    <string name="pref_links_title">Links</string>
     <string name="pref_m3u_export_summary">Radiosender in einer M3U-Playlistdatei sichern, die in andere Player importiert werden können.</string>
     <string name="pref_m3u_export_title">M3U-Playlist exportieren</string>
     <string name="pref_maintenance_title">Wartung</string>

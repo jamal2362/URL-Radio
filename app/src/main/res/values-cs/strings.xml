@@ -37,7 +37,6 @@
     <string name="player_sheet_h2_station_metadata">Právě hraje</string>
     <string name="player_sheet_h2_stream_url">Odkaz na stream</string>
     <!-- Settings -->
-    <string name="pref_about_title">O aplikaci</string>
     <string name="pref_advanced_title">Pokročilé</string>
     <string name="pref_app_version_summary">Verze</string>
     <string name="pref_app_version_title">Verze aplikace</string>

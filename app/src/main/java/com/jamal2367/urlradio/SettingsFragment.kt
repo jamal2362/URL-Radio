@@ -246,6 +246,22 @@ class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogList
         }
 
 
+        // set up "License" preference
+        val preferenceLicense = Preference(context)
+        preferenceLicense.title = getString(R.string.pref_license_title)
+        preferenceLicense.setIcon(R.drawable.ic_library_24dp)
+        preferenceLicense.summary = getString(R.string.pref_license_summary)
+        preferenceLicense.setOnPreferenceClickListener {
+            // open web browser
+            val intent = Intent().apply {
+                action = Intent.ACTION_VIEW
+                data = "https://github.com/jamal2362/URL-Radio/blob/master/LICENSE.md".toUri()
+            }
+            startActivity(intent)
+            return@setOnPreferenceClickListener true
+        }
+
+
         // set preference categories
         val preferenceCategoryGeneral = PreferenceCategory(activity as Context)
         preferenceCategoryGeneral.title = getString(R.string.pref_general_title)
@@ -268,13 +284,15 @@ class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogList
         preferenceCategoryAdvanced.contains(preferenceEnableEditingGeneral)
         preferenceCategoryAdvanced.contains(preferenceEnableEditingStreamUri)
 
-        val preferenceCategoryAbout = PreferenceCategory(context)
-        preferenceCategoryAbout.title = getString(R.string.pref_about_title)
-        preferenceCategoryAbout.contains(preferenceAppVersion)
-        preferenceCategoryAbout.contains(preferenceGitHub)
+        val preferenceCategoryLinks = PreferenceCategory(context)
+        preferenceCategoryLinks.title = getString(R.string.pref_links_title)
+        preferenceCategoryLinks.contains(preferenceAppVersion)
+        preferenceCategoryLinks.contains(preferenceGitHub)
 
 
         // setup preference screen
+        screen.addPreference(preferenceAppVersion)
+        screen.addPreference(preferenceLicense)
         screen.addPreference(preferenceCategoryGeneral)
         screen.addPreference(preferenceThemeSelection)
         screen.addPreference(preferenceCategoryMaintenance)
@@ -288,8 +306,7 @@ class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogList
         screen.addPreference(preferenceBufferSize)
         screen.addPreference(preferenceEnableEditingGeneral)
         screen.addPreference(preferenceEnableEditingStreamUri)
-        screen.addPreference(preferenceCategoryAbout)
-        screen.addPreference(preferenceAppVersion)
+        screen.addPreference(preferenceCategoryLinks)
         screen.addPreference(preferenceGitHub)
         preferenceScreen = screen
     }

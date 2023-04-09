@@ -47,7 +47,6 @@
     <string name="player_sheet_h2_station_metadata">En cours de lecture</string>
     <string name="player_sheet_h2_stream_url">Lien de diffusion</string>
     <!-- Settings -->
-    <string name="pref_about_title">À propos</string>
     <string name="pref_advanced_title">Paramètres avancés</string>
     <string name="pref_app_version_summary">Version</string>
     <string name="pref_app_version_title">Version de l\'application</string>

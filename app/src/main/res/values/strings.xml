@@ -62,7 +62,6 @@
     <string name="player_sheet_h2_stream_url">Streaming link</string>
 
     <!-- Settings -->
-    <string name="pref_about_title">About</string>
     <string name="pref_advanced_title">Advanced</string>
     <string name="pref_app_version_summary">Version</string>
     <string name="pref_app_version_title">App Version</string>
@@ -79,6 +78,9 @@
     <string name="pref_general_title">General</string>
     <string name="pref_github_title" translatable="false">GitHub</string>
     <string name="pref_github_summary" translatable="false">github.com/jamal2362/URL-Radio</string>
+    <string name="pref_license_title">This application is open source</string>
+    <string name="pref_license_summary">Licensed under the MIT License</string>
+    <string name="pref_links_title">Links</string>
     <string name="pref_m3u_export_summary">Save your radio stations to an M3U playlist file that can be imported into other players.</string>
     <string name="pref_m3u_export_title">Export M3U</string>
     <string name="pref_maintenance_title">Maintenance</string>
