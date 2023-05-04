@@ -13,7 +13,7 @@ android {
         targetSdkVersion 33
         versionCode 103
         versionName '10.3'
-        resConfigs 'en', 'ar', 'bg', 'cs', 'de', 'fr', 'it', 'nl', 'pl', 'pt', 'ru', 'tr', "zh-rCN"
+        resConfigs 'en', 'ar', 'bg', 'cs', 'de', 'fr', 'it', 'nl', 'pl', 'pt', 'ru', 'tr', 'zh-rCN'
         setProperty('archivesBaseName', 'URL_Radio_' + versionName)
     }
 
@@ -59,9 +59,9 @@ dependencies {
     implementation 'androidx.palette:palette-ktx:1.0.0'
     implementation 'androidx.preference:preference-ktx:1.2.0'
     implementation 'androidx.media:media:1.6.0'
-    implementation "androidx.media3:media3-exoplayer:1.0.1"
-    implementation "androidx.media3:media3-session:1.0.1"
-    implementation "androidx.media3:media3-datasource-okhttp:1.0.1"
+    implementation 'androidx.media3:media3-exoplayer:1.0.1'
+    implementation 'androidx.media3:media3-session:1.0.1'
+    implementation 'androidx.media3:media3-datasource-okhttp:1.0.1'
     implementation 'androidx.navigation:navigation-fragment-ktx:2.5.3'
     implementation 'androidx.navigation:navigation-ui-ktx:2.5.3'
     implementation 'androidx.work:work-runtime-ktx:2.8.1'
