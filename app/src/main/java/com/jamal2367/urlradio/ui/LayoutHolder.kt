@@ -142,6 +142,7 @@ data class LayoutHolder(var rootView: View) {
 
         // update name
         stationNameView.text = station.name
+        stationNameView.isSelected = true
 
         // update cover
         if (station.imageColor != -1) {
