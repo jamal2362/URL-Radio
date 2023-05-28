@@ -34,23 +34,25 @@ import com.google.android.material.textview.MaterialTextView
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
 import com.jamal2367.urlradio.core.Station
+import com.jamal2367.urlradio.search.DirectInputCheck
 import com.jamal2367.urlradio.search.RadioBrowserResult
-import com.jamal2367.urlradio.search.RadioBrowserResultAdapter
 import com.jamal2367.urlradio.search.RadioBrowserSearch
+import com.jamal2367.urlradio.search.SearchResultAdapter
 
 
 /*
  * FindStationDialog class
  */
-class FindStationDialog(
+class FindStationDialog (
     private var context: Context,
-    private var listener: FindFindStationDialogListener
-) : RadioBrowserResultAdapter.RadioBrowserResultAdapterListener,
-    RadioBrowserSearch.RadioBrowserSearchListener {
+    private var listener: FindFindStationDialogListener):
+    SearchResultAdapter.SearchResultAdapterListener,
+    RadioBrowserSearch.RadioBrowserSearchListener,
+    DirectInputCheck.DirectInputCheckListener {
 
     /* Interface used to communicate back to activity */
     interface FindFindStationDialogListener {
-        fun onFindStationDialog(remoteStationLocation: String, station: Station) {
+        fun onFindStationDialog(station: Station) {
         }
     }
 
@@ -61,17 +63,17 @@ class FindStationDialog(
     private lateinit var searchRequestProgressIndicator: ProgressBar
     private lateinit var noSearchResultsTextView: MaterialTextView
     private lateinit var stationSearchResultList: RecyclerView
-    private lateinit var searchResultAdapter: RadioBrowserResultAdapter
+    private lateinit var searchResultAdapter: SearchResultAdapter
     private lateinit var radioBrowserSearch: RadioBrowserSearch
+    private lateinit var directInputCheck: DirectInputCheck
     private var currentSearchString: String = String()
     private val handler: Handler = Handler(Looper.getMainLooper())
-    private var remoteStationLocation: String = String()
     private var station: Station = Station()
 
 
     /* Overrides onSearchResultTapped from RadioBrowserResultAdapterListener */
-    override fun onSearchResultTapped(radioBrowserResult: RadioBrowserResult) {
-        station = radioBrowserResult.toStation()
+    override fun onSearchResultTapped(result: Station) {
+        station = result
         // hide keyboard
         val imm: InputMethodManager =
             context.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -85,7 +87,20 @@ class FindStationDialog(
     @SuppressLint("NotifyDataSetChanged")
     override fun onRadioBrowserSearchResults(results: Array<RadioBrowserResult>) {
         if (results.isNotEmpty()) {
-            searchResultAdapter.searchResults = results
+            val stationList: List<Station> = results.map {it.toStation()}
+            searchResultAdapter.searchResults = stationList
+            searchResultAdapter.notifyDataSetChanged()
+            resetLayout(clearAdapter = false)
+        } else {
+            showNoResultsError()
+        }
+    }
+
+
+    /* Overrides onDirectInputCheck from DirectInputCheck */
+    override fun onDirectInputCheck(stationList: MutableList<Station>) {
+        if (stationList.isNotEmpty()) {
+            searchResultAdapter.searchResults = stationList
             searchResultAdapter.notifyDataSetChanged()
             resetLayout(clearAdapter = false)
         } else {
@@ -96,8 +111,9 @@ class FindStationDialog(
 
     /* Construct and show dialog */
     fun show() {
-        // initialize a radio browser search
+        // initialize a radio browser search and direct url input check
         radioBrowserSearch = RadioBrowserSearch(this)
+        directInputCheck = DirectInputCheck(this)
 
         // prepare dialog builder
         val builder = MaterialAlertDialogBuilder(context)
@@ -117,10 +133,10 @@ class FindStationDialog(
         // set up list of search results
         setupRecyclerView(context)
 
-        // add okay ("import") button
+        // add okay ("Add") button
         builder.setPositiveButton(R.string.dialog_find_station_button_add) { _, _ ->
             // listen for click on add button
-            (listener).onFindStationDialog(remoteStationLocation, station)
+            listener.onFindStationDialog(station)
         }
         // add cancel button
         builder.setNegativeButton(R.string.dialog_generic_button_cancel) { _, _ ->
@@ -162,7 +178,7 @@ class FindStationDialog(
 
     /* Sets up list of results (RecyclerView) */
     private fun setupRecyclerView(context: Context) {
-        searchResultAdapter = RadioBrowserResultAdapter(this, arrayOf())
+        searchResultAdapter = SearchResultAdapter(this, listOf())
         stationSearchResultList.adapter = searchResultAdapter
         val layoutManager: LinearLayoutManager = object : LinearLayoutManager(context) {
             override fun supportsPredictiveItemAnimations(): Boolean {
@@ -183,8 +199,7 @@ class FindStationDialog(
             }
             // handle direct URL input
             query.startsWith("http") -> {
-                remoteStationLocation = query
-                activateAddButton()
+                directInputCheck.checkStationAddress(context, query)
             }
             // handle search string input
             else -> {
@@ -200,8 +215,7 @@ class FindStationDialog(
         currentSearchString = query
         if (query.startsWith("htt")) {
             // handle direct URL input
-            remoteStationLocation = query
-            activateAddButton()
+            directInputCheck.checkStationAddress(context, query)
         } else if (query.contains(" ") || query.length > 1) {
             // show progress indicator
             showProgressIndicator()

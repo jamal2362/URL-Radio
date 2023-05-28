@@ -65,7 +65,6 @@ import com.jamal2367.urlradio.ui.LayoutHolder
 import com.jamal2367.urlradio.ui.PlayerState
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.Dispatchers.Main
 import java.util.*
 
 
@@ -252,53 +251,11 @@ class PlayerFragment : Fragment(),
 
 
     /* Overrides onFindStationDialog from FindStationDialog */
-    override fun onFindStationDialog(remoteStationLocation: String, station: Station) {
-        super.onFindStationDialog(remoteStationLocation, station)
-        if (remoteStationLocation.isNotEmpty()) {
-            // detect content type on background thread
-            CoroutineScope(IO).launch {
-                val deferred: Deferred<NetworkHelper.ContentType> = async(Dispatchers.Default) {
-                    NetworkHelper.detectContentTypeSuspended(remoteStationLocation)
-                }
-                // wait for result
-                val contentType: String = deferred.await().type.lowercase(Locale.getDefault())
-                // CASE: playlist detected
-                if (Keys.MIME_TYPES_M3U.contains(contentType) or
-                    Keys.MIME_TYPES_PLS.contains(contentType)
-                ) {
-                    // download playlist
-                    DownloadHelper.downloadPlaylists(
-                        activity as Context,
-                        arrayOf(remoteStationLocation)
-                    )
-                }
-                // CASE: stream address detected
-                else if (Keys.MIME_TYPES_MPEG.contains(contentType) or
-                    Keys.MIME_TYPES_OGG.contains(contentType) or
-                    Keys.MIME_TYPES_AAC.contains(contentType) or
-                    Keys.MIME_TYPES_HLS.contains(contentType)
-                ) {
-                    // create station and add to collection
-                    val newStation = Station(
-                        name = remoteStationLocation,
-                        streamUris = mutableListOf(remoteStationLocation),
-                        streamContent = contentType,
-                        modificationDate = GregorianCalendar.getInstance().time
-                    )
-                    collection =
-                        CollectionHelper.addStation(activity as Context, collection, newStation)
-                }
-                // CASE: invalid address
-                else {
-                    withContext(Main) {
-                        Snackbar.make(requireView(), R.string.toastmessage_station_not_valid, Snackbar.LENGTH_LONG
-                        ).show()
-                    }
-                }
-            }
-        }
-
-        if (station.radioBrowserStationUuid.isNotEmpty()) {
+    override fun onFindStationDialog(station: Station) {
+        if (station.streamContent.isNotEmpty() && station.streamContent != Keys.MIME_TYPE_UNSUPPORTED) {
+            // add station and save collection
+            collection = CollectionHelper.addStation(activity as Context, collection, station)
+        } else {
             // detect content type on background thread
             CoroutineScope(IO).launch {
                 val deferred: Deferred<NetworkHelper.ContentType> = async(Dispatchers.Default) { NetworkHelper.detectContentTypeSuspended(station.getStreamUri()) }

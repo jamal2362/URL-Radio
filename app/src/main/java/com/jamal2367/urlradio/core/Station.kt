@@ -19,9 +19,9 @@ import androidx.annotation.Keep
 import androidx.media3.common.MimeTypes
 import com.google.gson.annotations.Expose
 import com.jamal2367.urlradio.Keys
-import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
-import java.util.*
+import java.util.Date
+import java.util.UUID
 
 
 /*
@@ -49,10 +49,6 @@ data class Station(
     @Expose var radioBrowserStationUuid: String = String(),
     @Expose var radioBrowserChangeUuid: String = String()
 ) : Parcelable {
-
-    /* Define log tag */
-    @IgnoredOnParcel
-    private val TAG: String = Station::class.java.simpleName
 
 
     /* overrides toString method */

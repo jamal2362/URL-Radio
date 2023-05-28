@@ -26,6 +26,7 @@ import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.helpers.NetworkHelper
 import com.jamal2367.urlradio.helpers.PreferencesHelper
 import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers.IO
 
 
 /*
@@ -119,9 +120,8 @@ class RadioBrowserSearch(private var radioBrowserSearchListener: RadioBrowserSea
 
 
     /* Updates the address of the radio-browser.info api */
-    @OptIn(DelicateCoroutinesApi::class)
     private fun updateRadioBrowserApi() {
-        GlobalScope.launch {
+        CoroutineScope(IO).launch {
             val deferred: Deferred<String> = async { NetworkHelper.getRadioBrowserServerSuspended() }
             radioBrowserApi = deferred.await()
         }
