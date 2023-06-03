@@ -65,7 +65,7 @@ class DirectInputCheck(private var directInputCheckListener: DirectInputCheckLis
                 // CASE: playlist detected
                 if (Keys.MIME_TYPES_M3U.contains(contentType) or
                     Keys.MIME_TYPES_PLS.contains(contentType)) {
-                    // download playlist - up to 100 lines
+                    // download playlist - up to 100 lines, with max. 200 characters
                     val lines = mutableListOf<String>()
                     val connection =
                         withContext(IO) {
@@ -76,7 +76,8 @@ class DirectInputCheck(private var directInputCheckListener: DirectInputCheckLis
                     }.bufferedReader()
                     reader.useLines { sequence ->
                         sequence.take(100).forEach { line ->
-                            lines.add(line)
+                            val trimmedLine = line.take(2000)
+                            lines.add(trimmedLine)
                         }
                     }
                     Log.e(TAG, "Downloaded =>\n$lines") // todo remove when finished

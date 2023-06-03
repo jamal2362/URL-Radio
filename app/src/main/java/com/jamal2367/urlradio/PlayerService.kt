@@ -21,9 +21,7 @@ import android.media.audiofx.AudioEffect
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.os.Handler
 import android.util.Log
-import android.widget.Toast
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.media.MediaBrowserServiceCompat.BrowserRoot.EXTRA_RECENT
 import androidx.media3.common.*
@@ -67,7 +65,6 @@ class PlayerService : MediaLibraryService() {
     private val librarySessionCallback = CustomMediaLibrarySessionCallback()
     private var collection: Collection = Collection()
     private lateinit var metadataHistory: MutableList<String>
-    private lateinit var modificationDate: Date
     private var bufferSizeMultiplier: Int = PreferencesHelper.loadBufferSizeMultiplier()
     private var playbackRestartCounter: Int = 0
     private var playLastStation: Boolean = false
@@ -235,19 +232,6 @@ class PlayerService : MediaLibraryService() {
         }
         // save history
         PreferencesHelper.saveMetadataHistory(metadataHistory)
-    }
-
-
-    /* Try to restart Playback */
-    private fun tryToRestartPlayback() {
-        // restart playback for up to five times
-        if (playbackRestartCounter < 5) {
-            playbackRestartCounter++
-            player.play()
-        } else {
-            player.stop()
-            Toast.makeText(this, R.string.toastmessage_error_restart_playback_failed, Toast.LENGTH_LONG).show()
-        }
     }
 
 
@@ -598,33 +582,26 @@ class PlayerService : MediaLibraryService() {
     }
 
 
-    fun pausePlayback() {
-        Handler(player.applicationLooper).post {
-            player.pause()
-            Toast.makeText(this, R.string.toastmessage_error_restart_playback_failed, Toast.LENGTH_LONG).show()
-        }
-    }
-
-
     /*
      * Custom LoadErrorHandlingPolicy that network drop outs
      */
-    private val loadErrorHandlingPolicy: DefaultLoadErrorHandlingPolicy =
-        object : DefaultLoadErrorHandlingPolicy() {
-            override fun getRetryDelayMsFor(loadErrorInfo: LoadErrorHandlingPolicy.LoadErrorInfo): Long {
-                // try to reconnect every 5 seconds - up to 30 times
-                return if (loadErrorInfo.errorCount <= Keys.DEFAULT_MAX_RECONNECTION_COUNT && loadErrorInfo.exception is HttpDataSource.HttpDataSourceException) {
-                    Keys.RECONNECTION_WAIT_INTERVAL
-                } else {
-                    pausePlayback()
-                    C.TIME_UNSET
-                }
+    private val loadErrorHandlingPolicy: DefaultLoadErrorHandlingPolicy = object: DefaultLoadErrorHandlingPolicy()  {
+        override fun getRetryDelayMsFor(loadErrorInfo: LoadErrorHandlingPolicy.LoadErrorInfo): Long {
+            // try to reconnect every 5 seconds - up to 20 times
+            if (loadErrorInfo.errorCount <= Keys.DEFAULT_MAX_RECONNECTION_COUNT && loadErrorInfo.exception is HttpDataSource.HttpDataSourceException) {
+                return Keys.RECONNECTION_WAIT_INTERVAL
+//            } else {
+//                CoroutineScope(Main).launch {
+//                    player.stop()
+//                }
             }
-
-            override fun getMinimumLoadableRetryCount(dataType: Int): Int {
-                return Int.MAX_VALUE
-            }
+            return C.TIME_UNSET
         }
+
+        override fun getMinimumLoadableRetryCount(dataType: Int): Int {
+            return Int.MAX_VALUE
+        }
+    }
 
 
     /*
@@ -642,22 +619,6 @@ class PlayerService : MediaLibraryService() {
             }
         }
     }
-
-
-    /*
-    * Defines the listener for changes in shared preferences
-    */
-    private val sharedPreferenceChangeListener =
-        SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-            when (key) {
-                Keys.PREF_LARGE_BUFFER_SIZE -> {
-                    bufferSizeMultiplier = PreferencesHelper.loadBufferSizeMultiplier()
-                    if (!player.isPlaying && !player.isLoading) {
-                        initializePlayer()
-                    }
-                }
-            }
-        }
 
 
     /*
