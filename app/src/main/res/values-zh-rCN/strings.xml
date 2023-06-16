@@ -64,6 +64,9 @@
     <string name="pref_edit_station_summary_enabled">已启用电台信息编辑。长按电台条目进入编辑模式。</string>
     <string name="pref_edit_station_title">编辑电台</string>
     <string name="pref_general_title">常规</string>
+    <string name="pref_license_title">此应用程序开源</string>
+    <string name="pref_license_summary">基于 MIT 许可证获得许可</string>
+    <string name="pref_links_title">链接</string>
     <string name="pref_m3u_export_summary">将电台列表保存到M3U文件中，以便导入其他播放器。</string>
     <string name="pref_m3u_export_title">导出 M3U</string>
     <string name="pref_maintenance_title">维护</string>

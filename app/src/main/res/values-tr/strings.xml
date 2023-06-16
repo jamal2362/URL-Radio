@@ -64,6 +64,9 @@
     <string name="pref_edit_station_summary_enabled">İstasyon bilgilerinin düzenlenmesi etkinleştirildi. Düzenleme moduna girmek için uzun süre basın.</string>
     <string name="pref_edit_station_title">İstasyonları Düzenle</string>
     <string name="pref_general_title">Genel</string>
+    <string name="pref_license_title">Bu uygulama açık kaynak</string>
+    <string name="pref_license_summary">MIT Lisansı altında lisanslanmıştır</string>
+    <string name="pref_links_title">Bağlantılar</string>
     <string name="pref_m3u_export_summary">Radyo istasyonlarınızı diğer oynatıcılara aktarılabilen bir M3U çalma listesi dosyasına kaydedin.</string>
     <string name="pref_m3u_export_title">M3U\'yu dışa aktar</string>
     <string name="pref_maintenance_title">Bakım</string>
@@ -89,12 +92,14 @@
     <string name="toastmessage_backed_up">başarıyla yedeklendi.</string>
     <string name="toastmessage_copied_to_clipboard">Bağlantı panoya kopyalandı.</string>
     <string name="toastmessage_error_download_error">İndirme hatası</string>
+    <string name="toastmessage_error_restart_playback_failed">Oynatma yeniden başlatılamıyor.</string>
     <string name="toastmessage_install_file_helper">Lütfen bir dosya yöneticisi kurun.</string>
     <string name="toastmessage_restored">Yedekleme başarıyla geri yüklendi.</string>
     <string name="toastmessage_save_m3u">Radyo istasyonları M3U formatında kaydediliyor…</string>
     <string name="toastmessage_shortcut_created">Kısayol oluşturuldu.</string>
     <string name="toastmessage_shortcut_not_created">Kısayol oluşturulamadı. Bu cihaz kısayolların oluşturulmasına izin vermiyor.</string>
     <string name="toastmessage_sleep_timer_unable_to_start">Lütfen önce bir şeyler oynat.</string>
+    <string name="toastmessage_station_duplicate">Bu istasyon zaten eklendi.</string>
     <string name="toastmessage_station_not_valid">İstasyon geçerli değil.</string>
     <string name="toastmessage_updating_collection">İstasyon koleksiyonu güncelleniyor.</string>
     <string name="toastmessage_updating_station_images">İstasyon görüntüleri güncelleniyor.</string>
