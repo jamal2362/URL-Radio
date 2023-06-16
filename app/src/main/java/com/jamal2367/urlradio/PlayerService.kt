@@ -214,6 +214,7 @@ class PlayerService : MediaLibraryService() {
         PreferencesHelper.saveSleepTimerRunning(isRunning = false)
     }
 
+
     /* Updates metadata */
     private fun updateMetadata(metadata: String = String()) {
         // get metadata string
@@ -619,6 +620,22 @@ class PlayerService : MediaLibraryService() {
             }
         }
     }
+
+
+    /*
+    * Defines the listener for changes in shared preferences
+    */
+    private val sharedPreferenceChangeListener =
+        SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            when (key) {
+                Keys.PREF_LARGE_BUFFER_SIZE -> {
+                    bufferSizeMultiplier = PreferencesHelper.loadBufferSizeMultiplier()
+                    if (!player.isPlaying && !player.isLoading) {
+                        initializePlayer()
+                    }
+                }
+            }
+        }
 
 
     /*
