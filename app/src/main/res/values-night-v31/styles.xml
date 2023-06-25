@@ -31,4 +31,10 @@
         <!-- Set splash screen icon background color -->
         <item name="android:windowSplashScreenIconBackgroundColor">@color/splashBackgroundColor</item>
     </style>
+
+    <style name="ThemeOverlay.App.MaterialAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="colorSurface">@color/player_sheet_background</item>
+        <item name="materialAlertDialogBodyTextStyle">@style/TextAppearance.MaterialComponents.Body1</item>
+        <item name="android:backgroundDimAmount">0.64</item>
+    </style>
 </resources>
