@@ -21,8 +21,8 @@
     <color name="list_card_delete_icon">#FFFFFFFF</color>
     <color name="list_card_mark_starred_background">#FF495D92</color>
     <color name="list_card_mark_starred_star">#FFFFFFFF</color>
-    <color name="search_result_background">#FFCFCFCF</color>
-    <color name="search_result_background_selected">#FFA1A1A1</color>
+    <color name="search_result_background">#FFFEFBFF</color>
+    <color name="search_result_background_selected">#FFDAE2FF</color>
 
     <!-- player sheet -->
     <color name="player_button_background">#FF495D92</color>
