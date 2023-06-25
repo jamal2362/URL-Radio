@@ -172,7 +172,6 @@ class FindStationDialog (
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = false
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).isAllCaps = true
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE).isAllCaps = true
-
     }
 
 
