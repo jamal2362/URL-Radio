@@ -252,10 +252,10 @@ data class LayoutHolder(var rootView: View) {
     /* Toggles play/pause button */
     fun togglePlayButton(isPlaying: Boolean) {
         if (isPlaying) {
-            playButtonView.setImageResource(R.drawable.ic_player_stop_symbol_36dp)
+            playButtonView.setImageResource(R.drawable.ic_audio_wave_42dp)
             // bufferingIndicator.isVisible = false
         } else {
-            playButtonView.setImageResource(R.drawable.ic_player_play_symbol_36dp)
+            playButtonView.setImageResource(R.drawable.ic_player_play_symbol_42dp)
             // bufferingIndicator.isVisible = isBuffering
         }
     }

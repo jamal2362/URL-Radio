@@ -79,7 +79,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/station_icon"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/station_icon"
-        app:srcCompat="@drawable/ic_player_play_symbol_36dp" />
+        app:srcCompat="@drawable/ic_player_play_symbol_42dp" />
 
     <ProgressBar
         android:id="@+id/player_buffering_indicator"
