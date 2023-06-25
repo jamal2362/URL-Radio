@@ -37,4 +37,10 @@
         <item name="materialAlertDialogBodyTextStyle">@style/TextAppearance.MaterialComponents.Body1</item>
         <item name="android:backgroundDimAmount">0.64</item>
     </style>
+
+    <style name="ThemeOverlay.App.AlertDialogTheme" parent="@style/ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="android:background">@color/player_sheet_background</item>
+        <item name="dialogCornerRadius">28dp</item>
+        <item name="checkedTextViewStyle">@style/AlertDialog.TextColor</item>
+    </style>
 </resources>
