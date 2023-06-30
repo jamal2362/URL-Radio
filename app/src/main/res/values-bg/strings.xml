@@ -64,6 +64,9 @@
     <string name="pref_edit_station_summary_enabled">Редакцията на информацията за станциите е активирана. Натиснете и задръжте за да влезете в режим редакция.</string>
     <string name="pref_edit_station_title">Редакция на станциите</string>
     <string name="pref_general_title">Общи</string>
+    <string name="pref_license_title">Това е приложение с отворен код</string>
+    <string name="pref_license_summary">Лицензирано под лиценза на МТИ</string>
+    <string name="pref_links_title">Препратки</string>
     <string name="pref_m3u_export_summary">Запишете списъка станции като M3U файл, който може да бъде импортиран в други плеъри.</string>
     <string name="pref_m3u_export_title">Експорт на M3U</string>
     <string name="pref_maintenance_title">Поддръжка</string>
