@@ -129,7 +129,11 @@ class PlayerFragment : Fragment(),
         )
 
         // restore state of station list
-        listLayoutState = savedInstanceState?.getParcelable(Keys.KEY_SAVE_INSTANCE_STATE_STATION_LIST)
+        listLayoutState = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            savedInstanceState?.getParcelable(Keys.KEY_SAVE_INSTANCE_STATE_STATION_LIST, Parcelable::class.java)
+        } else {
+            savedInstanceState?.getParcelable(Keys.KEY_SAVE_INSTANCE_STATE_STATION_LIST)
+        }
 
         // Initialize single media picker launcher
         pickSingleMediaLauncher =
