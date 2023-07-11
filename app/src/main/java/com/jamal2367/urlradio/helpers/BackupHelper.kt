@@ -17,6 +17,7 @@ package com.jamal2367.urlradio.helpers
 import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import android.util.Log
 import android.view.View
 import com.google.android.material.snackbar.Snackbar
@@ -64,6 +65,11 @@ object BackupHelper {
     /* Extracts zip backup  file and restores files and folders - Credit: https://www.baeldung.com/java-compress-and-uncompress*/
     fun restore(view: View, context: Context, sourceUri: Uri) {
         Snackbar.make(view, R.string.toastmessage_restored, Snackbar.LENGTH_LONG).show()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            // bypass "ZipException" for Android 14 or above applications when zip file names contain ".." or start with "/"
+            dalvik.system.ZipPathValidator.clearCallback()
+        }
 
         val resolver: ContentResolver = context.contentResolver
         val sourceInputStream: InputStream? = resolver.openInputStream(sourceUri)
