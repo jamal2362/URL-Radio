@@ -405,7 +405,8 @@ object CollectionHelper {
         val metadata: MediaMetadata = MediaMetadata.Builder()
             .setTitle("Root Folder")
             .setIsPlayable(false)
-            .setFolderType(MediaMetadata.FOLDER_TYPE_MIXED)
+            .setIsBrowsable(true)
+            .setMediaType(MediaMetadata.MEDIA_TYPE_FOLDER_MIXED)
             .build()
         return MediaItem.Builder()
             .setMediaId("[rootID]")
@@ -581,7 +582,7 @@ object CollectionHelper {
                 //setArtworkUri(Uri.parse(Keys.LOCATION_RESOURCES + R.raw.ic_default_station_image))
                 setArtworkData(ImageHelper.getStationImageAsByteArray(context), MediaMetadata.PICTURE_TYPE_FRONT_COVER)
             }
-            setFolderType(MediaMetadata.FOLDER_TYPE_NONE)
+            setIsBrowsable(false)
             setIsPlayable(true)
         }.build()
         // build MediaItem and return it

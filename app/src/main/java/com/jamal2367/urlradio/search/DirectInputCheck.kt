@@ -15,7 +15,6 @@
 package com.jamal2367.urlradio.search
 
 import android.content.Context
-import android.util.Log
 import android.webkit.URLUtil
 import android.widget.Toast
 import com.jamal2367.urlradio.Keys
@@ -52,14 +51,6 @@ class DirectInputCheck(private var directInputCheckListener: DirectInputCheckLis
     private var lastCheckedAddress: String = String()
 
 
-    /*
-    TEST CASES - TODO REMOVE WHEN FINISHED
-    https://www.radioeins.de/live.m3u
-    https://www.radioeins.de/live.pls
-    http://radio.xaq.nl/m3u/speech.m3u
-    */
-
-
     /* Searches station(s) on radio-browser.info */
     fun checkStationAddress(context: Context, query: String) {
         // check if valid URL
@@ -67,18 +58,15 @@ class DirectInputCheck(private var directInputCheckListener: DirectInputCheckLis
             val stationList: MutableList<Station> = mutableListOf()
             CoroutineScope(IO).launch {
                 val contentType: String = NetworkHelper.detectContentType(query).type.lowercase(Locale.getDefault())
-                Log.e(TAG, "contentType => $contentType") // todo remove when finished
                 // CASE: M3U playlist detected
                 if (Keys.MIME_TYPES_M3U.contains(contentType)) {
                     val lines: List<String> = downloadPlaylist(query)
                     stationList.addAll(readM3uPlaylistContent(lines))
-                    Log.e(TAG, "Downloaded M3U =>\n$stationList") // todo remove when finished
                 }
                 // CASE: PLS playlist detected
                 else if (Keys.MIME_TYPES_PLS.contains(contentType)) {
                     val lines: List<String> = downloadPlaylist(query)
                     stationList.addAll(readPlsPlaylistContent(lines))
-                    Log.e(TAG, "Downloaded PLS =>\n$stationList") // todo remove when finished
                 }
                 // CASE: stream address detected
                 else if (Keys.MIME_TYPES_MPEG.contains(contentType) or
@@ -131,11 +119,10 @@ class DirectInputCheck(private var directInputCheckListener: DirectInputCheckLis
         var streamUri: String
         var contentType: String
 
-        for (line in playlist) {
+        playlist.forEach { line ->
             // get name of station
             if (line.startsWith("#EXTINF:")) {
-                val titleStartIndex = line.indexOf(',') + 1
-                name = line.substring(titleStartIndex).trim()
+                name = line.substringAfter(",").trim()
             }
             // get stream uri and check mime type
             else if (line.isNotBlank() && !line.startsWith("#")) {
@@ -161,7 +148,44 @@ class DirectInputCheck(private var directInputCheckListener: DirectInputCheckLis
     /* Reads a pls playlist and returns a list of stations */
     private fun readPlsPlaylistContent(playlist: List<String>): List<Station> {
         val stations: MutableList<Station> = mutableListOf()
-        // todo implement
+        var name = String()
+        var streamUri: String
+        var contentType: String
+
+        playlist.forEachIndexed { index, line ->
+            // get stream uri and check mime type
+            if (line.startsWith("File")) {
+                streamUri = line.substringAfter("=").trim()
+                contentType = NetworkHelper.detectContentType(streamUri).type.lowercase(Locale.getDefault())
+                if (contentType != Keys.MIME_TYPE_UNSUPPORTED) {
+                    // look for the matching station name
+                    val number: String = line.substring(4 /* File */, line.indexOf("="))
+                    val lineBeforeIndex: Int = index - 1
+                    val lineAfterIndex: Int = index + 1
+                    // first: check the line before
+                    if (lineBeforeIndex >= 0) {
+                        val lineBefore: String = playlist[lineBeforeIndex]
+                        if (lineBefore.startsWith("Title$number")) {
+                            name = lineBefore.substringAfter("=").trim()
+                        }
+                    }
+                    // then: check the line after
+                    if (name.isEmpty() && lineAfterIndex < playlist.size) {
+                        val lineAfter: String = playlist[lineAfterIndex]
+                        if (lineAfter.startsWith("Title$number")) {
+                            name = lineAfter.substringAfter("=").trim()
+                        }
+                    }
+                    // fallback: use stream uri as name
+                    if (name.isEmpty()) {
+                        name = streamUri
+                    }
+                    // add station
+                    val station = Station(name = name, streamUris = mutableListOf(streamUri), streamContent = contentType, modificationDate = GregorianCalendar.getInstance().time)
+                    stations.add(station)
+                }
+            }
+        }
         return stations
     }
 

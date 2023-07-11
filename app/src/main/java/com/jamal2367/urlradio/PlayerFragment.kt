@@ -66,6 +66,7 @@ import com.jamal2367.urlradio.ui.LayoutHolder
 import com.jamal2367.urlradio.ui.PlayerState
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
 import java.util.*
 
 
@@ -132,6 +133,7 @@ class PlayerFragment : Fragment(),
         listLayoutState = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             savedInstanceState?.getParcelable(Keys.KEY_SAVE_INSTANCE_STATE_STATION_LIST, Parcelable::class.java)
         } else {
+            @Suppress("DEPRECATION")
             savedInstanceState?.getParcelable(Keys.KEY_SAVE_INSTANCE_STATE_STATION_LIST)
         }
 
@@ -263,13 +265,13 @@ class PlayerFragment : Fragment(),
         } else {
             // detect content type on background thread
             CoroutineScope(IO).launch {
-                val deferred: Deferred<NetworkHelper.ContentType> = async(Dispatchers.Default) { NetworkHelper.detectContentTypeSuspended(station.getStreamUri()) }
-                // wait for result
-                val contentType: NetworkHelper.ContentType = deferred.await()
+                val contentType: NetworkHelper.ContentType = NetworkHelper.detectContentType(station.getStreamUri())
                 // set content type
                 station.streamContent = contentType.type
                 // add station and save collection
-                collection = CollectionHelper.addStation(activity as Context, collection, station)
+                withContext(Main) {
+                    collection = CollectionHelper.addStation(activity as Context, collection, station)
+                }
             }
         }
     }
