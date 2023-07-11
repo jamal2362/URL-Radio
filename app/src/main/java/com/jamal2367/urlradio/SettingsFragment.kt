@@ -246,6 +246,22 @@ class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogList
         }
 
 
+        // set up "Codeberg" preference
+        val preferenceCodeberg = Preference(context)
+        preferenceCodeberg.title = getString(R.string.pref_codeberg_title)
+        preferenceCodeberg.setIcon(R.drawable.ic_codeberg_24dp)
+        preferenceCodeberg.summary = getString(R.string.pref_codeberg_summary)
+        preferenceCodeberg.setOnPreferenceClickListener {
+            // open web browser
+            val intent = Intent().apply {
+                action = Intent.ACTION_VIEW
+                data = "https://codeberg.org/y20k/transistor".toUri()
+            }
+            startActivity(intent)
+            return@setOnPreferenceClickListener true
+        }
+
+
         // set up "License" preference
         val preferenceLicense = Preference(context)
         preferenceLicense.title = getString(R.string.pref_license_title)
@@ -288,6 +304,7 @@ class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogList
         preferenceCategoryLinks.title = getString(R.string.pref_links_title)
         preferenceCategoryLinks.contains(preferenceAppVersion)
         preferenceCategoryLinks.contains(preferenceGitHub)
+        preferenceCategoryLinks.contains(preferenceCodeberg)
 
 
         // setup preference screen
@@ -308,6 +325,7 @@ class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogList
         screen.addPreference(preferenceEnableEditingStreamUri)
         screen.addPreference(preferenceCategoryLinks)
         screen.addPreference(preferenceGitHub)
+        screen.addPreference(preferenceCodeberg)
         preferenceScreen = screen
     }
 
