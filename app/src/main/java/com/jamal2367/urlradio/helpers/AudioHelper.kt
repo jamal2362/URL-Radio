@@ -57,18 +57,17 @@ object AudioHelper {
         var metadataString = String()
         for (i in 0 until metadata.length()) {
             // extract IceCast metadata
-            when (val entry = metadata[i]) {
+            when (val entry = metadata.get(i)) {
                 is IcyInfo -> {
                     metadataString = entry.title.toString()
                 }
+
                 is IcyHeaders -> {
                     Log.i(TAG, "icyHeaders:" + entry.name + " - " + entry.genre)
                 }
+
                 else -> {
-                    Log.w(
-                        TAG,
-                        "Unsupported metadata received (type = ${entry.javaClass.simpleName})"
-                    )
+                    Log.w(TAG, "Unsupported metadata received (type = ${entry.javaClass.simpleName})")
                 }
             }
             // TODO implement HLS metadata extraction (Id3Frame / PrivFrame)
@@ -76,12 +75,10 @@ object AudioHelper {
         }
         // ensure a max length of the metadata string
         if (metadataString.isNotEmpty()) {
-            metadataString = metadataString.substring(
-                0,
-                min(metadataString.length, Keys.DEFAULT_MAX_LENGTH_OF_METADATA_ENTRY)
-            )
+            metadataString = metadataString.substring(0, min(metadataString.length, Keys.DEFAULT_MAX_LENGTH_OF_METADATA_ENTRY))
         }
         return metadataString
     }
+
 
 }
