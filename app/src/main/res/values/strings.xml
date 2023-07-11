@@ -87,7 +87,7 @@
     <string name="pref_m3u_export_title">Export M3U</string>
     <string name="pref_maintenance_title">Maintenance</string>
     <string name="pref_station_export_summary">Save entire collection of radio stations including images to device storage.</string>
-    <string name="pref_station_export_title">Export Station</string>
+    <string name="pref_station_export_title">Export Stations</string>
     <string name="pref_station_restore_summary">Restore collection of radio stations from backup. Existing stations will be replaced.</string>
     <string name="pref_station_restore_title">Restore Stations</string>
     <string name="pref_theme_selection_mode_dark">Dark mode</string>
