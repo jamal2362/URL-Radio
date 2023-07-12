@@ -83,7 +83,7 @@ You can help out the radio-browser.info community by [adding the missing station
 | M3U                | ✅ |
 | M3U8               | ✅ |
 | MP3                | ✅ |
-| OGG                | ✅ |
+| OGG (Vorbis)       | ✅ |
 | OPUS               | ✅ |
 | PLS                | ✅ |
 | HLS (Experimental) | ⚠️ |
