@@ -47,7 +47,9 @@ data class Station(
     @Expose var modificationDate: Date = Keys.DEFAULT_DATE,
     @Expose var isPlaying: Boolean = false,
     @Expose var radioBrowserStationUuid: String = String(),
-    @Expose var radioBrowserChangeUuid: String = String()
+    @Expose var radioBrowserChangeUuid: String = String(),
+    @Expose var bitrate: String = String(),
+    @Expose var codec: String = String()
 ) : Parcelable {
 
 
@@ -112,7 +114,8 @@ data class Station(
             modificationDate = modificationDate,
             isPlaying = isPlaying,
             radioBrowserStationUuid = radioBrowserStationUuid,
-            radioBrowserChangeUuid = radioBrowserChangeUuid
+            radioBrowserChangeUuid = radioBrowserChangeUuid,
+            bitrate = bitrate
         )
     }
 }

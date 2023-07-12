@@ -142,7 +142,12 @@ data class LayoutHolder(var rootView: View) {
 
         // update name
         stationNameView.text = station.name
+
+        // toggle text scrolling (marquee) if necessary
         stationNameView.isSelected = true
+
+        // reduce the shadow left and right because of scrolling (Marquee)
+        stationNameView.setFadingEdgeLength(10)
 
         // update cover
         if (station.imageColor != -1) {

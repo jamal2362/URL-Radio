@@ -71,12 +71,21 @@ class SearchResultAdapter(
         // update text
         searchResultViewHolder.nameView.text = searchResult.name
         searchResultViewHolder.streamView.text = searchResult.getStreamUri()
+        searchResultViewHolder.bitrateView.text = buildString {
+            append(searchResult.codec)
+            append(" - ")
+            append(searchResult.bitrate)
+            append("kbps")
+        }
         // mark selected if necessary
         val isSelected = selectedPosition == holder.adapterPosition
         searchResultViewHolder.searchResultLayout.isSelected = isSelected
         // toggle text scrolling (marquee) if necessary
         searchResultViewHolder.nameView.isSelected = isSelected
         searchResultViewHolder.streamView.isSelected = isSelected
+        // reduce the shadow left and right because of scrolling (Marquee)
+        searchResultViewHolder.nameView.setFadingEdgeLength(10)
+        searchResultViewHolder.streamView.setFadingEdgeLength(10)
         // attach touch listener
         searchResultViewHolder.searchResultLayout.setOnClickListener {
             // move marked position
@@ -110,6 +119,7 @@ class SearchResultAdapter(
         RecyclerView.ViewHolder(searchResultLayout) {
         val nameView: MaterialTextView = searchResultLayout.findViewById(R.id.station_name)
         val streamView: MaterialTextView = searchResultLayout.findViewById(R.id.station_url)
+        val bitrateView: MaterialTextView = searchResultLayout.findViewById(R.id.station_bitrate)
     }
 
 }
