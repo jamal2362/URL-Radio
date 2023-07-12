@@ -77,6 +77,7 @@ You can help out the radio-browser.info community by [adding the missing station
 | Supported formats  | 🔊 |
 | ------------------ | -- |
 | AAC                | ✅ |
+| AAC+               | ✅ |
 | ASX                | ✅ |
 | M3U                | ✅ |
 | M3U8               | ✅ |
