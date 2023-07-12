@@ -79,6 +79,7 @@ You can help out the radio-browser.info community by [adding the missing station
 | AAC                | ✅ |
 | AAC+               | ✅ |
 | ASX                | ✅ |
+| FLAC               | ✅ |
 | M3U                | ✅ |
 | M3U8               | ✅ |
 | MP3                | ✅ |
