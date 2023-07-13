@@ -31,7 +31,7 @@ data class RadioBrowserResult(
     @Expose val url_resolved: String,
     @Expose val homepage: String,
     @Expose val favicon: String,
-    @Expose val bitrate: String,
+    @Expose val bitrate: Int,
     @Expose val codec: String
 ) {
 

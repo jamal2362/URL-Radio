@@ -71,11 +71,21 @@ class SearchResultAdapter(
         // update text
         searchResultViewHolder.nameView.text = searchResult.name
         searchResultViewHolder.streamView.text = searchResult.getStreamUri()
-        searchResultViewHolder.bitrateView.text = buildString {
-            append(searchResult.codec)
-            append(" - ")
-            append(searchResult.bitrate)
-            append("kbps")
+        if (searchResult.codec.isNotEmpty()) {
+            if (searchResult.bitrate == 0) {
+                // show only the codec when the bitrate is at "0" from radio-browser.info API
+                searchResultViewHolder.bitrateView.text = searchResult.codec
+            } else {
+                // show the bitrate and codec if the result is available in the radio-browser.info API
+                searchResultViewHolder.bitrateView.text = buildString {
+                    append(searchResult.codec)
+                    append(" | ")
+                    append(searchResult.bitrate)
+                    append("kbps")}
+            }
+        } else {
+            // do not show for M3U and PLS playlists as they do not include codec or bitrate
+            searchResultViewHolder.bitrateView.visibility = View.GONE
         }
         // mark selected if necessary
         val isSelected = selectedPosition == holder.adapterPosition
