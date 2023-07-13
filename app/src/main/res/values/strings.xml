@@ -103,7 +103,7 @@
     <string name="sample_text_station_metadata" translatable="false">Future - Mask Off</string>
     <string name="sample_text_station_name" translatable="false">bigFM Deutschland</string>
     <string name="sample_text_steam_url" translatable="false">https://streams.bigfm.de/bigfm-deutschland-128-mp3</string>
-    <string name="sample_text_steam_bitrate" translatable="false">MP3 - 128kbps</string>
+    <string name="sample_text_steam_bitrate" translatable="false">MP3 | 128kbps</string>
 
     <!-- App Shortcuts -->
     <string name="shortcut_last_station_disabled_message">Shortcut for playback of last station disabled.</string>

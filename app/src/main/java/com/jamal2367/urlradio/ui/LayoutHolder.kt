@@ -70,6 +70,7 @@ data class LayoutHolder(var rootView: View) {
     private var sheetPreviousMetadataView: ImageButton = rootView.findViewById(R.id.sheet_previous_metadata_button)
     private var sheetCopyMetadataButtonView: ImageButton = rootView.findViewById(R.id.copy_station_metadata_button)
     private var sheetShareLinkButtonView: ImageView = rootView.findViewById(R.id.sheet_share_link_button)
+    private var sheetBitrateView: TextView = rootView.findViewById(R.id.sheet_bitrate_view)
     var sheetSleepTimerStartButtonView: ImageButton = rootView.findViewById(R.id.sleep_timer_start_button)
     var sheetSleepTimerCancelButtonView: ImageButton = rootView.findViewById(R.id.sleep_timer_cancel_button)
     private var sheetSleepTimerRemainingTimeView: TextView = rootView.findViewById(R.id.sleep_timer_remaining_time)
@@ -159,6 +160,27 @@ data class LayoutHolder(var rootView: View) {
         // update streaming link
         sheetStreamingLinkView.text = station.getStreamUri()
 
+        val bitrateText: CharSequence = if (station.codec.isNotEmpty()) {
+            if (station.bitrate == 0) {
+                // show only the codec when the bitrate is at "0" from radio-browser.info API
+                station.codec
+            } else {
+                // show the bitrate and codec if the result is available in the radio-browser.info API
+                buildString {
+                    append(station.codec)
+                    append(" | ")
+                    append(station.bitrate)
+                    append("kbps")
+                }
+            }
+        } else {
+            // do not show for M3U and PLS playlists as they do not include codec or bitrate
+            ""
+        }
+
+        // update bitrate
+        sheetBitrateView.text = bitrateText
+
         // update click listeners
         sheetStreamingLinkHeadline.setOnClickListener {
             copyToClipboard(
@@ -188,6 +210,12 @@ data class LayoutHolder(var rootView: View) {
             copyToClipboard(
                 context,
                 sheetMetadataHistoryView.text
+            )
+        }
+        sheetBitrateView.setOnClickListener {
+            copyToClipboard(
+                context,
+                sheetBitrateView.text
             )
         }
         sheetShareLinkButtonView.setOnClickListener {
