@@ -115,7 +115,8 @@ data class Station(
             isPlaying = isPlaying,
             radioBrowserStationUuid = radioBrowserStationUuid,
             radioBrowserChangeUuid = radioBrowserChangeUuid,
-            bitrate = bitrate
+            bitrate = bitrate,
+            codec = codec
         )
     }
 }
