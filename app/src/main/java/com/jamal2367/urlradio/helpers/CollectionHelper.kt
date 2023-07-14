@@ -509,6 +509,65 @@ object CollectionHelper {
     }
 
 
+    /* Export collection of stations as PLS */
+    fun exportCollectionPls(context: Context, collection: Collection) {
+        Log.v(TAG, "Exporting collection of stations as PLS")
+        // export collection as PLS - launch = fire & forget (no return value from save collection)
+        if (collection.stations.size > 0) {
+            CoroutineScope(IO).launch {
+                FileHelper.backupCollectionAsPlsSuspended(
+                    context,
+                    collection
+                )
+            }
+        }
+    }
+
+
+    /* Create PLS string from collection of stations */
+    fun createPlsString(collection: Collection): String {
+        /* Extended PLS Format
+        [playlist]
+
+        Title1=My Cool Stream
+        File1=http://www.site.com:8000/listen.pls
+        Length1=-1
+
+        NumberOfEntries=1
+        Version=2
+         */
+
+        val plsString = StringBuilder()
+        var counter = 1
+
+        // add opening tag
+        plsString.append("[playlist]")
+        plsString.append("\n")
+
+        // add name and stream address
+        collection.stations.forEach { station ->
+            plsString.append("\n")
+            plsString.append("Title$counter=")
+            plsString.append(station.name)
+            plsString.append("\n")
+            plsString.append("File$counter=")
+            plsString.append(station.getStreamUri())
+            plsString.append("\n")
+            plsString.append("Length$counter=-1")
+            plsString.append("\n")
+            counter++
+        }
+
+        // add ending tag
+        plsString.append("\n")
+        plsString.append("NumberOfEntries=${collection.stations.size}")
+        plsString.append("\n")
+        plsString.append("Version=2")
+
+        return plsString.toString()
+    }
+
+
     /* Sends a broadcast containing the collection as parcel */
     fun sendCollectionBroadcast(context: Context, modificationDate: Date) {
         Log.v(TAG, "Broadcasting that collection has changed.")

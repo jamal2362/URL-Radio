@@ -362,6 +362,30 @@ object FileHelper {
     }
 
 
+    /* Get content Uri for PLS file */
+    fun getPlslUri(activity: Activity): Uri? {
+        var plslUri: Uri? = null
+        // try to get an existing PLS File
+        var plsFile =
+            File(activity.getExternalFilesDir(Keys.FOLDER_COLLECTION), Keys.COLLECTION_PLS_FILE)
+        if (!plsFile.exists()) {
+            plsFile = File(
+                activity.getExternalFilesDir(Keys.URLRADIO_LEGACY_FOLDER_COLLECTION),
+                Keys.COLLECTION_PLS_FILE
+            )
+        }
+        // get Uri for existing M3U File
+        if (plsFile.exists()) {
+            plslUri = FileProvider.getUriForFile(
+                activity,
+                "${activity.applicationContext.packageName}.provider",
+                plsFile
+            )
+        }
+        return plslUri
+    }
+
+
     /* Returns content:// Uri for given file:// path */
     fun getContentUriForFile(context: Context, file: File): Uri {
         return FileProvider.getUriForFile(context, "${context.applicationContext.packageName}.provider", file)
@@ -412,6 +436,25 @@ object FileHelper {
                     m3uString,
                     Keys.FOLDER_COLLECTION,
                     Keys.COLLECTION_M3U_FILE
+                )
+            )
+        }
+    }
+
+
+    /* Suspend function: Exports collection of stations as PLS file - local backup copy */
+    suspend fun backupCollectionAsPlsSuspended(context: Context, collection: Collection) {
+        return suspendCoroutine { cont ->
+            Log.v(TAG, "Backing up collection as PLS - Thread: ${Thread.currentThread().name}")
+            // create PLS string
+            val plsString: String = CollectionHelper.createPlsString(collection)
+            // save PLS as text file
+            cont.resume(
+                writeTextFile(
+                    context,
+                    plsString,
+                    Keys.FOLDER_COLLECTION,
+                    Keys.COLLECTION_PLS_FILE
                 )
             )
         }

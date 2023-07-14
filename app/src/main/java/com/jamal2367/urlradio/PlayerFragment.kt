@@ -585,6 +585,7 @@ class PlayerFragment : Fragment(),
             layout.toggleOnboarding(activity as Context, collection.stations.size)
             updatePlayerViews()
             CollectionHelper.exportCollectionM3u(activity as Context, collection)
+            CollectionHelper.exportCollectionPls(activity as Context, collection)
         }
     }
 

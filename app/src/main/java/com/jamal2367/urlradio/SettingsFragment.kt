@@ -140,10 +140,21 @@ class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogList
         // set up "M3U Export" preference
         val preferenceM3uExport = Preference(activity as Context)
         preferenceM3uExport.title = getString(R.string.pref_m3u_export_title)
-        preferenceM3uExport.setIcon(R.drawable.ic_playlist_24dp)
+        preferenceM3uExport.setIcon(R.drawable.ic_save_m3u_24dp)
         preferenceM3uExport.summary = getString(R.string.pref_m3u_export_summary)
         preferenceM3uExport.setOnPreferenceClickListener {
             openSaveM3uDialog()
+            return@setOnPreferenceClickListener true
+        }
+
+
+        // set up "PLS Export" preference
+        val preferencePlsExport = Preference(activity as Context)
+        preferencePlsExport.title = getString(R.string.pref_pls_export_title)
+        preferencePlsExport.setIcon(R.drawable.ic_save_pls_24dp)
+        preferencePlsExport.summary = getString(R.string.pref_pls_export_summary)
+        preferencePlsExport.setOnPreferenceClickListener {
+            openSavePlsDialog()
             return@setOnPreferenceClickListener true
         }
 
@@ -291,6 +302,7 @@ class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogList
         val preferenceCategoryImportExport = PreferenceCategory(activity as Context)
         preferenceCategoryImportExport.title = getString(R.string.pref_backup_import_export_title)
         preferenceCategoryImportExport.contains(preferenceM3uExport)
+        preferenceCategoryImportExport.contains(preferencePlsExport)
         preferenceCategoryImportExport.contains(preferenceBackupCollection)
         preferenceCategoryImportExport.contains(preferenceRestoreCollection)
 
@@ -317,6 +329,7 @@ class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogList
 //        screen.addPreference(preferenceUpdateCollection)
         screen.addPreference(preferenceCategoryImportExport)
         screen.addPreference(preferenceM3uExport)
+        screen.addPreference(preferencePlsExport)
         screen.addPreference(preferenceBackupCollection)
         screen.addPreference(preferenceRestoreCollection)
         screen.addPreference(preferenceCategoryAdvanced)
@@ -362,6 +375,11 @@ class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogList
         registerForActivityResult(StartActivityForResult(), this::requestSaveM3uResult)
 
 
+    /* Register the ActivityResultLauncher for the save pls dialog */
+    private val requestSavePlsLauncher =
+        registerForActivityResult(StartActivityForResult(), this::requestSavePlsResult)
+
+
     /* Register the ActivityResultLauncher for the backup dialog */
     private val requestBackupCollectionLauncher =
         registerForActivityResult(StartActivityForResult(), this::requestBackupCollectionResult)
@@ -386,6 +404,25 @@ class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogList
                 Snackbar.make(requireView(), R.string.toastmessage_save_m3u, Snackbar.LENGTH_LONG).show()
             } else {
                 Log.w(TAG, "M3U export failed.")
+            }
+        }
+    }
+
+
+    /* Pass the activity result for the save pls dialog */
+    private fun requestSavePlsResult(result: ActivityResult) {
+        // save PLS file to result file location
+        if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+            val sourceUri: Uri? = FileHelper.getPlslUri(activity as Activity)
+            val targetUri: Uri? = result.data?.data
+            if (targetUri != null && sourceUri != null) {
+                // copy file async (= fire & forget - no return value needed)
+                CoroutineScope(IO).launch {
+                    FileHelper.saveCopyOfFileSuspended(activity as Context, sourceUri, targetUri)
+                }
+                Snackbar.make(requireView(), R.string.toastmessage_save_pls, Snackbar.LENGTH_LONG).show()
+            } else {
+                Log.w(TAG, "PLS export failed.")
             }
         }
     }
@@ -478,6 +515,23 @@ class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogList
             requestSaveM3uLauncher.launch(intent)
         } catch (exception: Exception) {
             Log.e(TAG, "Unable to save M3U.\n$exception")
+            Snackbar.make(requireView(), R.string.toastmessage_install_file_helper, Snackbar.LENGTH_LONG).show()
+        }
+    }
+
+
+    /* Opens up a file picker to select the save location */
+    private fun openSavePlsDialog() {
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = Keys.MIME_TYPE_PLS
+            putExtra(Intent.EXTRA_TITLE, Keys.COLLECTION_PLS_FILE)
+        }
+        // file gets saved in the ActivityResult
+        try {
+            requestSavePlsLauncher.launch(intent)
+        } catch (exception: Exception) {
+            Log.e(TAG, "Unable to save PLS.\n$exception")
             Snackbar.make(requireView(), R.string.toastmessage_install_file_helper, Snackbar.LENGTH_LONG).show()
         }
     }

@@ -86,6 +86,8 @@
     <string name="pref_m3u_export_summary">Save your radio stations to an M3U playlist file that can be imported into other players.</string>
     <string name="pref_m3u_export_title">Export M3U</string>
     <string name="pref_maintenance_title">Maintenance</string>
+    <string name="pref_pls_export_summary">Save your radio stations to an PLS playlist file that can be imported into other players.</string>
+    <string name="pref_pls_export_title">Export PLS</string>
     <string name="pref_station_export_summary">Save entire collection of radio stations including images to device storage.</string>
     <string name="pref_station_export_title">Export Stations</string>
     <string name="pref_station_restore_summary">Restore collection of radio stations from backup. Existing stations will be replaced.</string>
@@ -121,6 +123,7 @@
     <string name="toastmessage_install_file_helper">Please install a file manager.</string>
     <string name="toastmessage_restored">Stations has been successfully restored.</string>
     <string name="toastmessage_save_m3u">Saving radio stations as M3U…</string>
+    <string name="toastmessage_save_pls">Saving radio stations as PLS…</string>
     <string name="toastmessage_shortcut_created">Shortcut created.</string>
     <string name="toastmessage_shortcut_not_created">Shortcut not created. This device does not allow the creation of shortcuts.</string>
     <string name="toastmessage_sleep_timer_unable_to_start">Please start playback first.</string>
