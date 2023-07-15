@@ -39,15 +39,15 @@ class SearchResultAdapter(
 
     /* Main class variables */
     private var selectedPosition: Int = RecyclerView.NO_POSITION
-
-    /* ExoPlayer */
     private var exoPlayer: ExoPlayer? = null
-
     private var paused: Boolean = false
+    private var isItemSelected: Boolean = false
 
     /* Listener Interface */
     interface SearchResultAdapterListener {
         fun onSearchResultTapped(result: Station)
+        fun activateAddButton()
+        fun deactivateAddButton()
     }
 
 
@@ -120,19 +120,38 @@ class SearchResultAdapter(
             selectedPosition = holder.adapterPosition
             notifyItemChanged(previousSelectedPosition)
             notifyItemChanged(selectedPosition)
-            // Get the selected station from searchResults
-            val selectedStation = searchResults[holder.adapterPosition]
-            // Perform pre-playback here
-            performPrePlayback(searchResultViewHolder.searchResultLayout.context, selectedStation.getStreamUri())
-            // hand over station
-            listener.onSearchResultTapped(searchResult)
+
+            // check if the selected position is the same as before
+            val samePositionSelected = previousSelectedPosition == selectedPosition
+
+            if (samePositionSelected) {
+                // if the same position is selected again, reset the selection
+                resetSelection(false)
+            } else {
+                // get the selected station from searchResults
+                val selectedStation = searchResults[holder.adapterPosition]
+                // perform pre-playback here
+                performPrePlayback(searchResultViewHolder.searchResultLayout.context, selectedStation.getStreamUri())
+                // hand over station
+                listener.onSearchResultTapped(searchResult)
+            }
+
+            // update isItemSelected based on the selection
+            isItemSelected = !samePositionSelected
+
+            // enable/disable the Add button based on isItemSelected
+            if (isItemSelected) {
+                listener.activateAddButton()
+            } else {
+                listener.deactivateAddButton()
+            }
         }
     }
 
 
     private fun performPrePlayback(context: Context, streamUri: String) {
         if (streamUri.contains(".m3u8")) {
-            // Release previous player if it exists
+            // release previous player if it exists
             exoPlayer?.stop()
             exoPlayer?.release()
             exoPlayer = null
@@ -143,16 +162,16 @@ class SearchResultAdapter(
             exoPlayer?.release()
             exoPlayer = null
 
-            // Create a new instance of ExoPlayer
+            // create a new instance of ExoPlayer
             exoPlayer = ExoPlayer.Builder(context).build()
 
-            // Create a MediaItem with the streamUri
+            // create a MediaItem with the streamUri
             val mediaItem = MediaItem.fromUri(streamUri)
 
-            // Set the MediaItem to the ExoPlayer
+            // set the MediaItem to the ExoPlayer
             exoPlayer?.setMediaItem(mediaItem)
 
-            // Prepare and start the ExoPlayer
+            // prepare and start the ExoPlayer
             exoPlayer?.prepare()
             exoPlayer?.play()
 
@@ -175,7 +194,7 @@ class SearchResultAdapter(
 
 
     fun stopPrePlayback() {
-        // Stop the ExoPlayer and release resources
+        // stop the ExoPlayer and release resources
         exoPlayer?.stop()
         exoPlayer?.release()
         exoPlayer = null
@@ -191,6 +210,7 @@ class SearchResultAdapter(
             notifyDataSetChanged()
         } else {
             notifyItemChanged(currentlySelected)
+            stopPrePlayback()
         }
     }
 

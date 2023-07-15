@@ -239,8 +239,14 @@ class FindStationDialog (
 
 
     /* Makes the "Add" button clickable */
-    private fun activateAddButton() {
+    override fun activateAddButton() {
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = true
+        searchRequestProgressIndicator.isGone = true
+        noSearchResultsTextView.isGone = true
+    }
+
+    override fun deactivateAddButton() {
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = false
         searchRequestProgressIndicator.isGone = true
         noSearchResultsTextView.isGone = true
     }
