@@ -14,9 +14,13 @@
 
 package com.jamal2367.urlradio.search
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.media3.common.MediaItem
+import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textview.MaterialTextView
 import com.jamal2367.urlradio.R
@@ -33,6 +37,8 @@ class SearchResultAdapter(
     /* Main class variables */
     private var selectedPosition: Int = RecyclerView.NO_POSITION
 
+    /* ExoPlayer */
+    private var exoPlayer: ExoPlayer? = null
 
     /* Listener Interface */
     interface SearchResultAdapterListener {
@@ -103,9 +109,53 @@ class SearchResultAdapter(
             selectedPosition = holder.adapterPosition
             notifyItemChanged(previousSelectedPosition)
             notifyItemChanged(selectedPosition)
+            // Get the selected station from searchResults
+            val selectedStation = searchResults[holder.adapterPosition]
+            // Perform pre-playback here
+            performPrePlayback(searchResultViewHolder.searchResultLayout.context, selectedStation.getStreamUri())
             // hand over station
             listener.onSearchResultTapped(searchResult)
         }
+    }
+
+
+    private fun performPrePlayback(context: Context, streamUri: String) {
+        if (streamUri.contains(".m3u8")) {
+            // Release previous player if it exists
+            exoPlayer?.stop()
+            exoPlayer?.release()
+            exoPlayer = null
+
+            // show toast when no playback is possible
+            Toast.makeText(context, R.string.toastmessage_preview_playback_failed, Toast.LENGTH_SHORT).show()
+        } else {
+            exoPlayer?.release()
+            exoPlayer = null
+
+            // Create a new instance of ExoPlayer
+            exoPlayer = ExoPlayer.Builder(context).build()
+
+            // Create a MediaItem with the streamUri
+            val mediaItem = MediaItem.fromUri(streamUri)
+
+            // Set the MediaItem to the ExoPlayer
+            exoPlayer?.setMediaItem(mediaItem)
+
+            // Prepare and start the ExoPlayer
+            exoPlayer?.prepare()
+            exoPlayer?.play()
+
+            // show toast when playback is possible
+            Toast.makeText(context, R.string.toastmessage_preview_playback_started, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
+    fun stopPrePlayback() {
+        // Stop the ExoPlayer and release resources
+        exoPlayer?.stop()
+        exoPlayer?.release()
+        exoPlayer = null
     }
 
 

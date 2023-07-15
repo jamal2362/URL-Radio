@@ -121,6 +121,8 @@
     <string name="toastmessage_error_download_error">Download error</string>
     <string name="toastmessage_error_restart_playback_failed">Unable to start or restart playback.</string>
     <string name="toastmessage_install_file_helper">Please install a file manager.</string>
+    <string name="toastmessage_preview_playback_failed">Preview playback not possible.</string>
+    <string name="toastmessage_preview_playback_started">Preview playback was started.</string>
     <string name="toastmessage_restored">Stations has been successfully restored.</string>
     <string name="toastmessage_save_m3u">Saving radio stations as M3U…</string>
     <string name="toastmessage_save_pls">Saving radio stations as PLS…</string>

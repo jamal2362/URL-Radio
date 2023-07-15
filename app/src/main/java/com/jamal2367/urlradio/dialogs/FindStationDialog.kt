@@ -137,26 +137,31 @@ class FindStationDialog (
         builder.setPositiveButton(R.string.dialog_find_station_button_add) { _, _ ->
             // listen for click on add button
             listener.onFindStationDialog(station)
+            searchResultAdapter.stopPrePlayback()
         }
         // add cancel button
         builder.setNegativeButton(R.string.dialog_generic_button_cancel) { _, _ ->
             // listen for click on cancel button
             radioBrowserSearch.stopSearchRequest()
+            searchResultAdapter.stopPrePlayback()
         }
         // handle outside-click as "no"
         builder.setOnCancelListener {
             radioBrowserSearch.stopSearchRequest()
+            searchResultAdapter.stopPrePlayback()
         }
 
         // listen for input
         stationSearchBoxView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextChange(query: String): Boolean {
                 handleSearchBoxLiveInput(context, query)
+                searchResultAdapter.stopPrePlayback()
                 return true
             }
 
             override fun onQueryTextSubmit(query: String): Boolean {
                 handleSearchBoxInput(context, query)
+                searchResultAdapter.stopPrePlayback()
                 return true
             }
         })
