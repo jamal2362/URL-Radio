@@ -19,6 +19,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.RecyclerView
@@ -39,6 +42,8 @@ class SearchResultAdapter(
 
     /* ExoPlayer */
     private var exoPlayer: ExoPlayer? = null
+
+    private var paused: Boolean = false
 
     /* Listener Interface */
     interface SearchResultAdapterListener {
@@ -153,6 +158,18 @@ class SearchResultAdapter(
 
             // show toast when playback is possible
             Toast.makeText(context, R.string.toastmessage_preview_playback_started, Toast.LENGTH_SHORT).show()
+
+            // listen for app pause events
+            val lifecycle = (context as AppCompatActivity).lifecycle
+            val lifecycleObserver = object : DefaultLifecycleObserver {
+                override fun onPause(owner: LifecycleOwner) {
+                    if (!paused) {
+                        paused = true
+                        stopPrePlayback()
+                    }
+                }
+            }
+            lifecycle.addObserver(lifecycleObserver)
         }
     }
 
