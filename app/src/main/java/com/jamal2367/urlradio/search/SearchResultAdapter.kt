@@ -74,9 +74,11 @@ class SearchResultAdapter(
         // get reference to ViewHolder
         val searchResultViewHolder: SearchResultViewHolder = holder as SearchResultViewHolder
         val searchResult: Station = searchResults[position]
+
         // update text
         searchResultViewHolder.nameView.text = searchResult.name
         searchResultViewHolder.streamView.text = searchResult.getStreamUri()
+
         if (searchResult.codec.isNotEmpty()) {
             if (searchResult.bitrate == 0) {
                 // show only the codec when the bitrate is at "0" from radio-browser.info API
@@ -93,15 +95,19 @@ class SearchResultAdapter(
             // do not show for M3U and PLS playlists as they do not include codec or bitrate
             searchResultViewHolder.bitrateView.visibility = View.GONE
         }
+
         // mark selected if necessary
         val isSelected = selectedPosition == holder.adapterPosition
         searchResultViewHolder.searchResultLayout.isSelected = isSelected
+
         // toggle text scrolling (marquee) if necessary
         searchResultViewHolder.nameView.isSelected = isSelected
         searchResultViewHolder.streamView.isSelected = isSelected
+
         // reduce the shadow left and right because of scrolling (Marquee)
         searchResultViewHolder.nameView.setFadingEdgeLength(10)
         searchResultViewHolder.streamView.setFadingEdgeLength(10)
+
         // attach touch listener
         searchResultViewHolder.searchResultLayout.setOnClickListener {
             // move marked position
