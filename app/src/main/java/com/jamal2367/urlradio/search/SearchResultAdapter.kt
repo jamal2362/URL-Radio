@@ -15,6 +15,7 @@
 package com.jamal2367.urlradio.search
 
 import android.content.Context
+import android.media.AudioManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -159,6 +160,9 @@ class SearchResultAdapter(
             // show toast when no playback is possible
             Toast.makeText(context, R.string.toastmessage_preview_playback_failed, Toast.LENGTH_SHORT).show()
         } else {
+            stopRadioPlayback(context)
+
+            exoPlayer?.stop()
             exoPlayer?.release()
             exoPlayer = null
 
@@ -198,6 +202,13 @@ class SearchResultAdapter(
         exoPlayer?.stop()
         exoPlayer?.release()
         exoPlayer = null
+    }
+
+
+    private fun stopRadioPlayback(context: Context) {
+        // stop radio playback when one is active
+        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        audioManager.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
     }
 
 
