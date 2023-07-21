@@ -94,6 +94,7 @@ class CollectionAdapter(
         PreferencesHelper.unregisterPreferenceChangeListener(sharedPreferenceChangeListener)
     }
 
+
     /* Overrides onCreateViewHolder */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
 
@@ -111,6 +112,49 @@ class CollectionAdapter(
                 StationViewHolder(v)
             }
         }
+    }
+
+
+    /* Implement the method to handle item move */
+    fun onItemMove(fromPosition: Int, toPosition: Int) {
+        val stationList = collection.stations
+        val stationCount = stationList.size
+
+        if (fromPosition !in 0 until stationCount || toPosition !in 0 until stationCount) {
+            return
+        }
+
+        val fromStation = stationList[fromPosition]
+        val toStation = stationList[toPosition]
+
+        if (fromStation.starred != toStation.starred) {
+            // Prevent moving a starred item into non-starred area or vice versa
+            return
+        }
+
+        // Move within the same group (either starred or non-starred)
+        Collections.swap(stationList, fromPosition, toPosition)
+
+        // Update the value of expandedStationPosition if necessary
+        expandedStationPosition = if (fromPosition == expandedStationPosition) toPosition else expandedStationPosition
+
+        // Notify the adapter about the item move
+        notifyItemMoved(fromPosition, toPosition)
+    }
+
+
+    /* Implement the method to handle item dismissal */
+    fun onItemDismiss(position: Int) {
+        // Remove the item at the given position from your data collection
+        collection.stations.removeAt(position)
+        notifyItemRemoved(position)
+    }
+
+
+    /* Method for saving the collection after the drag-and-drop operation */
+    fun saveCollectionAfterDragDrop() {
+        // Save the collection after the dragging is completed
+        CollectionHelper.saveCollection(context, collection)
     }
 
 
@@ -326,15 +370,6 @@ class CollectionAdapter(
         }
         stationViewHolder.stationImageView.setOnClickListener {
             collectionAdapterListener.onPlayButtonTapped(station.uuid)
-        }
-        stationViewHolder.stationCardView.setOnLongClickListener {
-            if (editStationsEnabled) {
-                val position: Int = stationViewHolder.adapterPosition
-                toggleEditViews(position, station.uuid)
-                return@setOnLongClickListener true
-            } else {
-                return@setOnLongClickListener false
-            }
         }
         stationViewHolder.playButtonView.setOnLongClickListener {
             if (editStationsEnabled) {

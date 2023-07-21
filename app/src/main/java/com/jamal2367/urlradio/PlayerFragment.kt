@@ -96,6 +96,7 @@ class PlayerFragment : Fragment(),
     private var listLayoutState: Parcelable? = null
     private val handler: Handler = Handler(Looper.getMainLooper())
     private var tempStationUuid: String = String()
+    private var itemTouchHelper: ItemTouchHelper? = null
 
 
     /* Overrides onCreate from Fragment */
@@ -158,7 +159,7 @@ class PlayerFragment : Fragment(),
     }
 
 
-    /* Overrides onCreate from Fragment*/
+    /* Overrides onCreate from Fragment */
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -176,7 +177,43 @@ class PlayerFragment : Fragment(),
         // set player sheet background
         (activity as AppCompatActivity).window.navigationBarColor = ContextCompat.getColor(requireActivity(), R.color.player_sheet_background)
 
+        // associate the ItemTouchHelper with the RecyclerView
+        itemTouchHelper = ItemTouchHelper(ItemTouchHelperCallback())
+        itemTouchHelper?.attachToRecyclerView(layout.recyclerView)
+
         return rootView
+    }
+
+
+    /* Implement the ItemTouchHelper.Callback for drag and drop functionality */
+    inner class ItemTouchHelperCallback : ItemTouchHelper.Callback() {
+
+        override fun isLongPressDragEnabled() = true
+
+        override fun isItemViewSwipeEnabled() = true
+
+        override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
+            val dragFlags = ItemTouchHelper.UP or ItemTouchHelper.DOWN
+            val swipeFlags = ItemTouchHelper.START or ItemTouchHelper.END
+            return makeMovementFlags(dragFlags, swipeFlags)
+        }
+
+        override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+            val fromPosition = viewHolder.adapterPosition
+            val toPosition = target.adapterPosition
+            collectionAdapter.onItemMove(fromPosition, toPosition)
+            return true
+        }
+
+        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+            val position = viewHolder.adapterPosition
+            collectionAdapter.onItemDismiss(position)
+        }
+
+        override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+            super.clearView(recyclerView, viewHolder)
+            collectionAdapter.saveCollectionAfterDragDrop()
+        }
     }
 
 
