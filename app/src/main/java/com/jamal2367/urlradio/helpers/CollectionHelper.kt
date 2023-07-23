@@ -665,11 +665,11 @@ object CollectionHelper {
     }
 
 
-    /* Sorts radio stations by name only for favorites */
+    /* Sorts radio stations */
     fun sortCollection(collection: Collection): Collection {
         val favoriteStations = collection.stations.filter { it.starred }
-        val sortedFavorites = favoriteStations.sortedBy { it.name.lowercase(Locale.getDefault()) }
-        collection.stations = (sortedFavorites + collection.stations.filter { !it.starred }) as MutableList<Station>
+        val otherStations = collection.stations.filter { !it.starred }
+        collection.stations = (favoriteStations + otherStations) as MutableList<Station>
         return collection
     }
 
