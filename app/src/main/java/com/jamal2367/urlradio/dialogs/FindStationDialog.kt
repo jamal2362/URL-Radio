@@ -220,7 +220,7 @@ class FindStationDialog (
         if (query.startsWith("htt")) {
             // handle direct URL input
             directInputCheck.checkStationAddress(context, query)
-        } else if (query.contains(" ") || query.length > 1) {
+        } else if (query.contains(" ") || query.length > 2) {
             // show progress indicator
             showProgressIndicator()
             // handle search string input - delay request to manage server load (not sure if necessary)
