@@ -18,6 +18,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.drawable.AnimatedVectorDrawable
 import android.os.Build
 import android.view.View
 import android.view.animation.Animation
@@ -285,7 +286,9 @@ data class LayoutHolder(var rootView: View) {
     /* Toggles play/pause button */
     fun togglePlayButton(isPlaying: Boolean) {
         if (isPlaying) {
-            playButtonView.setImageResource(R.drawable.ic_audio_wave_42dp)
+            playButtonView.setImageResource(R.drawable.ic_audio_waves_animated)
+            val animatedVectorDrawable = playButtonView.drawable as? AnimatedVectorDrawable
+            animatedVectorDrawable?.start()
             // bufferingIndicator.isVisible = false
         } else {
             playButtonView.setImageResource(R.drawable.ic_player_play_symbol_42dp)
