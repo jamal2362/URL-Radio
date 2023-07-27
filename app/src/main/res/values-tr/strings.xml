@@ -70,6 +70,8 @@
     <string name="pref_m3u_export_summary">Radyo istasyonlarınızı diğer oynatıcılara aktarılabilen bir M3U çalma listesi dosyasına kaydedin.</string>
     <string name="pref_m3u_export_title">M3U\'yu dışa aktar</string>
     <string name="pref_maintenance_title">Bakım</string>
+    <string name="pref_pls_export_summary">Radyo istasyonları, diğer oynatıcılara aktarılabilen bir PLS çalma listesi dosyasına kaydet.</string>
+    <string name="pref_pls_export_title">PLS olarak dışa aktar</string>
     <string name="pref_station_export_summary">Resimler de dahil olmak üzere tüm radyo istasyonlarını cihaz belleğine kaydet.</string>
     <string name="pref_station_export_title">İstasyonları Yedekle</string>
     <string name="pref_station_restore_summary">Radyo istasyonlarını yedekten geri yükle. Mevcut istasyonlar değiştirilecek.</string>
@@ -94,8 +96,11 @@
     <string name="toastmessage_error_download_error">İndirme hatası</string>
     <string name="toastmessage_error_restart_playback_failed">Oynatma yeniden başlatılamıyor.</string>
     <string name="toastmessage_install_file_helper">Lütfen bir dosya yöneticisi kurun.</string>
+    <string name="toastmessage_preview_playback_failed">Oynatma önizlemesi mümkün görünmüyor.</string>
+    <string name="toastmessage_preview_playback_started">Oynatma önizlemesi başlatıldı.</string>
     <string name="toastmessage_restored">Yedekleme başarıyla geri yüklendi.</string>
     <string name="toastmessage_save_m3u">Radyo istasyonları M3U formatında kaydediliyor…</string>
+    <string name="toastmessage_save_pls">Radyo istasyonları PLS olarak kaydediliyor…</string>
     <string name="toastmessage_shortcut_created">Kısayol oluşturuldu.</string>
     <string name="toastmessage_shortcut_not_created">Kısayol oluşturulamadı. Bu cihaz kısayolların oluşturulmasına izin vermiyor.</string>
     <string name="toastmessage_sleep_timer_unable_to_start">Lütfen önce bir şeyler oynat.</string>
