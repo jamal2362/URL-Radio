@@ -172,11 +172,7 @@ object ImageHelper {
             }
             else -> {
                 // default return
-                return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    context.resources.getColor(R.color.default_neutral_medium_light, null)
-                } else {
-                    ContextCompat.getColor(context, R.color.default_neutral_medium_light)
-                }
+                return context.resources.getColor(R.color.default_neutral_medium_light, null)
             }
         }
     }

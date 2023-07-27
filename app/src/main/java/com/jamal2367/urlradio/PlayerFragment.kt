@@ -174,7 +174,7 @@ class PlayerFragment : Fragment(),
         // hide action bar
         (activity as AppCompatActivity).supportActionBar?.hide()
 
-        // set player sheet background
+        // set the same background color of the player sheet for the navigation bar
         (activity as AppCompatActivity).window.navigationBarColor = ContextCompat.getColor(requireActivity(), R.color.player_sheet_background)
 
         // associate the ItemTouchHelper with the RecyclerView

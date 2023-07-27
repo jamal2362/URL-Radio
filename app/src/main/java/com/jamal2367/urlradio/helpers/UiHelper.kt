@@ -131,18 +131,12 @@ object UiHelper {
     abstract class SwipeToDeleteCallback(context: Context) :
         ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
 
-        private val deleteIcon =
-            ContextCompat.getDrawable(context, R.drawable.ic_remove_circle_24dp)
+        private val deleteIcon = ContextCompat.getDrawable(context, R.drawable.ic_remove_circle_24dp)
         private val intrinsicWidth: Int = deleteIcon?.intrinsicWidth ?: 0
         private val intrinsicHeight: Int = deleteIcon?.intrinsicHeight ?: 0
         private val background: ColorDrawable = ColorDrawable()
-        private val backgroundColor = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            context.resources.getColor(R.color.list_card_delete_background, null)
-        } else {
-            ContextCompat.getColor(context, R.color.list_card_delete_background)
-        }
-        private val clearPaint: Paint =
-            Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR) }
+        private val backgroundColor = ContextCompat.getColor(context, R.color.list_card_delete_background)
+        private val clearPaint: Paint = Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR) }
 
         override fun getMovementFlags(
             recyclerView: RecyclerView,
@@ -241,13 +235,8 @@ object UiHelper {
         private val intrinsicWidth: Int = starIcon?.intrinsicWidth ?: 0
         private val intrinsicHeight: Int = starIcon?.intrinsicHeight ?: 0
         private val background: ColorDrawable = ColorDrawable()
-        private val backgroundColor = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            context.resources.getColor(R.color.list_card_mark_starred_background, null)
-        } else {
-            ContextCompat.getColor(context, R.color.list_card_mark_starred_background)
-        }
-        private val clearPaint: Paint =
-            Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR) }
+        private val backgroundColor = ContextCompat.getColor(context, R.color.list_card_mark_starred_background)
+        private val clearPaint: Paint = Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR) }
 
         override fun getMovementFlags(
             recyclerView: RecyclerView,

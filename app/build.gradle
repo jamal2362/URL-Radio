@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId 'com.jamal2367.urlradio'
-        minSdkVersion 21
+        minSdkVersion 23
         targetSdkVersion 34
         versionCode 115
         versionName '11.5'
