@@ -13,7 +13,7 @@ android {
         targetSdkVersion 34
         versionCode 115
         versionName '11.5'
-        resConfigs 'en', 'ar', 'bg', 'cs', 'de', 'fr', 'it', 'nl', 'pl', 'pt', 'ru', 'tr', 'uk', 'zh-rCN'
+        resConfigs 'en', 'ar', 'bg', 'cs', 'de', 'fr', 'it', 'nl', 'pl', 'pt', 'ru', 'ro', 'tr', 'uk', 'zh-rCN'
         setProperty('archivesBaseName', 'URL_Radio_' + versionName)
     }
 
