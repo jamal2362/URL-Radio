@@ -2,12 +2,10 @@
 <set xmlns:android="http://schemas.android.com/apk/res/android"
     android:interpolator="@android:anim/decelerate_interpolator"
     android:shareInterpolator="false">
-
     <rotate
-        android:duration="300"
+        android:duration="500"
         android:fromDegrees="0"
         android:pivotX="50%"
         android:pivotY="50%"
-        android:toDegrees="45" />
-
+        android:toDegrees="360" />
 </set>
