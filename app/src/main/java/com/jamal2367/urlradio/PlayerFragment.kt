@@ -193,6 +193,11 @@ class PlayerFragment : Fragment(),
         override fun isItemViewSwipeEnabled() = true
 
         override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
+            // disable drag and drop for the new card
+            if (viewHolder.itemViewType == Keys.VIEW_TYPE_ADD_NEW) {
+                return 0
+            }
+
             val dragFlags = ItemTouchHelper.UP or ItemTouchHelper.DOWN
             val swipeFlags = ItemTouchHelper.START or ItemTouchHelper.END
             return makeMovementFlags(dragFlags, swipeFlags)
