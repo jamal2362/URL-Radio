@@ -67,7 +67,7 @@
     <string name="pref_license_title">此应用程序开源</string>
     <string name="pref_license_summary">基于 MIT 许可证获得许可</string>
     <string name="pref_links_title">链接</string>
-    <string name="pref_m3u_export_summary">将电台列表保存到M3U文件中，以便导入其他播放器。</string>
+    <string name="pref_m3u_export_summary">将电台列表保存到 M3U 文件中，以便导入其他播放器。</string>
     <string name="pref_m3u_export_title">导出 M3U</string>
     <string name="pref_maintenance_title">维护</string>
     <string name="pref_pls_export_summary">将电台列表保存到 PLS 文件中，以便导入其他播放器。</string>
@@ -96,6 +96,8 @@
     <string name="toastmessage_error_download_error">下载发生错误</string>
     <string name="toastmessage_error_restart_playback_failed">无法开始或重启播放。</string>
     <string name="toastmessage_install_file_helper">请安装文件管理器。</string>
+    <string name="toastmessage_preview_playback_failed">无法进行播放预览。</string>
+    <string name="toastmessage_preview_playback_started">播放预览已开始。</string>
     <string name="toastmessage_restored">电台已成功还原。</string>
     <string name="toastmessage_save_m3u">正在将电台保存为 M3U 列表……</string>
     <string name="toastmessage_save_pls">正在将电台保存为 PLS 列表……</string>
