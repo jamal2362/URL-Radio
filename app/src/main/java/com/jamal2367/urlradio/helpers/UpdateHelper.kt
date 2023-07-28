@@ -133,24 +133,6 @@ class UpdateHelper(
     }
 
 
-    /* Initiates update of a station's information */
-    fun updateStation(station: Station) {
-        when {
-            station.radioBrowserStationUuid.isNotEmpty() -> {
-                // request download from radio browser
-                downloadFromRadioBrowser(station.radioBrowserStationUuid)
-            }
-            station.remoteStationLocation.isNotEmpty() -> {
-                // direct playlist download
-                DownloadHelper.downloadPlaylists(context, arrayOf(station.remoteStationLocation))
-            }
-            else -> {
-                Log.w(TAG, "Unable to update station: ${station.name}.")
-            }
-        }
-    }
-
-
     /* Get updated station from radio browser - results are handled by onRadioBrowserSearchResults */
     private fun downloadFromRadioBrowser(radioBrowserStationUuid: String) {
         val radioBrowserSearch = RadioBrowserSearch(this)

@@ -224,6 +224,7 @@ class SearchResultAdapter(
 
             audioManager.requestAudioFocus(focusRequest)
         } else {
+            @Suppress("DEPRECATION")
             // For older versions where AudioFocusRequest is not available
             audioManager.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
         }
@@ -235,8 +236,9 @@ class SearchResultAdapter(
         val currentlySelected: Int = selectedPosition
         selectedPosition = RecyclerView.NO_POSITION
         if (clearAdapter) {
-            searchResults = listOf()
-            notifyDataSetChanged()
+            val previousItemCount = itemCount
+            searchResults = emptyList()
+            notifyItemRangeRemoved(0, previousItemCount)
         } else {
             notifyItemChanged(currentlySelected)
             stopPrePlayback()

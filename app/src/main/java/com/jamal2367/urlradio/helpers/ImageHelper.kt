@@ -17,7 +17,6 @@ package com.jamal2367.urlradio.helpers
 import android.content.Context
 import android.graphics.*
 import android.net.Uri
-import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.net.toUri
@@ -80,31 +79,6 @@ object ImageHelper {
     }
 
 
-    /* Composes foreground bitmap onto background bitmap */
-    private fun composeImages(
-        foreground: Bitmap,
-        background: Bitmap,
-        size: Int,
-        yOffset: Int
-    ): Bitmap {
-        val outputImage = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(outputImage)
-        canvas.drawBitmap(background, 0f, 0f, null)
-        canvas.drawBitmap(
-            foreground,
-            createTransformationMatrix(
-                size,
-                yOffset,
-                foreground.height.toFloat(),
-                foreground.width.toFloat(),
-                true
-            ),
-            null
-        )
-        return outputImage
-    }
-
-
     /* Creates station image on a square background with the main station image color and option padding for adaptive icons */
     fun createSquareImage(
         context: Context,
@@ -139,7 +113,6 @@ object ImageHelper {
             bitmap,
             createTransformationMatrix(
                 size,
-                0,
                 bitmap.height.toFloat(),
                 bitmap.width.toFloat(),
                 adaptivePadding
@@ -247,7 +220,6 @@ object ImageHelper {
     /* Creates a transformation matrix with the given size and optional padding  */
     private fun createTransformationMatrix(
         size: Int,
-        yOffset: Int,
         inputImageHeight: Float,
         inputImageWidth: Float,
         scaled: Boolean
@@ -261,18 +233,18 @@ object ImageHelper {
         }
 
         // define variables needed for transformation matrix
-        var aspectRatio = 0.0f
-        var xTranslation = 0.0f
-        var yTranslation = 0.0f
+        val aspectRatio: Float
+        val xTranslation: Float
+        val yTranslation: Float
 
         // landscape format and square
         if (inputImageWidth >= inputImageHeight) {
             aspectRatio = (size - padding * 2) / inputImageWidth
             xTranslation = 0.0f + padding
-            yTranslation = (size - inputImageHeight * aspectRatio) / 2.0f + yOffset
-        } else if (inputImageHeight > inputImageWidth) {
+            yTranslation = (size - inputImageHeight * aspectRatio) / 2.0f
+        } else {
             aspectRatio = (size - padding * 2) / inputImageHeight
-            yTranslation = 0.0f + padding + yOffset
+            yTranslation = 0.0f + padding
             xTranslation = (size - inputImageWidth * aspectRatio) / 2.0f
         }
 

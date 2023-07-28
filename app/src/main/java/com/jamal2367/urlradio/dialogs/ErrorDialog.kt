@@ -67,6 +67,9 @@ class ErrorDialog {
                 when (errorDetailsView.visibility) {
                     View.GONE -> errorDetailsView.isVisible = true
                     View.VISIBLE -> errorDetailsView.isGone = true
+                    View.INVISIBLE -> {
+                        return@setOnClickListener
+                    }
                 }
             }
             // set details text view

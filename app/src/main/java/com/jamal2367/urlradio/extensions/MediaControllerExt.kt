@@ -73,19 +73,3 @@ fun MediaController.playStreamDirectly(streamUri: String) {
         bundleOf(Pair(Keys.KEY_STREAM_URI, streamUri))
     )
 }
-
-
-/* Returns mediaId of currently active media item */
-fun MediaController.getCurrentMediaId(): String {
-    return if (mediaItemCount > 0) {
-        getMediaItemAt(0).mediaId
-    } else {
-        String()
-    }
-}
-
-
-/* Returns if controller/player has one or more media items  */
-fun MediaController.hasMediaItems(): Boolean {
-    return mediaItemCount > 0
-}

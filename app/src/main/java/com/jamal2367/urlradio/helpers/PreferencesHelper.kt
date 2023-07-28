@@ -61,20 +61,6 @@ object PreferencesHelper {
     }
 
 
-    /* Loads keepDebugLog true or false */
-    fun loadKeepDebugLog(): Boolean {
-        return sharedPreferences.getBoolean(Keys.PREF_KEEP_DEBUG_LOG, false)
-    }
-
-
-    /* Saves keepDebugLog true or false */
-    fun saveKeepDebugLog(keepDebugLog: Boolean = false) {
-        sharedPreferences.edit {
-            putBoolean(Keys.PREF_KEEP_DEBUG_LOG, keepDebugLog)
-        }
-    }
-
-
     /* Saves state of playback for player to shared preferences */
     fun saveIsPlaying(isPlaying: Boolean) {
         sharedPreferences.edit {
@@ -95,14 +81,6 @@ object PreferencesHelper {
         sharedPreferences.edit {
             putString(Keys.PREF_STATION_LIST_EXPANDED_UUID, stationUuid)
         }
-    }
-
-
-    /* Loads last update from shared preferences */
-    fun loadLastUpdateCollection(): Date {
-        val lastSaveString: String =
-            sharedPreferences.getString(Keys.PREF_LAST_UPDATE_COLLECTION, "") ?: String()
-        return DateTimeHelper.convertFromRfc2822(lastSaveString)
     }
 
 
@@ -181,15 +159,6 @@ object PreferencesHelper {
             isPlaying = sharedPreferences.getBoolean(Keys.PREF_PLAYER_STATE_IS_PLAYING, false)
             sleepTimerRunning =
                 sharedPreferences.getBoolean(Keys.PREF_PLAYER_STATE_SLEEP_TIMER_RUNNING, false)
-        }
-    }
-
-
-    /* Saves state of player user interface to shared preferences */
-    fun savePlayerState(playerState: PlayerState) {
-        sharedPreferences.edit {
-            putString(Keys.PREF_PLAYER_STATE_STATION_UUID, playerState.stationUuid)
-            putBoolean(Keys.PREF_PLAYER_STATE_IS_PLAYING, playerState.isPlaying)
         }
     }
 

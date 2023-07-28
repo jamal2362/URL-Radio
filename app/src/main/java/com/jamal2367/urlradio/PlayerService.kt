@@ -190,7 +190,7 @@ class PlayerService : MediaLibraryService() {
             override fun onFinish() {
                 Log.v(TAG, "Sleep timer finished. Sweet dreams.")
                 sleepTimerTimeRemaining = 0L
-                player.pause() // todo may use player.stop() here
+                player.stop()
             }
 
             override fun onTick(millisUntilFinished: Long) {

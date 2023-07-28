@@ -16,7 +16,6 @@ package com.jamal2367.urlradio.core
 
 import android.os.Parcelable
 import androidx.annotation.Keep
-import androidx.media3.common.MimeTypes
 import com.google.gson.annotations.Expose
 import com.jamal2367.urlradio.Keys
 import kotlinx.parcelize.Parcelize
@@ -77,20 +76,6 @@ data class Station(
     /* Checks if a Station has the minimum required elements / data */
     fun isValid(): Boolean {
         return uuid.isNotEmpty() && name.isNotEmpty() && streamUris.isNotEmpty() && streamUris[stream].isNotEmpty() && modificationDate != Keys.DEFAULT_DATE && streamContent != Keys.MIME_TYPE_UNSUPPORTED
-    }
-
-
-    /* Get the correct Mime type - used for building a MediaItem  */
-    fun getMediaType(): String {
-        return if (Keys.MIME_TYPES_MPEG.contains(streamContent)) {
-            MimeTypes.AUDIO_MPEG
-        } else if (Keys.MIME_TYPES_AAC.contains(streamContent)) {
-            MimeTypes.AUDIO_AAC
-        } else if (Keys.MIME_TYPES_HLS.contains(streamContent)) {
-            MimeTypes.APPLICATION_M3U8
-        } else {
-            MimeTypes.AUDIO_UNKNOWN
-        }
     }
 
 

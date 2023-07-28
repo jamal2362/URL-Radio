@@ -100,8 +100,9 @@ class FindStationDialog (
     /* Overrides onDirectInputCheck from DirectInputCheck */
     override fun onDirectInputCheck(stationList: MutableList<Station>) {
         if (stationList.isNotEmpty()) {
+            val startPosition = searchResultAdapter.searchResults.size
             searchResultAdapter.searchResults = stationList
-            searchResultAdapter.notifyDataSetChanged()
+            searchResultAdapter.notifyItemRangeInserted(startPosition, stationList.size)
             resetLayout(clearAdapter = false)
         } else {
             showNoResultsError()

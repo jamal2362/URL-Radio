@@ -76,8 +76,6 @@ data class LayoutHolder(var rootView: View) {
     var sheetSleepTimerCancelButtonView: ImageButton = rootView.findViewById(R.id.sleep_timer_cancel_button)
     private var sheetSleepTimerRemainingTimeView: TextView = rootView.findViewById(R.id.sleep_timer_remaining_time)
     private var onboardingLayout: ConstraintLayout = rootView.findViewById(R.id.onboarding_layout)
-    private var onboardingQuoteViews: Group = rootView.findViewById(R.id.onboarding_quote_views)
-    private var onboardingImportViews: Group = rootView.findViewById(R.id.onboarding_import_views)
     private var bottomSheetBehavior: BottomSheetBehavior<ConstraintLayout> = BottomSheetBehavior.from(bottomSheet)
     private var metadataHistory: MutableList<String>
     private var metadataHistoryPosition: Int
@@ -149,7 +147,7 @@ data class LayoutHolder(var rootView: View) {
         stationNameView.isSelected = true
 
         // reduce the shadow left and right because of scrolling (Marquee)
-        stationNameView.setFadingEdgeLength(10)
+        stationNameView.setFadingEdgeLength(8)
 
         // update cover
         if (station.imageColor != -1) {
@@ -261,7 +259,6 @@ data class LayoutHolder(var rootView: View) {
                 val metadataString = metadataHistory[metadataHistoryPosition]
                 metadataView.text = metadataString
                 sheetMetadataHistoryView.text = metadataString
-                sheetMetadataHistoryView.isSelected = true
             }
         }
     }
@@ -278,6 +275,7 @@ data class LayoutHolder(var rootView: View) {
                 val sleepTimerTimeRemaining = DateTimeHelper.convertToMinutesAndSeconds(timeRemaining)
                 sheetSleepTimerRemainingTimeView.text = sleepTimerTimeRemaining
                 sheetSleepTimerRemainingTimeView.contentDescription = "${context.getString(R.string.descr_expanded_player_sleep_timer_remaining_time)}: $sleepTimerTimeRemaining"
+                stationNameView.isSelected = false
             }
         }
     }
@@ -301,18 +299,6 @@ data class LayoutHolder(var rootView: View) {
     fun showBufferingIndicator(buffering: Boolean) {
         bufferingIndicator.isVisible = buffering
         isBuffering = buffering
-    }
-
-
-    /* Toggle the Import Running indicator  */
-    fun toggleImportingStationViews() {
-        if (onboardingImportViews.visibility == View.INVISIBLE) {
-            onboardingImportViews.isVisible = true
-            onboardingQuoteViews.isVisible = false
-        } else {
-            onboardingImportViews.isVisible = false
-            onboardingQuoteViews.isVisible = true
-        }
     }
 
 
@@ -355,13 +341,12 @@ data class LayoutHolder(var rootView: View) {
         when (isPlaying) {
             true -> {
                 val rotateClockwise = AnimationUtils.loadAnimation(context, R.anim.rotate_clockwise_slow)
-                rotateClockwise.setAnimationListener(createAnimationListener(isPlaying))
+                rotateClockwise.setAnimationListener(createAnimationListener(true))
                 playButtonView.startAnimation(rotateClockwise)
             }
-
             false -> {
                 val rotateCounterClockwise = AnimationUtils.loadAnimation(context, R.anim.rotate_counterclockwise_fast)
-                rotateCounterClockwise.setAnimationListener(createAnimationListener(isPlaying))
+                rotateCounterClockwise.setAnimationListener(createAnimationListener(false))
                 playButtonView.startAnimation(rotateCounterClockwise)
             }
 
@@ -419,11 +404,6 @@ data class LayoutHolder(var rootView: View) {
         bottomSheetBehavior.addBottomSheetCallback(object :
             BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(view: View, slideOffset: Float) {
-                if (slideOffset < 0.25f) {
-                    // showPlayerViews()
-                } else {
-                    // hidePlayerViews()
-                }
             }
 
             override fun onStateChanged(view: View, state: Int) {

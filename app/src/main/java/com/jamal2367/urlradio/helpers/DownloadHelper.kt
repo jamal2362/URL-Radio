@@ -240,13 +240,6 @@ object DownloadHelper {
     }
 
 
-    /* Saves collection of radio station to storage */
-    private fun saveCollection(context: Context) {
-        // save collection (not async) - and store modification date
-        modificationDate = CollectionHelper.saveCollection(context, collection, async = false)
-    }
-
-
     /* Reads station playlist file and adds it to collection */
     private fun addStation(context: Context, localFileUri: Uri, remoteFileLocation: String) {
         // read station playlist
@@ -353,20 +346,6 @@ object DownloadHelper {
                 cursor.getString(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TITLE))
         }
         return remoteFileLocation
-    }
-
-
-    /* Checks if a given download ID represents a finished download */
-    private fun isDownloadFinished(downloadId: Long): Boolean {
-        var downloadStatus: Int = -1
-        val cursor: Cursor =
-            downloadManager.query(DownloadManager.Query().setFilterById(downloadId))
-        if (cursor.count > 0) {
-            cursor.moveToFirst()
-            downloadStatus =
-                cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
-        }
-        return (downloadStatus == DownloadManager.STATUS_SUCCESSFUL)
     }
 
 

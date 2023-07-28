@@ -14,7 +14,6 @@
 
 package com.jamal2367.urlradio.collection
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.text.Editable
@@ -592,12 +591,11 @@ class CollectionAdapter(
 
 
     /* Updates the station list - redraws the views with changed content */
-    @SuppressLint("NotifyDataSetChanged")
     private fun updateRecyclerView(oldCollection: Collection, newCollection: Collection) {
         collection = newCollection
         if (oldCollection.stations.size == 0 && newCollection.stations.size > 0) {
-            // data set has been initialized - redraw the whole list
-            notifyDataSetChanged()
+            // data set has been initialized - notify the adapter about the new items inserted
+            notifyItemRangeInserted(0, newCollection.stations.size)
         } else {
             // calculate differences between current collection and new collection - and inform this adapter about the changes
             val diffResult =

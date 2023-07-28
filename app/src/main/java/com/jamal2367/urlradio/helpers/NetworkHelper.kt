@@ -17,8 +17,6 @@ package com.jamal2367.urlradio.helpers
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
-import android.net.NetworkCapabilities
-import android.net.NetworkCapabilities.*
 import android.util.Log
 import com.jamal2367.urlradio.Keys
 import java.net.HttpURLConnection
@@ -40,54 +38,6 @@ object NetworkHelper {
 
     /* Data class: holder for content type information */
     data class ContentType(var type: String = String(), var charset: String = String())
-
-
-    /* Checks if the active network connection is over Wifi */
-    fun isConnectedToWifi(context: Context): Boolean {
-        var result = false
-        val connMgr = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val activeNetwork: Network? = connMgr.activeNetwork
-        if (activeNetwork != null) {
-            val capabilities: NetworkCapabilities? = connMgr.getNetworkCapabilities(activeNetwork)
-            if (capabilities != null) {
-                // check if a Wifi connection is active
-                result = capabilities.hasTransport(TRANSPORT_WIFI)
-            }
-        }
-        return result
-    }
-
-
-    /* Checks if the active network connection is over Cellular */
-    fun isConnectedToCellular(context: Context): Boolean {
-        var result = false
-        val connMgr = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val activeNetwork: Network? = connMgr.activeNetwork
-        if (activeNetwork != null) {
-            val capabilities: NetworkCapabilities? = connMgr.getNetworkCapabilities(activeNetwork)
-            if (capabilities != null) {
-                // check if a cellular connection is active
-                result = capabilities.hasTransport(TRANSPORT_CELLULAR)
-            }
-        }
-        return result
-    }
-
-
-    /* Checks if the active network connection is over VPN */
-    fun isConnectedToVpn(context: Context): Boolean {
-        var result = false
-        val connMgr = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val activeNetwork: Network? = connMgr.activeNetwork
-        if (activeNetwork != null) {
-            val capabilities: NetworkCapabilities? = connMgr.getNetworkCapabilities(activeNetwork)
-            if (capabilities != null) {
-                // check if a VPN connection is active
-                result = capabilities.hasTransport(TRANSPORT_VPN)
-            }
-        }
-        return result
-    }
 
 
     /* Checks if the active network connection is connected to any network */

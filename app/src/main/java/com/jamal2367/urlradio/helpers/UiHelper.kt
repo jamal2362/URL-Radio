@@ -20,14 +20,12 @@ import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
 import android.graphics.drawable.ColorDrawable
-import android.os.Build
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.snackbar.Snackbar
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
 
@@ -55,65 +53,6 @@ object UiHelper {
             p.setMargins(l, t, r, b)
             view.requestLayout()
         }
-    }
-
-
-    /* Sets layout margins for given view in percent */
-    fun setViewMarginsPercentage(
-        context: Context,
-        view: View,
-        height: Int,
-        width: Int,
-        left: Int = 0,
-        right: Int = 0,
-        top: Int = 0,
-        bottom: Int = 0
-    ) {
-        val l: Int = ((width / 100.0f) * left).toInt()
-        val r: Int = ((width / 100.0f) * right).toInt()
-        val t: Int = ((height / 100.0f) * top).toInt()
-        val b: Int = ((height / 100.0f) * bottom).toInt()
-        setViewMargins(context, view, l, r, t, b)
-    }
-
-
-    /* Displays a simple Snackbar message and anchors it to given view */
-    fun displaySnackbar(
-        contextView: View,
-        anchorView: View,
-        text: Int,
-        requireConfirmation: Boolean
-    ) {
-        if (requireConfirmation) {
-            Snackbar.make(contextView, text, Snackbar.LENGTH_INDEFINITE)
-                .setAnchorView(anchorView)
-                .setAction(R.string.dialog_generic_button_okay) {
-                    // snackbar ok button has clicked - just dismiss / do nothing
-                }
-                .show()
-        } else {
-            Snackbar.make(contextView, text, Snackbar.LENGTH_SHORT)
-                .setAnchorView(anchorView)
-                .show()
-        }
-    }
-
-
-    /* Get the height of the system's top status bar */
-    fun getStatusBarHeight(context: Context): Int {
-        var result = 0
-        val resourceId: Int =
-            context.resources.getIdentifier("status_bar_height", "dimen", "android")
-        if (resourceId > 0) {
-            result = context.resources.getDimensionPixelSize(resourceId)
-        }
-        return result
-    }
-
-
-    /* Get scaling factor from display density */
-    fun getDensityScalingFactor(context: Context): Float {
-        return context.resources.displayMetrics.density
     }
 
 
@@ -186,7 +125,7 @@ object UiHelper {
                     dX,
                     dY,
                     actionState,
-                    isCurrentlyActive
+                    false
                 )
                 return
             }
@@ -286,7 +225,7 @@ object UiHelper {
                     dX,
                     dY,
                     actionState,
-                    isCurrentlyActive
+                    false
                 )
                 return
             }

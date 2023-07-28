@@ -475,7 +475,7 @@ class PlayerFragment : Fragment(),
 
 
 //    /* Sets up the general playback controls - Note: station specific controls and views are updated in updatePlayerViews() */
-//    @SuppressLint("ClickableViewAccessibility") // it is probably okay to suppress this warning - the OnTouchListener on the time played view does only toggle the time duration / remaining display
+//    // it is probably okay to suppress this warning - the OnTouchListener on the time played view does only toggle the time duration / remaining display
 //    private fun setupPlaybackControls() {
 //
 //        // main play/pause button

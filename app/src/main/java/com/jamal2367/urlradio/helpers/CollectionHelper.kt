@@ -26,12 +26,10 @@ import androidx.core.net.toUri
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
-import com.google.gson.GsonBuilder
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
 import com.jamal2367.urlradio.core.Collection
 import com.jamal2367.urlradio.core.Station
-import com.jamal2367.urlradio.search.RadioBrowserResult
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import java.io.File
@@ -62,14 +60,6 @@ object CollectionHelper {
             if (it.remoteStationLocation == remoteStationLocation) return false
         }
         return true
-    }
-
-
-    /* Checks if enough time passed since last update */
-    fun hasEnoughTimePassedSinceLastUpdate(): Boolean {
-        val lastUpdate: Date = PreferencesHelper.loadLastUpdateCollection()
-        val currentDate: Date = Calendar.getInstance().time
-        return currentDate.time - lastUpdate.time > Keys.MINIMUM_TIME_BETWEEN_UPDATES
     }
 
 
@@ -121,10 +111,7 @@ object CollectionHelper {
                     // update name - if not changed previously by user
                     if (!it.nameManuallySet) it.name = station.name
                     // re-download station image - if new URL and not changed previously by user
-                    if (!it.imageManuallySet && it.remoteImageLocation != station.remoteImageLocation) DownloadHelper.updateStationImage(
-                        context,
-                        it
-                    )
+                    DownloadHelper.updateStationImage(context, it)
                 }
             }
             // sort and save collection
@@ -300,22 +287,6 @@ object CollectionHelper {
     }
 
 
-    /* Get station from collection for given Stream Uri */
-    fun getStationWithStreamUri(collection: Collection, streamUri: String): Station {
-        collection.stations.forEach { station ->
-            if (station.getStreamUri() == streamUri) {
-                return station
-            }
-        }
-        // fallback: return first station
-        return if (collection.stations.isNotEmpty()) {
-            collection.stations.first()
-        } else {
-            Station()
-        }
-    }
-
-
     /* Gets MediaIem for next station within collection */
     fun getNextMediaItem(context: Context, collection: Collection, stationUuid: String): MediaItem {
         val currentStationPosition: Int = getStationPosition(collection, stationUuid)
@@ -364,17 +335,6 @@ object CollectionHelper {
             }
         }
         return -1
-    }
-
-
-    /* Get name of station from collection for given UUID */
-    fun getStationName(collection: Collection, stationUuid: String): String {
-        collection.stations.forEach { station ->
-            if (station.uuid == stationUuid) {
-                return station.name
-            }
-        }
-        return String()
     }
 
 
@@ -655,16 +615,6 @@ object CollectionHelper {
     }
 
 
-    /* Creates a fallback station - stupid hack for Android Auto compatibility :-/ */
-    fun createFallbackStation(): Station {
-        return Station(
-            name = "KCSB",
-            streamUris = mutableListOf("http://live.kcsb.org:80/KCSB_128"),
-            streamContent = Keys.MIME_TYPE_MPEG
-        )
-    }
-
-
     /* Sorts radio stations */
     fun sortCollection(collection: Collection): Collection {
         val favoriteStations = collection.stations.filter { it.starred }
@@ -688,15 +638,6 @@ object CollectionHelper {
             Log.e(TAG, "Unable to get base URL from $urlString.\n$e ")
         }
         return faviconAddress
-    }
-
-
-    /* Converts search result JSON string */
-    fun createRadioBrowserResult(result: String): Array<RadioBrowserResult> {
-        val gsonBuilder = GsonBuilder()
-        gsonBuilder.setDateFormat("M/d/yy hh:mm a")
-        val gson = gsonBuilder.create()
-        return gson.fromJson(result, Array<RadioBrowserResult>::class.java)
     }
 
 }

@@ -43,10 +43,6 @@ class DirectInputCheck(private var directInputCheckListener: DirectInputCheckLis
     }
 
 
-    /* Define log tag */
-    private val TAG: String = DirectInputCheck::class.java.simpleName
-
-
     /* Main class variables */
     private var lastCheckedAddress: String = String()
 
