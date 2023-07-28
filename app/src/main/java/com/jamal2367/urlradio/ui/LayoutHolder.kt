@@ -144,7 +144,7 @@ data class LayoutHolder(var rootView: View) {
         stationNameView.text = station.name
 
         // toggle text scrolling (marquee) if necessary
-        stationNameView.isSelected = true
+        stationNameView.isSelected = isPlaying
 
         // reduce the shadow left and right because of scrolling (Marquee)
         stationNameView.setFadingEdgeLength(8)
