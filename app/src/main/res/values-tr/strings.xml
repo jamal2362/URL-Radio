@@ -45,7 +45,6 @@
     <!-- Onboarding -->
     <string name="onboarding_app_description">Radyo uygulaması</string>
     <string name="onboarding_app_get_started">Başlayın</string>
-    <string name="onboarding_app_import_running">İstasyonlarınızı içe aktarılıyor…</string>
     <!-- Player -->
     <string name="player_sheet_h2_station_metadata">Şimdi oynatılıyor</string>
     <string name="player_sheet_h2_stream_url">Yayın bağlantısı</string>

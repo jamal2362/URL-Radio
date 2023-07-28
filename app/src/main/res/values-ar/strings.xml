@@ -42,7 +42,6 @@
     <!-- Onboarding -->
     <string name="onboarding_app_description">تطبيق الراديو</string>
     <string name="onboarding_app_get_started">ابدأ الآن</string>
-    <string name="onboarding_app_import_running">استيراد محطاتك…</string>
     <!-- Player -->
     <string name="player_sheet_h2_station_metadata">قيد التشغيل حالياً</string>
     <string name="player_sheet_h2_stream_url">روابط البث</string>

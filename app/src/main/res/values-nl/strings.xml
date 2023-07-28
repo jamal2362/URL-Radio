@@ -45,7 +45,6 @@
     <!-- Onboarding -->
     <string name="onboarding_app_description">Radio App</string>
     <string name="onboarding_app_get_started">Aan de slag</string>
-    <string name="onboarding_app_import_running">Uw zenders importeren…</string>
     <!-- Player -->
     <string name="player_sheet_h2_station_metadata">Nu aan het afspelen</string>
     <string name="player_sheet_h2_stream_url">Link naar de stream</string>

@@ -45,7 +45,6 @@
     <!-- Onboarding -->
     <string name="onboarding_app_description">广播应用</string>
     <string name="onboarding_app_get_started">即刻上手</string>
-    <string name="onboarding_app_import_running">正在导入您的电台……</string>
     <!-- Player -->
     <string name="player_sheet_h2_station_metadata">当前正在播放</string>
     <string name="player_sheet_h2_stream_url">串流链接</string>

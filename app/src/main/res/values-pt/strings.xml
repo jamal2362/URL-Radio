@@ -43,7 +43,6 @@
     <!-- Onboarding -->
     <string name="onboarding_app_description">Aplicação de rádio</string>
     <string name="onboarding_app_get_started">Começar</string>
-    <string name="onboarding_app_import_running">A importar estações…</string>
     <!-- Player -->
     <string name="player_sheet_h2_station_metadata">Atualmente</string>
     <string name="player_sheet_h2_stream_url">Ligação da transmissão</string>

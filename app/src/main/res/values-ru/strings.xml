@@ -42,7 +42,6 @@
     <!-- Onboarding -->
     <string name="onboarding_app_description">Радиоприёмник</string>
     <string name="onboarding_app_get_started">Начать</string>
-    <string name="onboarding_app_import_running">Импорт ваших станций…</string>
     <!-- Player -->
     <string name="player_sheet_h2_station_metadata">Сейчас играет</string>
     <string name="player_sheet_h2_stream_url">Адрес потока</string>

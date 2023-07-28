@@ -45,7 +45,6 @@
     <!-- Onboarding -->
     <string name="onboarding_app_description">Радіозастосунок</string>
     <string name="onboarding_app_get_started">Початок роботи</string>
-    <string name="onboarding_app_import_running">Імпорт Ваших станцій…</string>
     <!-- Player -->
     <string name="player_sheet_h2_station_metadata">Зараз грає</string>
     <string name="player_sheet_h2_stream_url">URL трансляції</string>
@@ -70,6 +69,8 @@
     <string name="pref_m3u_export_summary">Збережіть свої радіостанції у файлі списку відтворення M3U, який можна імпортувати в інші програвачі.</string>
     <string name="pref_m3u_export_title">Експорт M3U</string>
     <string name="pref_maintenance_title">Обслуговування</string>
+    <string name="pref_pls_export_summary">Збережіть свої радіостанції у файлі списку відтворення PLS, який можна імпортувати в інші програвачі.</string>
+    <string name="pref_pls_export_title">Експорт PLS</string>
     <string name="pref_station_export_summary">Зберегти всю колекцію радіостанцій, включаючи зображення до пам\'яті пристрою.</string>
     <string name="pref_station_export_title">Експорт станції</string>
     <string name="pref_station_restore_summary">Відновлення колекції радіостанцій із резервної копії. Наявні станції буде замінено.</string>
@@ -94,8 +95,11 @@
     <string name="toastmessage_error_download_error">Помилка завантаження</string>
     <string name="toastmessage_error_restart_playback_failed">Не вдалося почати або перезапустити відтворення.</string>
     <string name="toastmessage_install_file_helper">Будь ласка, встановіть менеджер файлів.</string>
+    <string name="toastmessage_preview_playback_failed">Попереднє відтворення неможливе.</string>
+    <string name="toastmessage_preview_playback_started">Розпочалося попереднє відтворення.</string>
     <string name="toastmessage_restored">Станції були успішно відновлені.</string>
     <string name="toastmessage_save_m3u">Збереження радіостанцій як М3U…</string>
+    <string name="toastmessage_save_pls">Збереження радіостанцій як PLS…</string>
     <string name="toastmessage_shortcut_created">Посилання створено.</string>
     <string name="toastmessage_shortcut_not_created">Ярлик не створено. Цей пристрій не дозволяє створювати ярлики.</string>
     <string name="toastmessage_sleep_timer_unable_to_start">Будь ласка, спочатку почніть відтворення.</string>

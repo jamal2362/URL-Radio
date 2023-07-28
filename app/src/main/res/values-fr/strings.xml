@@ -42,7 +42,6 @@
     <!-- Onboarding -->
     <string name="onboarding_app_description">Appli radio</string>
     <string name="onboarding_app_get_started">C\'est parti !</string>
-    <string name="onboarding_app_import_running">Importation de vos stations…</string>
     <!-- Player -->
     <string name="player_sheet_h2_station_metadata">En cours de lecture</string>
     <string name="player_sheet_h2_stream_url">Lien de diffusion</string>

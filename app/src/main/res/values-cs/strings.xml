@@ -32,7 +32,6 @@
     <string name="notification_skip_to_next">Následující</string>
     <!-- Onboarding -->
     <string name="onboarding_app_description">Aplikace Rádio</string>
-    <string name="onboarding_app_import_running">Importování stanic…</string>
     <!-- Player -->
     <string name="player_sheet_h2_station_metadata">Právě hraje</string>
     <string name="player_sheet_h2_stream_url">Odkaz na stream</string>
