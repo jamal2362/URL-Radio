@@ -4,13 +4,12 @@ apply plugin: 'kotlin-parcelize'
 
 android {
     namespace 'com.jamal2367.urlradio'
-    compileSdkVersion 34
-    buildToolsVersion '34.0.0'
+    compileSdk 34
 
     defaultConfig {
         applicationId 'com.jamal2367.urlradio'
-        minSdkVersion 23
-        targetSdkVersion 34
+        minSdk 23
+        targetSdk 34
         versionCode 116
         versionName '11.6'
         resConfigs 'en', 'ar', 'bg', 'cs', 'de', 'fr', 'it', 'nl', 'pl', 'pt', 'ru', 'ro', 'tr', 'uk', 'zh-rCN'
