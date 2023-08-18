@@ -188,7 +188,7 @@ class PlayerFragment : Fragment(),
     /* Implement the ItemTouchHelper.Callback for drag and drop functionality */
     inner class ItemTouchHelperCallback : ItemTouchHelper.Callback() {
 
-        override fun isLongPressDragEnabled() = true
+        override fun isLongPressDragEnabled() = !collectionAdapter.isExpandedForEdit
 
         override fun isItemViewSwipeEnabled() = true
 

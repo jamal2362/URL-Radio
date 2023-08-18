@@ -65,7 +65,7 @@ class CollectionAdapter(
     private var editStationStreamsEnabled: Boolean = PreferencesHelper.loadEditStreamUrisEnabled()
     private var expandedStationUuid: String = PreferencesHelper.loadStationListStreamUuid()
     private var expandedStationPosition: Int = -1
-    private var isExpandedForEdit: Boolean = false
+    var isExpandedForEdit: Boolean = false
 
 
     /* Listener Interface */
@@ -118,31 +118,34 @@ class CollectionAdapter(
 
     /* Implement the method to handle item move */
     fun onItemMove(fromPosition: Int, toPosition: Int) {
-        if (!isExpandedForEdit) {
-            val stationList = collection.stations
-            val stationCount = stationList.size
-
-            if (fromPosition !in 0 until stationCount || toPosition !in 0 until stationCount) {
-                return
-            }
-
-            val fromStation = stationList[fromPosition]
-            val toStation = stationList[toPosition]
-
-            if (fromStation.starred != toStation.starred) {
-                // Prevent moving a starred item into non-starred area or vice versa
-                return
-            }
-
-            // Move within the same group (either starred or non-starred)
-            Collections.swap(stationList, fromPosition, toPosition)
-
-            // Update the value of expandedStationPosition if necessary
-            expandedStationPosition = if (fromPosition == expandedStationPosition) toPosition else expandedStationPosition
-
-            // Notify the adapter about the item move
-            notifyItemMoved(fromPosition, toPosition)
+        // Do nothing if in "edit" mode
+        if (isExpandedForEdit) {
+            return
         }
+
+        val stationList = collection.stations
+        val stationCount = stationList.size
+
+        if (fromPosition !in 0 until stationCount || toPosition !in 0 until stationCount) {
+            return
+        }
+
+        val fromStation = stationList[fromPosition]
+        val toStation = stationList[toPosition]
+
+        if (fromStation.starred != toStation.starred) {
+            // Prevent moving a starred item into non-starred area or vice versa
+            return
+        }
+
+        // Move within the same group (either starred or non-starred)
+        Collections.swap(stationList, fromPosition, toPosition)
+
+        // Update the value of expandedStationPosition if necessary
+        expandedStationPosition = if (fromPosition == expandedStationPosition) toPosition else expandedStationPosition
+
+        // Notify the adapter about the item move
+        notifyItemMoved(fromPosition, toPosition)
     }
 
 
