@@ -26,15 +26,20 @@ import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import java.net.URL
 import java.util.GregorianCalendar
 import java.util.Locale
 
 
+data class IcecastMetadata(
+    val title: String?
+)
 /*
  * DirectInputCheck class
  */
-class DirectInputCheck(private var directInputCheckListener: DirectInputCheckListener) {
+class DirectInputCheck(private var directInputCheckListener: DirectInputCheckListener, private val context: Context) {
 
     /* Interface used to send back station list for checked */
     interface DirectInputCheckListener {
@@ -69,12 +74,8 @@ class DirectInputCheck(private var directInputCheckListener: DirectInputCheckLis
                     Keys.MIME_TYPES_OGG.contains(contentType) or
                     Keys.MIME_TYPES_AAC.contains(contentType) or
                     Keys.MIME_TYPES_HLS.contains(contentType)) {
-                    // create station and add to collection
-                    val station = Station(name = query, streamUris = mutableListOf(query), streamContent = contentType, modificationDate = GregorianCalendar.getInstance().time)
-                    if (lastCheckedAddress != query) {
-                        stationList.add(station)
-                    }
-                    lastCheckedAddress = query
+                    // process Icecast stream and extract metadata
+                    processIcecastStream(query, stationList)
                 }
                 // CASE: invalid address
                 else {
@@ -183,6 +184,42 @@ class DirectInputCheck(private var directInputCheckListener: DirectInputCheckLis
             }
         }
         return stations
+    }
+
+
+    private fun extractIcecastMetadata(streamUri: String): IcecastMetadata {
+        // make an HTTP request at the stream URL to get Icecast metadata.
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url(streamUri)
+            .build()
+
+        val response = client.newCall(request).execute()
+        val icecastHeaders = response.headers
+
+        // analyze the Icecast metadata and extract information like title, description, bitrate, etc.
+        val title = icecastHeaders["icy-name"]
+
+        val defaultTitle = context.getString(R.string.dialog_no_title)
+
+        return IcecastMetadata(title?.takeIf { it.isNotEmpty() } ?: defaultTitle)
+    }
+
+
+    private fun updateStationWithIcecastMetadata(station: Station, icecastMetadata: IcecastMetadata) {
+        station.name = icecastMetadata.title.toString()
+    }
+
+
+    private fun processIcecastStream(streamUri: String, stationList: MutableList<Station>) {
+        val icecastMetadata = extractIcecastMetadata(streamUri)
+        val station = Station(name = icecastMetadata.title.toString(), streamUris = mutableListOf(streamUri), modificationDate = GregorianCalendar.getInstance().time)
+        updateStationWithIcecastMetadata(station, icecastMetadata)
+        // create station and add to collection
+        if (lastCheckedAddress != streamUri) {
+            stationList.add(station)
+        }
+        lastCheckedAddress = streamUri
     }
 
 }

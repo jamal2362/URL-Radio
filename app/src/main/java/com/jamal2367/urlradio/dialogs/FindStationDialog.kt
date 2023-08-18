@@ -114,7 +114,7 @@ class FindStationDialog (
     fun show() {
         // initialize a radio browser search and direct url input check
         radioBrowserSearch = RadioBrowserSearch(this)
-        directInputCheck = DirectInputCheck(this)
+        directInputCheck = DirectInputCheck(this, context)
 
         // prepare dialog builder
         val builder = MaterialAlertDialogBuilder(context)
