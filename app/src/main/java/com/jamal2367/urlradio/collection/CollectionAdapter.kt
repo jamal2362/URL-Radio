@@ -315,13 +315,12 @@ class CollectionAdapter(
                 // remember previously expanded position
                 val previousExpandedStationPosition: Int = expandedStationPosition
                 // if station was expanded - collapse it
-                if (previousExpandedStationPosition > -1 && previousExpandedStationPosition < collection.stations.size) notifyItemChanged(
-                    previousExpandedStationPosition
-                )
+                if (previousExpandedStationPosition > -1 && previousExpandedStationPosition < collection.stations.size)
+                    notifyItemChanged(previousExpandedStationPosition)
                 // store current station as the expanded one
                 saveStationListExpandedState(position, stationUuid)
                 // update station view
-                notifyItemChanged(expandedStationPosition)
+                notifyDataSetChanged()
             }
         }
     }
