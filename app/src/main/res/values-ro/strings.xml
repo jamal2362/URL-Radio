@@ -28,6 +28,7 @@
     <string name="dialog_generic_button_cancel">Anulează</string>
     <string name="dialog_generic_button_okay">Ok</string>
     <string name="dialog_generic_details_button">Afișează detalii</string>
+    <string name="dialog_no_title">Fără titlu</string>
     <string name="dialog_opml_import_details_default">Nu sunt disponibile detalii</string>
     <string name="dialog_yes_no_message_remove_station">Elimini această stație?</string>
     <string name="dialog_yes_no_message_update_station_images">Descarci cea mai recentă versiune a imaginilor tuturor stațiilor?</string>
