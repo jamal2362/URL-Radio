@@ -166,9 +166,7 @@ class CollectionAdapter(
 
     /* Overrides onBindViewHolder */
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-
         when (holder) {
-
             // CASE ADD NEW CARD
             is AddNewViewHolder -> {
                 // get reference to StationViewHolder
@@ -181,7 +179,6 @@ class CollectionAdapter(
                     it.findNavController().navigate(R.id.settings_destination)
                 }
             }
-
             // CASE STATION CARD
             is StationViewHolder -> {
                 // get station from position
