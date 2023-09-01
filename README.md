@@ -79,12 +79,12 @@ You can help out the radio-browser.info community by [adding the missing station
 | AAC                | ✅ |
 | AAC+               | ✅ |
 | FLAC               | ✅ |
+| HLS (M3U8)         | ✅ |
 | M3U                | ✅ |
 | MP3                | ✅ |
 | OGG (Vorbis)       | ✅ |
 | OPUS               | ✅ |
 | PLS                | ✅ |
-| HLS (M3U8)         | ⛔ |
 </details>
 
 ----------------------------------------
