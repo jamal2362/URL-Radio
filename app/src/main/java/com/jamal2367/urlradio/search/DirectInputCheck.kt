@@ -39,7 +39,7 @@ data class IcecastMetadata(
 /*
  * DirectInputCheck class
  */
-class DirectInputCheck(private var directInputCheckListener: DirectInputCheckListener, private val context: Context) {
+class DirectInputCheck(private var directInputCheckListener: DirectInputCheckListener) {
 
     /* Interface used to send back station list for checked */
     interface DirectInputCheckListener {
@@ -200,9 +200,7 @@ class DirectInputCheck(private var directInputCheckListener: DirectInputCheckLis
         // analyze the Icecast metadata and extract information like title, description, bitrate, etc.
         val title = icecastHeaders["icy-name"]
 
-        val defaultTitle = context.getString(R.string.dialog_no_title)
-
-        return IcecastMetadata(title?.takeIf { it.isNotEmpty() } ?: defaultTitle)
+        return IcecastMetadata(title?.takeIf { it.isNotEmpty() } ?: streamUri)
     }
 
 
