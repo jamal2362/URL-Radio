@@ -68,6 +68,7 @@ class PlayerService : MediaLibraryService() {
     private var bufferSizeMultiplier: Int = PreferencesHelper.loadBufferSizeMultiplier()
     private var playbackRestartCounter: Int = 0
     private var playLastStation: Boolean = false
+    private var manuallyCancelledSleepTimer = false
 
 
     /* Overrides onCreate from Service */
@@ -206,12 +207,22 @@ class PlayerService : MediaLibraryService() {
 
     /* Cancels sleep timer */
     private fun cancelSleepTimer() {
-        if (this::sleepTimer.isInitialized && sleepTimerTimeRemaining > 0L) {
-            sleepTimerTimeRemaining = 0L
-            sleepTimer.cancel()
+        if (this::sleepTimer.isInitialized) {
+            if (manuallyCancelledSleepTimer) {
+                sleepTimerTimeRemaining = 0L
+                sleepTimer.cancel()
+            }
+            manuallyCancelledSleepTimer = false
         }
         // store timer state
         PreferencesHelper.saveSleepTimerRunning(isRunning = false)
+    }
+
+
+    /* Function to cancel the timer manually */
+    fun manuallyCancelSleepTimer() {
+        manuallyCancelledSleepTimer = true
+        cancelSleepTimer()
     }
 
 
@@ -354,7 +365,7 @@ class PlayerService : MediaLibraryService() {
                     startSleepTimer()
                 }
                 Keys.CMD_CANCEL_SLEEP_TIMER -> {
-                    cancelSleepTimer()
+                    manuallyCancelSleepTimer()
                 }
                 Keys.CMD_REQUEST_SLEEP_TIMER_REMAINING -> {
                     val resultBundle = Bundle()
