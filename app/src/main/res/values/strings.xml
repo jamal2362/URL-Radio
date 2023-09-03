@@ -2,7 +2,7 @@
 <resources>
     <!-- App Name -->
     <string name="app_name" translatable="false">URL Radio</string>
-    <string name="app_version_name" translatable="false">\"Acid\"</string>
+    <string name="app_version_name" translatable="false">\"Sweet\"</string>
 
     <!-- Accessibility Descriptions -->
     <string name="descr_app_icon">App icon depicting an old radio</string>
