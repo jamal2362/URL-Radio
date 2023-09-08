@@ -600,13 +600,8 @@ class PlayerFragment : Fragment(),
 
     /* Toggle periodic update request of Sleep Timer state from player service */
     private fun togglePeriodicSleepTimerUpdateRequest() {
-        if (playerState.sleepTimerRunning && playerState.isPlaying) {
-            handler.removeCallbacks(periodicSleepTimerUpdateRequestRunnable)
-            handler.postDelayed(periodicSleepTimerUpdateRequestRunnable, 0)
-        } else {
-            handler.removeCallbacks(periodicSleepTimerUpdateRequestRunnable)
-            layout.sleepTimerRunningViews.isGone = true
-        }
+        handler.removeCallbacks(periodicSleepTimerUpdateRequestRunnable)
+        handler.postDelayed(periodicSleepTimerUpdateRequestRunnable, 0)
     }
 
 
