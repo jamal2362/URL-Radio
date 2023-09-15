@@ -326,10 +326,6 @@ class PlayerFragment : Fragment(),
         if (controller?.isPlaying == true && stationUuid == playerState.stationUuid) {
             // stop playback
             controller?.pause()
-            // stop sleeptimer if any available
-            togglePeriodicSleepTimerUpdateRequest()
-            layout.updateSleepTimer(activity as Context)
-            playerState.sleepTimerRunning = false
         }
         // CASE: the selected station is not playing (another station might be playing)
         else {
@@ -744,11 +740,6 @@ class PlayerFragment : Fragment(),
             super.onPlayerError(error)
             layout.togglePlayButton(false)
             layout.showBufferingIndicator(false)
-
-            // disable sleeptimer on error
-            togglePeriodicSleepTimerUpdateRequest()
-            layout.updateSleepTimer(activity as Context)
-            playerState.sleepTimerRunning = false
             // TODO: display Toast error message
         }
     }
