@@ -91,12 +91,14 @@
     <string name="toastalert_failed_picking_media">Bildauswahl fehlgeschlagen.</string>
     <!-- Toasts -->
     <string name="toastmessage_backed_up">wurde erfolgreich gesichert.</string>
+    <string name="toastmessage_connection_failed">Die Verbindung konnte nicht aufgebaut oder wiederhergestellt werden.</string>
     <string name="toastmessage_copied_to_clipboard">In die Zwischenablage kopiert</string>
     <string name="toastmessage_error_download_error">Fehler beim Herunterladen</string>
     <string name="toastmessage_error_restart_playback_failed">Die Wiedergabe konnte nicht gestartet oder neu gestartet werden</string>
     <string name="toastmessage_install_file_helper">Bitte installiere einen Dateimanager</string>
     <string name="toastmessage_preview_playback_failed">Die Vorschauwiedergabe ist nicht möglich.</string>
     <string name="toastmessage_preview_playback_started">Die Vorschauwiedergabe wurde gestartet.</string>
+    <string name="toastmessage_reconnect">Es wird versucht, die Verbindung wiederherzustellen.</string>
     <string name="toastmessage_restored">Stationen wurden erfolgreich wiederhergestellt.</string>
     <string name="toastmessage_save_m3u">Radiosender als M3U gespeichert…</string>
     <string name="toastmessage_save_pls">Radiosender als PLS gespeichert…</string>

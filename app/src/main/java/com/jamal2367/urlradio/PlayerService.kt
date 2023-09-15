@@ -22,6 +22,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
+import android.widget.Toast
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.media.MediaBrowserServiceCompat.BrowserRoot.EXTRA_RECENT
 import androidx.media3.common.*
@@ -545,7 +546,7 @@ class PlayerService : MediaLibraryService() {
                     }
                     // buffering - data needs to be loaded
                     Player.STATE_BUFFERING -> {
-                        // todo
+                        Toast.makeText(applicationContext, R.string.toastmessage_reconnect, Toast.LENGTH_LONG).show()
                     }
                     // player finished playing all media
                     Player.STATE_ENDED -> {

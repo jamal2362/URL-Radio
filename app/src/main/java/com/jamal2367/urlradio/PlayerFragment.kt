@@ -35,7 +35,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
-import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.media3.common.MediaItem
@@ -722,9 +721,6 @@ class PlayerFragment : Fragment(),
                 // playback is active
                 layout.showPlayer(activity as Context)
                 layout.showBufferingIndicator(buffering = false)
-            } else {
-                // playback is not active
-                playerState.sleepTimerRunning = true
             }
         }
 
@@ -740,7 +736,7 @@ class PlayerFragment : Fragment(),
             super.onPlayerError(error)
             layout.togglePlayButton(false)
             layout.showBufferingIndicator(false)
-            // TODO: display Toast error message
+            Toast.makeText(activity, R.string.toastmessage_connection_failed, Toast.LENGTH_LONG).show()
         }
     }
 
