@@ -17,20 +17,18 @@ package com.jamal2367.urlradio.search
 import android.content.Context
 import android.webkit.URLUtil
 import android.widget.Toast
-import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
 import com.jamal2367.urlradio.core.Station
-import com.jamal2367.urlradio.helpers.NetworkHelper
+import com.jamal2367.urlradio.helpers.CollectionHelper
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.net.URL
 import java.util.GregorianCalendar
-import java.util.Locale
 
 
 data class IcecastMetadata(
@@ -58,158 +56,48 @@ class DirectInputCheck(private var directInputCheckListener: DirectInputCheckLis
         if (URLUtil.isValidUrl(query)) {
             val stationList: MutableList<Station> = mutableListOf()
             CoroutineScope(IO).launch {
-                val contentType: String = NetworkHelper.detectContentType(query).type.lowercase(Locale.getDefault())
-                // CASE: M3U playlist detected
-                if (Keys.MIME_TYPES_M3U.contains(contentType)) {
-                    val lines: List<String> = downloadPlaylist(query)
-                    stationList.addAll(readM3uPlaylistContent(lines))
-                }
-                // CASE: PLS playlist detected
-                else if (Keys.MIME_TYPES_PLS.contains(contentType)) {
-                    val lines: List<String> = downloadPlaylist(query)
-                    stationList.addAll(readPlsPlaylistContent(lines))
-                }
-                // CASE: stream address detected
-                else if (Keys.MIME_TYPES_MPEG.contains(contentType) or
-                    Keys.MIME_TYPES_OGG.contains(contentType) or
-                    Keys.MIME_TYPES_AAC.contains(contentType) or
-                    Keys.MIME_TYPES_HLS.contains(contentType)) {
-                    // process Icecast stream and extract metadata
-                    processIcecastStream(query, stationList)
-                }
-                // CASE: invalid address
-                else {
-                    withContext(Main) {
+                stationList.addAll(CollectionHelper.createStationsFromUrl(query, lastCheckedAddress))
+                lastCheckedAddress = query
+                withContext(Main) {
+                    if (stationList.isNotEmpty()) {
+                        // hand over station is to listener
+                        directInputCheckListener.onDirectInputCheck(stationList)
+                    } else {
+                        // invalid address
                         Toast.makeText(context, R.string.toastmessage_station_not_valid, Toast.LENGTH_LONG).show()
                     }
                 }
-                // hand over station is to listener
-                if (stationList.isNotEmpty()) {
-                    withContext(Main) {
-                        directInputCheckListener.onDirectInputCheck(stationList)
-                    }
-                }
             }
         }
     }
 
 
-    /* Download playlist - up to 100 lines, with max. 200 characters */
-    private fun downloadPlaylist(playlistUrlString: String): List<String> {
-        val lines = mutableListOf<String>()
-        val connection = URL(playlistUrlString).openConnection()
-        val reader = connection.getInputStream().bufferedReader()
-        reader.useLines { sequence ->
-            sequence.take(100).forEach { line ->
-                val trimmedLine = line.take(2000)
-                lines.add(trimmedLine)
-            }
+    private suspend fun extractIcecastMetadata(streamUri: String): IcecastMetadata {
+        return withContext(IO) {
+            // make an HTTP request at the stream URL to get Icecast metadata.
+            val client = OkHttpClient()
+            val request = Request.Builder()
+                .url(streamUri)
+                .build()
+
+            val response = client.newCall(request).execute()
+            val icecastHeaders = response.headers
+
+            // analyze the Icecast metadata and extract information like title, description, bitrate, etc.
+            val title = icecastHeaders["icy-name"]
+
+            IcecastMetadata(title?.takeIf { it.isNotEmpty() } ?: streamUri)
         }
-        return lines
     }
 
 
-    /* Reads a m3u playlist and returns a list of stations */
-    private fun readM3uPlaylistContent(playlist: List<String>): List<Station> {
-        val stations: MutableList<Station> = mutableListOf()
-        var name = String()
-        var streamUri: String
-        var contentType: String
-
-        playlist.forEach { line ->
-            // get name of station
-            if (line.startsWith("#EXTINF:")) {
-                name = line.substringAfter(",").trim()
-            }
-            // get stream uri and check mime type
-            else if (line.isNotBlank() && !line.startsWith("#")) {
-                streamUri = line.trim()
-                // use the stream address as the name if no name is specified
-                if (name.isEmpty()) {
-                    name = streamUri
-                }
-                contentType = NetworkHelper.detectContentType(streamUri).type.lowercase(Locale.getDefault())
-                // store station in list if mime type is supported
-                if (contentType != Keys.MIME_TYPE_UNSUPPORTED) {
-                    val station = Station(name = name, streamUris = mutableListOf(streamUri), streamContent = contentType, modificationDate = GregorianCalendar.getInstance().time)
-                    stations.add(station)
-                }
-                // reset name for the next station - useful if playlist does not provide name(s)
-                name = String()
-            }
+    private suspend fun updateStationWithIcecastMetadata(station: Station, icecastMetadata: IcecastMetadata) {
+        withContext(Dispatchers.Default) {
+            station.name = icecastMetadata.title.toString()
         }
-        return stations
     }
 
-
-    /* Reads a pls playlist and returns a list of stations */
-    private fun readPlsPlaylistContent(playlist: List<String>): List<Station> {
-        val stations: MutableList<Station> = mutableListOf()
-        var name = String()
-        var streamUri: String
-        var contentType: String
-
-        playlist.forEachIndexed { index, line ->
-            // get stream uri and check mime type
-            if (line.startsWith("File")) {
-                streamUri = line.substringAfter("=").trim()
-                contentType = NetworkHelper.detectContentType(streamUri).type.lowercase(Locale.getDefault())
-                if (contentType != Keys.MIME_TYPE_UNSUPPORTED) {
-                    // look for the matching station name
-                    val number: String = line.substring(4 /* File */, line.indexOf("="))
-                    val lineBeforeIndex: Int = index - 1
-                    val lineAfterIndex: Int = index + 1
-                    // first: check the line before
-                    if (lineBeforeIndex >= 0) {
-                        val lineBefore: String = playlist[lineBeforeIndex]
-                        if (lineBefore.startsWith("Title$number")) {
-                            name = lineBefore.substringAfter("=").trim()
-                        }
-                    }
-                    // then: check the line after
-                    if (name.isEmpty() && lineAfterIndex < playlist.size) {
-                        val lineAfter: String = playlist[lineAfterIndex]
-                        if (lineAfter.startsWith("Title$number")) {
-                            name = lineAfter.substringAfter("=").trim()
-                        }
-                    }
-                    // fallback: use stream uri as name
-                    if (name.isEmpty()) {
-                        name = streamUri
-                    }
-                    // add station
-                    val station = Station(name = name, streamUris = mutableListOf(streamUri), streamContent = contentType, modificationDate = GregorianCalendar.getInstance().time)
-                    stations.add(station)
-                }
-            }
-        }
-        return stations
-    }
-
-
-    private fun extractIcecastMetadata(streamUri: String): IcecastMetadata {
-        // make an HTTP request at the stream URL to get Icecast metadata.
-        val client = OkHttpClient()
-        val request = Request.Builder()
-            .url(streamUri)
-            .build()
-
-        val response = client.newCall(request).execute()
-        val icecastHeaders = response.headers
-
-        // analyze the Icecast metadata and extract information like title, description, bitrate, etc.
-        val title = icecastHeaders["icy-name"]
-
-        return IcecastMetadata(title?.takeIf { it.isNotEmpty() } ?: streamUri)
-    }
-
-
-    private fun updateStationWithIcecastMetadata(station: Station, icecastMetadata: IcecastMetadata) {
-        station.name = icecastMetadata.title.toString()
-    }
-
-
-    private fun processIcecastStream(streamUri: String, stationList: MutableList<Station>) {
+    suspend fun processIcecastStream(streamUri: String, stationList: MutableList<Station>) {
         val icecastMetadata = extractIcecastMetadata(streamUri)
         val station = Station(name = icecastMetadata.title.toString(), streamUris = mutableListOf(streamUri), modificationDate = GregorianCalendar.getInstance().time)
         updateStationWithIcecastMetadata(station, icecastMetadata)

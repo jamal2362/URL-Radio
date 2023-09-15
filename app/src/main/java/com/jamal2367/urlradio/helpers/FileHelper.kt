@@ -223,7 +223,7 @@ object FileHelper {
     fun readCollection(context: Context): Collection {
         Log.v(TAG, "Reading collection - Thread: ${Thread.currentThread().name}")
         // get JSON from text file
-        val json: String = readTextFile(context)
+        val json: String = readTextFileFromFile(context)
         var collection = Collection()
         if (json.isNotBlank()) {
             // convert JSON and return as collection
@@ -416,7 +416,7 @@ object FileHelper {
 
 
     /* Reads InputStream from file uri and returns it as String */
-    private fun readTextFile(context: Context): String {
+    private fun readTextFileFromFile(context: Context): String {
         // todo read https://commonsware.com/blog/2016/03/15/how-consume-content-uri.html
         // https://developer.android.com/training/secure-file-sharing/retrieve-info
 
@@ -425,7 +425,7 @@ object FileHelper {
         if (!file.exists() || !file.canRead()) {
             return String()
         }
-        // readSuspended until last line reached
+        // read until last line reached
         val stream: InputStream = file.inputStream()
         val reader = BufferedReader(InputStreamReader(stream))
         val builder: StringBuilder = StringBuilder()
@@ -435,6 +435,29 @@ object FileHelper {
         }
         stream.close()
         return builder.toString()
+    }
+
+
+    /* Reads InputStream from content uri and returns it as List of String */
+    fun readTextFileFromContentUri(context: Context, contentUri: Uri): List<String> {
+        val lines: MutableList<String> = mutableListOf()
+        try {
+            // open input stream from content URI
+            val inputStream: InputStream? = context.contentResolver.openInputStream(contentUri)
+            if (inputStream != null) {
+                val reader: InputStreamReader = inputStream.reader()
+                var index = 0
+                reader.forEachLine {
+                    index += 1
+                    if (index < 256)
+                        lines.add(it)
+                }
+                inputStream.close()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return lines
     }
 
 

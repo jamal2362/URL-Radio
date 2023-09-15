@@ -30,6 +30,7 @@ import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
 import com.jamal2367.urlradio.core.Collection
 import com.jamal2367.urlradio.core.Station
+import com.jamal2367.urlradio.search.DirectInputCheck
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import java.io.File
@@ -424,6 +425,135 @@ object CollectionHelper {
         }
         // return modification date
         return date
+    }
+
+
+    /* Creates station from playlist URLs and stream address URLs */
+    suspend fun createStationsFromUrl(query: String, lastCheckedAddress: String = String()): List<Station> {
+        val stationList: MutableList<Station> = mutableListOf()
+        val contentType: String = NetworkHelper.detectContentType(query).type.lowercase(Locale.getDefault())
+        val directInputCheck: DirectInputCheck? = null
+
+        // CASE: M3U playlist detected
+        if (Keys.MIME_TYPES_M3U.contains(contentType)) {
+            val lines: List<String> = NetworkHelper.downloadPlaylist(query)
+            stationList.addAll(readM3uPlaylistContent(lines))
+        }
+        // CASE: PLS playlist detected
+        else if (Keys.MIME_TYPES_PLS.contains(contentType)) {
+            val lines: List<String> = NetworkHelper.downloadPlaylist(query)
+            stationList.addAll(readPlsPlaylistContent(lines))
+        }
+        // CASE: stream address detected
+        else if (Keys.MIME_TYPES_MPEG.contains(contentType) or
+            Keys.MIME_TYPES_OGG.contains(contentType) or
+            Keys.MIME_TYPES_AAC.contains(contentType) or
+            Keys.MIME_TYPES_HLS.contains(contentType)) {
+            // process Icecast stream and extract metadata
+            directInputCheck?.processIcecastStream(query, stationList)
+            // create station and add to collection
+            val station = Station(name = query, streamUris = mutableListOf(query), streamContent = contentType, modificationDate = GregorianCalendar.getInstance().time)
+            if (lastCheckedAddress != query) {
+                stationList.add(station)
+            }
+        }
+        return stationList
+    }
+
+
+    /* Creates station from URI pointing to a local file */
+    fun createStationListFromContentUri(context: Context, contentUri: Uri): List<Station> {
+        val stationList: MutableList<Station> = mutableListOf()
+        val fileType: String = FileHelper.getContentType(context, contentUri)
+        // CASE: M3U playlist detected
+        if (Keys.MIME_TYPES_M3U.contains(fileType)) {
+            val playlist = FileHelper.readTextFileFromContentUri(context, contentUri)
+            stationList.addAll(readM3uPlaylistContent(playlist))
+        }
+        // CASE: PLS playlist detected
+        else if (Keys.MIME_TYPES_PLS.contains(fileType)) {
+            val playlist = FileHelper.readTextFileFromContentUri(context, contentUri)
+            stationList.addAll(readPlsPlaylistContent(playlist))
+        }
+        return stationList
+    }
+
+
+    /* Reads a m3u playlist and returns a list of stations */
+    private fun readM3uPlaylistContent(playlist: List<String>): List<Station> {
+        val stations: MutableList<Station> = mutableListOf()
+        var name = String()
+        var streamUri: String
+        var contentType: String
+
+        playlist.forEach { line ->
+            // get name of station
+            if (line.startsWith("#EXTINF:")) {
+                name = line.substringAfter(",").trim()
+            }
+            // get stream uri and check mime type
+            else if (line.isNotBlank() && !line.startsWith("#")) {
+                streamUri = line.trim()
+                // use the stream address as the name if no name is specified
+                if (name.isEmpty()) {
+                    name = streamUri
+                }
+                contentType = NetworkHelper.detectContentType(streamUri).type.lowercase(Locale.getDefault())
+                // store station in list if mime type is supported
+                if (contentType != Keys.MIME_TYPE_UNSUPPORTED) {
+                    val station = Station(name = name, streamUris = mutableListOf(streamUri), streamContent = contentType, modificationDate = GregorianCalendar.getInstance().time)
+                    stations.add(station)
+                }
+                // reset name for the next station - useful if playlist does not provide name(s)
+                name = String()
+            }
+        }
+        return stations
+    }
+
+
+    /* Reads a pls playlist and returns a list of stations */
+    private fun readPlsPlaylistContent(playlist: List<String>): List<Station> {
+        val stations: MutableList<Station> = mutableListOf()
+        var name = String()
+        var streamUri: String
+        var contentType: String
+
+        playlist.forEachIndexed { index, line ->
+            // get stream uri and check mime type
+            if (line.startsWith("File")) {
+                streamUri = line.substringAfter("=").trim()
+                contentType = NetworkHelper.detectContentType(streamUri).type.lowercase(Locale.getDefault())
+                if (contentType != Keys.MIME_TYPE_UNSUPPORTED) {
+                    // look for the matching station name
+                    val number: String = line.substring(4 /* File */, line.indexOf("="))
+                    val lineBeforeIndex: Int = index - 1
+                    val lineAfterIndex: Int = index + 1
+                    // first: check the line before
+                    if (lineBeforeIndex >= 0) {
+                        val lineBefore: String = playlist[lineBeforeIndex]
+                        if (lineBefore.startsWith("Title$number")) {
+                            name = lineBefore.substringAfter("=").trim()
+                        }
+                    }
+                    // then: check the line after
+                    if (name.isEmpty() && lineAfterIndex < playlist.size) {
+                        val lineAfter: String = playlist[lineAfterIndex]
+                        if (lineAfter.startsWith("Title$number")) {
+                            name = lineAfter.substringAfter("=").trim()
+                        }
+                    }
+                    // fallback: use stream uri as name
+                    if (name.isEmpty()) {
+                        name = streamUri
+                    }
+                    // add station
+                    val station = Station(name = name, streamUris = mutableListOf(streamUri), streamContent = contentType, modificationDate = GregorianCalendar.getInstance().time)
+                    stations.add(station)
+                }
+            }
+        }
+        return stations
     }
 
 

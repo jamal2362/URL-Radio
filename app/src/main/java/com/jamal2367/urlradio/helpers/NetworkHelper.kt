@@ -88,6 +88,21 @@ object NetworkHelper {
     }
 
 
+    /* Download playlist - up to 100 lines, with max. 200 characters */
+    fun downloadPlaylist(playlistUrlString: String): List<String> {
+        val lines = mutableListOf<String>()
+        val connection = URL(playlistUrlString).openConnection()
+        val reader = connection.getInputStream().bufferedReader()
+        reader.useLines { sequence ->
+            sequence.take(100).forEach { line ->
+                val trimmedLine = line.take(2000)
+                lines.add(trimmedLine)
+            }
+        }
+        return lines
+    }
+
+
     /* Suspend function: Detects content type (mime type) from given URL string - async using coroutine */
     suspend fun detectContentTypeSuspended(urlString: String): ContentType {
         return suspendCoroutine { cont ->
