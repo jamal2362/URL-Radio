@@ -19,7 +19,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
-import android.graphics.drawable.ColorDrawable
+import android.graphics.RectF
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
@@ -73,7 +73,6 @@ object UiHelper {
         private val deleteIcon = ContextCompat.getDrawable(context, R.drawable.ic_remove_circle_24dp)
         private val intrinsicWidth: Int = deleteIcon?.intrinsicWidth ?: 0
         private val intrinsicHeight: Int = deleteIcon?.intrinsicHeight ?: 0
-        private val background: ColorDrawable = ColorDrawable()
         private val backgroundColor = ContextCompat.getColor(context, R.color.list_card_delete_background)
         private val clearPaint: Paint = Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR) }
 
@@ -130,15 +129,18 @@ object UiHelper {
                 return
             }
 
-            // draw red delete background
-            background.color = backgroundColor
-            background.setBounds(
-                itemView.left + 75,
-                itemView.top,
-                itemView.right,
-                itemView.bottom
-            ) // left - top - right - bottom
-            background.draw(c)
+            // draw delete and rounded background
+            val roundedBackground = RectF(
+                itemView.left.toFloat(),
+                itemView.top.toFloat(),
+                itemView.right.toFloat(),
+                itemView.bottom.toFloat()
+            )
+            val cornerRadius = 84f
+
+            val paint = Paint()
+            paint.color = backgroundColor
+            c.drawRoundRect(roundedBackground, cornerRadius, cornerRadius, paint)
 
             // calculate position of delete icon
             val deleteIconTop = itemView.top + (itemHeight - intrinsicHeight) / 2
@@ -173,7 +175,6 @@ object UiHelper {
         private val starIcon = ContextCompat.getDrawable(context, R.drawable.ic_favorite_24dp)
         private val intrinsicWidth: Int = starIcon?.intrinsicWidth ?: 0
         private val intrinsicHeight: Int = starIcon?.intrinsicHeight ?: 0
-        private val background: ColorDrawable = ColorDrawable()
         private val backgroundColor = ContextCompat.getColor(context, R.color.list_card_mark_starred_background)
         private val clearPaint: Paint = Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR) }
 
@@ -230,15 +231,18 @@ object UiHelper {
                 return
             }
 
-            // draw red background
-            background.color = backgroundColor
-            background.setBounds(
-                itemView.left,
-                itemView.top,
-                itemView.right + -75,
-                itemView.bottom
-            ) // left - top - right - bottom
-            background.draw(c)
+            // draw favorite color and rounded background
+            val roundedBackground = RectF(
+                itemView.left.toFloat(),
+                itemView.top.toFloat(),
+                itemView.right.toFloat(),
+                itemView.bottom.toFloat()
+            )
+            val cornerRadius = 84f
+
+            val paint = Paint()
+            paint.color = backgroundColor
+            c.drawRoundRect(roundedBackground, cornerRadius, cornerRadius, paint)
 
             // calculate position of delete icon
             val deleteIconTop = itemView.top + (itemHeight - intrinsicHeight) / 2
