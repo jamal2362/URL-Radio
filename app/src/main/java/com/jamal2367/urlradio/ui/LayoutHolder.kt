@@ -56,7 +56,7 @@ data class LayoutHolder(var rootView: View) {
     private var bottomSheet: ConstraintLayout = rootView.findViewById(R.id.bottom_sheet)
 
     //private var sheetMetadataViews: Group
-    var sleepTimerRunningViews: Group = rootView.findViewById(R.id.sleep_timer_running_views)
+    private var sleepTimerRunningViews: Group = rootView.findViewById(R.id.sleep_timer_running_views)
     private var downloadProgressIndicator: ProgressBar = rootView.findViewById(R.id.download_progress_indicator)
     private var stationImageView: ImageView = rootView.findViewById(R.id.station_icon)
     private var stationNameView: TextView = rootView.findViewById(R.id.player_station_name)
