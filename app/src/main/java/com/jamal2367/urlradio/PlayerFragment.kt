@@ -50,6 +50,9 @@ import com.android.volley.RequestQueue
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.timepicker.MaterialTimePicker
+import com.google.android.material.timepicker.MaterialTimePicker.INPUT_MODE_KEYBOARD
+import com.google.android.material.timepicker.TimeFormat
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.gson.Gson
@@ -452,14 +455,28 @@ class PlayerFragment : Fragment(),
         layout.sheetSleepTimerStartButtonView.setOnClickListener {
             when (controller?.isPlaying) {
                 true -> {
-                    playerState.sleepTimerRunning = true
-                    controller?.startSleepTimer()
-                    togglePeriodicSleepTimerUpdateRequest()
+                    val timePicker = MaterialTimePicker.Builder()
+                        .setTimeFormat(TimeFormat.CLOCK_24H)
+                        .setHour(0)
+                        .setMinute(1)
+                        .setInputMode(INPUT_MODE_KEYBOARD)
+                        .build()
+
+                    timePicker.addOnPositiveButtonClickListener {
+                        val selectedTimeMillis = (timePicker.hour * 60 * 60 * 1000L) + (timePicker.minute * 60 * 1000L)
+                        // start the sleep timer with the selected time
+                        playerState.sleepTimerRunning = true
+                        controller?.startSleepTimer(selectedTimeMillis)
+                        togglePeriodicSleepTimerUpdateRequest()
+                    }
+
+                    // display the TimePicker dialog
+                    timePicker.show(requireActivity().supportFragmentManager, "tag")
                 }
                 else -> Snackbar.make(
                     requireView(),
                     R.string.toastmessage_sleep_timer_unable_to_start,
-                    Snackbar.LENGTH_LONG
+                    Snackbar.LENGTH_SHORT
                 ).show()
             }
         }

@@ -18,6 +18,9 @@
         <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog</item>
         <item name="alertDialogTheme">@style/ThemeOverlay.App.AlertDialogTheme</item>
 
+        <!-- Material Time Picker Theming -->
+        <item name="materialTimePickerTheme">@style/ThemeOverlay.App.TimePicker</item>
+
         <!-- Don't show light status bar -->
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>

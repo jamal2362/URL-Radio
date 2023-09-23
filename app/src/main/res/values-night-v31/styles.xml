@@ -22,6 +22,9 @@
         <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog</item>
         <item name="alertDialogTheme">@style/ThemeOverlay.App.AlertDialogTheme</item>
 
+        <!-- Material Time Picker Theming -->
+        <item name="materialTimePickerTheme">@style/ThemeOverlay.App.TimePicker</item>
+
         <!-- Don't show light status bar -->
         <item name="android:statusBarColor">@android:color/transparent</item>
 
@@ -36,6 +39,10 @@
         <item name="colorSurface">@color/player_sheet_background</item>
         <item name="materialAlertDialogBodyTextStyle">@style/TextAppearance.MaterialComponents.Body1</item>
         <item name="android:backgroundDimAmount">0.64</item>
+    </style>
+
+    <style name="ThemeOverlay.App.TimePicker" parent="ThemeOverlay.MaterialComponents.TimePicker">
+        <item name="colorSurface">@color/player_sheet_background</item>
     </style>
 
     <style name="ThemeOverlay.App.AlertDialogTheme" parent="@style/ThemeOverlay.Material3.MaterialAlertDialog">

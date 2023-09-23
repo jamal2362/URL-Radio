@@ -225,18 +225,26 @@
         app:layout_constraintTop_toBottomOf="@+id/sheet_previous_metadata_button"
         tools:text="@string/sample_text_steam_bitrate" />
 
+    <Space
+        android:id="@+id/space_placeholder"
+        android:layout_width="8dp"
+        android:layout_height="40dp"
+        app:layout_constraintBottom_toBottomOf="@+id/sleep_timer_start_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/sleep_timer_start_button" />
+
     <ImageButton
         android:id="@+id/sleep_timer_start_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginBottom="16dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/descr_expanded_player_sleep_timer_start_button"
         android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/space_placeholder"
         app:layout_constraintTop_toBottomOf="@+id/sheet_previous_metadata_button"
         app:srcCompat="@drawable/ic_sleep_timer_24dp" />
 
@@ -244,6 +252,7 @@
         android:id="@+id/sleep_timer_remaining_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="2dp"
         android:contentDescription="@string/descr_expanded_player_sleep_timer_remaining_time"
         android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
         android:textColor="@color/player_sheet_text_main"

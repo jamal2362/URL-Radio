@@ -26,8 +26,7 @@ object Keys {
     const val CURRENT_COLLECTION_CLASS_VERSION_NUMBER: Int = 0
 
     // time values
-    const val SLEEP_TIMER_DURATION: Long = 300000L          // 5 minutes in  milliseconds
-    const val SLEEP_TIMER_INTERVAL: Long = 1000L            // 1 second in milliseconds
+    const val SLEEP_TIMER_DURATION = "SLEEP_TIMER_DURATION"
     const val RECONNECTION_WAIT_INTERVAL: Long = 500L       // 5 seconds in milliseconds
 
     // intent actions
@@ -49,7 +48,6 @@ object Keys {
     const val ARG_RESTORE_COLLECTION: String = "ArgRestoreCollection"
 
     // keys
-    const val KEY_DOWNLOAD_WORK_REQUEST: String = "DOWNLOAD_WORK_REQUEST"
     const val KEY_SAVE_INSTANCE_STATE_STATION_LIST: String = "SAVE_INSTANCE_STATE_STATION_LIST"
     const val KEY_STREAM_URI: String = "STREAM_URI"
 
@@ -164,9 +162,6 @@ object Keys {
     // default values
     val DEFAULT_DATE: Date = Date(0L)
     const val EMPTY_STRING_RESOURCE: Int = 0
-
-    // requests
-    const val REQUEST_UPDATE_COLLECTION: Int = 2
 
     // theme states
     const val STATE_THEME_FOLLOW_SYSTEM: String = "stateFollowSystem"

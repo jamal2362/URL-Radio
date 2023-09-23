@@ -39,10 +39,13 @@ import com.google.android.material.snackbar.Snackbar
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
 import com.jamal2367.urlradio.core.Station
-import com.jamal2367.urlradio.helpers.DateTimeHelper
 import com.jamal2367.urlradio.helpers.ImageHelper
 import com.jamal2367.urlradio.helpers.PreferencesHelper
 import com.jamal2367.urlradio.helpers.UiHelper
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 
 /*
@@ -272,12 +275,23 @@ data class LayoutHolder(var rootView: View) {
             }
             else -> {
                 sleepTimerRunningViews.isVisible = true
-                val sleepTimerTimeRemaining = DateTimeHelper.convertToMinutesAndSeconds(timeRemaining)
+                val sleepTimerTimeRemaining = convertToHHmmss(timeRemaining)
                 sheetSleepTimerRemainingTimeView.text = sleepTimerTimeRemaining
                 sheetSleepTimerRemainingTimeView.contentDescription = "${context.getString(R.string.descr_expanded_player_sleep_timer_remaining_time)}: $sleepTimerTimeRemaining"
                 stationNameView.isSelected = false
             }
         }
+    }
+
+
+    private fun convertToHHmmss(milliseconds: Long): String {
+        val hours = TimeUnit.MILLISECONDS.toHours(milliseconds)
+        val minutes = TimeUnit.MILLISECONDS.toMinutes(milliseconds) % 60
+        val seconds = TimeUnit.MILLISECONDS.toSeconds(milliseconds) % 60
+
+        val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.US)
+        val date = Date(hours * 60 * 60 * 1000 + minutes * 60 * 1000 + seconds * 1000)
+        return dateFormat.format(date)
     }
 
 
@@ -287,9 +301,11 @@ data class LayoutHolder(var rootView: View) {
             playButtonView.setImageResource(R.drawable.ic_audio_waves_animated)
             val animatedVectorDrawable = playButtonView.drawable as? AnimatedVectorDrawable
             animatedVectorDrawable?.start()
+            sheetSleepTimerStartButtonView.isVisible = true
             // bufferingIndicator.isVisible = false
         } else {
             playButtonView.setImageResource(R.drawable.ic_player_play_symbol_42dp)
+            sheetSleepTimerStartButtonView.isVisible = false
             // bufferingIndicator.isVisible = isBuffering
         }
     }

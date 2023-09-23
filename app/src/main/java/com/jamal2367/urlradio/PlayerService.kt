@@ -63,6 +63,7 @@ class PlayerService : MediaLibraryService() {
     private lateinit var mediaLibrarySession: MediaLibrarySession
     private lateinit var sleepTimer: CountDownTimer
     var sleepTimerTimeRemaining: Long = 0L
+    private var sleepTimerEndTime: Long = 0L
     private val librarySessionCallback = CustomMediaLibrarySessionCallback()
     private var collection: Collection = Collection()
     private lateinit var metadataHistory: MutableList<String>
@@ -179,16 +180,17 @@ class PlayerService : MediaLibraryService() {
 
 
     /* Starts sleep timer / adds default duration to running sleeptimer */
-    private fun startSleepTimer() {
+    private fun startSleepTimer(selectedTimeMillis: Long) {
         // stop running timer
         if (sleepTimerTimeRemaining > 0L && this::sleepTimer.isInitialized) {
             sleepTimer.cancel()
         }
+
+        // set the end time of the sleep timer
+        sleepTimerEndTime = System.currentTimeMillis() + selectedTimeMillis
+
         // initialize timer
-        sleepTimer = object : CountDownTimer(
-            Keys.SLEEP_TIMER_DURATION + sleepTimerTimeRemaining,
-            Keys.SLEEP_TIMER_INTERVAL
-        ) {
+        sleepTimer = object : CountDownTimer(selectedTimeMillis, 1000) {
             override fun onFinish() {
                 Log.v(TAG, "Sleep timer finished. Sweet dreams.")
                 sleepTimerTimeRemaining = 0L
@@ -363,7 +365,8 @@ class PlayerService : MediaLibraryService() {
         ): ListenableFuture<SessionResult> {
             when (customCommand.customAction) {
                 Keys.CMD_START_SLEEP_TIMER -> {
-                    startSleepTimer()
+                    val selectedTimeMillis = args.getLong(Keys.SLEEP_TIMER_DURATION)
+                    startSleepTimer(selectedTimeMillis)
                 }
                 Keys.CMD_CANCEL_SLEEP_TIMER -> {
                     manuallyCancelSleepTimer()

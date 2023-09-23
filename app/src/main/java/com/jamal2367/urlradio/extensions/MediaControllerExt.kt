@@ -27,8 +27,11 @@ import com.jamal2367.urlradio.helpers.CollectionHelper
 
 
 /* Starts the sleep timer */
-fun MediaController.startSleepTimer() {
-    sendCustomCommand(SessionCommand(Keys.CMD_START_SLEEP_TIMER, Bundle.EMPTY), Bundle.EMPTY)
+fun MediaController.startSleepTimer(timerDurationMillis: Long) {
+    val bundle = Bundle().apply {
+        putLong(Keys.SLEEP_TIMER_DURATION, timerDurationMillis)
+    }
+    sendCustomCommand(SessionCommand(Keys.CMD_START_SLEEP_TIMER, bundle), bundle)
 }
 
 
