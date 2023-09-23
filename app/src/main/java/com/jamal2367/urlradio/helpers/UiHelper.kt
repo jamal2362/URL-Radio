@@ -75,6 +75,7 @@ object UiHelper {
         private val intrinsicHeight: Int = deleteIcon?.intrinsicHeight ?: 0
         private val backgroundColor = ContextCompat.getColor(context, R.color.list_card_delete_background)
         private val clearPaint: Paint = Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR) }
+        private val cornerRadius: Float = dpToPx(context)
 
         override fun getMovementFlags(
             recyclerView: RecyclerView,
@@ -136,7 +137,6 @@ object UiHelper {
                 itemView.right.toFloat(),
                 itemView.bottom.toFloat()
             )
-            val cornerRadius = 84f
 
             val paint = Paint()
             paint.color = backgroundColor
@@ -159,6 +159,12 @@ object UiHelper {
         private fun clearCanvas(c: Canvas?, left: Float, top: Float, right: Float, bottom: Float) {
             c?.drawRect(left, top, right, bottom, clearPaint)
         }
+
+        // conversion from dp to px
+        private fun dpToPx(context: Context): Float {
+            val density = context.resources.displayMetrics.density
+            return 24 * density
+        }
     }
     /*
      * End of inner class
@@ -177,6 +183,7 @@ object UiHelper {
         private val intrinsicHeight: Int = starIcon?.intrinsicHeight ?: 0
         private val backgroundColor = ContextCompat.getColor(context, R.color.list_card_mark_starred_background)
         private val clearPaint: Paint = Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR) }
+        private val cornerRadius: Float = dpToPx(context)
 
         override fun getMovementFlags(
             recyclerView: RecyclerView,
@@ -238,7 +245,6 @@ object UiHelper {
                 itemView.right.toFloat(),
                 itemView.bottom.toFloat()
             )
-            val cornerRadius = 84f
 
             val paint = Paint()
             paint.color = backgroundColor
@@ -260,6 +266,12 @@ object UiHelper {
 
         private fun clearCanvas(c: Canvas?, left: Float, top: Float, right: Float, bottom: Float) {
             c?.drawRect(left, top, right, bottom, clearPaint)
+        }
+
+        // conversion from dp to px
+        private fun dpToPx(context: Context): Float {
+            val density = context.resources.displayMetrics.density
+            return 24 * density
         }
     }
     /*
