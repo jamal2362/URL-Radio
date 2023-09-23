@@ -39,6 +39,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
 import com.jamal2367.urlradio.core.Station
+import com.jamal2367.urlradio.helpers.DateTimeHelper
 import com.jamal2367.urlradio.helpers.ImageHelper
 import com.jamal2367.urlradio.helpers.PreferencesHelper
 import com.jamal2367.urlradio.helpers.UiHelper
@@ -275,23 +276,12 @@ data class LayoutHolder(var rootView: View) {
             }
             else -> {
                 sleepTimerRunningViews.isVisible = true
-                val sleepTimerTimeRemaining = convertToHHmmss(timeRemaining)
+                val sleepTimerTimeRemaining = DateTimeHelper.convertToMinutesAndSeconds(timeRemaining)
                 sheetSleepTimerRemainingTimeView.text = sleepTimerTimeRemaining
                 sheetSleepTimerRemainingTimeView.contentDescription = "${context.getString(R.string.descr_expanded_player_sleep_timer_remaining_time)}: $sleepTimerTimeRemaining"
                 stationNameView.isSelected = false
             }
         }
-    }
-
-
-    private fun convertToHHmmss(milliseconds: Long): String {
-        val hours = TimeUnit.MILLISECONDS.toHours(milliseconds)
-        val minutes = TimeUnit.MILLISECONDS.toMinutes(milliseconds) % 60
-        val seconds = TimeUnit.MILLISECONDS.toSeconds(milliseconds) % 60
-
-        val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.US)
-        val date = Date(hours * 60 * 60 * 1000 + minutes * 60 * 1000 + seconds * 1000)
-        return dateFormat.format(date)
     }
 
 
