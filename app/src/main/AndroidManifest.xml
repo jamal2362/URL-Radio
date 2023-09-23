@@ -36,6 +36,7 @@
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize"
+            android:windowSoftInputMode="adjustPan"
             android:exported="true">
 
             <!-- react to main intents -->
