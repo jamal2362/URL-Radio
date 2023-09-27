@@ -752,6 +752,16 @@ class PlayerFragment : Fragment(),
                 // playback is active
                 layout.showPlayer(activity as Context)
                 layout.showBufferingIndicator(buffering = false)
+            } else {
+                // playback is paused or stopped
+                // check if buffering (playback is not active but playWhenReady is true)
+                if (controller?.playWhenReady == true) {
+                    // playback is buffering, show the buffering indicator
+                    layout.showBufferingIndicator(buffering = true)
+                } else {
+                    // playback is not buffering, hide the buffering indicator
+                    layout.showBufferingIndicator(buffering = false)
+                }
             }
         }
 

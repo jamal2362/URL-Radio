@@ -98,7 +98,6 @@
     <string name="toastmessage_install_file_helper">Будь ласка, встановіть менеджер файлів.</string>
     <string name="toastmessage_preview_playback_failed">Попереднє відтворення неможливе.</string>
     <string name="toastmessage_preview_playback_started">Розпочалося попереднє відтворення.</string>
-    <string name="toastmessage_reconnect">Спроба відновлення з\'єднання.</string>
     <string name="toastmessage_restored">Станції були успішно відновлені.</string>
     <string name="toastmessage_save_m3u">Збереження радіостанцій як М3U…</string>
     <string name="toastmessage_save_pls">Збереження радіостанцій як PLS…</string>

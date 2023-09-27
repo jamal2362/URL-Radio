@@ -549,7 +549,7 @@ class PlayerService : MediaLibraryService() {
                     }
                     // buffering - data needs to be loaded
                     Player.STATE_BUFFERING -> {
-                        Toast.makeText(applicationContext, R.string.toastmessage_reconnect, Toast.LENGTH_LONG).show()
+                        // todo
                     }
                     // player finished playing all media
                     Player.STATE_ENDED -> {
