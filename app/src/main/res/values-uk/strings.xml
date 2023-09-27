@@ -63,7 +63,7 @@
     <string name="pref_edit_station_summary_enabled">Редагування інформації про станцію увімкнено. Використовуйте тривале натискання для переходу у режим редагування.</string>
     <string name="pref_edit_station_title">Редагувати станції</string>
     <string name="pref_general_title">Загальні</string>
-    <string name="pref_license_title">Цей додаток має відкритий початковий код</string>
+    <string name="pref_license_title">Цей застосунок має відкритий початковий код</string>
     <string name="pref_license_summary">На умовах ліцензії MIT</string>
     <string name="pref_links_title">Посилання</string>
     <string name="pref_m3u_export_summary">Збережіть свої радіостанції у файлі списку відтворення M3U, який можна імпортувати в інші програвачі.</string>
@@ -91,12 +91,14 @@
     <string name="toastalert_failed_picking_media">Не вдалося обрати зображення.</string>
     <!-- Toasts -->
     <string name="toastmessage_backed_up">було успішно зарезервовано.</string>
+    <string name="toastmessage_connection_failed">Неможливо встановити або відновити з\'єднання.</string>
     <string name="toastmessage_copied_to_clipboard">Скопійовано до буфера обміну.</string>
     <string name="toastmessage_error_download_error">Помилка завантаження</string>
     <string name="toastmessage_error_restart_playback_failed">Не вдалося почати або перезапустити відтворення.</string>
     <string name="toastmessage_install_file_helper">Будь ласка, встановіть менеджер файлів.</string>
     <string name="toastmessage_preview_playback_failed">Попереднє відтворення неможливе.</string>
     <string name="toastmessage_preview_playback_started">Розпочалося попереднє відтворення.</string>
+    <string name="toastmessage_reconnect">Спроба відновлення з\'єднання.</string>
     <string name="toastmessage_restored">Станції були успішно відновлені.</string>
     <string name="toastmessage_save_m3u">Збереження радіостанцій як М3U…</string>
     <string name="toastmessage_save_pls">Збереження радіостанцій як PLS…</string>
