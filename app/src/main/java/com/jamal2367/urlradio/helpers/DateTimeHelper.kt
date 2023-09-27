@@ -56,13 +56,14 @@ object DateTimeHelper {
     }
 
 
-    /* Converts a milliseconds in to a readable format */
-    fun convertToMinutesAndSeconds(milliseconds: Long, negativeValue: Boolean = false): String {
-        // convert milliseconds to minutes and seconds
-        val minutes: Long = milliseconds / 1000 / 60
+    /* Converts a milliseconds into a readable format (HH:mm:ss) */
+    fun convertToHoursMinutesSeconds(milliseconds: Long, negativeValue: Boolean = false): String {
+        // convert milliseconds to hours, minutes, and seconds
+        val hours: Long = milliseconds / 1000 / 3600
+        val minutes: Long = milliseconds / 1000 % 3600 / 60
         val seconds: Long = milliseconds / 1000 % 60
         var timeString =
-            "${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
+            "${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
         if (negativeValue) {
             // add a minus sign if a negative values was requested
             timeString = "-$timeString"

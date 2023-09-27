@@ -471,7 +471,7 @@ class PlayerFragment : Fragment(),
                         .build()
 
                     timePicker.addOnPositiveButtonClickListener {
-                        val selectedTimeMillis = (timePicker.hour * 60 * 60 * 1000L) + (timePicker.minute * 60 * 1000L)
+                        val selectedTimeMillis = (timePicker.hour * 60 * 60 * 1000L) + (timePicker.minute * 60 * 1000L) + 1000
                         // start the sleep timer with the selected time
                         playerState.sleepTimerRunning = true
                         controller?.startSleepTimer(selectedTimeMillis)

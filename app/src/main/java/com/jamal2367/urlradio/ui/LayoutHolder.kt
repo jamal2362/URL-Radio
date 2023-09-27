@@ -276,7 +276,7 @@ data class LayoutHolder(var rootView: View) {
             }
             else -> {
                 sleepTimerRunningViews.isVisible = true
-                val sleepTimerTimeRemaining = DateTimeHelper.convertToMinutesAndSeconds(timeRemaining)
+                val sleepTimerTimeRemaining = DateTimeHelper.convertToHoursMinutesSeconds(timeRemaining)
                 sheetSleepTimerRemainingTimeView.text = sleepTimerTimeRemaining
                 sheetSleepTimerRemainingTimeView.contentDescription = "${context.getString(R.string.descr_expanded_player_sleep_timer_remaining_time)}: $sleepTimerTimeRemaining"
                 stationNameView.isSelected = false
