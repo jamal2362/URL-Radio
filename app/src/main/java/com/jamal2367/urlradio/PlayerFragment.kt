@@ -61,6 +61,7 @@ import com.jamal2367.urlradio.collection.CollectionAdapter
 import com.jamal2367.urlradio.collection.CollectionViewModel
 import com.jamal2367.urlradio.core.Collection
 import com.jamal2367.urlradio.core.Station
+import com.jamal2367.urlradio.dialogs.AddStationDialog
 import com.jamal2367.urlradio.dialogs.FindStationDialog
 import com.jamal2367.urlradio.dialogs.YesNoDialog
 import com.jamal2367.urlradio.extensions.*
@@ -78,7 +79,8 @@ import java.util.*
  */
 class PlayerFragment : Fragment(),
     SharedPreferences.OnSharedPreferenceChangeListener,
-    FindStationDialog.FindFindStationDialogListener,
+    FindStationDialog.FindStationDialogListener,
+    AddStationDialog.AddStationDialogListener,
     CollectionAdapter.CollectionAdapterListener,
     YesNoDialog.YesNoDialogListener {
 
@@ -322,6 +324,15 @@ class PlayerFragment : Fragment(),
     }
 
 
+    /* Overrides onAddStationDialog from AddDialog */
+    override fun onAddStationDialog(station: Station) {
+        if (station.streamContent.isNotEmpty() && station.streamContent != Keys.MIME_TYPE_UNSUPPORTED) {
+            // add station and save collection
+            collection = CollectionHelper.addStation(activity as Context, collection, station)
+        }
+    }
+
+
     /* Overrides onPlayButtonTapped from CollectionAdapterListener */
     override fun onPlayButtonTapped(stationUuid: String) {
         // CASE: the selected station is playing
@@ -339,10 +350,7 @@ class PlayerFragment : Fragment(),
 
     /* Overrides onAddNewButtonTapped from CollectionAdapterListener */
     override fun onAddNewButtonTapped() {
-        FindStationDialog(
-            activity as Activity,
-            this as FindStationDialog.FindFindStationDialogListener
-        ).show()
+        FindStationDialog(activity as Activity, this as FindStationDialog.FindStationDialogListener).show()
     }
 
 
@@ -589,25 +597,31 @@ class PlayerFragment : Fragment(),
         val intentUri: Uri? = (activity as Activity).intent.data
         if (intentUri != null) {
             CoroutineScope(IO).launch {
+                // get station list from intent source
                 val stationList: MutableList<Station> = mutableListOf()
                 val scheme: String = intentUri.scheme ?: String()
+                // CASE: intent is a web link
                 if (scheme.startsWith("http")) {
-                    Log.i(TAG, "URL Radio was started to handle a web link.")
+                    Log.i(TAG, "Transistor was started to handle a web link.")
                     stationList.addAll(CollectionHelper.createStationsFromUrl(intentUri.toString()))
-                } else if (scheme.startsWith("content")) {
-                    Log.i(TAG, "URL Radio was started to handle a local audio playlist.")
+                }
+                // CASE: intent is a local file
+                else if (scheme.startsWith("content")) {
+                    Log.i(TAG, "Transistor was started to handle a local audio playlist.")
                     stationList.addAll(CollectionHelper.createStationListFromContentUri(activity as Context, intentUri))
                 }
-                if (stationList.isNotEmpty()) {
-                    // todo hand over station list to a new AddStationDialog
-                    Log.e(TAG, stationList.toString()) // todo remove
-                } else {
-                    // invalid address
-                    Toast.makeText(context, R.string.toastmessage_station_not_valid, Toast.LENGTH_LONG).show()
+                withContext(Main) {
+                    if (stationList.isNotEmpty()) {
+                        AddStationDialog(activity as Activity, stationList, this@PlayerFragment as AddStationDialog.AddStationDialogListener).show()
+                    } else {
+                        // invalid address
+                        Toast.makeText(context, R.string.toastmessage_station_not_valid, Toast.LENGTH_LONG).show()
+                    }
                 }
             }
         }
     }
+
 
     /* Handles START_PLAYER_SERVICE request from App Shortcut */
     private fun handleStartPlayer() {

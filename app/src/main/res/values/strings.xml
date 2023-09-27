@@ -20,6 +20,7 @@
     <string name="descr_player_station_image">Station image</string>
 
     <!-- Dialogs -->
+    <string name="dialog_add_station_title">Add Station</string>
     <string name="dialog_edit_station_name">Station name</string>
     <string name="dialog_edit_stream_uri">Stream address</string>
     <string name="dialog_error_message_default">An error occurred</string>

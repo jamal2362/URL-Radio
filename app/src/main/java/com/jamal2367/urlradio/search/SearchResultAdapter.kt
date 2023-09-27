@@ -156,18 +156,15 @@ class SearchResultAdapter(
     private fun performPrePlayback(context: Context, streamUri: String) {
         if (streamUri.contains(".m3u8")) {
             // release previous player if it exists
-            exoPlayer?.stop()
-            exoPlayer?.release()
-            exoPlayer = null
+            stopPrePlayback()
 
             // show toast when no playback is possible
             Toast.makeText(context, R.string.toastmessage_preview_playback_failed, Toast.LENGTH_SHORT).show()
         } else {
             stopRadioPlayback(context)
 
-            exoPlayer?.stop()
-            exoPlayer?.release()
-            exoPlayer = null
+            // release previous player if it exists
+            stopPrePlayback()
 
             // create a new instance of ExoPlayer
             exoPlayer = ExoPlayer.Builder(context).build()

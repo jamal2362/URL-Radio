@@ -44,14 +44,14 @@ import com.jamal2367.urlradio.search.SearchResultAdapter
  * FindStationDialog class
  */
 class FindStationDialog (
-    private var context: Context,
-    private var listener: FindFindStationDialogListener):
+    private val context: Context,
+    private val listener: FindStationDialogListener):
     SearchResultAdapter.SearchResultAdapterListener,
     RadioBrowserSearch.RadioBrowserSearchListener,
     DirectInputCheck.DirectInputCheckListener {
 
     /* Interface used to communicate back to activity */
-    interface FindFindStationDialogListener {
+    interface FindStationDialogListener {
         fun onFindStationDialog(station: Station) {
         }
     }
@@ -71,7 +71,7 @@ class FindStationDialog (
     private var station: Station = Station()
 
 
-    /* Overrides onSearchResultTapped from RadioBrowserResultAdapterListener */
+    /* Overrides onSearchResultTapped from SearchResultAdapterListener */
     override fun onSearchResultTapped(result: Station) {
         station = result
         // hide keyboard
