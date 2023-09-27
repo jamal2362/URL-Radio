@@ -62,8 +62,14 @@ object DateTimeHelper {
         val hours: Long = milliseconds / 1000 / 3600
         val minutes: Long = milliseconds / 1000 % 3600 / 60
         val seconds: Long = milliseconds / 1000 % 60
+        val hourPart = if (hours > 0) {
+            "${hours.toString().padStart(2, '0')}:"
+        } else {
+            ""
+        }
+
         var timeString =
-            "${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
+            "$hourPart${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
         if (negativeValue) {
             // add a minus sign if a negative values was requested
             timeString = "-$timeString"
