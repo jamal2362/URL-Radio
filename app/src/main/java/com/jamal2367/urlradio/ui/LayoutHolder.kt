@@ -43,10 +43,6 @@ import com.jamal2367.urlradio.helpers.DateTimeHelper
 import com.jamal2367.urlradio.helpers.ImageHelper
 import com.jamal2367.urlradio.helpers.PreferencesHelper
 import com.jamal2367.urlradio.helpers.UiHelper
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.concurrent.TimeUnit
 
 
 /*

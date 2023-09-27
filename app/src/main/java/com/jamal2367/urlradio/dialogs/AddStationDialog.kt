@@ -22,7 +22,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jamal2367.urlradio.R
-import com.jamal2367.urlradio.collection.CollectionAdapter
 import com.jamal2367.urlradio.core.Station
 import com.jamal2367.urlradio.search.SearchResultAdapter
 
