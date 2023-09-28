@@ -27,7 +27,7 @@ object Keys {
 
     // time values
     const val SLEEP_TIMER_DURATION = "SLEEP_TIMER_DURATION"
-    const val RECONNECTION_WAIT_INTERVAL: Long = 500L       // 5 seconds in milliseconds
+    const val RECONNECTION_WAIT_INTERVAL: Long = 5000L       // 5 seconds in milliseconds
 
     // intent actions
     const val ACTION_SHOW_PLAYER: String = "com.jamal2367.urlradio.action.SHOW_PLAYER"
