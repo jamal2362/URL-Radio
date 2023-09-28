@@ -41,6 +41,8 @@ import com.jamal2367.urlradio.helpers.AppThemeHelper.getColor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 /*
@@ -512,7 +514,12 @@ class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogList
         val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
             type = Keys.MIME_TYPE_M3U
-            putExtra(Intent.EXTRA_TITLE, Keys.COLLECTION_M3U_FILE)
+
+            val timeStamp: String
+            val dateFormat = SimpleDateFormat("_yyyy-MM-dd'T'HH_mm", Locale.US)
+            timeStamp = dateFormat.format(Date())
+
+            putExtra(Intent.EXTRA_TITLE, "collection$timeStamp.m3u")
         }
         // file gets saved in the ActivityResult
         try {
@@ -529,7 +536,12 @@ class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogList
         val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
             type = Keys.MIME_TYPE_PLS
-            putExtra(Intent.EXTRA_TITLE, Keys.COLLECTION_PLS_FILE)
+
+            val timeStamp: String
+            val dateFormat = SimpleDateFormat("_yyyy-MM-dd'T'HH_mm", Locale.US)
+            timeStamp = dateFormat.format(Date())
+
+            putExtra(Intent.EXTRA_TITLE, "collection$timeStamp.pls")
         }
         // file gets saved in the ActivityResult
         try {
@@ -546,7 +558,12 @@ class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogList
         val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
             type = Keys.MIME_TYPE_ZIP
-            putExtra(Intent.EXTRA_TITLE, Keys.COLLECTION_BACKUP_FILE)
+
+            val timeStamp: String
+            val dateFormat = SimpleDateFormat("_yyyy-MM-dd'T'HH_mm", Locale.US)
+            timeStamp = dateFormat.format(Date())
+
+            putExtra(Intent.EXTRA_TITLE, "URL_Radio$timeStamp.zip")
         }
         // file gets saved in the ActivityResult
         try {

@@ -144,7 +144,6 @@ object Keys {
     const val COLLECTION_FILE: String = "collection.json"
     const val COLLECTION_M3U_FILE: String = "collection.m3u"
     const val COLLECTION_PLS_FILE: String = "collection.pls"
-    const val COLLECTION_BACKUP_FILE: String = "URL_Radio-Backup.zip"
     const val STATION_IMAGE_FILE: String = "station-image.jpg"
 
     // server addresses
