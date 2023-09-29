@@ -44,7 +44,7 @@
     <string name="notification_skip_to_previous">Zurück</string>
     <string name="notification_skip_to_next">Nächste</string>
     <!-- Onboarding -->
-    <string name="onboarding_app_description">Radio App</string>
+    <string name="onboarding_app_description">Tauche ein in den Sound deiner Wahl!</string>
     <string name="onboarding_app_get_started">Jetzt starten</string>
     <!-- Player -->
     <string name="player_sheet_h2_station_metadata">Momentan läuft</string>
