@@ -34,6 +34,7 @@
     <string name="dialog_generic_button_okay">OK</string>
     <string name="dialog_generic_details_button">Show details</string>
     <string name="dialog_opml_import_details_default">No details available</string>
+    <string name="dialog_restore_collection_replace_existing">Replace current collection of radio stations with the radio station from backup?</string>
     <string name="dialog_yes_no_message_remove_station">Remove this station?</string>
     <string name="dialog_yes_no_message_update_station_images">Download latest version of all station images?</string>
     <string name="dialog_yes_no_positive_button_default">Yes</string>

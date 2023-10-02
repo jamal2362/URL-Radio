@@ -30,6 +30,7 @@
     <string name="dialog_generic_button_okay">OK</string>
     <string name="dialog_generic_details_button">Details anzeigen</string>
     <string name="dialog_opml_import_details_default">Keine Details verfügbar</string>
+    <string name="dialog_restore_collection_replace_existing">Soll die aktuelle Sammlung von Radiostationen durch die Radiostationen aus dem Backup ersetzt werden?</string>
     <string name="dialog_yes_no_message_remove_station">Diesen Sender entfernen?</string>
     <string name="dialog_yes_no_message_update_station_images">Neueste Version aller Senderbilder herunterladen\?</string>
     <string name="dialog_yes_no_positive_button_default">Ja</string>

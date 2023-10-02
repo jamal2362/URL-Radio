@@ -182,7 +182,7 @@ class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogList
         preferenceRestoreCollection.setIcon(R.drawable.ic_upload_24dp)
         preferenceRestoreCollection.summary = getString(R.string.pref_station_restore_summary)
         preferenceRestoreCollection.setOnPreferenceClickListener {
-            openRestoreCollecionDialog()
+            openRestoreCollectionDialog()
             return@setOnPreferenceClickListener true
         }
 
@@ -434,7 +434,7 @@ class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogList
     }
 
 
-    /* Pass the activity result for the backup collecion dialog */
+    /* Pass the activity result for the backup collection dialog */
     private fun requestBackupCollectionResult(result: ActivityResult) {
         // save station backup file to result file location
         if (result.resultCode == Activity.RESULT_OK && result.data != null) {
@@ -576,7 +576,7 @@ class SettingsFragment : PreferenceFragmentCompat(), YesNoDialog.YesNoDialogList
 
 
     /* Opens up a file picker to select the file containing the collection to be restored */
-    private fun openRestoreCollecionDialog() {
+    private fun openRestoreCollectionDialog() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
             type = "*/*"

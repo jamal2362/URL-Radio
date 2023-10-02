@@ -696,7 +696,7 @@ class PlayerFragment : Fragment(),
                     YesNoDialog(this as YesNoDialog.YesNoDialogListener).show(
                         context = activity as Context,
                         type = Keys.DIALOG_RESTORE_COLLECTION,
-                        messageString = "Replace current collection radio stations with the radio station from backup?",
+                        messageString = getString(R.string.dialog_restore_collection_replace_existing),
                         payloadString = restoreCollectionFileString
                     )
                 }
