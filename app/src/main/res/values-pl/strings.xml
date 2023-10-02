@@ -43,7 +43,6 @@
     <string name="notification_skip_to_previous">Poprzedni</string>
     <string name="notification_skip_to_next">Następny</string>
     <!-- Onboarding -->
-    <string name="onboarding_app_description">Aplikacja radiowa</string>
     <string name="onboarding_app_get_started">Zaczynamy</string>
     <!-- Player -->
     <string name="player_sheet_h2_station_metadata">Obecnie odtwarzane</string>

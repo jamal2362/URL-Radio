@@ -43,7 +43,6 @@
     <string name="notification_skip_to_previous">Προηγούμενο</string>
     <string name="notification_skip_to_next">Επόμενο</string>
     <!-- Onboarding -->
-    <string name="onboarding_app_description">Εφαρμογή Ραδιόφωνο</string>
     <string name="onboarding_app_get_started">Ας ξεκινήσουμε</string>
     <!-- Player -->
     <string name="player_sheet_h2_station_metadata">Παίζεται τώρα</string>

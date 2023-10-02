@@ -43,7 +43,6 @@
     <string name="notification_skip_to_previous">Попередня</string>
     <string name="notification_skip_to_next">Наступна</string>
     <!-- Onboarding -->
-    <string name="onboarding_app_description">Радіозастосунок</string>
     <string name="onboarding_app_get_started">Початок роботи</string>
     <!-- Player -->
     <string name="player_sheet_h2_station_metadata">Зараз грає</string>

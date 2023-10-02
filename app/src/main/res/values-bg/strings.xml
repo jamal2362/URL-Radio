@@ -43,7 +43,6 @@
     <string name="notification_skip_to_previous">Предишна</string>
     <string name="notification_skip_to_next">Следваща</string>
     <!-- Onboarding -->
-    <string name="onboarding_app_description">Радио приложение</string>
     <string name="onboarding_app_get_started">Първи стъпки</string>
     <!-- Player -->
     <string name="player_sheet_h2_station_metadata">В момента се възпроизвежда</string>

@@ -43,7 +43,6 @@
     <string name="notification_skip_to_previous">上一个</string>
     <string name="notification_skip_to_next">下一个</string>
     <!-- Onboarding -->
-    <string name="onboarding_app_description">广播应用</string>
     <string name="onboarding_app_get_started">即刻上手</string>
     <!-- Player -->
     <string name="player_sheet_h2_station_metadata">当前正在播放</string>

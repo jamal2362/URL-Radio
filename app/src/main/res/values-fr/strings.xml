@@ -43,7 +43,6 @@
     <string name="notification_skip_to_previous">Précédent</string>
     <string name="notification_skip_to_next">Suivant</string>
     <!-- Onboarding -->
-    <string name="onboarding_app_description">Appli radio</string>
     <string name="onboarding_app_get_started">C\'est parti !</string>
     <!-- Player -->
     <string name="player_sheet_h2_station_metadata">En cours de lecture</string>

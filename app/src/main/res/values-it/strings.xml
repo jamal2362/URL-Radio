@@ -40,7 +40,6 @@
     <string name="notification_skip_to_previous">Precedente</string>
     <string name="notification_skip_to_next">Successiva</string>
     <!-- Onboarding -->
-    <string name="onboarding_app_description">App Radio</string>
     <string name="onboarding_app_get_started">Per iniziare</string>
     <!-- Player -->
     <string name="player_sheet_h2_station_metadata">In riproduzione</string>

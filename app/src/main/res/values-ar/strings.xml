@@ -40,7 +40,6 @@
     <string name="notification_skip_to_previous">السابق</string>
     <string name="notification_skip_to_next">التالي</string>
     <!-- Onboarding -->
-    <string name="onboarding_app_description">تطبيق الراديو</string>
     <string name="onboarding_app_get_started">ابدأ الآن</string>
     <!-- Player -->
     <string name="player_sheet_h2_station_metadata">قيد التشغيل حالياً</string>

@@ -43,7 +43,6 @@
     <string name="notification_skip_to_previous">Önceki</string>
     <string name="notification_skip_to_next">Sonraki</string>
     <!-- Onboarding -->
-    <string name="onboarding_app_description">Radyo uygulaması</string>
     <string name="onboarding_app_get_started">Başlayın</string>
     <!-- Player -->
     <string name="player_sheet_h2_station_metadata">Şimdi oynatılıyor</string>

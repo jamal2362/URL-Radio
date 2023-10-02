@@ -41,7 +41,6 @@
     <string name="notification_skip_to_previous">Anterior</string>
     <string name="notification_skip_to_next">Seguinte</string>
     <!-- Onboarding -->
-    <string name="onboarding_app_description">Aplicação de rádio</string>
     <string name="onboarding_app_get_started">Começar</string>
     <!-- Player -->
     <string name="player_sheet_h2_station_metadata">Atualmente</string>

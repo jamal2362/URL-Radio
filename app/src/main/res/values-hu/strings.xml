@@ -43,7 +43,6 @@
     <string name="notification_skip_to_previous">Előző</string>
     <string name="notification_skip_to_next">Következő</string>
     <!-- Onboarding -->
-    <string name="onboarding_app_description">Rádió app</string>
     <string name="onboarding_app_get_started">Hadd szóljon</string>
     <!-- Player -->
     <string name="player_sheet_h2_station_metadata">Most szól</string>

@@ -40,7 +40,6 @@
     <string name="notification_skip_to_previous">Předchozí</string>
     <string name="notification_skip_to_next">Následující</string>
     <!-- Onboarding -->
-    <string name="onboarding_app_description">Obklopte se oblíbenou hudbou!</string>
     <string name="onboarding_app_get_started">Začínáme</string>
     <!-- Player -->
     <string name="player_sheet_h2_station_metadata">Právě hraje</string>
