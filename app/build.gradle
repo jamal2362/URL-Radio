@@ -16,10 +16,6 @@ android {
         setProperty('archivesBaseName', 'URL_Radio_' + versionName)
     }
 
-    kotlinOptions {
-        jvmTarget = '17'
-    }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
@@ -49,9 +45,6 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-
-    // Kotlin //
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
 
     // Google Stuff //
     implementation 'com.google.android.material:material:1.10.0'
