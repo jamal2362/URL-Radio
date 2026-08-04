@@ -11,7 +11,7 @@ package com.jamal2367.urlradio.ui.stations
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,7 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -90,8 +90,10 @@ fun StationListScreen(
 
         val listState = rememberLazyListState()
 
-        // Drag-to-reorder state. Index is the item currently being dragged, or -1.
-        var draggingIndex by remember { mutableIntStateOf(-1) }
+        // Drag-to-reorder state. The dragged row is tracked by uuid rather than by index:
+        // the index changes underneath us on every successful swap, and reading a stale one
+        // was why only the row that happened to start at the top could be moved.
+        var draggingUuid by remember { mutableStateOf<String?>(null) }
         var dragOffsetY by remember { mutableFloatStateOf(0f) }
 
         LazyColumn(
@@ -105,7 +107,55 @@ fun StationListScreen(
                 key = { _, station -> station.uuid },
             ) { index, station ->
                 val isEditorOpen = station.uuid == expandedStationUuid
-                val isDragging = index == draggingIndex
+                val isDragging = station.uuid == draggingUuid
+
+                // Reordering is disabled while an editor is open, matching the old
+                // isLongPressDragEnabled() rule. This lives on the drag handle only -- not
+                // the whole row -- so it never has to race the row's own long-press-to-edit
+                // gesture for the same touch.
+                val dragHandleModifier = if (isEditorOpen) Modifier else Modifier.pointerInput(station.uuid) {
+                    detectDragGestures(
+                        onDragStart = {
+                            draggingUuid = station.uuid
+                            dragOffsetY = 0f
+                        },
+                        onDragEnd = {
+                            draggingUuid = null
+                            dragOffsetY = 0f
+                            onMoveFinished()
+                        },
+                        onDragCancel = {
+                            draggingUuid = null
+                            dragOffsetY = 0f
+                        },
+                        onDrag = { change, dragAmount ->
+                            change.consume()
+                            dragOffsetY += dragAmount.y
+
+                            // Where the dragged row is actually drawn right now: its laid-out
+                            // position plus the offset the finger has added.
+                            val items = listState.layoutInfo.visibleItemsInfo
+                            val dragged = items.firstOrNull { it.key == draggingUuid } ?: return@detectDragGestures
+                            val draggedCentre = dragged.offset + dragged.size / 2 + dragOffsetY
+
+                            // Swap with whichever row that centre now sits inside. Comparing
+                            // against real layout positions handles rows of differing height
+                            // and lets a fast drag cross several of them.
+                            val target = items.firstOrNull { other ->
+                                other.index != dragged.index &&
+                                    draggedCentre >= other.offset &&
+                                    draggedCentre <= other.offset + other.size
+                            } ?: return@detectDragGestures
+
+                            if (onMove(dragged.index, target.index)) {
+                                // The row is about to be laid out at the target's position,
+                                // so drop the same amount from the offset and the row stays
+                                // put under the finger.
+                                dragOffsetY -= (target.offset - dragged.offset)
+                            }
+                        },
+                    )
+                }
 
                 SwipeableStationRow(
                     station = station,
@@ -121,45 +171,10 @@ fun StationListScreen(
                     onPlaceOnHomeScreen = { onPlaceOnHomeScreen(station) },
                     onDeleteRequest = { onDeleteRequest(station) },
                     onToggleStarred = { onToggleStarred(station) },
+                    dragHandleModifier = dragHandleModifier,
                     modifier = Modifier
                         .zIndex(if (isDragging) 1f else 0f)
-                        .graphicsLayer { translationY = if (isDragging) dragOffsetY else 0f }
-                        .then(
-                            // Reordering is disabled while an editor is open, matching the
-                            // old isLongPressDragEnabled() rule.
-                            if (isEditorOpen) Modifier else Modifier.pointerInput(station.uuid, stations.size) {
-                                detectDragGesturesAfterLongPress(
-                                    onDragStart = {
-                                        draggingIndex = index
-                                        dragOffsetY = 0f
-                                    },
-                                    onDragEnd = {
-                                        draggingIndex = -1
-                                        dragOffsetY = 0f
-                                        onMoveFinished()
-                                    },
-                                    onDragCancel = {
-                                        draggingIndex = -1
-                                        dragOffsetY = 0f
-                                    },
-                                    onDrag = { change, dragAmount ->
-                                        change.consume()
-                                        dragOffsetY += dragAmount.y
-                                        val itemHeight = listState.layoutInfo.visibleItemsInfo
-                                            .firstOrNull { it.index == draggingIndex }?.size ?: 0
-                                        if (itemHeight > 0 && kotlin.math.abs(dragOffsetY) > itemHeight / 2) {
-                                            val direction = if (dragOffsetY > 0) 1 else -1
-                                            val from = draggingIndex
-                                            val to = from + direction
-                                            if (onMove(from, to)) {
-                                                draggingIndex = to
-                                                dragOffsetY -= direction * itemHeight
-                                            }
-                                        }
-                                    },
-                                )
-                            }
-                        ),
+                        .graphicsLayer { translationY = if (isDragging) dragOffsetY else 0f },
                 )
             }
         }
@@ -182,6 +197,7 @@ private fun SwipeableStationRow(
     onDeleteRequest: () -> Unit,
     onToggleStarred: () -> Unit,
     modifier: Modifier = Modifier,
+    dragHandleModifier: Modifier = Modifier,
 ) {
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { value ->
@@ -205,7 +221,10 @@ private fun SwipeableStationRow(
 
     SwipeToDismissBox(
         state = dismissState,
-        backgroundContent = { SwipeBackground(dismissState.targetValue) },
+        // dismissDirection follows the raw swipe offset, unlike targetValue which only
+        // flips once the row is dragged past the threshold. Keying the background on the
+        // latter is what made the colour appear only from halfway across.
+        backgroundContent = { SwipeBackground(dismissState.dismissDirection) },
         modifier = modifier,
     ) {
         StationCard(
@@ -220,14 +239,15 @@ private fun SwipeableStationRow(
             onCancelEdit = onCancelEdit,
             onChangeImage = onChangeImage,
             onPlaceOnHomeScreen = onPlaceOnHomeScreen,
+            dragHandleModifier = dragHandleModifier,
         )
     }
 }
 
 @Composable
-private fun SwipeBackground(target: SwipeToDismissBoxValue) {
-    val isDelete = target == SwipeToDismissBoxValue.EndToStart
-    val isStar = target == SwipeToDismissBoxValue.StartToEnd
+private fun SwipeBackground(direction: SwipeToDismissBoxValue) {
+    val isDelete = direction == SwipeToDismissBoxValue.EndToStart
+    val isStar = direction == SwipeToDismissBoxValue.StartToEnd
     if (!isDelete && !isStar) return
 
     val background = if (isDelete) MaterialTheme.colorScheme.errorContainer

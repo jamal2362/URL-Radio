@@ -12,16 +12,25 @@
 package com.jamal2367.urlradio.ui.player
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -29,6 +38,7 @@ import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,10 +47,13 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -58,6 +71,7 @@ fun PlayerPane(
     expanded: Boolean,
     metadataIndex: Int,
     onToggleExpanded: () -> Unit,
+    onSetExpanded: (Boolean) -> Unit,
     onTogglePlayback: () -> Unit,
     onPreviousMetadata: () -> Unit,
     onNextMetadata: () -> Unit,
@@ -70,8 +84,30 @@ fun PlayerPane(
 ) {
     val shownMetadata = playback.metadataHistory.getOrNull(metadataIndex)
         ?: station.name.ifEmpty { "" }
+    val playbackButtonDescription = stringResource(R.string.descr_player_playback_button)
 
-    Column(modifier = modifier.fillMaxWidth()) {
+    Column(
+        // Dragging the player up opens it, dragging down closes it. Sits on the whole panel
+        // rather than the compact row so a downward swipe anywhere over the expanded
+        // controls closes it too. The threshold is in pixels, so it is compared against the
+        // drag total rather than a dp.
+        modifier = modifier
+            .fillMaxWidth()
+            .pointerInput(Unit) {
+                var dragTotal = 0f
+                detectVerticalDragGestures(
+                    onDragStart = { dragTotal = 0f },
+                    onDragEnd = {
+                        if (dragTotal < -SWIPE_THRESHOLD_PX) onSetExpanded(true)
+                        else if (dragTotal > SWIPE_THRESHOLD_PX) onSetExpanded(false)
+                    },
+                    onVerticalDrag = { change, amount ->
+                        change.consume()
+                        dragTotal += amount
+                    },
+                )
+            }
+    ) {
         // ---- compact row: always visible ----
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -110,13 +146,21 @@ fun PlayerPane(
                     ContainedLoadingIndicator()
                 } else {
                     FilledIconButton(onClick = onTogglePlayback) {
-                        Icon(
-                            painter = painterResource(
-                                if (playback.isPlaying) R.drawable.ic_player_stop_symbol_36dp
-                                else R.drawable.ic_player_play_symbol_42dp
-                            ),
-                            contentDescription = stringResource(R.string.descr_player_playback_button),
-                        )
+                        if (playback.isPlaying) {
+                            EqualizerIcon(
+                                color = LocalContentColor.current,
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .semantics {
+                                        contentDescription = playbackButtonDescription
+                                    },
+                            )
+                        } else {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_player_play_symbol_42dp),
+                                contentDescription = playbackButtonDescription,
+                            )
+                        }
                     }
                 }
             }
@@ -172,28 +216,38 @@ fun PlayerPane(
                     },
                 )
 
-                val bitrateText = bitrateLabel(station)
-                if (bitrateText.isNotEmpty()) {
+                // Codec/bitrate on the left, sleep timer opposite it on the right.
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                ) {
+                    val bitrateText = bitrateLabel(station)
                     Text(
                         text = bitrateText,
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier
+                            .weight(1f)
                             .combinedClickable(onClick = { onCopy(bitrateText) })
                             .padding(vertical = 8.dp),
                     )
-                }
 
-                SleepTimerRow(
-                    isPlaying = playback.isPlaying,
-                    remainingMillis = playback.sleepTimerRemaining,
-                    onStart = onStartSleepTimer,
-                    onCancel = onCancelSleepTimer,
-                )
+                    SleepTimerControls(
+                        isPlaying = playback.isPlaying,
+                        remainingMillis = playback.sleepTimerRemaining,
+                        onStart = onStartSleepTimer,
+                        onCancel = onCancelSleepTimer,
+                    )
+                }
             }
         }
     }
 }
+
+private const val SWIPE_THRESHOLD_PX = 40f
 
 /* Builds the "codec | bitrate kbps" line. M3U and PLS playlists carry neither, so the
    row is left out entirely for them -- same rule the old LayoutHolder used. */
@@ -237,7 +291,7 @@ private fun LabelledValue(
 }
 
 @Composable
-private fun SleepTimerRow(
+private fun SleepTimerControls(
     isPlaying: Boolean,
     remainingMillis: Long,
     onStart: () -> Unit,
@@ -246,9 +300,6 @@ private fun SleepTimerRow(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp),
     ) {
         // The start button only appears during playback, exactly as before: a sleep timer
         // without playback has nothing to stop.
@@ -271,6 +322,42 @@ private fun SleepTimerRow(
                     contentDescription = stringResource(R.string.descr_expanded_player_sleep_timer_cancel_button),
                 )
             }
+        }
+    }
+}
+
+/* Three bars bouncing out of phase, standing in for the old ic_audio_waves_animated AVD
+   that lived on the play button while a station was playing. */
+@Composable
+private fun EqualizerIcon(color: Color, modifier: Modifier = Modifier) {
+    val transition = rememberInfiniteTransition(label = "equalizer")
+    val bars = listOf(420, 560, 500).mapIndexed { index, duration ->
+        transition.animateFloat(
+            initialValue = 0.25f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(duration, delayMillis = index * 90, easing = FastOutSlowInEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
+            label = "equalizerBar$index",
+        )
+    }
+
+    Row(
+        // Centred, not Start: the three bars are narrower than the 24dp icon slot, so
+        // left-aligning them pushed the whole group off-centre inside the round button.
+        horizontalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.Bottom,
+        modifier = modifier,
+    ) {
+        bars.forEach { bar ->
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .fillMaxHeight(bar.value)
+                    .clip(RoundedCornerShape(1.dp))
+                    .background(color)
+            )
         }
     }
 }

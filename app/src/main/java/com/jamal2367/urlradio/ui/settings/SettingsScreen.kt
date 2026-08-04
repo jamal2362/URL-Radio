@@ -13,19 +13,24 @@
 package com.jamal2367.urlradio.ui.settings
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -72,136 +77,135 @@ fun SettingsScreen(
 
     LazyColumn(
         contentPadding = contentPadding,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = modifier.fillMaxSize(),
     ) {
         item {
-            SettingsRow(
-                title = stringResource(R.string.pref_app_version_title),
-                summary = versionSummary,
-                icon = R.drawable.ic_info_24dp,
-                onClick = { callbacks.onCopyVersion(versionSummary) },
-            )
-        }
-        item {
-            SettingsRow(
-                title = stringResource(R.string.pref_license_title),
-                summary = stringResource(R.string.pref_license_summary),
-                icon = R.drawable.ic_library_24dp,
-                onClick = { callbacks.onOpenUrl(LICENSE_URL) },
-            )
+            SettingsGroup {
+                SettingsRow(
+                    title = stringResource(R.string.pref_app_version_title),
+                    summary = versionSummary,
+                    icon = R.drawable.ic_info_24dp,
+                    onClick = { callbacks.onCopyVersion(versionSummary) },
+                )
+                SettingsRow(
+                    title = stringResource(R.string.pref_license_title),
+                    summary = stringResource(R.string.pref_license_summary),
+                    icon = R.drawable.ic_library_24dp,
+                    onClick = { callbacks.onOpenUrl(LICENSE_URL) },
+                )
+            }
         }
 
         item { CategoryHeader(stringResource(R.string.pref_general_title)) }
         item {
-            SettingsRow(
-                title = stringResource(R.string.pref_theme_selection_title),
-                summary = "${stringResource(R.string.pref_theme_selection_summary)} $themeLabel",
-                icon = R.drawable.ic_brush_24dp,
-                onClick = { showThemeDialog = true },
-            )
+            SettingsGroup {
+                SettingsRow(
+                    title = stringResource(R.string.pref_theme_selection_title),
+                    summary = "${stringResource(R.string.pref_theme_selection_summary)} $themeLabel",
+                    icon = R.drawable.ic_brush_24dp,
+                    onClick = { showThemeDialog = true },
+                )
+            }
         }
 
         item { CategoryHeader(stringResource(R.string.pref_maintenance_title)) }
         item {
-            SettingsRow(
-                title = stringResource(R.string.pref_update_station_images_title),
-                summary = stringResource(R.string.pref_update_station_images_summary),
-                icon = R.drawable.ic_image_24dp,
-                onClick = callbacks.onUpdateStationImages,
-            )
+            SettingsGroup {
+                SettingsRow(
+                    title = stringResource(R.string.pref_update_station_images_title),
+                    summary = stringResource(R.string.pref_update_station_images_summary),
+                    icon = R.drawable.ic_image_24dp,
+                    onClick = callbacks.onUpdateStationImages,
+                )
+            }
         }
 
         item { CategoryHeader(stringResource(R.string.pref_backup_import_export_title)) }
         item {
-            SettingsRow(
-                title = stringResource(R.string.pref_m3u_export_title),
-                summary = stringResource(R.string.pref_m3u_export_summary),
-                icon = R.drawable.ic_save_m3u_24dp,
-                onClick = callbacks.onExportM3u,
-            )
-        }
-        item {
-            SettingsRow(
-                title = stringResource(R.string.pref_pls_export_title),
-                summary = stringResource(R.string.pref_pls_export_summary),
-                icon = R.drawable.ic_save_pls_24dp,
-                onClick = callbacks.onExportPls,
-            )
-        }
-        item {
-            SettingsRow(
-                title = stringResource(R.string.pref_station_export_title),
-                summary = stringResource(R.string.pref_station_export_summary),
-                icon = R.drawable.ic_download_24dp,
-                onClick = callbacks.onBackup,
-            )
-        }
-        item {
-            SettingsRow(
-                title = stringResource(R.string.pref_station_restore_title),
-                summary = stringResource(R.string.pref_station_restore_summary),
-                icon = R.drawable.ic_upload_24dp,
-                onClick = callbacks.onRestore,
-            )
+            SettingsGroup {
+                SettingsRow(
+                    title = stringResource(R.string.pref_m3u_export_title),
+                    summary = stringResource(R.string.pref_m3u_export_summary),
+                    icon = R.drawable.ic_save_m3u_24dp,
+                    onClick = callbacks.onExportM3u,
+                )
+                SettingsRow(
+                    title = stringResource(R.string.pref_pls_export_title),
+                    summary = stringResource(R.string.pref_pls_export_summary),
+                    icon = R.drawable.ic_save_pls_24dp,
+                    onClick = callbacks.onExportPls,
+                )
+                SettingsRow(
+                    title = stringResource(R.string.pref_station_export_title),
+                    summary = stringResource(R.string.pref_station_export_summary),
+                    icon = R.drawable.ic_download_24dp,
+                    onClick = callbacks.onBackup,
+                )
+                SettingsRow(
+                    title = stringResource(R.string.pref_station_restore_title),
+                    summary = stringResource(R.string.pref_station_restore_summary),
+                    icon = R.drawable.ic_upload_24dp,
+                    onClick = callbacks.onRestore,
+                )
+            }
         }
 
         item { CategoryHeader(stringResource(R.string.pref_advanced_title)) }
         item {
-            SettingsSwitchRow(
-                title = stringResource(R.string.pref_buffer_size_title),
-                summary = stringResource(
-                    if (largeBuffer) R.string.pref_buffer_size_summary_enabled
-                    else R.string.pref_buffer_size_summary_disabled
-                ),
-                icon = R.drawable.ic_network_check_24dp,
-                checked = largeBuffer,
-                onCheckedChange = callbacks.onLargeBufferChanged,
-            )
-        }
-        item {
-            SettingsSwitchRow(
-                title = stringResource(R.string.pref_edit_station_title),
-                summary = stringResource(
-                    if (editStations) R.string.pref_edit_station_summary_enabled
-                    else R.string.pref_edit_station_summary_disabled
-                ),
-                icon = R.drawable.ic_edit_24dp,
-                checked = editStations,
-                onCheckedChange = callbacks.onEditStationsChanged,
-            )
-        }
-        item {
-            // Editing stream addresses only makes sense while editing is on at all --
-            // the old screen disabled and unchecked this entry in the same way.
-            SettingsSwitchRow(
-                title = stringResource(R.string.pref_edit_station_stream_title),
-                summary = stringResource(
-                    if (editStreamUris) R.string.pref_edit_station_stream_summary_enabled
-                    else R.string.pref_edit_station_stream_summary_disabled
-                ),
-                icon = R.drawable.ic_music_note_24dp,
-                checked = editStreamUris,
-                enabled = editStations,
-                onCheckedChange = callbacks.onEditStreamUrisChanged,
-            )
+            SettingsGroup {
+                SettingsSwitchRow(
+                    title = stringResource(R.string.pref_buffer_size_title),
+                    summary = stringResource(
+                        if (largeBuffer) R.string.pref_buffer_size_summary_enabled
+                        else R.string.pref_buffer_size_summary_disabled
+                    ),
+                    icon = R.drawable.ic_network_check_24dp,
+                    checked = largeBuffer,
+                    onCheckedChange = callbacks.onLargeBufferChanged,
+                )
+                SettingsSwitchRow(
+                    title = stringResource(R.string.pref_edit_station_title),
+                    summary = stringResource(
+                        if (editStations) R.string.pref_edit_station_summary_enabled
+                        else R.string.pref_edit_station_summary_disabled
+                    ),
+                    icon = R.drawable.ic_edit_24dp,
+                    checked = editStations,
+                    onCheckedChange = callbacks.onEditStationsChanged,
+                )
+                // Editing stream addresses only makes sense while editing is on at all --
+                // the old screen disabled and unchecked this entry in the same way.
+                SettingsSwitchRow(
+                    title = stringResource(R.string.pref_edit_station_stream_title),
+                    summary = stringResource(
+                        if (editStreamUris) R.string.pref_edit_station_stream_summary_enabled
+                        else R.string.pref_edit_station_stream_summary_disabled
+                    ),
+                    icon = R.drawable.ic_music_note_24dp,
+                    checked = editStreamUris,
+                    enabled = editStations,
+                    onCheckedChange = callbacks.onEditStreamUrisChanged,
+                )
+            }
         }
 
         item { CategoryHeader(stringResource(R.string.pref_links_title)) }
         item {
-            SettingsRow(
-                title = stringResource(R.string.pref_github_title),
-                summary = stringResource(R.string.pref_github_summary),
-                icon = R.drawable.ic_github_24dp,
-                onClick = { callbacks.onOpenUrl(GITHUB_URL) },
-            )
-        }
-        item {
-            SettingsRow(
-                title = stringResource(R.string.pref_codeberg_title),
-                summary = stringResource(R.string.pref_codeberg_summary),
-                icon = R.drawable.ic_codeberg_24dp,
-                onClick = { callbacks.onOpenUrl(CODEBERG_URL) },
-            )
+            SettingsGroup {
+                SettingsRow(
+                    title = stringResource(R.string.pref_github_title),
+                    summary = stringResource(R.string.pref_github_summary),
+                    icon = R.drawable.ic_github_24dp,
+                    onClick = { callbacks.onOpenUrl(GITHUB_URL) },
+                )
+                SettingsRow(
+                    title = stringResource(R.string.pref_codeberg_title),
+                    summary = stringResource(R.string.pref_codeberg_summary),
+                    icon = R.drawable.ic_codeberg_24dp,
+                    onClick = { callbacks.onOpenUrl(CODEBERG_URL) },
+                )
+            }
         }
     }
 
@@ -217,17 +221,28 @@ fun SettingsScreen(
     }
 }
 
+/* Groups related entries into one rounded card, replacing the flat divider-separated list. */
+@Composable
+private fun SettingsGroup(content: @Composable ColumnScope.() -> Unit) {
+    Surface(
+        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+    ) {
+        Column(content = content)
+    }
+}
+
 @Composable
 private fun CategoryHeader(title: String) {
-    Column {
-        HorizontalDivider(modifier = Modifier.padding(top = 8.dp))
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleSmallEmphasized,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp),
-        )
-    }
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleSmallEmphasized,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(start = 32.dp, end = 32.dp, top = 16.dp, bottom = 4.dp),
+    )
 }
 
 @Composable
@@ -237,16 +252,10 @@ private fun SettingsRow(
     icon: Int,
     onClick: () -> Unit,
 ) {
-    ListItem(
-        headlineContent = { Text(title) },
-        supportingContent = { Text(summary) },
-        leadingContent = {
-            Icon(
-                painter = painterResource(icon),
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-            )
-        },
+    SettingsRowLayout(
+        title = title,
+        summary = summary,
+        icon = icon,
         modifier = Modifier.clickable(onClick = onClick),
     )
 }
@@ -260,21 +269,65 @@ private fun SettingsSwitchRow(
     onCheckedChange: (Boolean) -> Unit,
     enabled: Boolean = true,
 ) {
-    ListItem(
-        headlineContent = { Text(title) },
-        supportingContent = { Text(summary) },
-        leadingContent = {
+    SettingsRowLayout(
+        title = title,
+        summary = summary,
+        icon = icon,
+        enabled = enabled,
+        modifier = Modifier.clickable(enabled = enabled) { onCheckedChange(!checked) },
+        trailing = {
+            Switch(checked = checked, onCheckedChange = onCheckedChange, enabled = enabled)
+        },
+    )
+}
+
+@Composable
+private fun SettingsRowLayout(
+    title: String,
+    summary: String,
+    icon: Int,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    trailing: @Composable (() -> Unit)? = null,
+) {
+    val contentAlpha = if (enabled) 1f else 0.38f
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 14.dp),
+    ) {
+        Surface(
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = contentAlpha),
+        ) {
             Icon(
                 painter = painterResource(icon),
                 contentDescription = null,
-                modifier = Modifier.size(24.dp),
+                tint = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = contentAlpha),
+                modifier = Modifier
+                    .padding(10.dp)
+                    .size(24.dp),
             )
-        },
-        trailingContent = {
-            Switch(checked = checked, onCheckedChange = onCheckedChange, enabled = enabled)
-        },
-        modifier = Modifier.clickable(enabled = enabled) { onCheckedChange(!checked) },
-    )
+        }
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 16.dp)
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = contentAlpha),
+            )
+            Text(
+                text = summary,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = contentAlpha),
+            )
+        }
+        trailing?.invoke()
+    }
 }
 
 @Composable

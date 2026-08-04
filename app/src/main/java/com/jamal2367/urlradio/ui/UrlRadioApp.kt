@@ -14,6 +14,8 @@ package com.jamal2367.urlradio.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +30,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -48,16 +51,23 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 import com.jamal2367.urlradio.R
 import com.jamal2367.urlradio.core.Station
 import com.jamal2367.urlradio.playback.PlaybackUiState
@@ -116,6 +126,9 @@ fun UrlRadioApp(
 ) {
     var screen by remember { mutableStateOf(AppScreen.Stations) }
     var playerExpanded by remember { mutableStateOf(false) }
+    // Bumped by every interaction with the expanded player so the idle timer below restarts
+    // rather than closing the panel while the user is still working in it.
+    var playerActivity by remember { mutableIntStateOf(0) }
     var metadataIndex by remember { mutableIntStateOf(-1) }
     var showSleepTimerPicker by remember { mutableStateOf(false) }
     var pendingDelete by remember { mutableStateOf<Station?>(null) }
@@ -132,6 +145,12 @@ fun UrlRadioApp(
             playerExpanded -> playerExpanded = false
             else -> screen = AppScreen.Stations
         }
+    }
+
+    LaunchedEffect(playerExpanded, playerActivity) {
+        if (!playerExpanded) return@LaunchedEffect
+        delay(5_000)
+        playerExpanded = false
     }
 
     Scaffold(
@@ -196,6 +215,7 @@ fun UrlRadioApp(
                                 expanded = true,
                                 metadataIndex = effectiveMetadataIndex,
                                 onToggleExpanded = {},
+                                onSetExpanded = {},
                                 onTogglePlayback = { actions.onTogglePlayback(state.currentStation) },
                                 onPreviousMetadata = {
                                     metadataIndex = previousIndex(effectiveMetadataIndex, historySize)
@@ -247,22 +267,45 @@ fun UrlRadioApp(
                     // The player is hidden entirely while onboarding is showing, which is
                     // what the old bottom sheet did through STATE_HIDDEN.
                     AnimatedVisibility(visible = !state.showOnboarding) {
-                        Surface(tonalElevation = 3.dp) {
+                        Surface(
+                            shape = RoundedCornerShape(28.dp),
+                            tonalElevation = 3.dp,
+                            shadowElevation = 6.dp,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        ) {
                             PlayerPane(
                                 station = state.currentStation,
                                 playback = state.playback,
                                 expanded = playerExpanded,
                                 metadataIndex = effectiveMetadataIndex,
-                                onToggleExpanded = { playerExpanded = !playerExpanded },
-                                onTogglePlayback = { actions.onTogglePlayback(state.currentStation) },
+                                onToggleExpanded = {
+                                    playerExpanded = !playerExpanded
+                                    playerActivity++
+                                },
+                                onSetExpanded = {
+                                    playerExpanded = it
+                                    playerActivity++
+                                },
+                                onTogglePlayback = {
+                                    actions.onTogglePlayback(state.currentStation)
+                                    playerActivity++
+                                },
                                 onPreviousMetadata = {
                                     metadataIndex = previousIndex(effectiveMetadataIndex, historySize)
+                                    playerActivity++
                                 },
                                 onNextMetadata = {
                                     metadataIndex = nextIndex(effectiveMetadataIndex, historySize)
+                                    playerActivity++
                                 },
-                                onCopy = actions.onCopy,
-                                onCopyFullHistory = actions.onCopyFullHistory,
+                                onCopy = {
+                                    actions.onCopy(it)
+                                    playerActivity++
+                                },
+                                onCopyFullHistory = {
+                                    actions.onCopyFullHistory()
+                                    playerActivity++
+                                },
                                 onShare = { actions.onShare(state.currentStation) },
                                 onStartSleepTimer = { showSleepTimerPicker = true },
                                 onCancelSleepTimer = actions.onCancelSleepTimer,
@@ -305,54 +348,150 @@ private fun StationsPane(
     onOpenSettings: () -> Unit,
     onDeleteRequest: (Station) -> Unit,
 ) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        StationListScreen(
-            stations = state.stations,
-            playingStationUuid = if (state.playback.isPlaying) state.playback.stationUuid else "",
-            expandedStationUuid = state.expandedStationUuid,
-            editStationsEnabled = state.editStationsEnabled,
-            editStreamUrisEnabled = state.editStreamUrisEnabled,
-            showOnboarding = state.showOnboarding,
-            hasActiveDownloads = state.hasActiveDownloads,
-            onTogglePlayback = actions.onTogglePlayback,
-            onToggleEditor = actions.onToggleEditor,
-            onSaveStation = actions.onSaveStation,
-            onCancelEdit = actions.onCancelEdit,
-            onChangeImage = actions.onChangeImage,
-            onPlaceOnHomeScreen = actions.onPlaceOnHomeScreen,
-            onDeleteRequest = onDeleteRequest,
-            onToggleStarred = actions.onToggleStarred,
-            onMove = actions.onMove,
-            onMoveFinished = actions.onMoveFinished,
-            contentPadding = PaddingValues(
-                start = 12.dp,
-                end = 12.dp,
-                top = contentPadding.calculateTopPadding() + 12.dp,
-                bottom = 96.dp,
-            ),
-        )
+    // 0 = all stations, 1 = favourites only. Favourites are always sorted to the front of
+    // the collection (see CollectionHelper.sortCollection), so this filtered list is a plain
+    // prefix of state.stations and its indices line up with the full list -- onMove needs no
+    // remapping.
+    var selectedTab by remember { mutableIntStateOf(0) }
+    val visibleStations = if (selectedTab == 1) state.stations.filter { it.starred } else state.stations
 
-        // Add-station and settings, as an Expressive floating toolbar. Replaces the two
-        // extended FABs that used to be a list footer item.
-        HorizontalFloatingToolbar(
-            expanded = true,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 16.dp),
-        ) {
-            IconButton(onClick = actions.onAddStation) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_add_24dp),
-                    contentDescription = stringResource(R.string.dialog_find_station_title),
+    Column(modifier = Modifier.fillMaxSize()) {
+        if (!state.showOnboarding) {
+            FloatingTabBar(
+                selectedTab = selectedTab,
+                onSelect = { selectedTab = it },
+                modifier = Modifier.padding(
+                    top = contentPadding.calculateTopPadding() + 8.dp,
+                    bottom = 4.dp,
+                ),
+            )
+        }
+
+        Box(modifier = Modifier.weight(1f)) {
+            if (selectedTab == 1 && visibleStations.isEmpty() && !state.showOnboarding) {
+                Text(
+                    text = stringResource(R.string.stations_favorites_empty),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(horizontal = 32.dp),
+                )
+            } else {
+                StationListScreen(
+                    stations = visibleStations,
+                    playingStationUuid = if (state.playback.isPlaying) state.playback.stationUuid else "",
+                    expandedStationUuid = state.expandedStationUuid,
+                    editStationsEnabled = state.editStationsEnabled,
+                    editStreamUrisEnabled = state.editStreamUrisEnabled,
+                    showOnboarding = state.showOnboarding,
+                    hasActiveDownloads = state.hasActiveDownloads,
+                    onTogglePlayback = actions.onTogglePlayback,
+                    onToggleEditor = actions.onToggleEditor,
+                    onSaveStation = actions.onSaveStation,
+                    onCancelEdit = actions.onCancelEdit,
+                    onChangeImage = actions.onChangeImage,
+                    onPlaceOnHomeScreen = actions.onPlaceOnHomeScreen,
+                    onDeleteRequest = onDeleteRequest,
+                    onToggleStarred = actions.onToggleStarred,
+                    onMove = actions.onMove,
+                    onMoveFinished = actions.onMoveFinished,
+                    contentPadding = PaddingValues(
+                        start = 12.dp,
+                        end = 12.dp,
+                        top = if (state.showOnboarding) contentPadding.calculateTopPadding() + 12.dp else 12.dp,
+                        bottom = 96.dp,
+                    ),
                 )
             }
-            IconButton(onClick = onOpenSettings) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_settings_24dp),
-                    contentDescription = stringResource(R.string.fragment_settings_title),
-                )
+
+            // Add-station and settings, as an Expressive floating toolbar. Replaces the two
+            // extended FABs that used to be a list footer item.
+            HorizontalFloatingToolbar(
+                expanded = true,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 16.dp),
+            ) {
+                IconButton(onClick = actions.onAddStation) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_add_24dp),
+                        contentDescription = stringResource(R.string.dialog_find_station_title),
+                    )
+                }
+                IconButton(onClick = onOpenSettings) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_settings_24dp),
+                        contentDescription = stringResource(R.string.fragment_settings_title),
+                    )
+                }
             }
         }
+    }
+}
+
+/* A floating pill that swaps the station list between all stations and favourites. */
+@Composable
+private fun FloatingTabBar(
+    selectedTab: Int,
+    onSelect: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        shape = RoundedCornerShape(28.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        shadowElevation = 4.dp,
+        modifier = modifier.padding(horizontal = 12.dp),
+    ) {
+        Row(modifier = Modifier.padding(4.dp)) {
+            FloatingTabBarItem(
+                label = stringResource(R.string.tab_stations_all),
+                selected = selectedTab == 0,
+                onClick = { onSelect(0) },
+                modifier = Modifier.weight(1f),
+            )
+            FloatingTabBarItem(
+                label = stringResource(R.string.tab_stations_favorites),
+                selected = selectedTab == 1,
+                onClick = { onSelect(1) },
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+@Composable
+private fun FloatingTabBarItem(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val background by animateColorAsState(
+        targetValue = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
+        label = "tabBackground",
+    )
+    val content by animateColorAsState(
+        targetValue = if (selected) MaterialTheme.colorScheme.onPrimary
+        else MaterialTheme.colorScheme.onSurfaceVariant,
+        label = "tabContent",
+    )
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .clip(RoundedCornerShape(24.dp))
+            .background(background)
+            .selectable(selected = selected, role = Role.Tab, onClick = onClick)
+            .padding(vertical = 12.dp),
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLargeEmphasized,
+            color = content,
+            maxLines = 1,
+        )
     }
 }
 

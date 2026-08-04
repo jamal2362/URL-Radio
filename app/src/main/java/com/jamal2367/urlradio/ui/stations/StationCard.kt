@@ -15,7 +15,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -81,6 +83,7 @@ fun StationCard(
     onChangeImage: () -> Unit,
     onPlaceOnHomeScreen: () -> Unit,
     modifier: Modifier = Modifier,
+    dragHandleModifier: Modifier = Modifier,
 ) {
     val accentColor = MaterialTheme.colorScheme.primary
     Card(
@@ -90,17 +93,18 @@ fun StationCard(
     ) {
         // Explicitly clipped: the accent bar runs to the very edge of the card, and
         // without this it squares off the rounded trailing corners.
-        Column(modifier = Modifier.clip(CardShape)) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    // A plain tap toggles playback; a long press opens the editor, but only
-                    // when the user enabled editing -- same rule as the old adapter.
-                    .combinedClickable(
-                        onClick = onTogglePlayback,
-                        onLongClick = if (editStationsEnabled) onToggleEditor else null,
-                    )
-            ) {
+        Box(modifier = Modifier.clip(CardShape)) {
+            Column {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        // A plain tap toggles playback; a long press opens the editor, but only
+                        // when the user enabled editing -- same rule as the old adapter.
+                        .combinedClickable(
+                            onClick = onTogglePlayback,
+                            onLongClick = if (editStationsEnabled) onToggleEditor else null,
+                        )
+                ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
@@ -124,42 +128,58 @@ fun StationCard(
                         contentDescription = stringResource(R.string.descr_card_starred_station),
                         tint = if (station.imageColor != -1) Color(station.imageColor)
                         else MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp),
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                            .size(24.dp),
+                    )
+                }
+
+                // A dedicated handle for drag-to-reorder, separate from the row's own
+                // long-press-to-edit gesture so the two never fight over the same touch.
+                Icon(
+                    painter = painterResource(R.drawable.ic_drag_handle_24dp),
+                    contentDescription = stringResource(R.string.descr_card_drag_handle),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .padding(start = 4.dp)
+                        .size(24.dp)
+                        .then(dragHandleModifier),
+                )
+            }
+                }
+
+                AnimatedVisibility(
+                    visible = isEditorOpen,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically(),
+                ) {
+                    StationEditor(
+                        station = station,
+                        editStreamUrisEnabled = editStreamUrisEnabled,
+                        onSave = onSave,
+                        onCancel = onCancelEdit,
+                        onChangeImage = onChangeImage,
+                        onPlaceOnHomeScreen = onPlaceOnHomeScreen,
                     )
                 }
             }
 
-                // The station that is playing is marked by an accent bar down the trailing
-                // edge. Drawn as a child of the Card so the card's own clip rounds it off.
-                if (isPlaying) {
-                    // matchParentSize takes the row's measured height, which fillMaxHeight
-                    // alone cannot do here: the Box wraps its content, so there is no
-                    // bounded height to fill and the bar would collapse to nothing.
-                    Box(modifier = Modifier.matchParentSize()) {
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.CenterEnd)
-                                .fillMaxHeight()
-                                .width(8.dp)
-                                .background(accentColor)
-                        )
-                    }
+            // The station that is playing is marked by an accent bar down the trailing
+            // edge. A sibling of the whole Column -- not just the header row -- so it still
+            // reaches the bottom of the card while the inline editor is open.
+            if (isPlaying) {
+                // matchParentSize takes the column's measured height, which fillMaxHeight
+                // alone cannot do here: the Box wraps its content, so there is no
+                // bounded height to fill and the bar would collapse to nothing.
+                Box(modifier = Modifier.matchParentSize()) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .fillMaxHeight()
+                            .width(8.dp)
+                            .background(accentColor)
+                    )
                 }
-            }
-
-            AnimatedVisibility(
-                visible = isEditorOpen,
-                enter = fadeIn() + expandVertically(),
-                exit = fadeOut() + shrinkVertically(),
-            ) {
-                StationEditor(
-                    station = station,
-                    editStreamUrisEnabled = editStreamUrisEnabled,
-                    onSave = onSave,
-                    onCancel = onCancelEdit,
-                    onChangeImage = onChangeImage,
-                    onPlaceOnHomeScreen = onPlaceOnHomeScreen,
-                )
             }
         }
     }

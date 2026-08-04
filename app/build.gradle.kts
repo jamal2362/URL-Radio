@@ -18,8 +18,7 @@ android {
 
     androidResources {
         localeFilters += listOf(
-            "en", "ar", "bg", "cs", "de", "el", "fr", "hu", "it",
-            "nl", "pl", "pt", "ru", "ro", "tr", "uk", "zh-rCN"
+            "en", "de"
         )
     }
 

@@ -8,6 +8,7 @@
     <string name="descr_app_icon">App icon depicting an old radio</string>
     <string name="descr_card_small_play_button">Play/stop</string>
     <string name="descr_card_starred_station">Starred station</string>
+    <string name="descr_card_drag_handle">Drag to reorder</string>
     <string name="descr_card_station_image_change">Change station image</string>
     <string name="descr_card_station_image">Station image</string>
     <string name="descr_expanded_player_metadata_copy_button">Copy the now playing information</string>
@@ -54,6 +55,11 @@
     <!-- Onboarding -->
     <string name="onboarding_app_description">Immerse yourself in the sound of your choice!</string>
     <string name="onboarding_app_get_started">Get started</string>
+
+    <!-- Stations -->
+    <string name="tab_stations_all">All Stations</string>
+    <string name="tab_stations_favorites">Favorites</string>
+    <string name="stations_favorites_empty">No favorites yet. Swipe a station to the right to add it here.</string>
 
     <!-- Player -->
     <string name="player_sheet_h2_station_metadata">Currently playing</string>
