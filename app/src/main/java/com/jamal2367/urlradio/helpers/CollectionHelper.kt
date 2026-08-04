@@ -33,6 +33,8 @@ import com.jamal2367.urlradio.core.Station
 import com.jamal2367.urlradio.search.DirectInputCheck
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import java.io.File
 import java.net.URL
 import java.util.*
@@ -461,100 +463,122 @@ object CollectionHelper {
     }
 
 
-    /* Creates station from URI pointing to a local file */
-    fun createStationListFromContentUri(context: Context, contentUri: Uri): List<Station> {
-        val stationList: MutableList<Station> = mutableListOf()
+    /*
+     * Creates stations from a URI pointing to a local .m3u or .pls file.
+     *
+     * This is what both the "open playlist" intent and the playlist import in the settings
+     * end up calling.
+     */
+    suspend fun createStationListFromContentUri(context: Context, contentUri: Uri): List<Station> {
         val fileType: String = FileHelper.getContentType(context, contentUri)
-        // CASE: M3U playlist detected
-        if (Keys.MIME_TYPES_M3U.contains(fileType)) {
-            val playlist = FileHelper.readTextFileFromContentUri(context, contentUri)
-            stationList.addAll(readM3uPlaylistContent(playlist))
+        val playlist: List<String> = FileHelper.readTextFileFromContentUri(context, contentUri)
+        return when {
+            // CASE: M3U playlist detected
+            Keys.MIME_TYPES_M3U.contains(fileType) -> readM3uPlaylistContent(playlist)
+            // CASE: PLS playlist detected
+            Keys.MIME_TYPES_PLS.contains(fileType) -> readPlsPlaylistContent(playlist)
+            else -> emptyList()
         }
-        // CASE: PLS playlist detected
-        else if (Keys.MIME_TYPES_PLS.contains(fileType)) {
-            val playlist = FileHelper.readTextFileFromContentUri(context, contentUri)
-            stationList.addAll(readPlsPlaylistContent(playlist))
-        }
-        return stationList
     }
 
 
+    /* A name / stream address pair taken from a playlist, before its type has been checked */
+    private data class PlaylistEntry(val name: String, val streamUri: String)
+
+
     /* Reads a m3u playlist and returns a list of stations */
-    private fun readM3uPlaylistContent(playlist: List<String>): List<Station> {
-        val stations: MutableList<Station> = mutableListOf()
+    private suspend fun readM3uPlaylistContent(playlist: List<String>): List<Station> {
+        val entries: MutableList<PlaylistEntry> = mutableListOf()
         var name = String()
-        var streamUri: String
-        var contentType: String
 
         playlist.forEach { line ->
             // get name of station
             if (line.startsWith("#EXTINF:")) {
                 name = line.substringAfter(",").trim()
             }
-            // get stream uri and check mime type
+            // get stream uri
             else if (line.isNotBlank() && !line.startsWith("#")) {
-                streamUri = line.trim()
+                val streamUri = line.trim()
                 // use the stream address as the name if no name is specified
-                if (name.isEmpty()) {
-                    name = streamUri
-                }
-                contentType = NetworkHelper.detectContentType(streamUri).type.lowercase(Locale.getDefault())
-                // store station in list if mime type is supported
-                if (contentType != Keys.MIME_TYPE_UNSUPPORTED) {
-                    val station = Station(name = name, streamUris = mutableListOf(streamUri), streamContent = contentType, modificationDate = GregorianCalendar.getInstance().time)
-                    stations.add(station)
-                }
+                entries.add(PlaylistEntry(name.ifEmpty { streamUri }, streamUri))
                 // reset name for the next station - useful if playlist does not provide name(s)
                 name = String()
             }
         }
-        return stations
+        return createStationsFromEntries(entries)
     }
 
 
     /* Reads a pls playlist and returns a list of stations */
-    private fun readPlsPlaylistContent(playlist: List<String>): List<Station> {
-        val stations: MutableList<Station> = mutableListOf()
-        var name = String()
-        var streamUri: String
-        var contentType: String
+    private suspend fun readPlsPlaylistContent(playlist: List<String>): List<Station> {
+        val entries: MutableList<PlaylistEntry> = mutableListOf()
 
         playlist.forEachIndexed { index, line ->
-            // get stream uri and check mime type
-            if (line.startsWith("File")) {
-                streamUri = line.substringAfter("=").trim()
-                contentType = NetworkHelper.detectContentType(streamUri).type.lowercase(Locale.getDefault())
-                if (contentType != Keys.MIME_TYPE_UNSUPPORTED) {
-                    // look for the matching station name
-                    val number: String = line.substring(4 /* File */, line.indexOf("="))
-                    val lineBeforeIndex: Int = index - 1
-                    val lineAfterIndex: Int = index + 1
-                    // first: check the line before
-                    if (lineBeforeIndex >= 0) {
-                        val lineBefore: String = playlist[lineBeforeIndex]
-                        if (lineBefore.startsWith("Title$number")) {
-                            name = lineBefore.substringAfter("=").trim()
-                        }
+            // get stream uri
+            if (line.startsWith("File") && line.contains("=")) {
+                var name = String()
+                val streamUri: String = line.substringAfter("=").trim()
+                // look for the matching station name
+                val number: String = line.substring(4 /* File */, line.indexOf("="))
+                val lineBeforeIndex: Int = index - 1
+                val lineAfterIndex: Int = index + 1
+                // first: check the line before
+                if (lineBeforeIndex >= 0) {
+                    val lineBefore: String = playlist[lineBeforeIndex]
+                    if (lineBefore.startsWith("Title$number")) {
+                        name = lineBefore.substringAfter("=").trim()
                     }
-                    // then: check the line after
-                    if (name.isEmpty() && lineAfterIndex < playlist.size) {
-                        val lineAfter: String = playlist[lineAfterIndex]
-                        if (lineAfter.startsWith("Title$number")) {
-                            name = lineAfter.substringAfter("=").trim()
-                        }
-                    }
-                    // fallback: use stream uri as name
-                    if (name.isEmpty()) {
-                        name = streamUri
-                    }
-                    // add station
-                    val station = Station(name = name, streamUris = mutableListOf(streamUri), streamContent = contentType, modificationDate = GregorianCalendar.getInstance().time)
-                    stations.add(station)
                 }
+                // then: check the line after
+                if (name.isEmpty() && lineAfterIndex < playlist.size) {
+                    val lineAfter: String = playlist[lineAfterIndex]
+                    if (lineAfter.startsWith("Title$number")) {
+                        name = lineAfter.substringAfter("=").trim()
+                    }
+                }
+                // fallback: use stream uri as name
+                entries.add(PlaylistEntry(name.ifEmpty { streamUri }, streamUri))
             }
         }
-        return stations
+        return createStationsFromEntries(entries)
     }
+
+
+    /*
+     * Turns playlist entries into stations, dropping everything that does not serve a
+     * supported stream.
+     *
+     * Every entry needs a request of its own to find out what it serves. Those requests run
+     * side by side rather than one after the other -- a playlist with fifty entries used to
+     * take fifty round trips before the app showed anything. The permit count keeps that from
+     * turning into fifty simultaneous connections.
+     */
+    private suspend fun createStationsFromEntries(entries: List<PlaylistEntry>): List<Station> =
+        coroutineScope {
+            val permits = Semaphore(MAX_PARALLEL_CONTENT_TYPE_CHECKS)
+            entries.map { entry ->
+                async(IO) {
+                    permits.withPermit {
+                        val contentType: String = NetworkHelper.detectContentType(entry.streamUri)
+                            .type.lowercase(Locale.getDefault())
+                        if (contentType == Keys.MIME_TYPE_UNSUPPORTED) {
+                            null
+                        } else {
+                            Station(
+                                name = entry.name,
+                                streamUris = mutableListOf(entry.streamUri),
+                                streamContent = contentType,
+                                modificationDate = GregorianCalendar.getInstance().time
+                            )
+                        }
+                    }
+                }
+            }.awaitAll().filterNotNull()
+        }
+
+
+    /* How many playlist entries are checked at the same time */
+    private const val MAX_PARALLEL_CONTENT_TYPE_CHECKS = 8
 
 
     /* Export collection of stations as M3U */

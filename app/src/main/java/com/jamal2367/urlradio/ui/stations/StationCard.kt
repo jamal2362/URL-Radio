@@ -17,7 +17,6 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -55,7 +54,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
@@ -120,9 +118,15 @@ fun StationCard(
                             // While the editor is open the cover is the shortcut to the image
                             // picker; otherwise a long press on it opens the editor.
                             if (isEditorOpen) {
-                                Modifier.clickable(onClick = onChangeImage)
+                                Modifier.clickable(
+                                    interactionSource = null,
+                                    indication = null,
+                                    onClick = onChangeImage,
+                                )
                             } else {
                                 Modifier.combinedClickable(
+                                    interactionSource = null,
+                                    indication = null,
                                     onClick = onTogglePlayback,
                                     onLongClick = if (editStationsEnabled) onToggleEditor else null,
                                 )
@@ -137,7 +141,11 @@ fun StationCard(
                     modifier = Modifier
                         .weight(1f)
                         .padding(horizontal = 12.dp)
+                        // The cover and the name stay visually silent when tapped: no ripple,
+                        // no hover highlight. Only the free area of the row still reacts.
                         .combinedClickable(
+                            interactionSource = null,
+                            indication = null,
                             onClick = onTogglePlayback,
                             onLongClick = if (editStationsEnabled) onToggleEditor else null,
                         ),

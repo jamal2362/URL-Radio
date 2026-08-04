@@ -18,23 +18,32 @@
     <string name="descr_expanded_player_sleep_timer_start_button">Start sleep timer</string>
     <string name="descr_player_playback_button">Play/pause</string>
     <string name="descr_player_station_image">Station image</string>
+    <string name="descr_station_preview_playing">Preview playing</string>
 
     <!-- Dialogs -->
-    <string name="dialog_add_station_title">Add Station</string>
+    <string name="dialog_add_station_title">Add Stations</string>
+    <string name="dialog_add_station_found">Stations found: %1$d</string>
     <string name="dialog_edit_station_name">Station name</string>
     <string name="dialog_edit_stream_uri">Stream address</string>
     <string name="dialog_error_message_default">An error occurred</string>
     <string name="dialog_error_message_no_network">Connect to the Internet.</string>
     <string name="dialog_error_title_no_network">Offline</string>
     <string name="dialog_find_station_button_add">Add</string>
+    <string name="dialog_find_station_button_add_count">Add (%1$d)</string>
+    <string name="dialog_find_station_empty_hint">Search for a station name, or paste a stream address.</string>
     <string name="dialog_find_station_hint">Name or stream address</string>
     <string name="dialog_find_station_no_results">No results found.</string>
-    <string name="dialog_find_station_title">Find Station</string>
+    <string name="dialog_find_station_title">Find Stations</string>
     <string name="dialog_generic_button_cancel">Cancel</string>
+    <string name="dialog_generic_button_done">Done</string>
     <string name="dialog_generic_button_okay">OK</string>
     <string name="dialog_generic_details_button">Show details</string>
     <string name="dialog_opml_import_details_default">No details available</string>
     <string name="dialog_restore_collection_replace_existing">Replace current collection of radio stations with the radio station from backup?</string>
+    <string name="dialog_station_picker_clear">Clear</string>
+    <string name="dialog_station_picker_hint">Tap to select · Long press to preview</string>
+    <string name="dialog_station_picker_select_all">Select all</string>
+    <string name="dialog_station_picker_selected">%1$d selected</string>
     <string name="dialog_yes_no_message_remove_station">Remove this station?</string>
     <string name="dialog_yes_no_message_update_station_images">Download latest version of all station images?</string>
     <string name="dialog_yes_no_positive_button_default">Yes</string>
@@ -89,6 +98,8 @@
     <string name="pref_m3u_export_summary">Save your radio stations to an M3U playlist file that can be imported into other players.</string>
     <string name="pref_m3u_export_title">Export M3U</string>
     <string name="pref_maintenance_title">Maintenance</string>
+    <string name="pref_playlist_import_summary">Add radio stations from an M3U or PLS playlist file.</string>
+    <string name="pref_playlist_import_title">Import Playlist</string>
     <string name="pref_pls_export_summary">Save your radio stations to an PLS playlist file that can be imported into other players.</string>
     <string name="pref_pls_export_title">Export PLS</string>
     <string name="pref_station_export_summary">Save entire collection of radio stations including images to device storage.</string>
@@ -96,8 +107,11 @@
     <string name="pref_station_restore_summary">Restore collection of radio stations from backup. Existing stations will be replaced.</string>
     <string name="pref_station_restore_title">Restore Stations</string>
     <string name="pref_theme_selection_mode_dark">Dark mode</string>
+    <string name="pref_theme_selection_mode_dark_summary">Always use the dark colour scheme.</string>
     <string name="pref_theme_selection_mode_device_default">Same as device</string>
+    <string name="pref_theme_selection_mode_device_default_summary">Follows the light/dark setting of your system.</string>
     <string name="pref_theme_selection_mode_light">Light mode</string>
+    <string name="pref_theme_selection_mode_light_summary">Always use the light colour scheme.</string>
     <string name="pref_theme_selection_summary">Current theme:</string>
     <string name="pref_theme_selection_title">App Theme</string>
     <string name="pref_update_station_images_summary">Download latest version of all station images.</string>
@@ -125,6 +139,8 @@
     <string name="toastmessage_error_download_error">Download error</string>
     <string name="toastmessage_error_restart_playback_failed">Unable to start or restart playback.</string>
     <string name="toastmessage_install_file_helper">Please install a file manager.</string>
+    <string name="toastmessage_playlist_import_empty">No supported stations found in this playlist.</string>
+    <string name="toastmessage_playlist_import_running">Reading playlist…</string>
     <string name="toastmessage_preview_playback_failed">Preview playback not possible.</string>
     <string name="toastmessage_preview_playback_started">Preview playback was started.</string>
     <string name="toastmessage_restored">Stations has been successfully restored.</string>

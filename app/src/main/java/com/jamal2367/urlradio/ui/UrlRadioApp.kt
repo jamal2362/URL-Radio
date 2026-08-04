@@ -15,6 +15,10 @@ package com.jamal2367.urlradio.ui
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -61,10 +65,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import com.jamal2367.urlradio.R
@@ -175,6 +182,11 @@ fun UrlRadioApp(
         },
     ) { padding ->
         if (isWideLayout) {
+            // The second column only earns its 400dp when there is something to put in it.
+            // With an empty collection there is no station to play, so the column is dropped
+            // and the station pane - onboarding, at that point - gets the whole window.
+            val showSidePane = screen == AppScreen.Settings || !state.showOnboarding
+
             Row(
                 modifier = Modifier
                     .fillMaxSize()
@@ -189,14 +201,18 @@ fun UrlRadioApp(
                         onDeleteRequest = { pendingDelete = it },
                     )
                 }
-                Surface(
-                    tonalElevation = 3.dp,
-                    modifier = Modifier
-                        .width(400.dp)
-                        .fillMaxHeight(),
-                ) {
-                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                if (showSidePane) {
+                    Surface(
+                        tonalElevation = 3.dp,
+                        modifier = Modifier
+                            .width(400.dp)
+                            .fillMaxHeight(),
+                    ) {
                         if (screen == AppScreen.Settings) {
+                            // Not wrapped in a verticalScroll Column: SettingsScreen is a
+                            // LazyColumn and scrolls itself. Nesting the two measured it with
+                            // an unbounded height, which crashed the moment settings were
+                            // opened in landscape.
                             SettingsScreen(
                                 versionSummary = state.versionSummary,
                                 themeSelection = state.themeSelection,
@@ -205,31 +221,38 @@ fun UrlRadioApp(
                                 editStations = state.editStationsEnabled,
                                 editStreamUris = state.editStreamUrisEnabled,
                                 callbacks = actions.settings,
-                                contentPadding = PaddingValues(0.dp),
-                                modifier = Modifier.fillMaxHeight(),
+                                // The top app bar sits above this column, so its height has to
+                                // be kept clear here as well.
+                                contentPadding = PaddingValues(
+                                    top = padding.calculateTopPadding(),
+                                    bottom = 16.dp,
+                                ),
+                                modifier = Modifier.fillMaxSize(),
                             )
                         } else {
-                            PlayerPane(
-                                station = state.currentStation,
-                                playback = state.playback,
-                                expanded = true,
-                                metadataIndex = effectiveMetadataIndex,
-                                onToggleExpanded = {},
-                                onSetExpanded = {},
-                                onTogglePlayback = { actions.onTogglePlayback(state.currentStation) },
-                                onPreviousMetadata = {
-                                    metadataIndex = previousIndex(effectiveMetadataIndex, historySize)
-                                },
-                                onNextMetadata = {
-                                    metadataIndex = nextIndex(effectiveMetadataIndex, historySize)
-                                },
-                                onCopy = actions.onCopy,
-                                onCopyFullHistory = actions.onCopyFullHistory,
-                                onShare = { actions.onShare(state.currentStation) },
-                                onStartSleepTimer = { showSleepTimerPicker = true },
-                                onCancelSleepTimer = actions.onCancelSleepTimer,
-                                modifier = Modifier.padding(top = padding.calculateTopPadding()),
-                            )
+                            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                                PlayerPane(
+                                    station = state.currentStation,
+                                    playback = state.playback,
+                                    expanded = true,
+                                    metadataIndex = effectiveMetadataIndex,
+                                    onToggleExpanded = {},
+                                    onSetExpanded = {},
+                                    onTogglePlayback = { actions.onTogglePlayback(state.currentStation) },
+                                    onPreviousMetadata = {
+                                        metadataIndex = previousIndex(effectiveMetadataIndex, historySize)
+                                    },
+                                    onNextMetadata = {
+                                        metadataIndex = nextIndex(effectiveMetadataIndex, historySize)
+                                    },
+                                    onCopy = actions.onCopy,
+                                    onCopyFullHistory = actions.onCopyFullHistory,
+                                    onShare = { actions.onShare(state.currentStation) },
+                                    onStartSleepTimer = { showSleepTimerPicker = true },
+                                    onCancelSleepTimer = actions.onCancelSleepTimer,
+                                    modifier = Modifier.padding(top = padding.calculateTopPadding()),
+                                )
+                            }
                         }
                     }
                 }
@@ -250,28 +273,49 @@ fun UrlRadioApp(
                 // The scaffold reports the system bar insets but does not apply them, so the
                 // bottom inset is consumed here - otherwise the player and the floating
                 // toolbar end up underneath the gesture bar.
-                Column(
+                //
+                // The player floats over the list rather than sitting below it: the list is
+                // given just short of the player's height as bottom padding, so the last
+                // station scrolls a little way underneath the player instead of stopping
+                // cleanly above it.
+                val density = LocalDensity.current
+                var playerHeight by remember { mutableStateOf(0.dp) }
+
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(bottom = padding.calculateBottomPadding())
                 ) {
-                    Box(modifier = Modifier.weight(1f)) {
-                        StationsPane(
-                            state = state,
-                            actions = actions,
-                            contentPadding = padding,
-                            onOpenSettings = { screen = AppScreen.Settings },
-                            onDeleteRequest = { pendingDelete = it },
-                        )
-                    }
+                    StationsPane(
+                        state = state,
+                        actions = actions,
+                        contentPadding = padding,
+                        listBottomPadding = (playerHeight - PLAYER_STATION_OVERLAP)
+                            .coerceAtLeast(0.dp),
+                        onOpenSettings = { screen = AppScreen.Settings },
+                        onDeleteRequest = { pendingDelete = it },
+                    )
                     // The player is hidden entirely while onboarding is showing, which is
                     // what the old bottom sheet did through STATE_HIDDEN.
-                    AnimatedVisibility(visible = !state.showOnboarding) {
+                    AnimatedVisibility(
+                        visible = !state.showOnboarding,
+                        // Grows out of the bottom edge. The default for a Box-hosted
+                        // AnimatedVisibility expands from the top-start corner instead.
+                        enter = fadeIn() + expandVertically(expandFrom = Alignment.Bottom),
+                        exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Bottom),
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                    ) {
                         Surface(
                             shape = RoundedCornerShape(28.dp),
                             tonalElevation = 3.dp,
                             shadowElevation = 6.dp,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                            // Measured including its own margin, because that is the strip of
+                            // screen the list has to leave free.
+                            modifier = Modifier
+                                .onSizeChanged {
+                                    playerHeight = with(density) { it.height.toDp() }
+                                }
+                                .padding(horizontal = 12.dp, vertical = 8.dp),
                         ) {
                             PlayerPane(
                                 station = state.currentStation,
@@ -339,6 +383,16 @@ fun UrlRadioApp(
     dialogs()
 }
 
+/**
+ * How far the last station card is allowed to slide underneath the floating player. Small on
+ * purpose: it should read as the list continuing behind the player, not as a cropped card.
+ */
+private val PLAYER_STATION_OVERLAP = 14.dp
+
+/**
+ * @param listBottomPadding space kept free at the end of the list. In the compact layout the
+ *   player floats over the list, so this is its height minus [PLAYER_STATION_OVERLAP].
+ */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun StationsPane(
@@ -347,6 +401,7 @@ private fun StationsPane(
     contentPadding: PaddingValues,
     onOpenSettings: () -> Unit,
     onDeleteRequest: (Station) -> Unit,
+    listBottomPadding: Dp = 0.dp,
 ) {
     // 0 = all stations, 1 = favourites only. Favourites are always sorted to the front of
     // the collection (see CollectionHelper.sortCollection), so this filtered list is a plain
@@ -401,13 +456,11 @@ private fun StationsPane(
                     onToggleStarred = actions.onToggleStarred,
                     onMove = actions.onMove,
                     onMoveFinished = actions.onMoveFinished,
-                    // Nothing floats over the bottom of the list anymore, so the row only
-                    // needs its own breathing room rather than clearance for a toolbar.
                     contentPadding = PaddingValues(
                         start = 12.dp,
                         end = 12.dp,
                         top = 0.dp,
-                        bottom = 0.dp,
+                        bottom = listBottomPadding,
                     ),
                 )
             }

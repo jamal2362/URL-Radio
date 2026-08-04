@@ -63,6 +63,7 @@ import com.jamal2367.urlradio.R
 import com.jamal2367.urlradio.core.Station
 import com.jamal2367.urlradio.helpers.DateTimeHelper
 import com.jamal2367.urlradio.playback.PlaybackUiState
+import com.jamal2367.urlradio.playback.sanitizedMetadata
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -83,8 +84,9 @@ fun PlayerPane(
     onCancelSleepTimer: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // Stations that send no track title fall back to their own name rather than to a blank line.
     val shownMetadata = playback.metadataHistory.getOrNull(metadataIndex)
-        ?: station.name.ifEmpty { "" }
+        ?.sanitizedMetadata().orEmpty().ifEmpty { station.name }
     val playbackButtonDescription = stringResource(R.string.descr_player_playback_button)
 
     Column(

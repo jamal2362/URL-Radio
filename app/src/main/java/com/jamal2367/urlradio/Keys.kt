@@ -58,6 +58,9 @@ object Keys {
     const val CMD_REQUEST_SLEEP_TIMER_REMAINING: String = "REQUEST_SLEEP_TIMER_REMAINING"
     const val CMD_REQUEST_METADATA_HISTORY: String = "REQUEST_METADATA_HISTORY"
 
+    // broadcast from PlayerService to every connected controller - carries EXTRA_METADATA_HISTORY
+    const val CMD_METADATA_UPDATED: String = "METADATA_UPDATED"
+
     // preferences
     const val PREF_RADIO_BROWSER_API: String = "RADIO_BROWSER_API"
     const val PREF_ONE_TIME_HOUSEKEEPING_NECESSARY: String = "ONE_TIME_HOUSEKEEPING_NECESSARY_VERSIONCODE_95" // increment to current app version code to trigger housekeeping that runs only once

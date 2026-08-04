@@ -244,10 +244,17 @@ class PlayerService : MediaLibraryService() {
 
     /* Updates metadata */
     private fun updateMetadata(metadata: String = String()) {
-        // get metadata string
-        val metadataString: String = metadata.ifEmpty {
-            player.currentMediaItem?.mediaMetadata?.artist.toString()
-        }
+        /*
+         * Streams that send no title at all fall back to the name of the station. The name is
+         * carried as the artist of the current media item (see CollectionHelper.buildMediaItem).
+         * Reading it with toString() on a nullable used to put the literal string "null" into
+         * the history whenever there was neither a title nor a loaded media item.
+         */
+        val stationName: String = player.currentMediaItem?.mediaMetadata?.artist?.toString().orEmpty()
+        val metadataString: String = metadata.trim().ifEmpty { stationName.trim() }
+        if (metadataString.isEmpty()) return
+        // nothing to do when the stream repeats the entry that is already at the top
+        if (metadataHistory.lastOrNull() == metadataString) return
         // remove duplicates
         if (metadataHistory.contains(metadataString)) {
             metadataHistory.removeAll { it == metadataString }
@@ -260,6 +267,27 @@ class PlayerService : MediaLibraryService() {
         }
         // save history
         PreferencesHelper.saveMetadataHistory(metadataHistory)
+        // hand the new history to the UI
+        broadcastMetadataHistory()
+    }
+
+
+    /*
+     * Pushes the metadata history to every connected controller.
+     *
+     * Without this the UI only ever asked for the history when playback started or when it
+     * (re)connected, so a track change during playback stayed invisible until the station was
+     * restarted.
+     */
+    private fun broadcastMetadataHistory() {
+        if (!this::mediaLibrarySession.isInitialized) return
+        val extras = Bundle().apply {
+            putStringArrayList(Keys.EXTRA_METADATA_HISTORY, ArrayList(metadataHistory))
+        }
+        mediaLibrarySession.broadcastCustomCommand(
+            SessionCommand(Keys.CMD_METADATA_UPDATED, Bundle.EMPTY),
+            extras
+        )
     }
 
 
@@ -321,6 +349,7 @@ class PlayerService : MediaLibraryService() {
             builder.add(SessionCommand(Keys.CMD_CANCEL_SLEEP_TIMER, Bundle.EMPTY))
             builder.add(SessionCommand(Keys.CMD_REQUEST_SLEEP_TIMER_REMAINING, Bundle.EMPTY))
             builder.add(SessionCommand(Keys.CMD_REQUEST_METADATA_HISTORY, Bundle.EMPTY))
+            builder.add(SessionCommand(Keys.CMD_METADATA_UPDATED, Bundle.EMPTY))
             builder.add(SessionCommand(Keys.CMD_PLAY_STREAM, Bundle.EMPTY))
             return MediaSession.ConnectionResult.accept(builder.build(), connectionResult.availablePlayerCommands)
         }

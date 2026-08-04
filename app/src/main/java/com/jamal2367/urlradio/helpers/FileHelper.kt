@@ -438,7 +438,12 @@ object FileHelper {
     }
 
 
-    /* Reads InputStream from content uri and returns it as List of String */
+    /*
+     * Reads InputStream from content uri and returns it as List of String
+     *
+     * The line cap keeps a stray large file from being pulled into memory whole. It is high
+     * enough for a real playlist: a PLS entry costs three lines, an M3U entry two.
+     */
     fun readTextFileFromContentUri(context: Context, contentUri: Uri): List<String> {
         val lines: MutableList<String> = mutableListOf()
         try {
@@ -446,11 +451,10 @@ object FileHelper {
             val inputStream: InputStream? = context.contentResolver.openInputStream(contentUri)
             if (inputStream != null) {
                 val reader: InputStreamReader = inputStream.reader()
-                var index = 0
                 reader.forEachLine {
-                    index += 1
-                    if (index < 256)
+                    if (lines.size < MAX_PLAYLIST_LINES) {
                         lines.add(it)
+                    }
                 }
                 inputStream.close()
             }
@@ -459,6 +463,10 @@ object FileHelper {
         }
         return lines
     }
+
+
+    /* Upper bound for the number of lines read from an imported playlist */
+    private const val MAX_PLAYLIST_LINES: Int = 2048
 
 
     /*

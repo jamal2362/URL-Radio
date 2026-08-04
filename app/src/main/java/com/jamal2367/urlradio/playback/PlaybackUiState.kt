@@ -36,5 +36,12 @@ data class PlaybackUiState(
     val isSleepTimerRunning: Boolean get() = sleepTimerRemaining > 0L
 
     /** The newest metadata line, falling back to an empty string. */
-    val currentMetadata: String get() = metadataHistory.lastOrNull().orEmpty()
+    val currentMetadata: String get() = metadataHistory.lastOrNull().orEmpty().sanitizedMetadata()
 }
+
+/**
+ * Blanks out entries that carry no title. Besides empty lines this covers the literal string
+ * "null", which older versions wrote whenever a stream sent no metadata at all and which may
+ * still sit in a user's stored history.
+ */
+fun String.sanitizedMetadata(): String = trim().takeUnless { it.isEmpty() || it == "null" }.orEmpty()
