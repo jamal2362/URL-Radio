@@ -28,13 +28,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -356,16 +357,20 @@ private fun StationsPane(
     val visibleStations = if (selectedTab == 1) state.stations.filter { it.starred } else state.stations
 
     Column(modifier = Modifier.fillMaxSize()) {
-        if (!state.showOnboarding) {
-            FloatingTabBar(
-                selectedTab = selectedTab,
-                onSelect = { selectedTab = it },
-                modifier = Modifier.padding(
-                    top = contentPadding.calculateTopPadding() + 8.dp,
-                    bottom = 4.dp,
-                ),
-            )
-        }
+        // Add-station and settings flank the tab selector. The tabs themselves drop out
+        // during onboarding -- there is nothing to filter yet -- but the two buttons stay,
+        // because adding the first station is the whole point of that screen.
+        StationsTopBar(
+            selectedTab = selectedTab,
+            onSelect = { selectedTab = it },
+            showTabs = !state.showOnboarding,
+            onAddStation = actions.onAddStation,
+            onOpenSettings = onOpenSettings,
+            modifier = Modifier.padding(
+                top = contentPadding.calculateTopPadding() + 8.dp,
+                bottom = 4.dp,
+            ),
+        )
 
         Box(modifier = Modifier.weight(1f)) {
             if (selectedTab == 1 && visibleStations.isEmpty() && !state.showOnboarding) {
@@ -397,36 +402,71 @@ private fun StationsPane(
                     onToggleStarred = actions.onToggleStarred,
                     onMove = actions.onMove,
                     onMoveFinished = actions.onMoveFinished,
+                    // Nothing floats over the bottom of the list any more, so the row only
+                    // needs its own breathing room rather than clearance for a toolbar.
                     contentPadding = PaddingValues(
                         start = 12.dp,
                         end = 12.dp,
-                        top = if (state.showOnboarding) contentPadding.calculateTopPadding() + 12.dp else 12.dp,
-                        bottom = 96.dp,
+                        top = 12.dp,
+                        bottom = 12.dp,
                     ),
                 )
             }
+        }
+    }
+}
 
-            // Add-station and settings, as an Expressive floating toolbar. Replaces the two
-            // extended FABs that used to be a list footer item.
-            HorizontalFloatingToolbar(
-                expanded = true,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 16.dp),
-            ) {
-                IconButton(onClick = actions.onAddStation) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_add_24dp),
-                        contentDescription = stringResource(R.string.dialog_find_station_title),
-                    )
-                }
-                IconButton(onClick = onOpenSettings) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_settings_24dp),
-                        contentDescription = stringResource(R.string.fragment_settings_title),
-                    )
-                }
-            }
+/* The top row: add-station, the all/favourites selector, and settings. */
+@Composable
+private fun StationsTopBar(
+    selectedTab: Int,
+    onSelect: (Int) -> Unit,
+    showTabs: Boolean,
+    onAddStation: () -> Unit,
+    onOpenSettings: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp),
+    ) {
+        RoundBarButton(
+            icon = R.drawable.ic_add_24dp,
+            contentDescription = stringResource(R.string.dialog_find_station_title),
+            onClick = onAddStation,
+        )
+
+        if (showTabs) {
+            FloatingTabBar(
+                selectedTab = selectedTab,
+                onSelect = onSelect,
+                modifier = Modifier.weight(1f),
+            )
+        } else {
+            Spacer(modifier = Modifier.weight(1f))
+        }
+
+        RoundBarButton(
+            icon = R.drawable.ic_settings_24dp,
+            contentDescription = stringResource(R.string.fragment_settings_title),
+            onClick = onOpenSettings,
+        )
+    }
+}
+
+@Composable
+private fun RoundBarButton(icon: Int, contentDescription: String, onClick: () -> Unit) {
+    Surface(
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        shadowElevation = 4.dp,
+        modifier = Modifier.size(56.dp),
+    ) {
+        IconButton(onClick = onClick) {
+            Icon(painter = painterResource(icon), contentDescription = contentDescription)
         }
     }
 }
@@ -442,7 +482,7 @@ private fun FloatingTabBar(
         shape = RoundedCornerShape(28.dp),
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
         shadowElevation = 4.dp,
-        modifier = modifier.padding(horizontal = 12.dp),
+        modifier = modifier,
     ) {
         Row(modifier = Modifier.padding(4.dp)) {
             FloatingTabBarItem(
