@@ -10,6 +10,7 @@
 package com.jamal2367.urlradio.ui.theme
 
 import android.os.Build
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialExpressiveTheme
@@ -19,8 +20,11 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 
 /*
  * The brand fallback schemes. Only the roles the app actually had values for are
@@ -85,6 +89,25 @@ fun UrlRadioTheme(
 
             darkTheme -> DarkColors
             else -> LightColors
+        }
+    }
+
+    /*
+     * Match the system bar icons to the scheme actually being drawn.
+     *
+     * enableEdgeToEdge() and the values/values-night XML themes both pick their icon
+     * appearance from the *system* night mode, not from the app's own theme setting. With
+     * the app forced to light while the system is dark, the status bar kept drawing white
+     * icons onto the light background and they disappeared.
+     */
+    val view = LocalView.current
+    val activity = LocalActivity.current
+    if (!view.isInEditMode && activity != null) {
+        SideEffect {
+            WindowCompat.getInsetsController(activity.window, view).apply {
+                isAppearanceLightStatusBars = !darkTheme
+                isAppearanceLightNavigationBars = !darkTheme
+            }
         }
     }
 
