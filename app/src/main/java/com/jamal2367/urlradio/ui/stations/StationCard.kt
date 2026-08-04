@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -111,7 +112,18 @@ fun StationCard(
                     .fillMaxWidth()
                     .padding(12.dp),
             ) {
-                StationCover(station = station, modifier = Modifier.size(64.dp))
+                StationCover(
+                    station = station,
+                    modifier = Modifier
+                        .size(64.dp)
+                        // While the editor is open the cover itself is the shortcut to the
+                        // image picker. The parent row's tap-to-play is shadowed here, which
+                        // is what we want: playback is not what a tap means in edit mode.
+                        .then(
+                            if (isEditorOpen) Modifier.clickable(onClick = onChangeImage)
+                            else Modifier
+                        ),
+                )
 
                 Text(
                     text = station.name,
@@ -188,6 +200,9 @@ fun StationCard(
 @Composable
 private fun StationCover(station: Station, modifier: Modifier = Modifier) {
     val description = "${stringResource(R.string.descr_player_station_image)}: ${station.name}"
+    // Stations without their own artwork fall back to the app's default station image
+    // rather than showing an empty coloured square.
+    val placeholder = painterResource(R.drawable.ic_default_station_image_72dp)
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
@@ -201,13 +216,16 @@ private fun StationCover(station: Station, modifier: Modifier = Modifier) {
             // The file keeps its name when a station image is replaced, so the modification
             // date is folded into the cache key -- otherwise Coil would serve the old bitmap.
             model = ImageRequest.Builder(LocalContext.current)
-                .data(station.smallImage)
+                .data(station.smallImage.ifEmpty { null })
                 .memoryCacheKey("${station.smallImage}:${station.modificationDate.time}")
                 .diskCacheKey("${station.smallImage}:${station.modificationDate.time}")
                 .build(),
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxWidth(),
+            placeholder = placeholder,
+            error = placeholder,
+            fallback = placeholder,
+            modifier = Modifier.fillMaxSize(),
         )
     }
 }

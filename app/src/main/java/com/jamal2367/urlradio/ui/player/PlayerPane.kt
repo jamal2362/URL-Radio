@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -364,6 +365,8 @@ private fun EqualizerIcon(color: Color, modifier: Modifier = Modifier) {
 
 @Composable
 private fun StationArtwork(station: Station, modifier: Modifier = Modifier) {
+    // Same default station image the list uses for stations without their own artwork.
+    val placeholder = painterResource(R.drawable.ic_default_station_image_72dp)
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(14.dp))
@@ -374,12 +377,15 @@ private fun StationArtwork(station: Station, modifier: Modifier = Modifier) {
     ) {
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
-                .data(station.smallImage)
+                .data(station.smallImage.ifEmpty { null })
                 .memoryCacheKey("${station.smallImage}:${station.modificationDate.time}")
                 .build(),
             contentDescription = "${stringResource(R.string.descr_player_station_image)}: ${station.name}",
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxWidth(),
+            placeholder = placeholder,
+            error = placeholder,
+            fallback = placeholder,
+            modifier = Modifier.fillMaxSize(),
         )
     }
 }

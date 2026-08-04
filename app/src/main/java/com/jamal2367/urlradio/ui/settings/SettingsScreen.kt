@@ -23,11 +23,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
@@ -41,8 +41,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
@@ -345,17 +347,30 @@ private fun ThemeChooserDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.pref_theme_selection_title)) },
         text = {
+            // Plain rows rather than ListItem: ListItem paints its own `surface` colour,
+            // which sat as a lighter block inside the dialog's container colour.
             Column {
                 options.forEach { (value, label) ->
-                    ListItem(
-                        headlineContent = { Text(label) },
-                        leadingContent = {
-                            RadioButton(selected = value == current, onClick = { onSelect(value) })
-                        },
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onSelect(value) },
-                    )
+                            .clip(RoundedCornerShape(16.dp))
+                            .selectable(
+                                selected = value == current,
+                                role = Role.RadioButton,
+                                onClick = { onSelect(value) },
+                            )
+                            .padding(vertical = 4.dp),
+                    ) {
+                        RadioButton(selected = value == current, onClick = null)
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.padding(start = 12.dp),
+                        )
+                    }
                 }
             }
         },
