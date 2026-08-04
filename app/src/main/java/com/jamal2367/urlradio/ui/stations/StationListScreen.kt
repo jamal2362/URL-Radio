@@ -11,7 +11,7 @@ package com.jamal2367.urlradio.ui.stations
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -110,11 +110,11 @@ fun StationListScreen(
                 val isDragging = station.uuid == draggingUuid
 
                 // Reordering is disabled while an editor is open, matching the old
-                // isLongPressDragEnabled() rule. This lives on the drag handle only -- not
-                // the whole row -- so it never has to race the row's own long-press-to-edit
-                // gesture for the same touch.
-                val dragHandleModifier = if (isEditorOpen) Modifier else Modifier.pointerInput(station.uuid) {
-                    detectDragGestures(
+                // isLongPressDragEnabled() rule. Sits on the row as a whole; the cover and
+                // the station name claim their own long-press for opening the editor, so
+                // this only ever fires on the free area around them.
+                val dragModifier = if (isEditorOpen) Modifier else Modifier.pointerInput(station.uuid) {
+                    detectDragGesturesAfterLongPress(
                         onDragStart = {
                             draggingUuid = station.uuid
                             dragOffsetY = 0f
@@ -135,7 +135,7 @@ fun StationListScreen(
                             // Where the dragged row is actually drawn right now: its laid-out
                             // position plus the offset the finger has added.
                             val items = listState.layoutInfo.visibleItemsInfo
-                            val dragged = items.firstOrNull { it.key == draggingUuid } ?: return@detectDragGestures
+                            val dragged = items.firstOrNull { it.key == draggingUuid } ?: return@detectDragGesturesAfterLongPress
                             val draggedCentre = dragged.offset + dragged.size / 2 + dragOffsetY
 
                             // Swap with whichever row that centre now sits inside. Comparing
@@ -145,7 +145,7 @@ fun StationListScreen(
                                 other.index != dragged.index &&
                                     draggedCentre >= other.offset &&
                                     draggedCentre <= other.offset + other.size
-                            } ?: return@detectDragGestures
+                            } ?: return@detectDragGesturesAfterLongPress
 
                             if (onMove(dragged.index, target.index)) {
                                 // The row is about to be laid out at the target's position,
@@ -171,7 +171,7 @@ fun StationListScreen(
                     onPlaceOnHomeScreen = { onPlaceOnHomeScreen(station) },
                     onDeleteRequest = { onDeleteRequest(station) },
                     onToggleStarred = { onToggleStarred(station) },
-                    dragHandleModifier = dragHandleModifier,
+                    dragModifier = dragModifier,
                     modifier = Modifier
                         .zIndex(if (isDragging) 1f else 0f)
                         .graphicsLayer { translationY = if (isDragging) dragOffsetY else 0f },
@@ -197,7 +197,7 @@ private fun SwipeableStationRow(
     onDeleteRequest: () -> Unit,
     onToggleStarred: () -> Unit,
     modifier: Modifier = Modifier,
-    dragHandleModifier: Modifier = Modifier,
+    dragModifier: Modifier = Modifier,
 ) {
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { value ->
@@ -239,7 +239,7 @@ private fun SwipeableStationRow(
             onCancelEdit = onCancelEdit,
             onChangeImage = onChangeImage,
             onPlaceOnHomeScreen = onPlaceOnHomeScreen,
-            dragHandleModifier = dragHandleModifier,
+            dragModifier = dragModifier,
         )
     }
 }

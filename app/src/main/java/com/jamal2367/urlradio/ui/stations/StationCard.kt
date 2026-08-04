@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -84,7 +85,7 @@ fun StationCard(
     onChangeImage: () -> Unit,
     onPlaceOnHomeScreen: () -> Unit,
     modifier: Modifier = Modifier,
-    dragHandleModifier: Modifier = Modifier,
+    dragModifier: Modifier = Modifier,
 ) {
     val accentColor = MaterialTheme.colorScheme.primary
     Card(
@@ -99,12 +100,11 @@ fun StationCard(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        // A plain tap toggles playback; a long press opens the editor, but only
-                        // when the user enabled editing -- same rule as the old adapter.
-                        .combinedClickable(
-                            onClick = onTogglePlayback,
-                            onLongClick = if (editStationsEnabled) onToggleEditor else null,
-                        )
+                        // Long-pressing empty space in the row picks the station up for
+                        // reordering. The cover and the name below carry their own
+                        // long-press, so those two spots open the editor instead.
+                        .then(dragModifier)
+                        .combinedClickable(onClick = onTogglePlayback)
                 ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -116,12 +116,17 @@ fun StationCard(
                     station = station,
                     modifier = Modifier
                         .size(64.dp)
-                        // While the editor is open the cover itself is the shortcut to the
-                        // image picker. The parent row's tap-to-play is shadowed here, which
-                        // is what we want: playback is not what a tap means in edit mode.
                         .then(
-                            if (isEditorOpen) Modifier.clickable(onClick = onChangeImage)
-                            else Modifier
+                            // While the editor is open the cover is the shortcut to the image
+                            // picker; otherwise a long press on it opens the editor.
+                            if (isEditorOpen) {
+                                Modifier.clickable(onClick = onChangeImage)
+                            } else {
+                                Modifier.combinedClickable(
+                                    onClick = onTogglePlayback,
+                                    onLongClick = if (editStationsEnabled) onToggleEditor else null,
+                                )
+                            }
                         ),
                 )
 
@@ -131,7 +136,11 @@ fun StationCard(
                     maxLines = 2,
                     modifier = Modifier
                         .weight(1f)
-                        .padding(horizontal = 12.dp),
+                        .padding(horizontal = 12.dp)
+                        .combinedClickable(
+                            onClick = onTogglePlayback,
+                            onLongClick = if (editStationsEnabled) onToggleEditor else null,
+                        ),
                 )
 
                 if (station.starred) {
@@ -146,17 +155,10 @@ fun StationCard(
                     )
                 }
 
-                // A dedicated handle for drag-to-reorder, separate from the row's own
-                // long-press-to-edit gesture so the two never fight over the same touch.
-                Icon(
-                    painter = painterResource(R.drawable.ic_drag_handle_24dp),
-                    contentDescription = stringResource(R.string.descr_card_drag_handle),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier
-                        .padding(start = 4.dp)
-                        .size(24.dp)
-                        .then(dragHandleModifier),
-                )
+                // Free strip where the drag handle used to sit. Nothing claims these
+                // touches, so a long press here reaches the row's reorder gesture no matter
+                // how long the station name is.
+                Spacer(modifier = Modifier.width(4.dp))
             }
                 }
 
@@ -170,7 +172,6 @@ fun StationCard(
                         editStreamUrisEnabled = editStreamUrisEnabled,
                         onSave = onSave,
                         onCancel = onCancelEdit,
-                        onChangeImage = onChangeImage,
                         onPlaceOnHomeScreen = onPlaceOnHomeScreen,
                     )
                 }
@@ -236,7 +237,6 @@ private fun StationEditor(
     editStreamUrisEnabled: Boolean,
     onSave: (name: String, streamUri: String) -> Unit,
     onCancel: () -> Unit,
-    onChangeImage: () -> Unit,
     onPlaceOnHomeScreen: () -> Unit,
 ) {
     var name by rememberSaveable(station.uuid) { mutableStateOf(station.name) }
@@ -291,12 +291,7 @@ private fun StationEditor(
                 .fillMaxWidth()
                 .padding(top = 8.dp),
         ) {
-            IconButton(onClick = onChangeImage) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_image_24dp),
-                    contentDescription = stringResource(R.string.descr_card_station_image_change),
-                )
-            }
+            // No image button here any more -- tapping the cover above opens the picker.
             IconButton(onClick = onPlaceOnHomeScreen) {
                 Icon(
                     painter = painterResource(R.drawable.ic_home_24dp),

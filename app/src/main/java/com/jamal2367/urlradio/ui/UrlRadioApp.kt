@@ -22,12 +22,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -76,6 +74,7 @@ import com.jamal2367.urlradio.ui.player.PlayerPane
 import com.jamal2367.urlradio.ui.settings.SettingsCallbacks
 import com.jamal2367.urlradio.ui.settings.SettingsScreen
 import com.jamal2367.urlradio.ui.stations.StationListScreen
+import kotlin.time.Duration.Companion.milliseconds
 
 /** Which top-level surface is showing. */
 enum class AppScreen { Stations, Settings }
@@ -150,7 +149,7 @@ fun UrlRadioApp(
 
     LaunchedEffect(playerExpanded, playerActivity) {
         if (!playerExpanded) return@LaunchedEffect
-        delay(5_000)
+        delay(5_000.milliseconds)
         playerExpanded = false
     }
 
@@ -402,13 +401,13 @@ private fun StationsPane(
                     onToggleStarred = actions.onToggleStarred,
                     onMove = actions.onMove,
                     onMoveFinished = actions.onMoveFinished,
-                    // Nothing floats over the bottom of the list any more, so the row only
+                    // Nothing floats over the bottom of the list anymore, so the row only
                     // needs its own breathing room rather than clearance for a toolbar.
                     contentPadding = PaddingValues(
                         start = 12.dp,
                         end = 12.dp,
-                        top = 12.dp,
-                        bottom = 12.dp,
+                        top = 6.dp,
+                        bottom = 6.dp,
                     ),
                 )
             }
@@ -538,7 +537,7 @@ private fun FloatingTabBarItem(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SleepTimerPicker(onConfirm: (Long) -> Unit, onDismiss: () -> Unit) {
-    // Defaults to one minute, 24 hour clock -- same as the old MaterialTimePicker setup.
+    // Defaults to one minute, 24-hour clock -- same as the old MaterialTimePicker setup.
     val timeState = rememberTimePickerState(initialHour = 0, initialMinute = 1, is24Hour = true)
     TimePickerDialog(
         onDismissRequest = onDismiss,

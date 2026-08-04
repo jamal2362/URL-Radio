@@ -5,7 +5,6 @@
     <string name="descr_app_icon">App-Symbol in der Form eines alten Radios</string>
     <string name="descr_card_small_play_button">Start/Stopp</string>
     <string name="descr_card_starred_station">Markierter Sender</string>
-    <string name="descr_card_drag_handle">Zum Umsortieren ziehen</string>
     <string name="descr_card_station_image_change">Senderbild ändern</string>
     <string name="descr_card_station_image">Senderbild</string>
     <string name="descr_expanded_player_metadata_copy_button">Informationen zur aktuellen Wiedergabe kopieren</string>
