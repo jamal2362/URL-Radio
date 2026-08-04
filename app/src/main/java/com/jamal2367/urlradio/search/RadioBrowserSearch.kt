@@ -3,6 +3,11 @@
  * Implements the RadioBrowserSearch class
  * A RadioBrowserSearch performs searches on the radio-browser.info database
  *
+ * Migrated from Volley to OkHttp: OkHttp already ships with the app through
+ * media3-datasource-okhttp and DirectInputCheck, so Volley was one HTTP stack too many.
+ * A search that is still in flight is cancelled when a new one starts or when the dialog
+ * closes, which the Volley queue only did wholesale.
+ *
  * This file is part of
  * TRANSISTOR - Radio App for Android
  *
@@ -16,17 +21,26 @@ package com.jamal2367.urlradio.search
 
 import android.content.Context
 import android.util.Log
-import com.android.volley.*
-import com.android.volley.toolbox.JsonArrayRequest
-import com.android.volley.toolbox.Volley
 import com.google.gson.GsonBuilder
-import org.json.JSONArray
 import com.jamal2367.urlradio.BuildConfig
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.helpers.NetworkHelper
 import com.jamal2367.urlradio.helpers.PreferencesHelper
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.net.URLEncoder
+import java.util.concurrent.TimeUnit
+
+
+/* radio-browser.info asks clients to identify themselves by name and version. */
+private const val USER_AGENT_NAME = "URL-Radio"
 
 
 /*
@@ -48,7 +62,12 @@ class RadioBrowserSearch(private var radioBrowserSearchListener: RadioBrowserSea
 
     /* Main class variables */
     private var radioBrowserApi: String
-    private lateinit var requestQueue: RequestQueue
+    private val scope = CoroutineScope(SupervisorJob() + IO)
+    private var searchJob: Job? = null
+
+    private val client: OkHttpClient = OkHttpClient.Builder()
+        .callTimeout(30, TimeUnit.SECONDS)
+        .build()
 
 
     /* Init constructor */
@@ -63,50 +82,47 @@ class RadioBrowserSearch(private var radioBrowserSearchListener: RadioBrowserSea
     fun searchStation(context: Context, query: String, searchType: Int) {
         Log.v(TAG, "Search - Querying $radioBrowserApi for: $query")
 
-        // create queue and request
-        requestQueue = Volley.newRequestQueue(context)
+        // a newer query supersedes whatever is still running
+        searchJob?.cancel()
+
         val requestUrl: String = when (searchType) {
             // CASE: single station search - by radio browser UUID
             Keys.SEARCH_TYPE_BY_UUID -> "https://${radioBrowserApi}/json/stations/byuuid/${query}"
             // CASE: multiple results search by search term
-            else -> "https://${radioBrowserApi}/json/stations/search?name=${query.replace(" ", "+")}"
+            else -> "https://${radioBrowserApi}/json/stations/search?name=" +
+                URLEncoder.encode(query, "UTF-8")
         }
 
-        // request data from request URL
-        val stringRequest = object: JsonArrayRequest(Method.GET, requestUrl, null, responseListener, errorListener) {
-            @Throws(AuthFailureError::class)
-            override fun getHeaders(): Map<String, String> {
-                val params = HashMap<String, String>()
-                params["User-Agent"] = "$Keys.APPLICATION_NAME ${BuildConfig.VERSION_NAME}"
-                return params
+        searchJob = scope.launch {
+            val results: Array<RadioBrowserResult>? = try {
+                val request = Request.Builder()
+                    .url(requestUrl)
+                    // The previous code read "$Keys.APPLICATION_NAME ...", which Kotlin
+                    // parses as Keys.toString() + ".APPLICATION_NAME", so radio-browser.info
+                    // was told the client was "com.jamal2367.urlradio.Keys@1a2b3c.APPLICATION_NAME".
+                    .header("User-Agent", "$USER_AGENT_NAME/${BuildConfig.VERSION_NAME}")
+                    .build()
+                client.newCall(request).execute().use { response ->
+                    if (!response.isSuccessful) return@use null
+                    val body = response.body?.string()
+                    if (body.isNullOrEmpty()) null else createRadioBrowserResult(body)
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "Error: $e")
+                null
+            }
+            if (results != null) {
+                withContext(Main) {
+                    radioBrowserSearchListener.onRadioBrowserSearchResults(results)
+                }
             }
         }
-
-        // override retry policy
-        stringRequest.retryPolicy = object : RetryPolicy {
-            override fun getCurrentTimeout(): Int {
-                return 30000
-            }
-
-            override fun getCurrentRetryCount(): Int {
-                return 30000
-            }
-
-            @Throws(VolleyError::class)
-            override fun retry(error: VolleyError) {
-                Log.w(TAG, "Error: $error")
-            }
-        }
-
-        // add to RequestQueue.
-        requestQueue.add(stringRequest)
     }
 
 
     fun stopSearchRequest() {
-        if (this::requestQueue.isInitialized) {
-            requestQueue.stop()
-        }
+        searchJob?.cancel()
+        searchJob = null
     }
 
 
@@ -121,24 +137,9 @@ class RadioBrowserSearch(private var radioBrowserSearchListener: RadioBrowserSea
 
     /* Updates the address of the radio-browser.info api */
     private fun updateRadioBrowserApi() {
-        CoroutineScope(IO).launch {
-            val deferred: Deferred<String> = async { NetworkHelper.getRadioBrowserServerSuspended() }
-            radioBrowserApi = deferred.await()
+        scope.launch {
+            radioBrowserApi = NetworkHelper.getRadioBrowserServerSuspended()
         }
-    }
-
-
-    /* Listens for (positive) server responses to search requests */
-    private val responseListener: Response.Listener<JSONArray> = Response.Listener<JSONArray> { response ->
-        if (response != null) {
-            radioBrowserSearchListener.onRadioBrowserSearchResults(createRadioBrowserResult(response.toString()))
-        }
-    }
-
-
-    /* Listens for error response from server */
-    private val errorListener: Response.ErrorListener = Response.ErrorListener { error ->
-        Log.w(TAG, "Error: $error")
     }
 
 }

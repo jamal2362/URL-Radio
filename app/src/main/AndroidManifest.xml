@@ -33,10 +33,14 @@
             android:resource="@mipmap/ic_launcher" />
 
         <!-- Main activity for radio station playback on phone -->
+        <!--
+            configChanges for orientation/screenSize was removed on purpose: the adaptive
+            layout has to be re-evaluated when the window is resized or rotated, and Compose
+            restores its own state across the recreation.
+        -->
         <activity
             android:name=".MainActivity"
-            android:configChanges="orientation|screenSize"
-            android:windowSoftInputMode="adjustPan"
+            android:windowSoftInputMode="adjustResize"
             android:exported="true">
 
             <!-- react to main intents -->
@@ -146,15 +150,12 @@
         </receiver>
 
 
-        <!-- handles media buttons -->
-        <receiver
-            android:name="androidx.media.session.MediaButtonReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MEDIA_BUTTON" />
-            </intent-filter>
-        </receiver>
-
+        <!--
+            The legacy androidx.media MediaButtonReceiver declaration was removed together
+            with the androidx.media dependency: media3's MediaSessionService receives
+            MEDIA_BUTTON intents itself, so the extra receiver was dead weight and pointed
+            at a class that is no longer on the classpath.
+        -->
 
         <!-- file provider -->
         <provider

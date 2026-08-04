@@ -1,0 +1,319 @@
+/*
+ * SettingsScreen.kt
+ * The settings screen. Replaces SettingsFragment and androidx.preference.
+ *
+ * Every entry writes to the same SharedPreferences key it used before, so an update keeps
+ * the user's existing settings.
+ *
+ * This file is part of URL Radio
+ * Licensed under the MIT-License
+ * http://opensource.org/licenses/MIT
+ */
+
+package com.jamal2367.urlradio.ui.settings
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import com.jamal2367.urlradio.Keys
+import com.jamal2367.urlradio.R
+
+data class SettingsCallbacks(
+    val onThemeSelected: (String) -> Unit,
+    val onUpdateStationImages: () -> Unit,
+    val onExportM3u: () -> Unit,
+    val onExportPls: () -> Unit,
+    val onBackup: () -> Unit,
+    val onRestore: () -> Unit,
+    val onLargeBufferChanged: (Boolean) -> Unit,
+    val onEditStationsChanged: (Boolean) -> Unit,
+    val onEditStreamUrisChanged: (Boolean) -> Unit,
+    val onOpenUrl: (String) -> Unit,
+    val onCopyVersion: (String) -> Unit,
+)
+
+@Composable
+fun SettingsScreen(
+    versionSummary: String,
+    themeSelection: String,
+    themeLabel: String,
+    largeBuffer: Boolean,
+    editStations: Boolean,
+    editStreamUris: Boolean,
+    callbacks: SettingsCallbacks,
+    contentPadding: PaddingValues,
+    modifier: Modifier = Modifier,
+) {
+    var showThemeDialog by remember { mutableStateOf(false) }
+
+    LazyColumn(
+        contentPadding = contentPadding,
+        modifier = modifier.fillMaxSize(),
+    ) {
+        item {
+            SettingsRow(
+                title = stringResource(R.string.pref_app_version_title),
+                summary = versionSummary,
+                icon = R.drawable.ic_info_24dp,
+                onClick = { callbacks.onCopyVersion(versionSummary) },
+            )
+        }
+        item {
+            SettingsRow(
+                title = stringResource(R.string.pref_license_title),
+                summary = stringResource(R.string.pref_license_summary),
+                icon = R.drawable.ic_library_24dp,
+                onClick = { callbacks.onOpenUrl(LICENSE_URL) },
+            )
+        }
+
+        item { CategoryHeader(stringResource(R.string.pref_general_title)) }
+        item {
+            SettingsRow(
+                title = stringResource(R.string.pref_theme_selection_title),
+                summary = "${stringResource(R.string.pref_theme_selection_summary)} $themeLabel",
+                icon = R.drawable.ic_brush_24dp,
+                onClick = { showThemeDialog = true },
+            )
+        }
+
+        item { CategoryHeader(stringResource(R.string.pref_maintenance_title)) }
+        item {
+            SettingsRow(
+                title = stringResource(R.string.pref_update_station_images_title),
+                summary = stringResource(R.string.pref_update_station_images_summary),
+                icon = R.drawable.ic_image_24dp,
+                onClick = callbacks.onUpdateStationImages,
+            )
+        }
+
+        item { CategoryHeader(stringResource(R.string.pref_backup_import_export_title)) }
+        item {
+            SettingsRow(
+                title = stringResource(R.string.pref_m3u_export_title),
+                summary = stringResource(R.string.pref_m3u_export_summary),
+                icon = R.drawable.ic_save_m3u_24dp,
+                onClick = callbacks.onExportM3u,
+            )
+        }
+        item {
+            SettingsRow(
+                title = stringResource(R.string.pref_pls_export_title),
+                summary = stringResource(R.string.pref_pls_export_summary),
+                icon = R.drawable.ic_save_pls_24dp,
+                onClick = callbacks.onExportPls,
+            )
+        }
+        item {
+            SettingsRow(
+                title = stringResource(R.string.pref_station_export_title),
+                summary = stringResource(R.string.pref_station_export_summary),
+                icon = R.drawable.ic_download_24dp,
+                onClick = callbacks.onBackup,
+            )
+        }
+        item {
+            SettingsRow(
+                title = stringResource(R.string.pref_station_restore_title),
+                summary = stringResource(R.string.pref_station_restore_summary),
+                icon = R.drawable.ic_upload_24dp,
+                onClick = callbacks.onRestore,
+            )
+        }
+
+        item { CategoryHeader(stringResource(R.string.pref_advanced_title)) }
+        item {
+            SettingsSwitchRow(
+                title = stringResource(R.string.pref_buffer_size_title),
+                summary = stringResource(
+                    if (largeBuffer) R.string.pref_buffer_size_summary_enabled
+                    else R.string.pref_buffer_size_summary_disabled
+                ),
+                icon = R.drawable.ic_network_check_24dp,
+                checked = largeBuffer,
+                onCheckedChange = callbacks.onLargeBufferChanged,
+            )
+        }
+        item {
+            SettingsSwitchRow(
+                title = stringResource(R.string.pref_edit_station_title),
+                summary = stringResource(
+                    if (editStations) R.string.pref_edit_station_summary_enabled
+                    else R.string.pref_edit_station_summary_disabled
+                ),
+                icon = R.drawable.ic_edit_24dp,
+                checked = editStations,
+                onCheckedChange = callbacks.onEditStationsChanged,
+            )
+        }
+        item {
+            // Editing stream addresses only makes sense while editing is on at all --
+            // the old screen disabled and unchecked this entry in the same way.
+            SettingsSwitchRow(
+                title = stringResource(R.string.pref_edit_station_stream_title),
+                summary = stringResource(
+                    if (editStreamUris) R.string.pref_edit_station_stream_summary_enabled
+                    else R.string.pref_edit_station_stream_summary_disabled
+                ),
+                icon = R.drawable.ic_music_note_24dp,
+                checked = editStreamUris,
+                enabled = editStations,
+                onCheckedChange = callbacks.onEditStreamUrisChanged,
+            )
+        }
+
+        item { CategoryHeader(stringResource(R.string.pref_links_title)) }
+        item {
+            SettingsRow(
+                title = stringResource(R.string.pref_github_title),
+                summary = stringResource(R.string.pref_github_summary),
+                icon = R.drawable.ic_github_24dp,
+                onClick = { callbacks.onOpenUrl(GITHUB_URL) },
+            )
+        }
+        item {
+            SettingsRow(
+                title = stringResource(R.string.pref_codeberg_title),
+                summary = stringResource(R.string.pref_codeberg_summary),
+                icon = R.drawable.ic_codeberg_24dp,
+                onClick = { callbacks.onOpenUrl(CODEBERG_URL) },
+            )
+        }
+    }
+
+    if (showThemeDialog) {
+        ThemeChooserDialog(
+            current = themeSelection,
+            onSelect = {
+                callbacks.onThemeSelected(it)
+                showThemeDialog = false
+            },
+            onDismiss = { showThemeDialog = false },
+        )
+    }
+}
+
+@Composable
+private fun CategoryHeader(title: String) {
+    Column {
+        HorizontalDivider(modifier = Modifier.padding(top = 8.dp))
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleSmallEmphasized,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp),
+        )
+    }
+}
+
+@Composable
+private fun SettingsRow(
+    title: String,
+    summary: String,
+    icon: Int,
+    onClick: () -> Unit,
+) {
+    ListItem(
+        headlineContent = { Text(title) },
+        supportingContent = { Text(summary) },
+        leadingContent = {
+            Icon(
+                painter = painterResource(icon),
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+            )
+        },
+        modifier = Modifier.clickable(onClick = onClick),
+    )
+}
+
+@Composable
+private fun SettingsSwitchRow(
+    title: String,
+    summary: String,
+    icon: Int,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    enabled: Boolean = true,
+) {
+    ListItem(
+        headlineContent = { Text(title) },
+        supportingContent = { Text(summary) },
+        leadingContent = {
+            Icon(
+                painter = painterResource(icon),
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+            )
+        },
+        trailingContent = {
+            Switch(checked = checked, onCheckedChange = onCheckedChange, enabled = enabled)
+        },
+        modifier = Modifier.clickable(enabled = enabled) { onCheckedChange(!checked) },
+    )
+}
+
+@Composable
+private fun ThemeChooserDialog(
+    current: String,
+    onSelect: (String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val options = listOf(
+        Keys.STATE_THEME_FOLLOW_SYSTEM to stringResource(R.string.pref_theme_selection_mode_device_default),
+        Keys.STATE_THEME_LIGHT_MODE to stringResource(R.string.pref_theme_selection_mode_light),
+        Keys.STATE_THEME_DARK_MODE to stringResource(R.string.pref_theme_selection_mode_dark),
+    )
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.pref_theme_selection_title)) },
+        text = {
+            Column {
+                options.forEach { (value, label) ->
+                    ListItem(
+                        headlineContent = { Text(label) },
+                        leadingContent = {
+                            RadioButton(selected = value == current, onClick = { onSelect(value) })
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onSelect(value) },
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.dialog_generic_button_cancel))
+            }
+        },
+    )
+}
+
+private const val GITHUB_URL = "https://github.com/jamal2362/URL-Radio"
+private const val CODEBERG_URL = "https://codeberg.org/y20k/transistor"
+private const val LICENSE_URL = "https://github.com/jamal2362/URL-Radio/blob/master/LICENSE.md"

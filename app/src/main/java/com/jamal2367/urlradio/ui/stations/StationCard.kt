@@ -1,0 +1,285 @@
+/*
+ * StationCard.kt
+ * One row of the station list, including its inline editor
+ *
+ * This file is part of URL Radio
+ * Licensed under the MIT-License
+ * http://opensource.org/licenses/MIT
+ */
+
+package com.jamal2367.urlradio.ui.stations
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import com.jamal2367.urlradio.Keys
+import com.jamal2367.urlradio.R
+import com.jamal2367.urlradio.core.Station
+import com.jamal2367.urlradio.helpers.NetworkHelper
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
+import java.util.Locale
+
+private val CardShape = RoundedCornerShape(24.dp)
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun StationCard(
+    station: Station,
+    isPlaying: Boolean,
+    isEditorOpen: Boolean,
+    editStationsEnabled: Boolean,
+    editStreamUrisEnabled: Boolean,
+    onTogglePlayback: () -> Unit,
+    onToggleEditor: () -> Unit,
+    onSave: (name: String, streamUri: String) -> Unit,
+    onCancelEdit: () -> Unit,
+    onChangeImage: () -> Unit,
+    onPlaceOnHomeScreen: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val accentColor = MaterialTheme.colorScheme.primary
+    Card(
+        shape = CardShape,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        // Explicitly clipped: the accent bar runs to the very edge of the card, and
+        // without this it squares off the rounded trailing corners.
+        Column(modifier = Modifier.clip(CardShape)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    // A plain tap toggles playback; a long press opens the editor, but only
+                    // when the user enabled editing -- same rule as the old adapter.
+                    .combinedClickable(
+                        onClick = onTogglePlayback,
+                        onLongClick = if (editStationsEnabled) onToggleEditor else null,
+                    )
+            ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+            ) {
+                StationCover(station = station, modifier = Modifier.size(64.dp))
+
+                Text(
+                    text = station.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 2,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 12.dp),
+                )
+
+                if (station.starred) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_favorite_default_24dp),
+                        contentDescription = stringResource(R.string.descr_card_starred_station),
+                        tint = if (station.imageColor != -1) Color(station.imageColor)
+                        else MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
+            }
+
+                // The station that is playing is marked by an accent bar down the trailing
+                // edge. Drawn as a child of the Card so the card's own clip rounds it off.
+                if (isPlaying) {
+                    // matchParentSize takes the row's measured height, which fillMaxHeight
+                    // alone cannot do here: the Box wraps its content, so there is no
+                    // bounded height to fill and the bar would collapse to nothing.
+                    Box(modifier = Modifier.matchParentSize()) {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.CenterEnd)
+                                .fillMaxHeight()
+                                .width(8.dp)
+                                .background(accentColor)
+                        )
+                    }
+                }
+            }
+
+            AnimatedVisibility(
+                visible = isEditorOpen,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically(),
+            ) {
+                StationEditor(
+                    station = station,
+                    editStreamUrisEnabled = editStreamUrisEnabled,
+                    onSave = onSave,
+                    onCancel = onCancelEdit,
+                    onChangeImage = onChangeImage,
+                    onPlaceOnHomeScreen = onPlaceOnHomeScreen,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun StationCover(station: Station, modifier: Modifier = Modifier) {
+    val description = "${stringResource(R.string.descr_player_station_image)}: ${station.name}"
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(
+                if (station.imageColor != -1) Color(station.imageColor)
+                else MaterialTheme.colorScheme.surfaceVariant
+            )
+            .semantics { contentDescription = description },
+    ) {
+        AsyncImage(
+            // The file keeps its name when a station image is replaced, so the modification
+            // date is folded into the cache key -- otherwise Coil would serve the old bitmap.
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(station.smallImage)
+                .memoryCacheKey("${station.smallImage}:${station.modificationDate.time}")
+                .diskCacheKey("${station.smallImage}:${station.modificationDate.time}")
+                .build(),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+@Composable
+private fun StationEditor(
+    station: Station,
+    editStreamUrisEnabled: Boolean,
+    onSave: (name: String, streamUri: String) -> Unit,
+    onCancel: () -> Unit,
+    onChangeImage: () -> Unit,
+    onPlaceOnHomeScreen: () -> Unit,
+) {
+    var name by rememberSaveable(station.uuid) { mutableStateOf(station.name) }
+    var streamUri by rememberSaveable(station.uuid) { mutableStateOf(station.getStreamUri()) }
+    var streamUriAccepted by remember(station.uuid) { mutableStateOf(true) }
+
+    // Mirrors the old handleStationUriInput: the save button stays disabled until the
+    // edited address has been confirmed to serve a supported stream type.
+    LaunchedEffect(streamUri, editStreamUrisEnabled) {
+        if (!editStreamUrisEnabled || streamUri == station.getStreamUri()) {
+            streamUriAccepted = true
+            return@LaunchedEffect
+        }
+        streamUriAccepted = false
+        if (!streamUri.startsWith("http")) return@LaunchedEffect
+        delay(400) // debounce while the user is still typing
+        val contentType = withContext(Dispatchers.IO) {
+            NetworkHelper.detectContentTypeSuspended(streamUri).type.lowercase(Locale.getDefault())
+        }
+        streamUriAccepted = Keys.MIME_TYPES_MPEG.contains(contentType) ||
+            Keys.MIME_TYPES_OGG.contains(contentType) ||
+            Keys.MIME_TYPES_AAC.contains(contentType) ||
+            Keys.MIME_TYPES_HLS.contains(contentType)
+    }
+
+    Column(modifier = Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp)) {
+        OutlinedTextField(
+            value = name,
+            onValueChange = { name = it },
+            label = { Text(stringResource(R.string.dialog_edit_station_name)) },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+        )
+
+        if (editStreamUrisEnabled) {
+            OutlinedTextField(
+                value = streamUri,
+                onValueChange = { streamUri = it },
+                label = { Text(stringResource(R.string.dialog_edit_stream_uri)) },
+                singleLine = true,
+                isError = !streamUriAccepted,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+            )
+        }
+
+        Row(
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp),
+        ) {
+            IconButton(onClick = onChangeImage) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_image_24dp),
+                    contentDescription = stringResource(R.string.descr_card_station_image_change),
+                )
+            }
+            IconButton(onClick = onPlaceOnHomeScreen) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_home_24dp),
+                    contentDescription = stringResource(R.string.shortcut_last_station_short_label),
+                )
+            }
+            IconButton(onClick = onCancel) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_clear_24dp),
+                    contentDescription = stringResource(R.string.dialog_generic_button_cancel),
+                )
+            }
+            IconButton(
+                onClick = { onSave(name, streamUri) },
+                enabled = streamUriAccepted,
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_check_24dp),
+                    contentDescription = stringResource(R.string.dialog_generic_button_okay),
+                )
+            }
+        }
+    }
+}
