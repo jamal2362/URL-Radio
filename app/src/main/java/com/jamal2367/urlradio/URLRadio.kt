@@ -16,7 +16,6 @@ package com.jamal2367.urlradio
 
 import android.app.Application
 import android.util.Log
-import com.jamal2367.urlradio.helpers.AppThemeHelper
 import com.jamal2367.urlradio.helpers.PreferencesHelper
 import com.jamal2367.urlradio.helpers.PreferencesHelper.initPreferences
 
@@ -34,8 +33,9 @@ class URLRadio : Application() {
         super.onCreate()
         Log.v(TAG, "URLRadio application started.")
         initPreferences()
-        // set Dark / Light theme state
-        AppThemeHelper.setTheme(PreferencesHelper.loadThemeSelection())
+        // The light/dark decision is no longer pushed into AppCompatDelegate here. The
+        // Compose theme reads the preference itself, so it also follows a change made in
+        // settings without recreating the activity.
     }
 
 

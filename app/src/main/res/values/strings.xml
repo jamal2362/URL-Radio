@@ -55,6 +55,11 @@
     <string name="onboarding_app_description">Immerse yourself in the sound of your choice!</string>
     <string name="onboarding_app_get_started">Get started</string>
 
+    <!-- Stations -->
+    <string name="tab_stations_all">All Stations</string>
+    <string name="tab_stations_favorites">Favorites</string>
+    <string name="stations_favorites_empty">No favorites yet. Swipe a station to the right to add it here.</string>
+
     <!-- Player -->
     <string name="player_sheet_h2_station_metadata">Currently playing</string>
     <string name="player_sheet_h2_stream_url">Streaming link</string>

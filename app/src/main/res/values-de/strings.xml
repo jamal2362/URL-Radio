@@ -47,6 +47,10 @@
     <!-- Onboarding -->
     <string name="onboarding_app_description">Tauche ein in den Sound deiner Wahl!</string>
     <string name="onboarding_app_get_started">Jetzt starten</string>
+    <!-- Stations -->
+    <string name="tab_stations_all">Alle Sender</string>
+    <string name="tab_stations_favorites">Favoriten</string>
+    <string name="stations_favorites_empty">Noch keine Favoriten. Wische einen Sender nach rechts, um ihn hier hinzuzufügen.</string>
     <!-- Player -->
     <string name="player_sheet_h2_station_metadata">Momentan läuft</string>
     <string name="player_sheet_h2_stream_url">Streaming-Adresse</string>

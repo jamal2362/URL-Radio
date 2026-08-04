@@ -16,6 +16,7 @@ package com.jamal2367.urlradio.helpers
 
 import android.util.Log
 import androidx.media3.common.Metadata
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.extractor.metadata.icy.IcyHeaders
 import androidx.media3.extractor.metadata.icy.IcyInfo
 import com.jamal2367.urlradio.Keys
@@ -24,7 +25,11 @@ import kotlin.math.min
 
 /*
  * AudioHelper object
+ *
+ * Reads ICY metadata, which media3 still marks as unstable. The opt-in is declared here
+ * rather than suppressed at each call site.
  */
+@UnstableApi
 object AudioHelper {
 
 

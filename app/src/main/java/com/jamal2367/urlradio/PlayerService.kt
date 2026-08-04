@@ -23,7 +23,6 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import androidx.media.MediaBrowserServiceCompat.BrowserRoot.EXTRA_RECENT
 import androidx.media3.common.*
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.HttpDataSource
@@ -39,6 +38,7 @@ import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import com.jamal2367.urlradio.core.Collection
+import com.jamal2367.urlradio.core.Station
 import com.jamal2367.urlradio.helpers.AudioHelper
 import com.jamal2367.urlradio.helpers.CollectionHelper
 import com.jamal2367.urlradio.helpers.FileHelper
@@ -53,6 +53,13 @@ import java.util.*
  */
 @UnstableApi
 class PlayerService : MediaLibraryService() {
+
+    /*
+     * Value of MediaBrowserServiceCompat.BrowserRoot.EXTRA_RECENT, inlined so the app does
+     * not need the legacy androidx.media library for a single string constant. The system
+     * passes this when it asks for a resumable item after a reboot.
+     */
+    private val EXTRA_RECENT: String = "android.service.media.extra.RECENT"
 
     /* Define log tag */
     private val TAG: String = PlayerService::class.java.simpleName
@@ -90,11 +97,18 @@ class PlayerService : MediaLibraryService() {
         setMediaNotificationProvider(notificationProvider)
         // fetch the metadata history
         metadataHistory = PreferencesHelper.loadMetadataHistory()
+        // start listening for changes in shared preferences - without this the
+        // "large buffer size" setting only took effect after a process restart
+        PreferencesHelper.registerPreferenceChangeListener(sharedPreferenceChangeListener)
     }
 
 
     /* Overrides onDestroy from Service */
     override fun onDestroy() {
+        // stop listening for changes in shared preferences
+        PreferencesHelper.unregisterPreferenceChangeListener(sharedPreferenceChangeListener)
+        // unregister the collection changed receiver that onCreate registered
+        LocalBroadcastManager.getInstance(application).unregisterReceiver(collectionChangedReceiver)
         // player.removeAnalyticsListener(analyticsListener)
         player.removeListener(playerListener)
         player.release()
@@ -104,7 +118,7 @@ class PlayerService : MediaLibraryService() {
 
 
     /* Overrides onTaskRemoved from Service */
-    override fun onTaskRemoved(rootIntent: Intent) {
+    override fun onTaskRemoved(rootIntent: Intent?) {
         if (!player.playWhenReady) {
             stopSelf()
         }
@@ -307,6 +321,7 @@ class PlayerService : MediaLibraryService() {
             builder.add(SessionCommand(Keys.CMD_CANCEL_SLEEP_TIMER, Bundle.EMPTY))
             builder.add(SessionCommand(Keys.CMD_REQUEST_SLEEP_TIMER_REMAINING, Bundle.EMPTY))
             builder.add(SessionCommand(Keys.CMD_REQUEST_METADATA_HISTORY, Bundle.EMPTY))
+            builder.add(SessionCommand(Keys.CMD_PLAY_STREAM, Bundle.EMPTY))
             return MediaSession.ConnectionResult.accept(builder.build(), connectionResult.availablePlayerCommands)
         }
 
@@ -369,6 +384,23 @@ class PlayerService : MediaLibraryService() {
                 }
                 Keys.CMD_CANCEL_SLEEP_TIMER -> {
                     manuallyCancelSleepTimer()
+                }
+                Keys.CMD_PLAY_STREAM -> {
+                    // plays a stream address that is not part of the collection - used by the
+                    // exported com.jamal2367.urlradio.action.START intent (see EXTRA_STREAM_URI)
+                    val streamUri: String = args.getString(Keys.KEY_STREAM_URI) ?: String()
+                    if (streamUri.isEmpty()) {
+                        return Futures.immediateFuture(SessionResult(SessionError.ERROR_BAD_VALUE))
+                    }
+                    val station = Station(
+                        name = streamUri,
+                        streamUris = mutableListOf(streamUri),
+                        streamContent = Keys.MIME_TYPE_OCTET_STREAM
+                    )
+                    player.setMediaItem(CollectionHelper.buildMediaItem(this@PlayerService, station))
+                    player.prepare()
+                    player.play()
+                    return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
                 }
                 Keys.CMD_REQUEST_SLEEP_TIMER_REMAINING -> {
                     val resultBundle = Bundle()
@@ -643,13 +675,35 @@ class PlayerService : MediaLibraryService() {
         SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
             when (key) {
                 Keys.PREF_LARGE_BUFFER_SIZE -> {
-                    bufferSizeMultiplier = PreferencesHelper.loadBufferSizeMultiplier()
-                    if (!player.isPlaying && !player.isLoading) {
-                        initializePlayer()
+                    val newMultiplier: Int = PreferencesHelper.loadBufferSizeMultiplier()
+                    if (newMultiplier != bufferSizeMultiplier) {
+                        bufferSizeMultiplier = newMultiplier
+                        // only swap the player while it is idle - doing it during playback
+                        // would cut the stream off mid-sentence
+                        if (!player.isPlaying && !player.isLoading) {
+                            recreatePlayer()
+                        }
                     }
                 }
             }
         }
+
+
+    /*
+     * Rebuilds the player with the current buffer size and hands it to the session.
+     *
+     * initializePlayer() on its own only reassigns the `player` field. The MediaLibrarySession
+     * was built with the previous instance and would keep using it, so the new buffer size
+     * would never reach playback and the old player would leak. Both are handled here.
+     */
+    private fun recreatePlayer() {
+        val previousPlayer: Player = player
+        previousPlayer.removeListener(playerListener)
+        initializePlayer()
+        mediaLibrarySession.player = player
+        previousPlayer.release()
+        Log.v(TAG, "Player rebuilt with buffer size multiplier $bufferSizeMultiplier.")
+    }
 
 
     /*

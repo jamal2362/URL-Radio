@@ -32,4 +32,8 @@
     <color name="player_sheet_text_main">#FFFFFFFF</color>
     <color name="player_sheet_icon">#FFFFFFFF</color>
 
+
+    <!-- window background used by the XML theme before Compose draws -->
+    <color name="window_background">#FF1B1B1F</color>
+
 </resources>

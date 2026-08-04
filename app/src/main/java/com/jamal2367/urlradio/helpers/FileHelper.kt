@@ -461,15 +461,38 @@ object FileHelper {
     }
 
 
-    /* Writes given text to file on storage */
+    /*
+     * Writes given text to file on storage.
+     *
+     * Written to a temporary file and then moved into place, and serialised against other
+     * writers. Two overlapping writes used to share one truncated file and interleave: a
+     * shorter payload (favouriting a station makes the JSON one byte shorter) left the tail
+     * of the longer one behind, so collection.json ended up with a stray closing brace.
+     * Gson then rejected the whole file and the app silently started with no stations at all.
+     */
     @Suppress("SameParameterValue")
     private fun writeTextFile(context: Context, text: String, folder: String, fileName: String) {
-        if (text.isNotBlank()) {
-            File(context.getExternalFilesDir(folder), fileName).writeText(text)
-        } else {
+        if (text.isBlank()) {
             Log.w(TAG, "Writing text file $fileName failed. Empty text string text was provided.")
+            return
+        }
+        synchronized(fileWriteLock) {
+            val target = File(context.getExternalFilesDir(folder), fileName)
+            val temporary = File(target.parentFile, "$fileName.tmp")
+            try {
+                temporary.writeText(text)
+                if (!temporary.renameTo(target)) {
+                    target.writeText(text)
+                    temporary.delete()
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Writing text file $fileName failed.")
+                e.printStackTrace()
+            }
         }
     }
+
+    private val fileWriteLock = Any()
 
 
     /* Writes given bitmap as image file to storage */

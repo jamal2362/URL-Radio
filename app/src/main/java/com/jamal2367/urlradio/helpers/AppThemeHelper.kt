@@ -1,7 +1,11 @@
 /*
  * AppThemeHelper.kt
- * Implements the AppThemeHelper object
- * A AppThemeHelper can set the different app themes: Light Mode, Dark Mode, Follow System
+ * Turns the stored theme preference into something the UI can use
+ *
+ * AppCompatDelegate.setDefaultNightMode() is gone: the app no longer depends on AppCompat,
+ * and the Compose theme resolves light/dark straight from the preference (see MainActivity).
+ * getColor() is gone too - it read attributes out of an uninitialised TypedValue and so
+ * always returned 0, which is why the settings screen used to paint its navigation bar black.
  *
  * This file is part of
  * TRANSISTOR - Radio App for Android
@@ -15,12 +19,6 @@
 package com.jamal2367.urlradio.helpers
 
 import android.content.Context
-import android.content.res.TypedArray
-import android.util.Log
-import android.util.TypedValue
-import androidx.annotation.AttrRes
-import androidx.annotation.ColorInt
-import androidx.appcompat.app.AppCompatDelegate
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
 
@@ -30,60 +28,13 @@ import com.jamal2367.urlradio.R
  */
 object AppThemeHelper {
 
-    /* Define log tag */
-    private val TAG: String = AppThemeHelper::class.java.simpleName
-
-    private val sTypedValue = TypedValue()
-
-    /* Sets app theme */
-    fun setTheme(nightModeState: String) {
-        when (nightModeState) {
-            Keys.STATE_THEME_DARK_MODE -> {
-                if (AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_YES) {
-                    // turn on dark mode
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-                    Log.i(TAG, "Dark Mode activated.")
-                }
-            }
-            Keys.STATE_THEME_LIGHT_MODE -> {
-                if (AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_NO) {
-                    // turn on light mode
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-                    Log.i(TAG, "Theme: Light Mode activated.")
-                }
-            }
-            Keys.STATE_THEME_FOLLOW_SYSTEM -> {
-                if (AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM) {
-                    // turn on mode "follow system"
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-                    Log.i(TAG, "Theme: Follow System Mode activated.")
-                }
-            }
-            else -> {
-                // turn on mode "follow system"
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-                Log.i(TAG, "Theme: Follow System Mode activated.")
-            }
-        }
-    }
-
-
-    /* Returns a readable String for currently selected App Theme */
+    /* Returns a readable String for the currently selected app theme */
     fun getCurrentTheme(context: Context): String {
         return when (PreferencesHelper.loadThemeSelection()) {
             Keys.STATE_THEME_LIGHT_MODE -> context.getString(R.string.pref_theme_selection_mode_light)
             Keys.STATE_THEME_DARK_MODE -> context.getString(R.string.pref_theme_selection_mode_dark)
             else -> context.getString(R.string.pref_theme_selection_mode_device_default)
         }
-    }
-
-
-    @ColorInt
-    fun getColor(context: Context, @AttrRes resource: Int): Int {
-        val a: TypedArray = context.obtainStyledAttributes(sTypedValue.data, intArrayOf(resource))
-        val color = a.getColor(0, 0)
-        a.recycle()
-        return color
     }
 
 }

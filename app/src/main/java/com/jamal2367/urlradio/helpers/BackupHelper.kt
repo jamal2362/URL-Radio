@@ -19,8 +19,6 @@ import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.util.Log
-import android.view.View
-import com.google.android.material.snackbar.Snackbar
 import com.jamal2367.urlradio.R
 import java.io.*
 import java.util.*
@@ -35,20 +33,20 @@ object BackupHelper {
     private val TAG: String = BackupHelper::class.java.simpleName
 
 
-    /* Compresses all files in the app's external files directory into destination zip file */
-    fun backup(view: View, context: Context, destinationUri: Uri) {
+    /*
+     * Compresses all files in the app's external files directory into destination zip file.
+     *
+     * Reports progress through [onMessage] instead of showing a Snackbar itself: a helper
+     * has no business owning a View, and the Compose UI shows the message on its own
+     * SnackbarHost.
+     */
+    fun backup(context: Context, destinationUri: Uri, onMessage: (String) -> Unit = {}) {
         val sourceFolder: File? = context.getExternalFilesDir("")
         if (sourceFolder != null && sourceFolder.isDirectory) {
-            Snackbar.make(
-                view,
-                "${
-                    FileHelper.getFileName(
-                        context,
-                        destinationUri
-                    )
-                } ${context.getString(R.string.toastmessage_backed_up)}",
-                Snackbar.LENGTH_LONG
-            ).show()
+            onMessage(
+                "${FileHelper.getFileName(context, destinationUri)} " +
+                    context.getString(R.string.toastmessage_backed_up)
+            )
             val resolver: ContentResolver = context.contentResolver
             val outputStream: OutputStream? = resolver.openOutputStream(destinationUri)
             ZipOutputStream(BufferedOutputStream(outputStream)).use { zipOutputStream ->
@@ -63,8 +61,8 @@ object BackupHelper {
 
 
     /* Extracts zip backup  file and restores files and folders - Credit: https://www.baeldung.com/java-compress-and-uncompress*/
-    fun restore(view: View, context: Context, sourceUri: Uri) {
-        Snackbar.make(view, R.string.toastmessage_restored, Snackbar.LENGTH_LONG).show()
+    fun restore(context: Context, sourceUri: Uri, onMessage: (String) -> Unit = {}) {
+        onMessage(context.getString(R.string.toastmessage_restored))
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             // bypass "ZipException" for Android 14 or above applications when zip file names contain ".." or start with "/"

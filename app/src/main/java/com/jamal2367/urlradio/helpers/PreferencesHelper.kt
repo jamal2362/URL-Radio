@@ -18,10 +18,13 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import androidx.core.content.edit
-import androidx.preference.PreferenceManager
 import com.google.gson.Gson
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.ui.PlayerState
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.conflate
 import java.util.*
 
 
@@ -38,9 +41,17 @@ object PreferencesHelper {
     /* The sharedPreferences object to be initialized */
     private lateinit var sharedPreferences: SharedPreferences
 
-    /* Initialize a single sharedPreferences object when the app is launched */
+    /*
+     * Initialize a single sharedPreferences object when the app is launched.
+     *
+     * This deliberately opens the very same file that
+     * PreferenceManager.getDefaultSharedPreferences() used before androidx.preference was
+     * dropped: "<packageName>_preferences". Verified on device -- the file on a pre-migration
+     * install is named com.jamal2367.urlradio.debug_preferences.xml. Changing this name would
+     * silently reset every setting on update.
+     */
     fun Context.initPreferences() {
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        sharedPreferences = getSharedPreferences("${packageName}_preferences", Context.MODE_PRIVATE)
     }
 
 
@@ -201,6 +212,23 @@ object PreferencesHelper {
     }
 
 
+    /*
+     * Emits the current value of a preference and then again on every change.
+     *
+     * Used by the Compose layer instead of registering listeners by hand in every
+     * screen. The listener is removed when the collector goes away, so it cannot
+     * outlive the composition.
+     */
+    fun <T> preferenceFlow(key: String, read: () -> T): Flow<T> = callbackFlow {
+        trySend(read())
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, changedKey ->
+            if (changedKey == key) trySend(read())
+        }
+        sharedPreferences.registerOnSharedPreferenceChangeListener(listener)
+        awaitClose { sharedPreferences.unregisterOnSharedPreferenceChangeListener(listener) }
+    }.conflate()
+
+
     /* Start watching for changes in shared preferences - context must implement OnSharedPreferenceChangeListener */
     fun registerPreferenceChangeListener(listener: SharedPreferences.OnSharedPreferenceChangeListener) {
         sharedPreferences.registerOnSharedPreferenceChangeListener(listener)
@@ -253,6 +281,36 @@ object PreferencesHelper {
     /* Loads value of the option: Edit Station Streams */
     fun loadEditStreamUrisEnabled(): Boolean {
         return sharedPreferences.getBoolean(Keys.PREF_EDIT_STREAMS_URIS, true)
+    }
+
+
+    /*
+     * The setters below were previously handled implicitly by androidx.preference, which
+     * wrote each switch and list preference straight to these keys. The Compose settings
+     * screen writes them explicitly, using the very same keys.
+     */
+
+    /* Saves the selected app theme */
+    fun saveThemeSelection(themeSelection: String) {
+        sharedPreferences.edit {
+            putString(Keys.PREF_THEME_SELECTION, themeSelection)
+        }
+    }
+
+
+    /* Saves value of the option: Buffer Size */
+    fun saveLargeBufferSize(enabled: Boolean) {
+        sharedPreferences.edit {
+            putBoolean(Keys.PREF_LARGE_BUFFER_SIZE, enabled)
+        }
+    }
+
+
+    /* Saves value of the option: Edit Station Streams */
+    fun saveEditStreamUrisEnabled(enabled: Boolean) {
+        sharedPreferences.edit {
+            putBoolean(Keys.PREF_EDIT_STREAMS_URIS, enabled)
+        }
     }
 
 

@@ -40,4 +40,7 @@
 
     <color name="splashBackgroundColor">#FF1D3E66</color>
 
+    <!-- window background used by the XML theme before Compose draws -->
+    <color name="window_background">#FFFEFBFF</color>
+
 </resources>
