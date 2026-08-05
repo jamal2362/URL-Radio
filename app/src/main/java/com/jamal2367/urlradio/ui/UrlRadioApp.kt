@@ -73,7 +73,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import com.jamal2367.urlradio.R
@@ -279,10 +278,11 @@ fun UrlRadioApp(
             // bottom inset is consumed here - otherwise the player and the floating
             // toolbar end up underneath the gesture bar.
             //
-            // The player floats over the list rather than sitting below it: the list is
-            // given just short of the player's height as bottom padding, so the last
-            // station scrolls a little way underneath the player instead of stopping
-            // cleanly above it.
+            // The player floats above the list and nothing ever passes behind or below it.
+            // The list is given the player's whole footprint, margins included, as bottom
+            // padding on its container rather than as content padding: content padding only
+            // decides where the list comes to rest at its end, so a card being scrolled past
+            // would still be drawn underneath the player on its way out.
             val density = LocalDensity.current
             var playerHeight by remember { mutableStateOf(0.dp) }
 
@@ -291,17 +291,21 @@ fun UrlRadioApp(
                     .fillMaxSize()
                     .padding(bottom = padding.calculateBottomPadding())
             ) {
-                StationsPane(
-                    state = state,
-                    actions = actions,
-                    contentPadding = padding,
-                    selectedTab = selectedTab,
-                    onSelectTab = { selectedTab = it },
-                    listBottomPadding = playerHeight
-                        .coerceAtLeast(0.dp),
-                    onOpenSettings = { screen = AppScreen.Settings },
-                    onDeleteRequest = { pendingDelete = it },
-                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = playerHeight)
+                ) {
+                    StationsPane(
+                        state = state,
+                        actions = actions,
+                        contentPadding = padding,
+                        selectedTab = selectedTab,
+                        onSelectTab = { selectedTab = it },
+                        onOpenSettings = { screen = AppScreen.Settings },
+                        onDeleteRequest = { pendingDelete = it },
+                    )
+                }
                 // The player is hidden entirely while onboarding is showing, which is
                 // what the old bottom sheet did through STATE_HIDDEN.
                 AnimatedVisibility(
@@ -389,9 +393,6 @@ fun UrlRadioApp(
     dialogs()
 }
 
-/**
- * @param listBottomPadding space kept free at the end of the list.
- */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun StationsPane(
@@ -402,7 +403,6 @@ private fun StationsPane(
     onSelectTab: (Int) -> Unit,
     onOpenSettings: () -> Unit,
     onDeleteRequest: (Station) -> Unit,
-    listBottomPadding: Dp = 0.dp,
 ) {
     // Favourites are always sorted to the front of the collection (see
     // CollectionHelper.sortCollection), so this filtered list is a plain prefix of
@@ -459,7 +459,9 @@ private fun StationsPane(
                         start = 12.dp,
                         end = 12.dp,
                         top = 6.dp,
-                        bottom = listBottomPadding,
+                        // No room reserved for the player here: the list's container already
+                        // stops above it.
+                        bottom = 0.dp,
                     ),
                 )
             }
