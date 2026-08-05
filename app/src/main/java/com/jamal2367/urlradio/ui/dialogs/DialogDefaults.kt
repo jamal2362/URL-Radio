@@ -11,6 +11,7 @@ package com.jamal2367.urlradio.ui.dialogs
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
@@ -26,10 +27,21 @@ import androidx.compose.ui.window.DialogProperties
  */
 val WideDialogProperties = DialogProperties(usePlatformDefaultWidth = false)
 
+/** Nothing is gained by letting a dialog grow past this; Material uses the same figure. */
+private val DialogMaxWidth = 560.dp
+
 /**
- * Material still caps a dialog at 560dp inside [androidx.compose.material3.BasicAlertDialog],
- * so this widens dialogs on a phone without stretching them across a tablet.
+ * A margin on either side, then everything that is left up to [DialogMaxWidth]. In portrait
+ * the cap never binds and the dialog spans the screen; in landscape it stops at 560dp instead
+ * of stretching across the whole window.
+ *
+ * The order is what makes the cap work, and it is easy to get wrong. `fillMaxWidth` turns the
+ * width constraint into a fixed one, and a `widthIn` after it is coerced into that fixed
+ * constraint and does nothing -- which is also why the 560dp `sizeIn` that
+ * [androidx.compose.material3.BasicAlertDialog] applies internally has no effect here. The cap
+ * has to be in place before the width is filled.
  */
 val WideDialogModifier: Modifier = Modifier
-    .fillMaxWidth()
     .padding(horizontal = 16.dp)
+    .widthIn(max = DialogMaxWidth)
+    .fillMaxWidth()
