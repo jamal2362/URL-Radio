@@ -67,7 +67,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import java.util.Date
 
 
 /*
@@ -170,6 +169,10 @@ class PlayerService : MediaLibraryService() {
         exoPlayer.addListener(playerListener)
 
         // manually add seek to next and seek to previous since headphones issue them, and they are translated to next and previous station
+        //
+        // What those commands then do is shaped here rather than in
+        // MediaSession.Callback.onPlayerCommandRequest, which is deprecated: the replacement
+        // for changing what a player command does is the player itself.
         player = object : ForwardingPlayer(exoPlayer) {
             override fun getAvailableCommands(): Player.Commands {
                 return super.getAvailableCommands().buildUpon().add(COMMAND_SEEK_TO_NEXT)
@@ -182,6 +185,53 @@ class PlayerService : MediaLibraryService() {
 
             override fun getDuration(): Long {
                 return C.TIME_UNSET // this will hide progress bar for HLS stations in the notification
+            }
+
+            /* Headphone "next" means the next station: it is queued up and started. */
+            override fun seekToNext() {
+                addMediaItem(
+                    CollectionHelper.getNextMediaItem(
+                        this@PlayerService,
+                        collection,
+                        currentMediaItem?.mediaId ?: String()
+                    )
+                )
+                // super, not the overrides below: a station queued up here is already at the
+                // live edge, so it neither needs the resumption special case nor the seek.
+                super.prepare()
+                super.play()
+                super.seekToNext()
+            }
+
+            /* Headphone "previous", likewise. */
+            override fun seekToPrevious() {
+                addMediaItem(
+                    CollectionHelper.getPreviousMediaItem(
+                        this@PlayerService,
+                        collection,
+                        currentMediaItem?.mediaId ?: String()
+                    )
+                )
+                super.prepare()
+                super.play()
+                super.seekToPrevious()
+            }
+
+            override fun prepare() {
+                // Special case: the system asked for media resumption (see also
+                // onGetLibraryRoot), so the last station is put in place first.
+                if (playLastStation) {
+                    addMediaItem(CollectionHelper.getRecent(this@PlayerService, collection))
+                    playLastStation = false
+                }
+                super.prepare()
+            }
+
+            override fun play() {
+                // A live stream that was paused would otherwise resume out of a stale buffer,
+                // so playback returns to the start of the live window first.
+                if (!isPlaying) seekTo(0)
+                super.play()
             }
         }
     }
@@ -481,75 +531,6 @@ class PlayerService : MediaLibraryService() {
             return super.onCustomCommand(session, controller, customCommand, args)
         }
 
-        override fun onPlayerCommandRequest(
-            session: MediaSession,
-            controller: MediaSession.ControllerInfo,
-            playerCommand: Int
-        ): Int {
-            // playerCommand = one of COMMAND_PLAY_PAUSE, COMMAND_PREPARE, COMMAND_STOP, COMMAND_SEEK_TO_DEFAULT_POSITION, COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM, COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM, COMMAND_SEEK_TO_PREVIOUS, COMMAND_SEEK_TO_NEXT_MEDIA_ITEM, COMMAND_SEEK_TO_NEXT, COMMAND_SEEK_TO_MEDIA_ITEM, COMMAND_SEEK_BACK, COMMAND_SEEK_FORWARD, COMMAND_SET_SPEED_AND_PITCH, COMMAND_SET_SHUFFLE_MODE, COMMAND_SET_REPEAT_MODE, COMMAND_GET_CURRENT_MEDIA_ITEM, COMMAND_GET_TIMELINE, COMMAND_GET_MEDIA_ITEMS_METADATA, COMMAND_SET_MEDIA_ITEMS_METADATA, COMMAND_CHANGE_MEDIA_ITEMS, COMMAND_GET_AUDIO_ATTRIBUTES, COMMAND_GET_VOLUME, COMMAND_GET_DEVICE_VOLUME, COMMAND_SET_VOLUME, COMMAND_SET_DEVICE_VOLUME, COMMAND_ADJUST_DEVICE_VOLUME, COMMAND_SET_VIDEO_SURFACE, COMMAND_GET_TEXT, COMMAND_SET_TRACK_SELECTION_PARAMETERS or COMMAND_GET_TRACK_INFOS. */
-            // emulate headphone buttons
-            // start/pause: adb shell input keyevent 85
-            // next: adb shell input keyevent 87
-            // prev: adb shell input keyevent 88
-            when (playerCommand) {
-                Player.COMMAND_SEEK_TO_NEXT -> {
-                    player.addMediaItem(
-                        CollectionHelper.getNextMediaItem(
-                            this@PlayerService,
-                            collection,
-                            player.currentMediaItem?.mediaId ?: String()
-                        )
-                    )
-                    player.prepare()
-                    player.play()
-                    return SessionResult.RESULT_SUCCESS
-                }
-                Player.COMMAND_SEEK_TO_PREVIOUS -> {
-                    player.addMediaItem(
-                        CollectionHelper.getPreviousMediaItem(
-                            this@PlayerService,
-                            collection,
-                            player.currentMediaItem?.mediaId ?: String()
-                        )
-                    )
-                    player.prepare()
-                    player.play()
-                    return SessionResult.RESULT_SUCCESS
-                }
-                Player.COMMAND_PREPARE -> {
-                    return if (playLastStation) {
-                        // special case: system requested media resumption (see also onGetLibraryRoot)
-                        player.addMediaItem(CollectionHelper.getRecent(this@PlayerService, collection))
-                        player.prepare()
-                        playLastStation = false
-                        SessionResult.RESULT_SUCCESS
-                    } else {
-                        super.onPlayerCommandRequest(session, controller, playerCommand)
-                    }
-                }
-                Player.COMMAND_PLAY_PAUSE -> {
-                    return if (player.isPlaying) {
-                        super.onPlayerCommandRequest(session, controller, playerCommand)
-                    } else {
-                        // seek to the start of the "live window"
-                        player.seekTo(0)
-                        SessionResult.RESULT_SUCCESS
-                    }
-                }
-//                Player.COMMAND_PLAY_PAUSE -> {
-//                    // override pause with stop, to prevent unnecessary buffering
-//                    if (player.isPlaying) {
-//                        player.stop()
-//                        return SessionResult.RESULT_INFO_SKIPPED
-//                    } else {
-//                       return super.onPlayerCommandRequest(session, controller, playerCommand)
-//                    }
-//                }
-                else -> {
-                    return super.onPlayerCommandRequest(session, controller, playerCommand)
-                }
-            }
-        }
     }
 
 
@@ -564,21 +545,27 @@ class PlayerService : MediaLibraryService() {
             customLayout: ImmutableList<CommandButton>,
             showPauseButton: Boolean
         ): ImmutableList<CommandButton> {
-            val seekToPreviousCommandButton = CommandButton.Builder().apply {
-                setPlayerCommand(Player.COMMAND_SEEK_TO_PREVIOUS)
-                setIconResId(R.drawable.ic_notification_skip_to_previous_36dp)
-                setEnabled(true)
-            }.build()
-            val playCommandButton = CommandButton.Builder().apply {
+            // ICON_UNDEFINED with a custom resource id, rather than one of the predefined
+            // CommandButton.ICON_* constants: those would take precedence wherever they are
+            // available and the app's own notification icons would stop being used. This is
+            // what the deprecated Builder() + setIconResId pair did, spelled out.
+            val seekToPreviousCommandButton =
+                CommandButton.Builder(CommandButton.ICON_UNDEFINED).apply {
+                    setPlayerCommand(Player.COMMAND_SEEK_TO_PREVIOUS)
+                    setCustomIconResId(R.drawable.ic_notification_skip_to_previous_36dp)
+                    setEnabled(true)
+                }.build()
+            val playCommandButton = CommandButton.Builder(CommandButton.ICON_UNDEFINED).apply {
                 setPlayerCommand(Player.COMMAND_PLAY_PAUSE)
-                setIconResId(if (player.isPlaying) R.drawable.ic_notification_stop_36dp else R.drawable.ic_notification_play_36dp)
+                setCustomIconResId(if (player.isPlaying) R.drawable.ic_notification_stop_36dp else R.drawable.ic_notification_play_36dp)
                 setEnabled(true)
             }.build()
-            val seekToNextCommandButton = CommandButton.Builder().apply {
-                setPlayerCommand(Player.COMMAND_SEEK_TO_NEXT)
-                setIconResId(R.drawable.ic_notification_skip_to_next_36dp)
-                setEnabled(true)
-            }.build()
+            val seekToNextCommandButton =
+                CommandButton.Builder(CommandButton.ICON_UNDEFINED).apply {
+                    setPlayerCommand(Player.COMMAND_SEEK_TO_NEXT)
+                    setCustomIconResId(R.drawable.ic_notification_skip_to_next_36dp)
+                    setEnabled(true)
+                }.build()
             val commandButtons: MutableList<CommandButton> = mutableListOf(
                 seekToPreviousCommandButton,
                 playCommandButton,
