@@ -2,7 +2,7 @@
 <resources>
 
     <!--
-        The XML theme only has to carry the app through window creation now. Colours,
+        The XML theme only has to carry the app through window creation now. Colors,
         shapes, typography and every widget style live in the Compose theme
         (ui/theme/Theme.kt), and the system bar appearance is applied at runtime by
         enableEdgeToEdge().

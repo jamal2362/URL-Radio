@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-    <!-- NIGHT THEME COLORS -->
-
-    <!-- app colors -->
-
     <!-- text & icons -->
     <color name="text_default">#FFFFFFFF</color>
     <color name="icon_default">#FFDAE2FF</color>

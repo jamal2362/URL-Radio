@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-    <!-- DAY THEME COLORS -->
-
-    <!-- app colors -->
-
     <!-- text & icons -->
     <color name="text_default">#FF595959</color>
     <color name="icon_default">#FF495D92</color>
