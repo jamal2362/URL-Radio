@@ -297,7 +297,7 @@ fun UrlRadioApp(
                     contentPadding = padding,
                     selectedTab = selectedTab,
                     onSelectTab = { selectedTab = it },
-                    listBottomPadding = (playerHeight - PLAYER_STATION_OVERLAP)
+                    listBottomPadding = playerHeight
                         .coerceAtLeast(0.dp),
                     onOpenSettings = { screen = AppScreen.Settings },
                     onDeleteRequest = { pendingDelete = it },
@@ -390,14 +390,7 @@ fun UrlRadioApp(
 }
 
 /**
- * How far the last station card is allowed to slide underneath the floating player. Small on
- * purpose: it should read as the list continuing behind the player, not as a cropped card.
- */
-private val PLAYER_STATION_OVERLAP = 14.dp
-
-/**
- * @param listBottomPadding space kept free at the end of the list. In the compact layout the
- *   player floats over the list, so this is its height minus [PLAYER_STATION_OVERLAP].
+ * @param listBottomPadding space kept free at the end of the list.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
