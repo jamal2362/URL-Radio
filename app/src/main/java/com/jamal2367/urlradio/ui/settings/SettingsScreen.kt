@@ -81,6 +81,7 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
 ) {
     var showThemeDialog by remember { mutableStateOf(false) }
+    var showExportFormatDialog by remember { mutableStateOf(false) }
 
     LazyColumn(
         contentPadding = contentPadding,
@@ -137,17 +138,13 @@ fun SettingsScreen(
                     icon = R.drawable.ic_playlist_add_24dp,
                     onClick = callbacks.onImportPlaylist,
                 )
+                // One entry for both playlist formats. Which of the two is written is asked
+                // in a dialog rather than through two near-identical rows.
                 SettingsRow(
-                    title = stringResource(R.string.pref_m3u_export_title),
-                    summary = stringResource(R.string.pref_m3u_export_summary),
-                    icon = R.drawable.ic_save_m3u_24dp,
-                    onClick = callbacks.onExportM3u,
-                )
-                SettingsRow(
-                    title = stringResource(R.string.pref_pls_export_title),
-                    summary = stringResource(R.string.pref_pls_export_summary),
-                    icon = R.drawable.ic_save_pls_24dp,
-                    onClick = callbacks.onExportPls,
+                    title = stringResource(R.string.pref_playlist_export_title),
+                    summary = stringResource(R.string.pref_playlist_export_summary),
+                    icon = R.drawable.ic_playlist_export_24dp,
+                    onClick = { showExportFormatDialog = true },
                 )
                 SettingsRow(
                     title = stringResource(R.string.pref_station_export_title),
@@ -229,6 +226,103 @@ fun SettingsScreen(
             onSelect = callbacks.onThemeSelected,
             onDismiss = { showThemeDialog = false },
         )
+    }
+
+    if (showExportFormatDialog) {
+        ExportFormatDialog(
+            onExportM3u = {
+                showExportFormatDialog = false
+                callbacks.onExportM3u()
+            },
+            onExportPls = {
+                showExportFormatDialog = false
+                callbacks.onExportPls()
+            },
+            onDismiss = { showExportFormatDialog = false },
+        )
+    }
+}
+
+/* Asks which playlist format to write, standing in for the two separate export entries. */
+@Composable
+private fun ExportFormatDialog(
+    onExportM3u: () -> Unit,
+    onExportPls: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(
+                painter = painterResource(R.drawable.ic_playlist_export_24dp),
+                contentDescription = null,
+            )
+        },
+        title = { Text(stringResource(R.string.pref_playlist_export_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                ExportFormatRow(
+                    title = stringResource(R.string.pref_m3u_export_title),
+                    summary = stringResource(R.string.pref_m3u_export_summary),
+                    icon = R.drawable.ic_save_m3u_24dp,
+                    onClick = onExportM3u,
+                )
+                ExportFormatRow(
+                    title = stringResource(R.string.pref_pls_export_title),
+                    summary = stringResource(R.string.pref_pls_export_summary),
+                    icon = R.drawable.ic_save_pls_24dp,
+                    onClick = onExportPls,
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.dialog_generic_button_cancel))
+            }
+        },
+    )
+}
+
+@Composable
+private fun ExportFormatRow(title: String, summary: String, icon: Int, onClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.secondaryContainer),
+        ) {
+            Icon(
+                painter = painterResource(icon),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                modifier = Modifier.size(22.dp),
+            )
+        }
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 12.dp)
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = summary,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 

@@ -40,9 +40,11 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -89,161 +91,176 @@ fun PlayerPane(
         ?.sanitizedMetadata().orEmpty().ifEmpty { station.name }
     val playbackButtonDescription = stringResource(R.string.descr_player_playback_button)
 
-    Column(
-        // Dragging the player up opens it, dragging down closes it. Sits on the whole panel
-        // rather than the compact row so a downward swipe anywhere over the expanded
-        // controls closes it too. The threshold is in pixels, so it is compared against the
-        // drag total rather than a dp.
-        modifier = modifier
-            .fillMaxWidth()
-            .pointerInput(Unit) {
-                var dragTotal = 0f
-                detectVerticalDragGestures(
-                    onDragStart = { dragTotal = 0f },
-                    onDragEnd = {
-                        if (dragTotal < -SWIPE_THRESHOLD_PX) onSetExpanded(true)
-                        else if (dragTotal > SWIPE_THRESHOLD_PX) onSetExpanded(false)
-                    },
-                    onVerticalDrag = { change, amount ->
-                        change.consume()
-                        dragTotal += amount
-                    },
-                )
-            }
-    ) {
-        // ---- compact row: always visible ----
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
+    // The player stays visually silent under the finger: no ripple, no hover or focus
+    // highlight, anywhere inside it. A null RippleConfiguration switches off the ripple that
+    // the Material components (the play button, the icon buttons) request themselves; the
+    // plain clickables below additionally pass indication = null, which is what the theme's
+    // default indication would otherwise supply.
+    CompositionLocalProvider(LocalRippleConfiguration provides null) {
+        Column(
+            // Dragging the player up opens it, dragging down closes it. Sits on the whole panel
+            // rather than the compact row so a downward swipe anywhere over the expanded
+            // controls closes it too. The threshold is in pixels, so it is compared against the
+            // drag total rather than a dp.
+            modifier = modifier
                 .fillMaxWidth()
-                .combinedClickable(onClick = onToggleExpanded)
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .pointerInput(Unit) {
+                    var dragTotal = 0f
+                    detectVerticalDragGestures(
+                        onDragStart = { dragTotal = 0f },
+                        onDragEnd = {
+                            if (dragTotal < -SWIPE_THRESHOLD_PX) onSetExpanded(true)
+                            else if (dragTotal > SWIPE_THRESHOLD_PX) onSetExpanded(false)
+                        },
+                        onVerticalDrag = { change, amount ->
+                            change.consume()
+                            dragTotal += amount
+                        },
+                    )
+                }
         ) {
-            StationArtwork(station = station, modifier = Modifier.size(56.dp))
-
-            Column(
+            // ---- compact row: always visible ----
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 12.dp)
+                    .fillMaxWidth()
+                    .combinedClickable(
+                        interactionSource = null,
+                        indication = null,
+                        onClick = onToggleExpanded,
+                    )
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
             ) {
-                Text(
-                    text = station.name,
-                    style = MaterialTheme.typography.titleMediumEmphasized,
-                    maxLines = 1,
-                    // The old view enabled marquee only while playing; keep that.
-                    modifier = if (playback.isPlaying) Modifier.basicMarquee() else Modifier,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Text(
-                    text = if (playback.isPlaying) playback.currentMetadata.ifEmpty { station.name }
-                    else station.name,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
+                StationArtwork(station = station, modifier = Modifier.size(56.dp))
 
-            Box(contentAlignment = Alignment.Center) {
-                if (playback.isBuffering) {
-                    ContainedLoadingIndicator()
-                } else {
-                    FilledIconButton(onClick = onTogglePlayback) {
-                        if (playback.isPlaying) {
-                            EqualizerIcon(
-                                color = LocalContentColor.current,
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .semantics {
-                                        contentDescription = playbackButtonDescription
-                                    },
-                            )
-                        } else {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_player_play_symbol_42dp),
-                                contentDescription = playbackButtonDescription,
-                            )
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 12.dp)
+                ) {
+                    Text(
+                        text = station.name,
+                        style = MaterialTheme.typography.titleMediumEmphasized,
+                        maxLines = 1,
+                        // The old view enabled marquee only while playing; keep that.
+                        modifier = if (playback.isPlaying) Modifier.basicMarquee() else Modifier,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Text(
+                        text = if (playback.isPlaying) playback.currentMetadata.ifEmpty { station.name }
+                        else station.name,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+
+                Box(contentAlignment = Alignment.Center) {
+                    if (playback.isBuffering) {
+                        ContainedLoadingIndicator()
+                    } else {
+                        FilledIconButton(onClick = onTogglePlayback) {
+                            if (playback.isPlaying) {
+                                EqualizerIcon(
+                                    color = LocalContentColor.current,
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .semantics {
+                                            contentDescription = playbackButtonDescription
+                                        },
+                                )
+                            } else {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_player_play_symbol_42dp),
+                                    contentDescription = playbackButtonDescription,
+                                )
+                            }
                         }
                     }
                 }
             }
-        }
 
-        // ---- expanded controls ----
-        AnimatedVisibility(visible = expanded) {
-            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-                HorizontalDivider()
+            // ---- expanded controls ----
+            AnimatedVisibility(visible = expanded) {
+                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                    HorizontalDivider()
 
-                LabelledValue(
-                    label = stringResource(R.string.player_sheet_h2_stream_url),
-                    value = station.getStreamUri(),
-                    onClick = { onCopy(station.getStreamUri()) },
-                    trailing = {
-                        IconButton(onClick = onShare) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_share_24dp),
-                                contentDescription = null,
-                            )
-                        }
-                    },
-                )
-
-                LabelledValue(
-                    label = stringResource(R.string.player_sheet_h2_station_metadata),
-                    value = shownMetadata,
-                    onClick = { onCopy(shownMetadata) },
-                    onLongClick = onCopyFullHistory,
-                    leading = {
-                        IconButton(onClick = onPreviousMetadata) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_chevron_left_24dp),
-                                contentDescription = stringResource(R.string.descr_expanded_player_metadata_previous_button),
-                            )
-                        }
-                    },
-                    trailing = {
-                        Row {
-                            IconButton(onClick = onNextMetadata) {
+                    LabelledValue(
+                        label = stringResource(R.string.player_sheet_h2_stream_url),
+                        value = station.getStreamUri(),
+                        onClick = { onCopy(station.getStreamUri()) },
+                        trailing = {
+                            IconButton(onClick = onShare) {
                                 Icon(
-                                    painter = painterResource(R.drawable.ic_chevron_right_24dp),
-                                    contentDescription = stringResource(R.string.descr_expanded_player_metadata_next_button),
+                                    painter = painterResource(R.drawable.ic_share_24dp),
+                                    contentDescription = null,
                                 )
                             }
-                            IconButton(onClick = { onCopy(shownMetadata) }) {
+                        },
+                    )
+
+                    LabelledValue(
+                        label = stringResource(R.string.player_sheet_h2_station_metadata),
+                        value = shownMetadata,
+                        onClick = { onCopy(shownMetadata) },
+                        onLongClick = onCopyFullHistory,
+                        leading = {
+                            IconButton(onClick = onPreviousMetadata) {
                                 Icon(
-                                    painter = painterResource(R.drawable.ic_copy_content_24dp),
-                                    contentDescription = stringResource(R.string.descr_expanded_player_metadata_copy_button),
+                                    painter = painterResource(R.drawable.ic_chevron_left_24dp),
+                                    contentDescription = stringResource(R.string.descr_expanded_player_metadata_previous_button),
                                 )
                             }
-                        }
-                    },
-                )
+                        },
+                        trailing = {
+                            Row {
+                                IconButton(onClick = onNextMetadata) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_chevron_right_24dp),
+                                        contentDescription = stringResource(R.string.descr_expanded_player_metadata_next_button),
+                                    )
+                                }
+                                IconButton(onClick = { onCopy(shownMetadata) }) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_copy_content_24dp),
+                                        contentDescription = stringResource(R.string.descr_expanded_player_metadata_copy_button),
+                                    )
+                                }
+                            }
+                        },
+                    )
 
-                // Codec/bitrate on the left, sleep timer opposite it on the right.
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-                ) {
-                    val bitrateText = bitrateLabel(station)
-                    Text(
-                        text = bitrateText,
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    // Codec/bitrate on the left, sleep timer opposite it on the right.
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier
-                            .weight(1f)
-                            .combinedClickable(onClick = { onCopy(bitrateText) })
-                            .padding(vertical = 8.dp),
-                    )
+                            .fillMaxWidth()
+                            .padding(top = 8.dp),
+                    ) {
+                        val bitrateText = bitrateLabel(station)
+                        Text(
+                            text = bitrateText,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier
+                                .weight(1f)
+                                .combinedClickable(
+                                    interactionSource = null,
+                                    indication = null,
+                                    onClick = { onCopy(bitrateText) },
+                                )
+                                .padding(vertical = 8.dp),
+                        )
 
-                    SleepTimerControls(
-                        isPlaying = playback.isPlaying,
-                        remainingMillis = playback.sleepTimerRemaining,
-                        onStart = onStartSleepTimer,
-                        onCancel = onCancelSleepTimer,
-                    )
+                        SleepTimerControls(
+                            isPlaying = playback.isPlaying,
+                            remainingMillis = playback.sleepTimerRemaining,
+                            onStart = onStartSleepTimer,
+                            onCancel = onCancelSleepTimer,
+                        )
+                    }
                 }
             }
         }
@@ -275,7 +292,12 @@ private fun LabelledValue(
             text = label,
             style = MaterialTheme.typography.labelMediumEmphasized,
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick),
+            modifier = Modifier.combinedClickable(
+                interactionSource = null,
+                indication = null,
+                onClick = onClick,
+                onLongClick = onLongClick,
+            ),
         )
         Row(verticalAlignment = Alignment.CenterVertically) {
             leading?.invoke()
@@ -286,7 +308,12 @@ private fun LabelledValue(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
                     .weight(1f)
-                    .combinedClickable(onClick = onClick, onLongClick = onLongClick),
+                    .combinedClickable(
+                        interactionSource = null,
+                        indication = null,
+                        onClick = onClick,
+                        onLongClick = onLongClick,
+                    ),
             )
             trailing?.invoke()
         }

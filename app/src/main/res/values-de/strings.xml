@@ -84,6 +84,8 @@
     <string name="pref_m3u_export_summary">Radiosender in einer M3U-Playlistdatei sichern, die in andere Player importiert werden können.</string>
     <string name="pref_m3u_export_title">M3U-Playlist exportieren</string>
     <string name="pref_maintenance_title">Wartung</string>
+    <string name="pref_playlist_export_summary">Radiosender in einer M3U- oder PLS-Playlistdatei sichern, die in andere Player importiert werden können.</string>
+    <string name="pref_playlist_export_title">Playlist exportieren</string>
     <string name="pref_playlist_import_summary">Radiosender aus einer M3U- oder PLS-Playlistdatei hinzufügen.</string>
     <string name="pref_playlist_import_title">Playlist importieren</string>
     <string name="pref_pls_export_summary">Radiosender in einer PLS-Playlistdatei sichern, die in andere Player importiert werden können.</string>
