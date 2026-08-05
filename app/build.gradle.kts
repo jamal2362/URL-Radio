@@ -12,8 +12,8 @@ android {
         applicationId = "com.jamal2367.urlradio"
         minSdk = 23
         targetSdk = 37
-        versionCode = 128
-        versionName = "12.8"
+        versionCode = 130
+        versionName = "13.0"
     }
 
     buildFeatures {
