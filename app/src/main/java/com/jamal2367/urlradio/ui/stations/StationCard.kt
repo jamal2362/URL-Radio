@@ -54,6 +54,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
@@ -137,10 +138,16 @@ fun StationCard(
                 Text(
                     text = station.name,
                     style = MaterialTheme.typography.titleMedium,
-                    maxLines = 2,
+                    maxLines = 1,
+                    // Clip would cut the last glyph in half; a name that does not fit ends
+                    // in an ellipsis instead.
+                    overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
                         .weight(1f)
-                        .padding(horizontal = 12.dp)
+                        // With a heart the name stops 8dp short of it; without one there is
+                        // nothing to keep clear of, so the name runs out to the row's own
+                        // 8dp padding.
+                        .padding(start = 8.dp, end = if (station.starred) 8.dp else 0.dp)
                         // The cover and the name stay visually silent when tapped: no ripple,
                         // no hover highlight. Only the free area of the row still reacts.
                         .combinedClickable(
@@ -151,22 +158,20 @@ fun StationCard(
                         ),
                 )
 
+                // Neither the heart nor the padding around the name claims touches -- padding
+                // sits outside the text's clickable -- so a long press to the right of the
+                // name still reaches the row's reorder gesture, however long the name is.
                 if (station.starred) {
                     Icon(
                         painter = painterResource(R.drawable.ic_favorite_default_24dp),
                         contentDescription = stringResource(R.string.descr_card_starred_station),
                         tint = if (station.imageColor != -1) Color(station.imageColor)
                         else MaterialTheme.colorScheme.primary,
-                        modifier = Modifier
-                            .padding(start = 8.dp)
-                            .size(24.dp),
+                        modifier = Modifier.size(24.dp),
                     )
-                }
 
-                // Free strip where the drag handle used to sit. Nothing claims these
-                // touches, so a long press here reaches the row's reorder gesture no matter
-                // how long the station name is.
-                Spacer(modifier = Modifier.width(4.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
+                }
             }
                 }
 
