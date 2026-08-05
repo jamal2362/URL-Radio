@@ -28,12 +28,18 @@ import com.google.gson.GsonBuilder
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.core.Collection
 import com.jamal2367.urlradio.core.Station
-import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
-import java.io.*
-import java.util.*
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
+import java.io.BufferedReader
+import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
+import java.io.InputStreamReader
+import java.io.OutputStream
+import java.util.Date
+import java.util.Locale
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 
 /*
@@ -43,22 +49,7 @@ object FileHelper {
 
 
     /* Define log tag */
-    private val TAG: String = FileHelper::class.java.simpleName
-
-
-    /* Get file size for given Uri */
-    fun getFileSize(context: Context, uri: Uri): Long {
-        val cursor: Cursor? = context.contentResolver.query(uri, null, null, null, null)
-        return if (cursor != null) {
-            val sizeIndex: Int = cursor.getColumnIndex(OpenableColumns.SIZE)
-            cursor.moveToFirst()
-            val size: Long = cursor.getLong(sizeIndex)
-            cursor.close()
-            size
-        } else {
-            0L
-        }
-    }
+    private val tag: String = FileHelper::class.java.simpleName
 
 
     /* Get file name for given Uri */
@@ -93,7 +84,7 @@ object FileHelper {
 
     /* Determine content type based on file extension */
     fun getContentTypeFromExtension(fileName: String): String {
-        Log.i(TAG, "Deducing content type from file name: $fileName")
+        Log.i(tag, "Deducing content type from file name: $fileName")
         if (fileName.endsWith("m3u", true)) return Keys.MIME_TYPE_M3U
         if (fileName.endsWith("pls", true)) return Keys.MIME_TYPE_PLS
         if (fileName.endsWith("png", true)) return Keys.MIME_TYPE_PNG
@@ -163,7 +154,7 @@ object FileHelper {
         lastSave: Date,
         allowEmpty: Boolean = false,
     ) {
-        Log.v(TAG, "Saving collection - Thread: ${Thread.currentThread().name}")
+        Log.v(tag, "Saving collection - Thread: ${Thread.currentThread().name}")
         val collectionSize: Int = collection.stations.size
         // do not override an existing collection with an empty one - except when the last
         // station is deleted, or when the caller emptied the collection on purpose
@@ -183,11 +174,11 @@ object FileHelper {
                 PreferencesHelper.saveCollectionModificationDate(lastSave)
                 PreferencesHelper.saveCollectionSize(collectionSize)
             } else {
-                Log.w(TAG, "Not writing collection file. Reason: JSON string was completely empty.")
+                Log.w(tag, "Not writing collection file. Reason: JSON string was completely empty.")
             }
         } else {
             Log.w(
-                TAG,
+                tag,
                 "Not saving collection. Reason: Trying to override an collection with more than one station"
             )
         }
@@ -227,7 +218,7 @@ object FileHelper {
 
     /* Reads collection of radio stations from storage using GSON */
     fun readCollection(context: Context): Collection {
-        Log.v(TAG, "Reading collection - Thread: ${Thread.currentThread().name}")
+        Log.v(tag, "Reading collection - Thread: ${Thread.currentThread().name}")
         // get JSON from text file
         val json: String = readTextFileFromFile(context)
         var collection = Collection()
@@ -236,7 +227,7 @@ object FileHelper {
             try {
                 collection = getCustomGson().fromJson(json, collection::class.java)
             } catch (e: Exception) {
-                Log.e(TAG, "Error Reading collection.\nContent: $json")
+                Log.e(tag, "Error Reading collection.\nContent: $json")
                 e.printStackTrace()
             }
         }
@@ -269,8 +260,8 @@ object FileHelper {
 
 
     /* Get content Uri for PLS file */
-    fun getPlslUri(activity: Activity): Uri? {
-        var plslUri: Uri? = null
+    fun getPlsqlUri(activity: Activity): Uri? {
+        var plsqlUri: Uri? = null
         // try to get an existing PLS File
         var plsFile =
             File(activity.getExternalFilesDir(Keys.FOLDER_COLLECTION), Keys.COLLECTION_PLS_FILE)
@@ -282,13 +273,13 @@ object FileHelper {
         }
         // get Uri for existing M3U File
         if (plsFile.exists()) {
-            plslUri = FileProvider.getUriForFile(
+            plsqlUri = FileProvider.getUriForFile(
                 activity,
                 "${activity.applicationContext.packageName}.provider",
                 plsFile
             )
         }
-        return plslUri
+        return plsqlUri
     }
 
 
@@ -299,7 +290,7 @@ object FileHelper {
         lastUpdate: Date,
         allowEmpty: Boolean = false,
     ) {
-        return suspendCoroutine { cont ->
+        return suspendCancellableCoroutine { cont ->
             cont.resume(saveCollection(context, collection, lastUpdate, allowEmpty))
         }
     }
@@ -318,7 +309,7 @@ object FileHelper {
         originalFileUri: Uri,
         targetFileUri: Uri
     ): Boolean {
-        return suspendCoroutine { cont ->
+        return suspendCancellableCoroutine { cont ->
             cont.resume(copyFile(context, originalFileUri, targetFileUri))
         }
     }
@@ -326,8 +317,8 @@ object FileHelper {
 
     /* Suspend function: Exports collection of stations as M3U file - local backup copy */
     suspend fun backupCollectionAsM3uSuspended(context: Context, collection: Collection) {
-        return suspendCoroutine { cont ->
-            Log.v(TAG, "Backing up collection as M3U - Thread: ${Thread.currentThread().name}")
+        return suspendCancellableCoroutine { cont ->
+            Log.v(tag, "Backing up collection as M3U - Thread: ${Thread.currentThread().name}")
             // create M3U string
             val m3uString: String = CollectionHelper.createM3uString(collection)
             // save M3U as text file
@@ -345,8 +336,8 @@ object FileHelper {
 
     /* Suspend function: Exports collection of stations as PLS file - local backup copy */
     suspend fun backupCollectionAsPlsSuspended(context: Context, collection: Collection) {
-        return suspendCoroutine { cont ->
-            Log.v(TAG, "Backing up collection as PLS - Thread: ${Thread.currentThread().name}")
+        return suspendCancellableCoroutine { cont ->
+            Log.v(tag, "Backing up collection as PLS - Thread: ${Thread.currentThread().name}")
             // create PLS string
             val plsString: String = CollectionHelper.createPlsString(collection)
             // save PLS as text file
@@ -379,7 +370,7 @@ object FileHelper {
                 outputStream.close() // Close the output stream after copying
             }
         } catch (exception: Exception) {
-            Log.e(TAG, "Unable to copy file.")
+            Log.e(tag, "Unable to copy file.")
             success = false
             exception.printStackTrace()
         } finally {
@@ -390,7 +381,7 @@ object FileHelper {
                 // use contentResolver to handle files of type content://
                 context.contentResolver.delete(originalFileUri, null, null)
             } catch (e: Exception) {
-                Log.e(TAG, "Unable to delete the original file. Stack trace: $e")
+                Log.e(tag, "Unable to delete the original file. Stack trace: $e")
             }
         }
         return success
@@ -406,18 +397,18 @@ object FileHelper {
     }
 
 
-    /* Create nomedia file in given folder to prevent media scanning */
-    fun createNomediaFile(folder: File?) {
+    /* Create noMedia file in given folder to prevent media scanning */
+    fun createNoMediaFile(folder: File?) {
         if (folder != null && folder.exists() && folder.isDirectory) {
-            val nomediaFile: File = getNoMediaFile(folder)
-            if (!nomediaFile.exists()) {
+            val noMediaFile: File = getNoMediaFile(folder)
+            if (!noMediaFile.exists()) {
                 val noMediaOutStream = FileOutputStream(getNoMediaFile(folder))
                 noMediaOutStream.write(0)
             } else {
-                Log.v(TAG, ".nomedia file exists already in given folder.")
+                Log.v(tag, ".nomedia file exists already in given folder.")
             }
         } else {
-            Log.w(TAG, "Unable to create .nomedia file. Given folder is not valid.")
+            Log.w(tag, "Unable to create .nomedia file. Given folder is not valid.")
         }
     }
 
@@ -479,16 +470,16 @@ object FileHelper {
     /*
      * Writes given text to file on storage.
      *
-     * Written to a temporary file and then moved into place, and serialised against other
+     * Written to a temporary file and then moved into place, and serialized against other
      * writers. Two overlapping writes used to share one truncated file and interleave: a
-     * shorter payload (favouriting a station makes the JSON one byte shorter) left the tail
+     * shorter payload (favoring a station makes the JSON one byte shorter) left the tail
      * of the longer one behind, so collection.json ended up with a stray closing brace.
      * Gson then rejected the whole file and the app silently started with no stations at all.
      */
     @Suppress("SameParameterValue")
     private fun writeTextFile(context: Context, text: String, folder: String, fileName: String) {
         if (text.isBlank()) {
-            Log.w(TAG, "Writing text file $fileName failed. Empty text string text was provided.")
+            Log.w(tag, "Writing text file $fileName failed. Empty text string text was provided.")
             return
         }
         synchronized(fileWriteLock) {
@@ -501,7 +492,7 @@ object FileHelper {
                     temporary.delete()
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Writing text file $fileName failed.")
+                Log.e(tag, "Writing text file $fileName failed.")
                 e.printStackTrace()
             }
         }
@@ -527,7 +518,7 @@ object FileHelper {
     }
 
 
-    /* Returns a nomedia file object */
+    /* Returns a noMedia file object */
     private fun getNoMediaFile(folder: File): File {
         return File(folder, ".nomedia")
     }

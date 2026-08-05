@@ -31,13 +31,20 @@ import com.jamal2367.urlradio.R
 import com.jamal2367.urlradio.core.Collection
 import com.jamal2367.urlradio.core.Station
 import com.jamal2367.urlradio.search.DirectInputCheck
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import java.io.File
 import java.net.URL
-import java.util.*
+import java.util.Calendar
+import java.util.Date
+import java.util.GregorianCalendar
+import java.util.Locale
 
 
 /*
@@ -46,7 +53,7 @@ import java.util.*
 object CollectionHelper {
 
     /* Define log tag */
-    private val TAG: String = CollectionHelper::class.java.simpleName
+    private val tag: String = CollectionHelper::class.java.simpleName
 
     /* Checks if station is already in collection */
     private fun isNewStation(collection: Collection, station: Station): Boolean {
@@ -290,7 +297,7 @@ object CollectionHelper {
     }
 
 
-    /* Gets MediaIem for next station within collection */
+    /* Gets MediaItem for next station within collection */
     fun getNextMediaItem(context: Context, collection: Collection, stationUuid: String): MediaItem {
         val currentStationPosition: Int = getStationPosition(collection, stationUuid)
         return if (collection.stations.isEmpty() || currentStationPosition == -1) {
@@ -303,7 +310,7 @@ object CollectionHelper {
     }
 
 
-    /* Gets MediaIem for previous station within collection */
+    /* Gets MediaItem for previous station within collection */
     fun getPreviousMediaItem(context: Context, collection: Collection, stationUuid: String): MediaItem {
         val currentStationPosition: Int = getStationPosition(collection, stationUuid)
         return if (collection.stations.isEmpty() || currentStationPosition == -1) {
@@ -327,21 +334,7 @@ object CollectionHelper {
     }
 
 
-    /* Get the position from collection for given radioBrowserStationUuid */
-    fun getStationPositionFromRadioBrowserStationUuid(
-        collection: Collection,
-        radioBrowserStationUuid: String
-    ): Int {
-        collection.stations.forEachIndexed { stationId, station ->
-            if (station.radioBrowserStationUuid == radioBrowserStationUuid) {
-                return stationId
-            }
-        }
-        return -1
-    }
-
-
-    /* Returns the children stations under under root (simple media library structure: root > stations) */
+    /* Returns the children stations under root (simple media library structure: root > stations) */
     fun getChildren(context: Context, collection: Collection): List<MediaItem> {
         val mediaItems: MutableList<MediaItem> = mutableListOf()
         collection.stations.forEach { station ->
@@ -398,9 +391,9 @@ object CollectionHelper {
         // out-of-date copy back would undo whatever changed the collection in the meantime --
         // removing every station, say, where the pause that goes with it would otherwise put
         // them all straight back. The service reloads from the broadcast either way, so
-        // skipping the write here loses nothing but the playback flag.
+        // skipping to write here loses nothing but the playback flag.
         if (PreferencesHelper.loadCollectionModificationDate().after(collection.modificationDate)) {
-            Log.v(TAG, "Not saving playback state. Reason: collection on storage is newer.")
+            Log.v(tag, "Not saving playback state. Reason: collection on storage is newer.")
             return collection
         }
         // save collection and store modification date
@@ -422,7 +415,7 @@ object CollectionHelper {
         allowEmpty: Boolean = false,
     ): Date {
         Log.v(
-            TAG,
+            tag,
             "Saving collection of radio stations to storage. Async = ${async}. Size = ${collection.stations.size}"
         )
         // get modification date
@@ -603,9 +596,9 @@ object CollectionHelper {
 
     /* Export collection of stations as M3U */
     fun exportCollectionM3u(context: Context, collection: Collection) {
-        Log.v(TAG, "Exporting collection of stations as M3U")
+        Log.v(tag, "Exporting collection of stations as M3U")
         // export collection as M3U - launch = fire & forget (no return value from save collection)
-        if (collection.stations.size > 0) {
+        if (collection.stations.isNotEmpty()) {
             CoroutineScope(IO).launch {
                 FileHelper.backupCollectionAsM3uSuspended(
                     context,
@@ -645,9 +638,9 @@ object CollectionHelper {
 
     /* Export collection of stations as PLS */
     fun exportCollectionPls(context: Context, collection: Collection) {
-        Log.v(TAG, "Exporting collection of stations as PLS")
+        Log.v(tag, "Exporting collection of stations as PLS")
         // export collection as PLS - launch = fire & forget (no return value from save collection)
-        if (collection.stations.size > 0) {
+        if (collection.stations.isNotEmpty()) {
             CoroutineScope(IO).launch {
                 FileHelper.backupCollectionAsPlsSuspended(
                     context,
@@ -704,7 +697,7 @@ object CollectionHelper {
 
     /* Sends a broadcast containing the collection as parcel */
     fun sendCollectionBroadcast(context: Context, modificationDate: Date) {
-        Log.v(TAG, "Broadcasting that collection has changed.")
+        Log.v(tag, "Broadcasting that collection has changed.")
         val collectionChangedIntent = Intent()
         collectionChangedIntent.action = Keys.ACTION_COLLECTION_CHANGED
         collectionChangedIntent.putExtra(
@@ -809,7 +802,7 @@ object CollectionHelper {
             }
             faviconAddress = "http://$host/favicon.ico"
         } catch (e: Exception) {
-            Log.e(TAG, "Unable to get base URL from $urlString.\n$e ")
+            Log.e(tag, "Unable to get base URL from $urlString.\n$e ")
         }
         return faviconAddress
     }

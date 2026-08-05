@@ -97,7 +97,7 @@ fun PlayerPane(
     // The player stays visually silent under the finger: no ripple, no hover or focus
     // highlight, anywhere inside it. A null RippleConfiguration switches off the ripple that
     // the Material components (the play button, the icon buttons) request themselves; the
-    // plain clickables below additionally pass indication = null, which is what the theme's
+    // plain clickable below additionally pass indication = null, which is what the theme's
     // default indication would otherwise supply.
     CompositionLocalProvider(LocalRippleConfiguration provides null) {
         Column(
@@ -386,7 +386,7 @@ private fun EqualizerIcon(color: Color, modifier: Modifier = Modifier) {
         val gap = 2.dp.toPx()
         val corner = CornerRadius(1.dp.toPx())
         // Centred, not left-aligned: the three bars are narrower than the 24dp icon slot, so
-        // starting at zero pushed the whole group off-centre inside the round button.
+        // starting at zero pushed the whole group off-center inside the round button.
         var x = (size.width - (barWidth * bars.size + gap * (bars.size - 1))) / 2f
         bars.forEach { bar ->
             val barHeight = size.height * bar.value

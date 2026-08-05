@@ -20,8 +20,15 @@ import android.net.Uri
 import android.os.Build
 import android.util.Log
 import com.jamal2367.urlradio.R
-import java.io.*
-import java.util.*
+import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
+import java.util.Calendar
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
@@ -30,13 +37,13 @@ object BackupHelper {
 
 
     /* Define log tag */
-    private val TAG: String = BackupHelper::class.java.simpleName
+    private val tag: String = BackupHelper::class.java.simpleName
 
 
     /*
      * Compresses all files in the app's external files directory into destination zip file.
      *
-     * Reports progress through [onMessage] instead of showing a Snackbar itself: a helper
+     * Reports progress through [onMessage] instead of showing a Snack bar itself: a helper
      * has no business owning a View, and the Compose UI shows the message on its own
      * SnackbarHost.
      */
@@ -55,7 +62,7 @@ object BackupHelper {
                 }
             }
         } else {
-            Log.e(TAG, "Unable to access External Storage.")
+            Log.e(tag, "Unable to access External Storage.")
         }
     }
 
@@ -65,7 +72,7 @@ object BackupHelper {
         onMessage(context.getString(R.string.toastmessage_restored))
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            // bypass "ZipException" for Android 14 or above applications when zip file names contain ".." or start with "/"
+            // bypass "ZipException" for Android 14 or above applications when zip file names contain "." or start with "/"
             dalvik.system.ZipPathValidator.clearCallback()
         }
 
@@ -85,7 +92,7 @@ object BackupHelper {
                     true -> {
                         // create folder if zip entry is a folder
                         if (!newFile.isDirectory && !newFile.mkdirs()) {
-                            Log.w(TAG, "Failed to create directory $newFile")
+                            Log.w(tag, "Failed to create directory $newFile")
                         }
                     }
                     // CASE: File
@@ -93,7 +100,7 @@ object BackupHelper {
                         // create parent directory, if necessary
                         val parent: File? = newFile.parentFile
                         if (parent != null && !parent.isDirectory && !parent.mkdirs()) {
-                            Log.w(TAG, "Failed to create directory $parent")
+                            Log.w(tag, "Failed to create directory $parent")
                         }
                         // write file content
                         val fileOutputStream = FileOutputStream(newFile)
@@ -105,7 +112,7 @@ object BackupHelper {
                     }
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Unable to safely create file. $e")
+                Log.e(tag, "Unable to safely create file. $e")
             }
             // get next entry - zipEntry will be null, when zipInputStream has no more entries left
             zipEntry = zipInputStream.nextEntry

@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 /** How often the sleep timer remaining time is polled from the service. */
 private const val SLEEP_TIMER_POLL_INTERVAL_MS = 500L
@@ -183,7 +184,7 @@ class PlaybackConnection(
                     refreshMetadataHistory()
                 }
                 tick++
-                delay(SLEEP_TIMER_POLL_INTERVAL_MS)
+                delay(SLEEP_TIMER_POLL_INTERVAL_MS.milliseconds)
             }
         }
     }
@@ -233,7 +234,7 @@ class PlaybackConnection(
 
     /*
      * Tapping the station that is currently playing pauses it; tapping any other station
-     * starts that one. Mirrors the behaviour of the old onPlayButtonTapped.
+     * starts that one. Mirrors the behavior of the old onPlayButtonTapped.
      */
     fun togglePlayPause(station: Station) {
         val controller = this.controller ?: return

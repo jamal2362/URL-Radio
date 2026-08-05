@@ -16,14 +16,24 @@ package com.jamal2367.urlradio
 
 import android.app.PendingIntent
 import android.app.TaskStackBuilder
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.content.SharedPreferences
 import android.media.audiofx.AudioEffect
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import androidx.media3.common.*
+import androidx.media3.common.AudioAttributes
+import androidx.media3.common.C
+import androidx.media3.common.ForwardingPlayer
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Metadata
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.HttpDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
@@ -33,7 +43,15 @@ import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.upstream.DefaultAllocator
 import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy
 import androidx.media3.exoplayer.upstream.LoadErrorHandlingPolicy
-import androidx.media3.session.*
+import androidx.media3.session.CommandButton
+import androidx.media3.session.DefaultMediaNotificationProvider
+import androidx.media3.session.LibraryResult
+import androidx.media3.session.MediaLibraryService
+import androidx.media3.session.MediaSession
+import androidx.media3.session.SessionCommand
+import androidx.media3.session.SessionCommands
+import androidx.media3.session.SessionError
+import androidx.media3.session.SessionResult
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
@@ -43,9 +61,13 @@ import com.jamal2367.urlradio.helpers.AudioHelper
 import com.jamal2367.urlradio.helpers.CollectionHelper
 import com.jamal2367.urlradio.helpers.FileHelper
 import com.jamal2367.urlradio.helpers.PreferencesHelper
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.Main
-import java.util.*
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import java.util.Date
 
 
 /*
@@ -59,10 +81,10 @@ class PlayerService : MediaLibraryService() {
      * not need the legacy androidx.media library for a single string constant. The system
      * passes this when it asks for a resumable item after a reboot.
      */
-    private val EXTRA_RECENT: String = "android.service.media.extra.RECENT"
+    private val extraRecent: String = "android.service.media.extra.RECENT"
 
     /* Define log tag */
-    private val TAG: String = PlayerService::class.java.simpleName
+    private val tag: String = PlayerService::class.java.simpleName
 
     /* Main class variables */
     private lateinit var player: Player
@@ -192,7 +214,7 @@ class PlayerService : MediaLibraryService() {
     }
 
 
-    /* Starts sleep timer / adds default duration to running sleeptimer */
+    /* Starts sleep timer / adds default duration to running sleep timer */
     private fun startSleepTimer(selectedTimeMillis: Long) {
         // stop running timer
         if (sleepTimerTimeRemaining > 0L && this::sleepTimer.isInitialized) {
@@ -205,7 +227,7 @@ class PlayerService : MediaLibraryService() {
         // initialize timer
         sleepTimer = object : CountDownTimer(selectedTimeMillis, 1000) {
             override fun onFinish() {
-                Log.v(TAG, "Sleep timer finished. Sweet dreams.")
+                Log.v(tag, "Sleep timer finished. Sweet dreams.")
                 sleepTimerTimeRemaining = 0L
                 player.stop()
             }
@@ -293,7 +315,7 @@ class PlayerService : MediaLibraryService() {
 
     /* Reads collection of stations from storage using GSON */
     private fun loadCollection(context: Context) {
-        Log.v(TAG, "Loading collection of stations from storage")
+        Log.v(tag, "Loading collection of stations from storage")
         CoroutineScope(Main).launch {
             // load collection on background thread
             val deferred: Deferred<Collection> =
@@ -382,8 +404,8 @@ class PlayerService : MediaLibraryService() {
             browser: MediaSession.ControllerInfo,
             params: LibraryParams?
         ): ListenableFuture<LibraryResult<MediaItem>> {
-            return if (params?.extras?.containsKey(EXTRA_RECENT) == true) {
-                // special case: system requested media resumption via EXTRA_RECENT
+            return if (params?.extras?.containsKey(extraRecent) == true) {
+                // special case: system requested media resumption via extraRecent
                 playLastStation = true
                 Futures.immediateFuture(LibraryResult.ofItem(CollectionHelper.getRecent(this@PlayerService, collection), params))
             } else {
@@ -645,7 +667,7 @@ class PlayerService : MediaLibraryService() {
 
         override fun onPlayerError(error: PlaybackException) {
             super.onPlayerError(error)
-            Log.d(TAG, "PlayerError occurred: ${error.errorCodeName}")
+            Log.d(tag, "PlayerError occurred: ${error.errorCodeName}")
             // todo: test if playback needs to be restarted
         }
 
@@ -659,7 +681,7 @@ class PlayerService : MediaLibraryService() {
 
 
     /*
-     * Custom LoadErrorHandlingPolicy that network drop outs
+     * Custom LoadErrorHandlingPolicy that network drop-outs
      */
     private val loadErrorHandlingPolicy: DefaultLoadErrorHandlingPolicy = object: DefaultLoadErrorHandlingPolicy()  {
         override fun getRetryDelayMsFor(loadErrorInfo: LoadErrorHandlingPolicy.LoadErrorInfo): Long {
@@ -689,7 +711,7 @@ class PlayerService : MediaLibraryService() {
                 val date = Date(intent.getLongExtra(Keys.EXTRA_COLLECTION_MODIFICATION_DATE, 0L))
 
                 if (date.after(collection.modificationDate)) {
-                    Log.v(TAG, "PlayerService - reload collection after broadcast received.")
+                    Log.v(tag, "PlayerService - reload collection after broadcast received.")
                     loadCollection(context)
                 }
             }
@@ -731,7 +753,7 @@ class PlayerService : MediaLibraryService() {
         initializePlayer()
         mediaLibrarySession.player = player
         previousPlayer.release()
-        Log.v(TAG, "Player rebuilt with buffer size multiplier $bufferSizeMultiplier.")
+        Log.v(tag, "Player rebuilt with buffer size multiplier $bufferSizeMultiplier.")
     }
 
 

@@ -19,13 +19,13 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.util.Log
 import com.jamal2367.urlradio.Keys
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.net.HttpURLConnection
 import java.net.InetAddress
 import java.net.URL
 import java.net.UnknownHostException
-import java.util.*
+import java.util.Random
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 
 /*
@@ -34,7 +34,7 @@ import kotlin.coroutines.suspendCoroutine
 object NetworkHelper {
 
     /* Define log tag */
-    private val TAG: String = NetworkHelper::class.java.simpleName
+    private val tag: String = NetworkHelper::class.java.simpleName
 
     /* Data class: holder for content type information */
     data class ContentType(var type: String = String(), var charset: String = String())
@@ -50,12 +50,12 @@ object NetworkHelper {
 
     /* Detects content type (mime type) from given URL string - async using coroutine - use only on separate threat */
     fun detectContentType(urlString: String): ContentType {
-        Log.v(TAG, "Determining content type - Thread: ${Thread.currentThread().name}")
+        Log.v(tag, "Determining content type - Thread: ${Thread.currentThread().name}")
         val contentType = ContentType(Keys.MIME_TYPE_UNSUPPORTED, Keys.CHARSET_UNDEFINDED)
         val connection: HttpURLConnection? = createConnection(urlString)
         if (connection != null) {
             val contentTypeHeader: String = connection.contentType ?: String()
-            Log.v(TAG, "Raw content type header: $contentTypeHeader")
+            Log.v(tag, "Raw content type header: $contentTypeHeader")
             val contentTypeHeaderParts: List<String> = contentTypeHeader.split(";")
             contentTypeHeaderParts.forEachIndexed { index, part ->
                 if (index == 0 && part.isNotEmpty()) {
@@ -67,7 +67,7 @@ object NetworkHelper {
 
             // special treatment for octet-stream - try to get content type from file extension
             if (contentType.type.contains(Keys.MIME_TYPE_OCTET_STREAM)) {
-                Log.w(TAG, "Special case \"application/octet-stream\"")
+                Log.w(tag, "Special case \"application/octet-stream\"")
                 val headerFieldContentDisposition: String? =
                     connection.getHeaderField("Content-Disposition")
                 if (headerFieldContentDisposition != null) {
@@ -77,13 +77,13 @@ object NetworkHelper {
                     ) //getting value after '=' & stripping any "s
                     contentType.type = FileHelper.getContentTypeFromExtension(fileName)
                 } else {
-                    Log.i(TAG, "Unable to get file name from \"Content-Disposition\" header field.")
+                    Log.i(tag, "Unable to get file name from \"Content-Disposition\" header field.")
                 }
             }
 
             connection.disconnect()
         }
-        Log.i(TAG, "content type: ${contentType.type} | character set: ${contentType.charset}")
+        Log.i(tag, "content type: ${contentType.type} | character set: ${contentType.charset}")
         return contentType
     }
 
@@ -105,7 +105,7 @@ object NetworkHelper {
 
     /* Suspend function: Detects content type (mime type) from given URL string - async using coroutine */
     suspend fun detectContentTypeSuspended(urlString: String): ContentType {
-        return suspendCoroutine { cont ->
+        return suspendCancellableCoroutine { cont ->
             cont.resume(detectContentType(urlString))
         }
     }
@@ -113,14 +113,14 @@ object NetworkHelper {
 
     /* Suspend function: Gets a random radio-browser.info api address - async using coroutine */
     suspend fun getRadioBrowserServerSuspended(): String {
-        return suspendCoroutine { cont ->
+        return suspendCancellableCoroutine { cont ->
             val serverAddress: String = try {
                 // get all available radio browser servers
                 val serverAddressList: Array<InetAddress> =
                     InetAddress.getAllByName(Keys.RADIO_BROWSER_API_BASE)
                 // select a random address
                 serverAddressList[Random().nextInt(serverAddressList.size)].canonicalHostName
-            } catch (e: UnknownHostException) {
+            } catch (_: UnknownHostException) {
                 Keys.RADIO_BROWSER_API_DEFAULT
             }
             PreferencesHelper.saveRadioBrowserApiAddress(serverAddress)
@@ -129,13 +129,13 @@ object NetworkHelper {
     }
 
 
-    /* Creates a http connection from given url string */
+    /* Creates an http connection from given url string */
     private fun createConnection(urlString: String, redirectCount: Int = 0): HttpURLConnection? {
         var connection: HttpURLConnection? = null
 
         try {
             // try to open connection and get status
-            Log.i(TAG, "Opening http connection.")
+            Log.i(tag, "Opening http connection.")
             connection = URL(urlString).openConnection() as HttpURLConnection
             val status = connection.responseCode
 
@@ -146,17 +146,17 @@ object NetworkHelper {
                     val redirectUrl: String = connection.getHeaderField("Location")
                     connection.disconnect()
                     if (redirectCount < 5) {
-                        Log.i(TAG, "Following redirect to $redirectUrl")
+                        Log.i(tag, "Following redirect to $redirectUrl")
                         connection = createConnection(redirectUrl, redirectCount + 1)
                     } else {
                         connection = null
-                        Log.e(TAG, "Too many redirects.")
+                        Log.e(tag, "Too many redirects.")
                     }
                 }
             }
 
         } catch (e: Exception) {
-            Log.e(TAG, "Unable to open http connection.")
+            Log.e(tag, "Unable to open http connection.")
             e.printStackTrace()
         }
 

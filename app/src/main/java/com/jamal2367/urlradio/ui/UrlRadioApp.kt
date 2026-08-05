@@ -147,7 +147,7 @@ fun UrlRadioApp(
         mutableStateOf(AppScreen.Stations)
     }
     // Held here rather than inside StationsPane: the compact and the wide layout call that
-    // composable from two different places, so a saveable inside it would be filed under two
+    // composable from two different places, so a savable inside it would be filed under two
     // different keys and the selection would be dropped on the way from one layout to the
     // other. 0 = all stations, 1 = favourites only.
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
@@ -165,7 +165,7 @@ fun UrlRadioApp(
     else historySize - 1
 
     // Back first collapses the expanded player, then leaves settings, matching the old
-    // onBackPressed behaviour of minimising the sheet before the activity handled back.
+    // onBackPressed behavior of minimizing the sheet before the activity handled back.
     BackHandler(enabled = playerExpanded || screen == AppScreen.Settings) {
         when {
             playerExpanded -> playerExpanded = false

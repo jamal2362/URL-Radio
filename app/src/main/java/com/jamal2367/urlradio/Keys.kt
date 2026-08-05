@@ -42,13 +42,7 @@ object Keys {
     const val EXTRA_SLEEP_TIMER_REMAINING: String = "SLEEP_TIMER_REMAINING"
     const val EXTRA_METADATA_HISTORY: String = "METADATA_HISTORY"
 
-    // arguments
-    const val ARG_UPDATE_COLLECTION: String = "ArgUpdateCollection"
-    const val ARG_UPDATE_IMAGES: String = "ArgUpdateImages"
-    const val ARG_RESTORE_COLLECTION: String = "ArgRestoreCollection"
-
     // keys
-    const val KEY_SAVE_INSTANCE_STATE_STATION_LIST: String = "SAVE_INSTANCE_STATE_STATION_LIST"
     const val KEY_STREAM_URI: String = "STREAM_URI"
 
     // custom MediaController commands
@@ -86,27 +80,6 @@ object Keys {
     const val ACTIVE_DOWNLOADS_EMPTY: String = "zero"
     const val DEFAULT_MAX_RECONNECTION_COUNT: Int = 30
     const val LARGE_BUFFER_SIZE_MULTIPLIER: Int = 8
-
-    // view types
-    const val VIEW_TYPE_ADD_NEW: Int = 1
-    const val VIEW_TYPE_STATION: Int = 2
-
-    // view holder update types
-    const val HOLDER_UPDATE_COVER: Int = 0
-    const val HOLDER_UPDATE_NAME: Int = 1
-    const val HOLDER_UPDATE_PLAYBACK_STATE: Int = 2
-    const val HOLDER_UPDATE_DOWNLOAD_STATE: Int = 3
-    const val HOLDER_UPDATE_PLAYBACK_PROGRESS: Int = 4
-
-    // dialog types
-    const val DIALOG_UPDATE_COLLECTION: Int = 1
-    const val DIALOG_REMOVE_STATION: Int = 2
-    const val DIALOG_UPDATE_STATION_IMAGES: Int = 4
-    const val DIALOG_RESTORE_COLLECTION: Int = 5
-
-    // dialog results
-    const val DIALOG_EMPTY_PAYLOAD_STRING: String = ""
-    const val DIALOG_EMPTY_PAYLOAD_INT: Int = -1
 
     // search types
     const val SEARCH_TYPE_BY_KEYWORD = 0
@@ -159,11 +132,9 @@ object Keys {
     // sizes (in dp)
     const val SIZE_STATION_IMAGE_CARD: Int = 72
     const val SIZE_STATION_IMAGE_MAXIMUM: Int = 640
-    const val BOTTOM_SHEET_PEEK_HEIGHT: Int = 72
 
     // default values
     val DEFAULT_DATE: Date = Date(0L)
-    const val EMPTY_STRING_RESOURCE: Int = 0
 
     // theme states
     const val STATE_THEME_FOLLOW_SYSTEM: String = "stateFollowSystem"

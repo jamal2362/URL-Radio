@@ -16,7 +16,6 @@ package com.jamal2367.urlradio
 
 import android.app.Application
 import android.util.Log
-import com.jamal2367.urlradio.helpers.PreferencesHelper
 import com.jamal2367.urlradio.helpers.PreferencesHelper.initPreferences
 
 
@@ -26,12 +25,12 @@ import com.jamal2367.urlradio.helpers.PreferencesHelper.initPreferences
 class URLRadio : Application() {
 
     /* Define log tag */
-    private val TAG: String = URLRadio::class.java.simpleName
+    private val tag: String = URLRadio::class.java.simpleName
 
     /* Implements onCreate */
     override fun onCreate() {
         super.onCreate()
-        Log.v(TAG, "URLRadio application started.")
+        Log.v(tag, "URLRadio application started.")
         initPreferences()
         // The light/dark decision is no longer pushed into AppCompatDelegate here. The
         // Compose theme reads the preference itself, so it also follows a change made in
@@ -42,7 +41,7 @@ class URLRadio : Application() {
     /* Implements onTerminate */
     override fun onTerminate() {
         super.onTerminate()
-        Log.v(TAG, "URLRadio application terminated.")
+        Log.v(tag, "URLRadio application terminated.")
     }
 
 }

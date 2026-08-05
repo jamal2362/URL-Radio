@@ -67,12 +67,12 @@ private val DarkColors: ColorScheme = darkColorScheme(
 /**
  * The app theme.
  *
- * Dynamic colour is used from API 31 upwards, which mirrors what the app already did
+ * Dynamic color is used from API 31 upwards, which mirrors what the app already did
  * through its res/values-v31 resources. Below API 31 the brand palette above is used.
  *
  * @param darkTheme whether to render the dark scheme. Callers pass the resolved value
  *   of the user's theme preference; the default follows the system.
- * @param dynamicColor set to false to force the brand palette even on API 31+.
+ * @param dynamicColor set too false to force the brand palette even on API 31+.
  */
 @Composable
 fun UrlRadioTheme(

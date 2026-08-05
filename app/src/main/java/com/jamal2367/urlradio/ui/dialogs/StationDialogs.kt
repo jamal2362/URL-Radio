@@ -384,8 +384,8 @@ private fun StationPickerRow(
     Card(
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = container),
-        // The station being auditioned is outlined rather than recoloured, so it stays
-        // readable whether or not it is also ticked.
+        // The station being auditioned is outlined rather than recolored, so it stays
+        // readable whether it is also ticked.
         border = if (previewing) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
         modifier = Modifier
             .fillMaxWidth()

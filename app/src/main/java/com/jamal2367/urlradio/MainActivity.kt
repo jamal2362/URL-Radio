@@ -9,10 +9,8 @@
 
 package com.jamal2367.urlradio
 
-import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -70,10 +68,11 @@ import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.time.Duration.Companion.milliseconds
 
 class MainActivity : ComponentActivity() {
 
-    private val TAG: String = MainActivity::class.java.simpleName
+    private val tag: String = MainActivity::class.java.simpleName
 
     private lateinit var playback: PlaybackConnection
 
@@ -115,25 +114,25 @@ class MainActivity : ComponentActivity() {
 
     private val savePlsLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            copyExport(result, FileHelper.getPlslUri(this), R.string.toastmessage_save_pls, "PLS")
+            copyExport(result, FileHelper.getPlsqlUri(this), R.string.toastmessage_save_pls, "PLS")
         }
 
     private val backupLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             val target = result.data?.data
-            if (result.resultCode == Activity.RESULT_OK && target != null) {
+            if (result.resultCode == RESULT_OK && target != null) {
                 BackupHelper.backup(this, target) { message ->
                     lifecycleScope.launch { snackbarMessages.emit(message) }
                 }
             } else {
-                Log.w(TAG, "Station backup failed.")
+                Log.w(tag, "Station backup failed.")
             }
         }
 
     private val restoreLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             val source = result.data?.data
-            if (result.resultCode == Activity.RESULT_OK && source != null) {
+            if (result.resultCode == RESULT_OK && source != null) {
                 pendingRestoreUri = source
             }
         }
@@ -141,10 +140,10 @@ class MainActivity : ComponentActivity() {
     private val importPlaylistLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             val source = result.data?.data
-            if (result.resultCode == Activity.RESULT_OK && source != null) {
+            if (result.resultCode == RESULT_OK && source != null) {
                 importPlaylist(source)
             } else {
-                Log.w(TAG, "Playlist import cancelled.")
+                Log.w(tag, "Playlist import cancelled.")
             }
         }
 
@@ -161,7 +160,7 @@ class MainActivity : ComponentActivity() {
             PreferencesHelper.saveHouseKeepingNecessaryState()
         }
 
-        FileHelper.createNomediaFile(getExternalFilesDir(null))
+        FileHelper.createNoMediaFile(getExternalFilesDir(null))
 
         playback = PlaybackConnection(applicationContext, lifecycleScope)
 
@@ -250,7 +249,7 @@ class MainActivity : ComponentActivity() {
         val releasesPageUrl = stringResource(R.string.snackbar_url_app_home_page)
         val appName = stringResource(R.string.app_name)
         LaunchedEffect(Unit) {
-            kotlinx.coroutines.delay(5_000)
+            kotlinx.coroutines.delay(5_000.milliseconds)
             val newer = UpdateCheckHelper.findNewerRelease(releasesApiUrl, BuildConfig.VERSION_NAME)
             if (newer != null) {
                 val result = snackbarHostState.showSnackbar(
@@ -369,7 +368,7 @@ class MainActivity : ComponentActivity() {
                         },
                         onImportPlaylist = {
                             // "*/*" on purpose: plenty of providers report a playlist as
-                            // application/octet-stream, and a narrow filter greys those out.
+                            // application/octet-stream, and a narrow filter grays those out.
                             // EXTRA_MIME_TYPES still puts the playlist types first.
                             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                                 addCategory(Intent.CATEGORY_OPENABLE)
@@ -380,7 +379,7 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                             runCatching { importPlaylistLauncher.launch(intent) }.onFailure {
-                                Log.e(TAG, "Unable to open file picker for playlists.\n$it")
+                                Log.e(tag, "Unable to open file picker for playlists.\n$it")
                                 toast(R.string.toastmessage_install_file_helper)
                             }
                         },
@@ -400,7 +399,7 @@ class MainActivity : ComponentActivity() {
                                 putExtra(Intent.EXTRA_MIME_TYPES, Keys.MIME_TYPES_ZIP)
                             }
                             runCatching { restoreLauncher.launch(intent) }.onFailure {
-                                Log.e(TAG, "Unable to open file picker for ZIP.\n$it")
+                                Log.e(tag, "Unable to open file picker for ZIP.\n$it")
                             }
                         },
                         onLargeBufferChanged = {
@@ -525,7 +524,7 @@ class MainActivity : ComponentActivity() {
             Intent.ACTION_VIEW -> handleViewIntent(intent)
             // deferred until the controller is connected - see pendingPlaybackIntent
             Keys.ACTION_START -> pendingPlaybackIntent = Intent(intent)
-            Keys.ACTION_SHOW_PLAYER -> Log.i(TAG, "Tap on notification registered.")
+            Keys.ACTION_SHOW_PLAYER -> Log.i(tag, "Tap on notification registered.")
         }
         intent.action = ""
     }
@@ -566,7 +565,7 @@ class MainActivity : ComponentActivity() {
                 runCatching {
                     CollectionHelper.createStationListFromContentUri(this@MainActivity, uri)
                 }.getOrElse {
-                    Log.e(TAG, "Unable to read the picked playlist.\n$it")
+                    Log.e(tag, "Unable to read the picked playlist.\n$it")
                     emptyList()
                 }
             }
@@ -609,13 +608,13 @@ class MainActivity : ComponentActivity() {
 
     private fun copyExport(result: ActivityResult, source: Uri?, messageRes: Int, label: String) {
         val target = result.data?.data
-        if (result.resultCode == Activity.RESULT_OK && target != null && source != null) {
+        if (result.resultCode == RESULT_OK && target != null && source != null) {
             lifecycleScope.launch(Dispatchers.IO) {
                 FileHelper.saveCopyOfFileSuspended(this@MainActivity, source, target)
             }
             toast(messageRes)
         } else {
-            Log.w(TAG, "$label export failed.")
+            Log.w(tag, "$label export failed.")
         }
     }
 
@@ -632,14 +631,14 @@ class MainActivity : ComponentActivity() {
             putExtra(Intent.EXTRA_TITLE, "$baseName$timeStamp.$extension")
         }
         runCatching { launcher.launch(intent) }.onFailure {
-            Log.e(TAG, "Unable to open the file picker.\n$it")
+            Log.e(tag, "Unable to open the file picker.\n$it")
             toast(R.string.toastmessage_install_file_helper)
         }
     }
 
     private fun copyToClipboard(text: CharSequence) {
         val clip = ClipData.newPlainText("simple text", text)
-        (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(clip)
+        (getSystemService(CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(clip)
         // Since Android 13 the system shows its own copy confirmation.
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             toast(R.string.toastmessage_copied_to_clipboard)

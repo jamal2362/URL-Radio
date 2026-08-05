@@ -92,7 +92,7 @@ fun StationListScreen(
         // Drag-to-reorder state.
         //
         // Everything is measured against the slot the row started in: dragStartOffset plus
-        // the distance the finger has travelled since. That total is never corrected when a
+        // the distance the finger has traveled since. That total is never corrected when a
         // swap goes through, which is the point. Correcting it -- subtracting the distance
         // between the two slots on every move -- meant a move that the collection had already
         // applied, but that the list had not been laid out for yet, fed a position back into
@@ -120,59 +120,60 @@ fun StationListScreen(
                 // isLongPressDragEnabled() rule. Sits on the row as a whole; the cover and
                 // the station name claim their own long-press for opening the editor, so
                 // this only ever fires on the free area around them.
-                val dragModifier = if (isEditorOpen) Modifier else Modifier.pointerInput(station.uuid) {
-                    detectDragGesturesAfterLongPress(
-                        onDragStart = {
-                            val info = listState.layoutInfo.visibleItemsInfo
-                                .firstOrNull { it.key == station.uuid }
-                            draggedIndex = info?.index ?: index
-                            dragStartOffset = info?.offset ?: 0
-                            dragStartSize = info?.size ?: 0
-                            draggedDistance = 0f
-                        },
-                        onDragEnd = {
-                            draggedIndex = null
-                            draggedDistance = 0f
-                            onMoveFinished()
-                        },
-                        onDragCancel = {
-                            draggedIndex = null
-                            draggedDistance = 0f
-                        },
-                        onDrag = { change, dragAmount ->
-                            change.consume()
-                            draggedDistance += dragAmount.y
+                val dragModifier =
+                    if (isEditorOpen) Modifier else Modifier.pointerInput(station.uuid) {
+                        detectDragGesturesAfterLongPress(
+                            onDragStart = {
+                                val info = listState.layoutInfo.visibleItemsInfo
+                                    .firstOrNull { it.key == station.uuid }
+                                draggedIndex = info?.index ?: index
+                                dragStartOffset = info?.offset ?: 0
+                                dragStartSize = info?.size ?: 0
+                                draggedDistance = 0f
+                            },
+                            onDragEnd = {
+                                draggedIndex = null
+                                draggedDistance = 0f
+                                onMoveFinished()
+                            },
+                            onDragCancel = {
+                                draggedIndex = null
+                                draggedDistance = 0f
+                            },
+                            onDrag = { change, dragAmount ->
+                                change.consume()
+                                draggedDistance += dragAmount.y
 
-                            val from = draggedIndex ?: return@detectDragGesturesAfterLongPress
-                            val items = listState.layoutInfo.visibleItemsInfo
-                            val dragged = items.firstOrNull { it.index == from }
-                                ?: return@detectDragGesturesAfterLongPress
+                                val from = draggedIndex ?: return@detectDragGesturesAfterLongPress
+                                val items = listState.layoutInfo.visibleItemsInfo
+                                val dragged = items.firstOrNull { it.index == from }
+                                    ?: return@detectDragGesturesAfterLongPress
 
-                            // The strip the row now covers on screen.
-                            val top = dragStartOffset + draggedDistance
-                            val bottom = top + dragStartSize
-                            val movingDown = top > dragged.offset
+                                // The strip the row now covers on screen.
+                                val top = dragStartOffset + draggedDistance
+                                val bottom = top + dragStartSize
+                                val movingDown = top > dragged.offset
 
-                            // A row is taken over only once it has been cleared completely --
-                            // downwards past its bottom edge, upwards past its top one. Going
-                            // by the midpoint instead let a row swap back and forth while the
-                            // finger sat still on the boundary.
-                            items.firstOrNull { other ->
-                                other.index != from &&
-                                    other.offset + other.size >= top &&
-                                    other.offset <= bottom &&
-                                    (
-                                        if (movingDown) bottom > other.offset + other.size
-                                        else top < other.offset
-                                    )
-                            }?.let { target ->
-                                // moveStation refuses to mix favourites with the rest, so the
-                                // index only follows the row where the move was accepted.
-                                if (onMove(from, target.index)) draggedIndex = target.index
-                            }
-                        },
-                    )
-                }
+                                // A row is taken over only once it has been cleared completely --
+                                // downwards past its bottom edge, upwards past its top one. Going
+                                // by the midpoint instead let a row swap back and forth while the
+                                // finger sat still on the boundary.
+                                items.firstOrNull { other ->
+                                    other.index != from &&
+                                            other.offset + other.size >= top &&
+                                            other.offset <= bottom &&
+                                            (
+                                                    if (movingDown) bottom > other.offset + other.size
+                                                    else top < other.offset
+                                                    )
+                                }?.let { target ->
+                                    // moveStation refuses to mix favourites with the rest, so the
+                                    // index only follows the row where the move was accepted.
+                                    if (onMove(from, target.index)) draggedIndex = target.index
+                                }
+                            },
+                        )
+                    }
 
                 SwipeableStationRow(
                     station = station,
@@ -263,7 +264,7 @@ private fun SwipeableStationRow(
         state = dismissState,
         // dismissDirection follows the raw swipe offset, unlike targetValue which only
         // flips once the row is dragged past the threshold. Keying the background on the
-        // latter is what made the colour appear only from halfway across.
+        // latter is what made the color appear only from halfway across.
         backgroundContent = { SwipeBackground(dismissState.dismissDirection) },
         modifier = modifier,
     ) {

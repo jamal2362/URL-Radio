@@ -26,10 +26,16 @@ import com.jamal2367.urlradio.R
 import com.jamal2367.urlradio.core.Collection
 import com.jamal2367.urlradio.core.Station
 import com.jamal2367.urlradio.extensions.copy
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
-import java.util.*
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.util.Date
+import java.util.StringTokenizer
 
 
 /*
@@ -39,7 +45,7 @@ object DownloadHelper {
 
 
     /* Define log tag */
-    private val TAG: String = DownloadHelper::class.java.simpleName
+    private val tag: String = DownloadHelper::class.java.simpleName
 
 
     /* Main class variables */
@@ -88,7 +94,7 @@ object DownloadHelper {
             }
         }
         enqueueDownload(context, uris.toTypedArray(), Keys.FILE_TYPE_IMAGE)
-        Log.i(TAG, "Updating all station images.")
+        Log.i(tag, "Updating all station images.")
     }
 
 
@@ -107,7 +113,7 @@ object DownloadHelper {
                 Toast.LENGTH_LONG
             ).show()
             Log.w(
-                TAG,
+                tag,
                 "Download not successful: File name = $downloadErrorFileName Error code = $downloadErrorCode"
             )
             removeFromActiveDownloads(arrayOf(downloadId), deleteDownload = true)
@@ -187,7 +193,7 @@ object DownloadHelper {
         // enqueue downloads
         val newIds = LongArray(uris.size)
         for (i in uris.indices) {
-            Log.v(TAG, "DownloadManager enqueue: ${uris[i]}")
+            Log.v(tag, "DownloadManager enqueue: ${uris[i]}")
             // check if valid url and prevent double download
             val uri: Uri = uris[i]
             val scheme: String = uri.scheme ?: String()
@@ -212,11 +218,11 @@ object DownloadHelper {
         val activeDownloadsCopy = activeDownloads.copy()
         activeDownloadsCopy.forEach { downloadId ->
             if (getRemoteFileLocation(downloadManager, downloadId) == remoteFileLocation) {
-                Log.w(TAG, "File is already in download queue: $remoteFileLocation")
+                Log.w(tag, "File is already in download queue: $remoteFileLocation")
                 return false
             }
         }
-        Log.v(TAG, "File is not in download queue.")
+        Log.v(tag, "File is not in download queue.")
         return true
     }
 
@@ -384,7 +390,7 @@ object DownloadHelper {
     private fun determineAllowedNetworkTypes(type: Int, ignoreWifiRestriction: Boolean): Int {
         var allowedNetworkTypes: Int =
             (DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
-        // restrict download of audio files to WiFi if necessary
+        // restrict download of audio files to Wi-Fi if necessary
         if (type == Keys.FILE_TYPE_AUDIO) {
             if (!ignoreWifiRestriction && !PreferencesHelper.downloadOverMobile()) {
                 allowedNetworkTypes = DownloadManager.Request.NETWORK_WIFI

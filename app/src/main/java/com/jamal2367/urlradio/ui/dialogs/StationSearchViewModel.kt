@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 data class SearchUiState(
     val query: String = "",
@@ -46,10 +47,7 @@ data class SearchUiState(
     /** Set when a preview could not be started (HLS), consumed by the UI as a toast. */
     val previewUnsupportedEvent: Long? = null,
     val previewStartedEvent: Long? = null,
-) {
-    /** The ticked stations, in the order the results are shown. */
-    val selectedStations: List<Station> get() = results.filter { it.uuid in selectedUuids }
-}
+)
 
 class StationSearchViewModel(application: Application) : AndroidViewModel(application),
     RadioBrowserSearch.RadioBrowserSearchListener,
@@ -64,7 +62,7 @@ class StationSearchViewModel(application: Application) : AndroidViewModel(applic
     private var previewPlayer: ExoPlayer? = null
     private var debounceJob: Job? = null
 
-    /* Live input, debounced. The old dialog used a 100 ms Handler post. */
+    /* Live input, debounced. The old dialog used a 100 Ms Handler post. */
     fun onQueryChanged(query: String) {
         _state.update { it.copy(query = query) }
         debounceJob?.cancel()
@@ -89,8 +87,8 @@ class StationSearchViewModel(application: Application) : AndroidViewModel(applic
             query.contains(" ") || query.length > 2 -> {
                 _state.update { it.copy(isSearching = true, showNoResults = false) }
                 debounceJob = viewModelScope.launch {
-                    delay(300)
-                    radioBrowserSearch.searchStation(getApplication(), query, Keys.SEARCH_TYPE_BY_KEYWORD)
+                    delay(300.milliseconds)
+                    radioBrowserSearch.searchStation(query, Keys.SEARCH_TYPE_BY_KEYWORD)
                 }
             }
         }
@@ -116,7 +114,7 @@ class StationSearchViewModel(application: Application) : AndroidViewModel(applic
 
             else -> {
                 _state.update { it.copy(isSearching = true, showNoResults = false) }
-                radioBrowserSearch.searchStation(getApplication(), query, Keys.SEARCH_TYPE_BY_KEYWORD)
+                radioBrowserSearch.searchStation(query, Keys.SEARCH_TYPE_BY_KEYWORD)
             }
         }
     }

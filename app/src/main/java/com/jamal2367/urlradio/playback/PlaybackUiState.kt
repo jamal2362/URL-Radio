@@ -33,7 +33,6 @@ data class PlaybackUiState(
     /** Set when playback failed; cleared once the UI has shown it. */
     val errorEvent: Long? = null,
 ) {
-    val isSleepTimerRunning: Boolean get() = sleepTimerRemaining > 0L
 
     /** The newest metadata line, falling back to an empty string. */
     val currentMetadata: String get() = metadataHistory.lastOrNull().orEmpty().sanitizedMetadata()

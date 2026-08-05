@@ -34,7 +34,7 @@ object AudioHelper {
 
 
     /* Define log tag */
-    private val TAG: String = AudioHelper::class.java.simpleName
+    private val tag: String = AudioHelper::class.java.simpleName
 
 
     /* Extract audio stream metadata */
@@ -48,11 +48,14 @@ object AudioHelper {
                 }
 
                 is IcyHeaders -> {
-                    Log.i(TAG, "icyHeaders:" + entry.name + " - " + entry.genre)
+                    Log.i(tag, "icyHeaders:" + entry.name + " - " + entry.genre)
                 }
 
                 else -> {
-                    Log.w(TAG, "Unsupported metadata received (type = ${entry.javaClass.simpleName})")
+                    Log.w(
+                        tag,
+                        "Unsupported metadata received (type = ${entry.javaClass.simpleName})"
+                    )
                 }
             }
             // TODO implement HLS metadata extraction (Id3Frame / PrivFrame)
