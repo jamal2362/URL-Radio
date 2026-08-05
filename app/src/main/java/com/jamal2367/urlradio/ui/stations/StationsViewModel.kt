@@ -160,6 +160,30 @@ class StationsViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
+    /*
+     * Same clean-up as removeStation, for the whole collection at once. Saved with
+     * allowEmpty: the stored collection is only ever replaced by an empty one when the last
+     * station goes, and wiping several at once would otherwise be silently discarded and read
+     * straight back off the file.
+     */
+    fun removeAllStations() {
+        val current = _collection.value
+        if (current.stations.isEmpty()) return
+        val removed = current.stations.toList()
+        val updated = current.deepCopy()
+        updated.stations.clear()
+        _collection.value = updated
+        // Written before the images are cleaned up rather than after: the sooner the empty
+        // collection reaches storage, the smaller the window in which the player service can
+        // save its own copy over it. saveCollection does the file write on a background
+        // thread itself.
+        CollectionHelper.saveCollection(getApplication(), updated, allowEmpty = true)
+        viewModelScope.launch(Dispatchers.IO) {
+            val context = getApplication<Application>()
+            removed.forEach { CollectionHelper.deleteStationImages(context, it) }
+        }
+    }
+
     fun toggleStarred(stationUuid: String) {
         val updated = _collection.value.deepCopy()
         val station = updated.stations.firstOrNull { it.uuid == stationUuid } ?: return

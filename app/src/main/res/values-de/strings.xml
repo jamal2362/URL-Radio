@@ -40,9 +40,11 @@
     <string name="dialog_station_picker_hint">Tippen zum Auswählen · Langes Drücken für die Vorschau</string>
     <string name="dialog_station_picker_select_all">Alle auswählen</string>
     <string name="dialog_station_picker_selected">%1$d ausgewählt</string>
+    <string name="dialog_yes_no_message_remove_all_stations">Alle Sender entfernen? Das kann nicht rückgängig gemacht werden.</string>
     <string name="dialog_yes_no_message_remove_station">Diesen Sender entfernen?</string>
     <string name="dialog_yes_no_message_update_station_images">Neueste Version aller Senderbilder herunterladen\?</string>
     <string name="dialog_yes_no_positive_button_default">Ja</string>
+    <string name="dialog_yes_no_positive_button_remove_all_stations">Alle entfernen</string>
     <string name="dialog_yes_no_positive_button_remove_station">Entfernen</string>
     <string name="dialog_yes_no_positive_button_update_covers">Aktualisieren</string>
     <!-- Fragment -->
@@ -102,6 +104,8 @@
     <string name="pref_theme_selection_mode_light_summary">Immer das helle Farbschema verwenden.</string>
     <string name="pref_theme_selection_summary">Aktuell:</string>
     <string name="pref_theme_selection_title">App-Design</string>
+    <string name="pref_remove_all_stations_summary">Alle Radiosender der Sammlung samt ihrer Bilder löschen.</string>
+    <string name="pref_remove_all_stations_title">Alle Sender entfernen</string>
     <string name="pref_update_station_images_summary">Die neueste Version aller Senderbilder herunterladen.</string>
     <string name="pref_update_station_images_title">Senderbilder aktualisieren</string>
     <!-- Sample Text -->

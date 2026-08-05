@@ -71,6 +71,8 @@ fun ConfirmDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
+        modifier = WideDialogModifier,
+        properties = WideDialogProperties,
         title = title?.let { { Text(it) } },
         text = { Text(message) },
         confirmButton = {
@@ -94,6 +96,8 @@ fun ErrorDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
+        modifier = WideDialogModifier,
+        properties = WideDialogProperties,
         title = { Text(title) },
         text = {
             Column {
@@ -245,6 +249,8 @@ private fun StationPickerDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        modifier = WideDialogModifier,
+        properties = WideDialogProperties,
         icon = { Icon(painter = painterResource(icon), contentDescription = null) },
         title = { Text(title) },
         text = {

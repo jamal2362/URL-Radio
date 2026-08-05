@@ -393,6 +393,16 @@ object CollectionHelper {
                 it.isPlaying = isPlaying
             }
         }
+        // The caller here is the player service, which keeps its own copy of the collection
+        // and only refreshes it when the collection-changed broadcast reaches it. Writing an
+        // out-of-date copy back would undo whatever changed the collection in the meantime --
+        // removing every station, say, where the pause that goes with it would otherwise put
+        // them all straight back. The service reloads from the broadcast either way, so
+        // skipping the write here loses nothing but the playback flag.
+        if (PreferencesHelper.loadCollectionModificationDate().after(collection.modificationDate)) {
+            Log.v(TAG, "Not saving playback state. Reason: collection on storage is newer.")
+            return collection
+        }
         // save collection and store modification date
         collection.modificationDate = saveCollection(context, collection)
         return collection
@@ -400,7 +410,17 @@ object CollectionHelper {
 
 
     /* Saves collection of radio stations */
-    fun saveCollection(context: Context, collection: Collection, async: Boolean = true): Date {
+    /**
+     * @param allowEmpty lets a deliberately emptied collection through the guard in
+     *   [FileHelper.saveCollection], which otherwise refuses to replace a stored collection
+     *   with an empty one.
+     */
+    fun saveCollection(
+        context: Context,
+        collection: Collection,
+        async: Boolean = true,
+        allowEmpty: Boolean = false,
+    ): Date {
         Log.v(
             TAG,
             "Saving collection of radio stations to storage. Async = ${async}. Size = ${collection.stations.size}"
@@ -413,14 +433,14 @@ object CollectionHelper {
             true -> {
                 CoroutineScope(IO).launch {
                     // save collection on background thread
-                    FileHelper.saveCollectionSuspended(context, collection, date)
+                    FileHelper.saveCollectionSuspended(context, collection, date, allowEmpty)
                     // broadcast collection update
                     sendCollectionBroadcast(context, date)
                 }
             }
             false -> {
                 // save collection
-                FileHelper.saveCollection(context, collection, date)
+                FileHelper.saveCollection(context, collection, date, allowEmpty)
                 // broadcast collection update
                 sendCollectionBroadcast(context, date)
             }

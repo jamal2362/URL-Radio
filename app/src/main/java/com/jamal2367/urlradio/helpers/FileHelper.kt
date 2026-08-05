@@ -157,11 +157,17 @@ object FileHelper {
 
 
     /* Saves collection of radio stations as JSON text file */
-    fun saveCollection(context: Context, collection: Collection, lastSave: Date) {
+    fun saveCollection(
+        context: Context,
+        collection: Collection,
+        lastSave: Date,
+        allowEmpty: Boolean = false,
+    ) {
         Log.v(TAG, "Saving collection - Thread: ${Thread.currentThread().name}")
         val collectionSize: Int = collection.stations.size
-        // do not override an existing collection with an empty one - except when last station is deleted
-        if (collectionSize > 0 || PreferencesHelper.loadCollectionSize() == 1) {
+        // do not override an existing collection with an empty one - except when the last
+        // station is deleted, or when the caller emptied the collection on purpose
+        if (collectionSize > 0 || allowEmpty || PreferencesHelper.loadCollectionSize() == 1) {
             // convert to JSON
             val gson: Gson = getCustomGson()
             var json = String()
@@ -290,10 +296,11 @@ object FileHelper {
     suspend fun saveCollectionSuspended(
         context: Context,
         collection: Collection,
-        lastUpdate: Date
+        lastUpdate: Date,
+        allowEmpty: Boolean = false,
     ) {
         return suspendCoroutine { cont ->
-            cont.resume(saveCollection(context, collection, lastUpdate))
+            cont.resume(saveCollection(context, collection, lastUpdate, allowEmpty))
         }
     }
 

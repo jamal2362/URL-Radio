@@ -44,9 +44,11 @@
     <string name="dialog_station_picker_hint">Tap to select · Long press to preview</string>
     <string name="dialog_station_picker_select_all">Select all</string>
     <string name="dialog_station_picker_selected">%1$d selected</string>
+    <string name="dialog_yes_no_message_remove_all_stations">Remove all stations? This cannot be undone.</string>
     <string name="dialog_yes_no_message_remove_station">Remove this station?</string>
     <string name="dialog_yes_no_message_update_station_images">Download latest version of all station images?</string>
     <string name="dialog_yes_no_positive_button_default">Yes</string>
+    <string name="dialog_yes_no_positive_button_remove_all_stations">Remove all</string>
     <string name="dialog_yes_no_positive_button_remove_station">Remove</string>
     <string name="dialog_yes_no_positive_button_update_covers">Update</string>
 
@@ -116,6 +118,8 @@
     <string name="pref_theme_selection_mode_light_summary">Always use the light colour scheme.</string>
     <string name="pref_theme_selection_summary">Current theme:</string>
     <string name="pref_theme_selection_title">App Theme</string>
+    <string name="pref_remove_all_stations_summary">Delete every radio station in the collection, including its images.</string>
+    <string name="pref_remove_all_stations_title">Remove All Stations</string>
     <string name="pref_update_station_images_summary">Download latest version of all station images.</string>
     <string name="pref_update_station_images_title">Update Station Images</string>
 

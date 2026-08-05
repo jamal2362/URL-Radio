@@ -359,6 +359,14 @@ class MainActivity : ComponentActivity() {
                                     R.string.dialog_error_message_no_network
                             }
                         },
+                        onRemoveAllStations = {
+                            // Cleared first, stopped second. Pausing makes the player service
+                            // write its own copy of the collection back (see
+                            // CollectionHelper.savePlaybackState), so the empty collection
+                            // wants to be on its way to storage before that happens.
+                            stationsViewModel.removeAllStations()
+                            playback.pause()
+                        },
                         onImportPlaylist = {
                             // "*/*" on purpose: plenty of providers report a playlist as
                             // application/octet-stream, and a narrow filter greys those out.

@@ -36,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -90,11 +91,19 @@ fun StationListScreen(
 
         val listState = rememberLazyListState()
 
-        // Drag-to-reorder state. The dragged row is tracked by uuid rather than by index:
-        // the index changes underneath us on every successful swap, and reading a stale one
-        // was why only the row that happened to start at the top could be moved.
-        var draggingUuid by remember { mutableStateOf<String?>(null) }
-        var dragOffsetY by remember { mutableFloatStateOf(0f) }
+        // Drag-to-reorder state.
+        //
+        // Everything is measured against the slot the row started in: dragStartOffset plus
+        // the distance the finger has travelled since. That total is never corrected when a
+        // swap goes through, which is the point. Correcting it -- subtracting the distance
+        // between the two slots on every move -- meant a move that the collection had already
+        // applied, but that the list had not been laid out for yet, fed a position back into
+        // the next drag event that no longer described anything on screen. The row then
+        // swapped again off that stale reading, and again, which is what made it jump around.
+        var draggedIndex by remember { mutableStateOf<Int?>(null) }
+        var draggedDistance by remember { mutableFloatStateOf(0f) }
+        var dragStartOffset by remember { mutableIntStateOf(0) }
+        var dragStartSize by remember { mutableIntStateOf(0) }
 
         LazyColumn(
             state = listState,
@@ -107,7 +116,7 @@ fun StationListScreen(
                 key = { _, station -> station.uuid },
             ) { index, station ->
                 val isEditorOpen = station.uuid == expandedStationUuid
-                val isDragging = station.uuid == draggingUuid
+                val isDragging = draggedIndex == index
 
                 // Reordering is disabled while an editor is open, matching the old
                 // isLongPressDragEnabled() rule. Sits on the row as a whole; the cover and
@@ -116,42 +125,52 @@ fun StationListScreen(
                 val dragModifier = if (isEditorOpen) Modifier else Modifier.pointerInput(station.uuid) {
                     detectDragGesturesAfterLongPress(
                         onDragStart = {
-                            draggingUuid = station.uuid
-                            dragOffsetY = 0f
+                            val info = listState.layoutInfo.visibleItemsInfo
+                                .firstOrNull { it.key == station.uuid }
+                            draggedIndex = info?.index ?: index
+                            dragStartOffset = info?.offset ?: 0
+                            dragStartSize = info?.size ?: 0
+                            draggedDistance = 0f
                         },
                         onDragEnd = {
-                            draggingUuid = null
-                            dragOffsetY = 0f
+                            draggedIndex = null
+                            draggedDistance = 0f
                             onMoveFinished()
                         },
                         onDragCancel = {
-                            draggingUuid = null
-                            dragOffsetY = 0f
+                            draggedIndex = null
+                            draggedDistance = 0f
                         },
                         onDrag = { change, dragAmount ->
                             change.consume()
-                            dragOffsetY += dragAmount.y
+                            draggedDistance += dragAmount.y
 
-                            // Where the dragged row is actually drawn right now: its laid-out
-                            // position plus the offset the finger has added.
+                            val from = draggedIndex ?: return@detectDragGesturesAfterLongPress
                             val items = listState.layoutInfo.visibleItemsInfo
-                            val dragged = items.firstOrNull { it.key == draggingUuid } ?: return@detectDragGesturesAfterLongPress
-                            val draggedCentre = dragged.offset + dragged.size / 2 + dragOffsetY
+                            val dragged = items.firstOrNull { it.index == from }
+                                ?: return@detectDragGesturesAfterLongPress
 
-                            // Swap with whichever row that centre now sits inside. Comparing
-                            // against real layout positions handles rows of differing height
-                            // and lets a fast drag cross several of them.
-                            val target = items.firstOrNull { other ->
-                                other.index != dragged.index &&
-                                    draggedCentre >= other.offset &&
-                                    draggedCentre <= other.offset + other.size
-                            } ?: return@detectDragGesturesAfterLongPress
+                            // The strip the row now covers on screen.
+                            val top = dragStartOffset + draggedDistance
+                            val bottom = top + dragStartSize
+                            val movingDown = top > dragged.offset
 
-                            if (onMove(dragged.index, target.index)) {
-                                // The row is about to be laid out at the target's position,
-                                // so drop the same amount from the offset and the row stays
-                                // put under the finger.
-                                dragOffsetY -= (target.offset - dragged.offset)
+                            // A row is taken over only once it has been cleared completely --
+                            // downwards past its bottom edge, upwards past its top one. Going
+                            // by the midpoint instead let a row swap back and forth while the
+                            // finger sat still on the boundary.
+                            items.firstOrNull { other ->
+                                other.index != from &&
+                                    other.offset + other.size >= top &&
+                                    other.offset <= bottom &&
+                                    (
+                                        if (movingDown) bottom > other.offset + other.size
+                                        else top < other.offset
+                                    )
+                            }?.let { target ->
+                                // moveStation refuses to mix favourites with the rest, so the
+                                // index only follows the row where the move was accepted.
+                                if (onMove(from, target.index)) draggedIndex = target.index
                             }
                         },
                     )
@@ -173,8 +192,25 @@ fun StationListScreen(
                     onToggleStarred = { onToggleStarred(station) },
                     dragModifier = dragModifier,
                     modifier = Modifier
+                        // The rows making way for the dragged one slide into their new slot
+                        // instead of snapping. The dragged row is left out: it is placed by
+                        // the finger below, and animating it as well would make it lag.
+                        .then(if (isDragging) Modifier else Modifier.animateItem())
                         .zIndex(if (isDragging) 1f else 0f)
-                        .graphicsLayer { translationY = if (isDragging) dragOffsetY else 0f },
+                        .graphicsLayer {
+                            // Read at draw time, not during composition: the row keeps
+                            // following the finger through the frames where the list is still
+                            // settling into the new order. Once it has been laid out in the
+                            // slot it was dragged to, its own offset cancels most of the
+                            // distance out and the translation shrinks back to nothing.
+                            translationY = if (isDragging) {
+                                val laidOut = listState.layoutInfo.visibleItemsInfo
+                                    .firstOrNull { it.index == index }?.offset ?: dragStartOffset
+                                dragStartOffset + draggedDistance - laidOut
+                            } else {
+                                0f
+                            }
+                        },
                 )
             }
         }

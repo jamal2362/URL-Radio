@@ -52,10 +52,14 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
+import com.jamal2367.urlradio.ui.dialogs.ConfirmDialog
+import com.jamal2367.urlradio.ui.dialogs.WideDialogModifier
+import com.jamal2367.urlradio.ui.dialogs.WideDialogProperties
 
 data class SettingsCallbacks(
     val onThemeSelected: (String) -> Unit,
     val onUpdateStationImages: () -> Unit,
+    val onRemoveAllStations: () -> Unit,
     val onImportPlaylist: () -> Unit,
     val onExportM3u: () -> Unit,
     val onExportPls: () -> Unit,
@@ -82,6 +86,7 @@ fun SettingsScreen(
 ) {
     var showThemeDialog by remember { mutableStateOf(false) }
     var showExportFormatDialog by remember { mutableStateOf(false) }
+    var showRemoveAllDialog by remember { mutableStateOf(false) }
 
     LazyColumn(
         contentPadding = contentPadding,
@@ -125,6 +130,12 @@ fun SettingsScreen(
                     summary = stringResource(R.string.pref_update_station_images_summary),
                     icon = R.drawable.ic_image_24dp,
                     onClick = callbacks.onUpdateStationImages,
+                )
+                SettingsRow(
+                    title = stringResource(R.string.pref_remove_all_stations_title),
+                    summary = stringResource(R.string.pref_remove_all_stations_summary),
+                    icon = R.drawable.ic_remove_circle_24dp,
+                    onClick = { showRemoveAllDialog = true },
                 )
             }
         }
@@ -241,6 +252,18 @@ fun SettingsScreen(
             onDismiss = { showExportFormatDialog = false },
         )
     }
+
+    if (showRemoveAllDialog) {
+        // Wiping the collection is not undoable and there is no per-station swipe to fall
+        // back on here, so it goes through the same confirmation the single delete uses.
+        ConfirmDialog(
+            title = stringResource(R.string.pref_remove_all_stations_title),
+            message = stringResource(R.string.dialog_yes_no_message_remove_all_stations),
+            confirmLabel = stringResource(R.string.dialog_yes_no_positive_button_remove_all_stations),
+            onConfirm = callbacks.onRemoveAllStations,
+            onDismiss = { showRemoveAllDialog = false },
+        )
+    }
 }
 
 /* Asks which playlist format to write, standing in for the two separate export entries. */
@@ -252,6 +275,8 @@ private fun ExportFormatDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
+        modifier = WideDialogModifier,
+        properties = WideDialogProperties,
         icon = {
             Icon(
                 painter = painterResource(R.drawable.ic_playlist_export_24dp),
@@ -476,6 +501,8 @@ private fun ThemeChooserDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        modifier = WideDialogModifier,
+        properties = WideDialogProperties,
         icon = {
             Icon(painter = painterResource(R.drawable.ic_brush_24dp), contentDescription = null)
         },
