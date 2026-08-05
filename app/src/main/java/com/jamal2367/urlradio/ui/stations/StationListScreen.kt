@@ -13,7 +13,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -33,7 +32,6 @@ import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -191,26 +189,32 @@ fun StationListScreen(
                     onDeleteRequest = { onDeleteRequest(station) },
                     onToggleStarred = { onToggleStarred(station) },
                     dragModifier = dragModifier,
-                    modifier = Modifier
-                        // The rows making way for the dragged one slide into their new slot
-                        // instead of snapping. The dragged row is left out: it is placed by
-                        // the finger below, and animating it as well would make it lag.
-                        .then(if (isDragging) Modifier else Modifier.animateItem())
-                        .zIndex(if (isDragging) 1f else 0f)
-                        .graphicsLayer {
-                            // Read at draw time, not during composition: the row keeps
-                            // following the finger through the frames where the list is still
-                            // settling into the new order. Once it has been laid out in the
-                            // slot it was dragged to, its own offset cancels most of the
-                            // distance out and the translation shrinks back to nothing.
-                            translationY = if (isDragging) {
+                    // Everything here is scoped to an actual drag. Ordinary scrolling gets a
+                    // bare Modifier: no render layer, no z-order, and above all no placement
+                    // animation, so the reorder feature costs a plain scroll nothing at all.
+                    modifier = when {
+                        isDragging -> Modifier
+                            .zIndex(1f)
+                            .graphicsLayer {
+                                // Read at draw time, not during composition: the row keeps
+                                // following the finger through the frames where the list is
+                                // still settling into the new order. Once it has been laid
+                                // out in the slot it was dragged to, its own offset cancels
+                                // the distance out and the translation shrinks to nothing.
                                 val laidOut = listState.layoutInfo.visibleItemsInfo
                                     .firstOrNull { it.index == index }?.offset ?: dragStartOffset
-                                dragStartOffset + draggedDistance - laidOut
-                            } else {
-                                0f
+                                translationY = dragStartOffset + draggedDistance - laidOut
                             }
-                        },
+
+                        // Placement only, and only while a row is actually being dragged: the
+                        // rows making way for it slide into their new slot instead of
+                        // snapping. The fade animateItem otherwise adds ran for every row at
+                        // once when the collection finished loading.
+                        draggedIndex != null ->
+                            Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null)
+
+                        else -> Modifier
+                    },
                 )
             }
         }

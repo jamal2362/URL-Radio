@@ -76,6 +76,9 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.palette.ktx)
     implementation(libs.androidx.localbroadcastmanager)
+    // Installs src/main/baseline-prof.txt on the device. Without it the profile only ever
+    // reaches devices that install through Play, and never a locally built APK.
+    implementation(libs.androidx.profileinstaller)
 
     // Media3
     implementation(libs.media3.exoplayer)

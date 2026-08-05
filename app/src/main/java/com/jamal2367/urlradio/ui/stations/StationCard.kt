@@ -66,6 +66,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import java.util.Locale
+import kotlin.time.Duration.Companion.milliseconds
 
 private val CardShape = RoundedCornerShape(24.dp)
 
@@ -215,8 +216,20 @@ fun StationCard(
 private fun StationCover(station: Station, modifier: Modifier = Modifier) {
     val description = "${stringResource(R.string.descr_player_station_image)}: ${station.name}"
     // Stations without their own artwork fall back to the app's default station image
-    // rather than showing an empty coloured square.
+    // rather than showing an empty colored square.
     val placeholder = painterResource(R.drawable.ic_default_station_image_72dp)
+    val context = LocalContext.current
+    // Kept across recompositions: the list rebuilds this row whenever playback state or the
+    // collection changes, and assembling a request per row per pass is work the scroll can
+    // feel. The file keeps its name when a station image is replaced, so the modification
+    // date is folded into the cache key -- otherwise Coil would serve the old bitmap.
+    val request = remember(station.smallImage, station.modificationDate) {
+        ImageRequest.Builder(context)
+            .data(station.smallImage.ifEmpty { null })
+            .memoryCacheKey("${station.smallImage}:${station.modificationDate.time}")
+            .diskCacheKey("${station.smallImage}:${station.modificationDate.time}")
+            .build()
+    }
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
@@ -227,13 +240,7 @@ private fun StationCover(station: Station, modifier: Modifier = Modifier) {
             .semantics { contentDescription = description },
     ) {
         AsyncImage(
-            // The file keeps its name when a station image is replaced, so the modification
-            // date is folded into the cache key -- otherwise Coil would serve the old bitmap.
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(station.smallImage.ifEmpty { null })
-                .memoryCacheKey("${station.smallImage}:${station.modificationDate.time}")
-                .diskCacheKey("${station.smallImage}:${station.modificationDate.time}")
-                .build(),
+            model = request,
             contentDescription = null,
             contentScale = ContentScale.Crop,
             placeholder = placeholder,
@@ -265,7 +272,7 @@ private fun StationEditor(
         }
         streamUriAccepted = false
         if (!streamUri.startsWith("http")) return@LaunchedEffect
-        delay(400) // debounce while the user is still typing
+        delay(400.milliseconds) // debounce while the user is still typing
         val contentType = withContext(Dispatchers.IO) {
             NetworkHelper.detectContentTypeSuspended(streamUri).type.lowercase(Locale.getDefault())
         }
@@ -304,7 +311,7 @@ private fun StationEditor(
                 .fillMaxWidth()
                 .padding(top = 8.dp),
         ) {
-            // No image button here any more -- tapping the cover above opens the picker.
+            // No image button here anymore -- tapping the cover above opens the picker.
             IconButton(onClick = onPlaceOnHomeScreen) {
                 Icon(
                     painter = painterResource(R.drawable.ic_home_24dp),

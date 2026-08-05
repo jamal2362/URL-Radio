@@ -18,6 +18,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.combinedClickable
@@ -26,12 +27,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -45,10 +44,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -373,21 +376,27 @@ private fun EqualizerIcon(color: Color, modifier: Modifier = Modifier) {
         )
     }
 
-    Row(
-        // Centred, not Start: the three bars are narrower than the 24dp icon slot, so
-        // left-aligning them pushed the whole group off-centre inside the round button.
-        horizontalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterHorizontally),
-        verticalAlignment = Alignment.Bottom,
-        modifier = modifier,
-    ) {
+    // Drawn rather than laid out. The bar heights are read here, inside the draw phase, so a
+    // frame of this animation costs one redraw of the icon. Sizing three Boxes by the same
+    // values read them while composing, which recomposed and re-measured the icon on every
+    // frame for as long as a station was playing -- work the main thread was doing while the
+    // station list was trying to scroll.
+    Canvas(modifier = modifier) {
+        val barWidth = 4.dp.toPx()
+        val gap = 2.dp.toPx()
+        val corner = CornerRadius(1.dp.toPx())
+        // Centred, not left-aligned: the three bars are narrower than the 24dp icon slot, so
+        // starting at zero pushed the whole group off-centre inside the round button.
+        var x = (size.width - (barWidth * bars.size + gap * (bars.size - 1))) / 2f
         bars.forEach { bar ->
-            Box(
-                modifier = Modifier
-                    .width(4.dp)
-                    .fillMaxHeight(bar.value)
-                    .clip(RoundedCornerShape(1.dp))
-                    .background(color)
+            val barHeight = size.height * bar.value
+            drawRoundRect(
+                color = color,
+                topLeft = Offset(x, size.height - barHeight),
+                size = Size(barWidth, barHeight),
+                cornerRadius = corner,
             )
+            x += barWidth + gap
         }
     }
 }
@@ -396,6 +405,15 @@ private fun EqualizerIcon(color: Color, modifier: Modifier = Modifier) {
 private fun StationArtwork(station: Station, modifier: Modifier = Modifier) {
     // Same default station image the list uses for stations without their own artwork.
     val placeholder = painterResource(R.drawable.ic_default_station_image_72dp)
+    val context = LocalContext.current
+    // The player recomposes on every metadata and sleep-timer tick, so the request is built
+    // once per station rather than once per pass.
+    val request = remember(station.smallImage, station.modificationDate) {
+        ImageRequest.Builder(context)
+            .data(station.smallImage.ifEmpty { null })
+            .memoryCacheKey("${station.smallImage}:${station.modificationDate.time}")
+            .build()
+    }
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(14.dp))
@@ -405,10 +423,7 @@ private fun StationArtwork(station: Station, modifier: Modifier = Modifier) {
             ),
     ) {
         AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(station.smallImage.ifEmpty { null })
-                .memoryCacheKey("${station.smallImage}:${station.modificationDate.time}")
-                .build(),
+            model = request,
             contentDescription = "${stringResource(R.string.descr_player_station_image)}: ${station.name}",
             contentScale = ContentScale.Crop,
             placeholder = placeholder,

@@ -6,15 +6,11 @@
 
     <!-- Accessibility Descriptions -->
     <string name="descr_app_icon">App icon depicting an old radio</string>
-    <string name="descr_card_small_play_button">Play/stop</string>
     <string name="descr_card_starred_station">Starred station</string>
-    <string name="descr_card_station_image_change">Change station image</string>
-    <string name="descr_card_station_image">Station image</string>
     <string name="descr_expanded_player_metadata_copy_button">Copy the now playing information</string>
     <string name="descr_expanded_player_metadata_next_button">Next now playing metadata entry</string>
     <string name="descr_expanded_player_metadata_previous_button">Previous now playing metadata entry</string>
     <string name="descr_expanded_player_sleep_timer_cancel_button">Cancel sleep timer</string>
-    <string name="descr_expanded_player_sleep_timer_remaining_time">Time remaining on sleep timer</string>
     <string name="descr_expanded_player_sleep_timer_start_button">Start sleep timer</string>
     <string name="descr_player_playback_button">Play/pause</string>
     <string name="descr_player_station_image">Station image</string>
@@ -25,7 +21,6 @@
     <string name="dialog_add_station_found">Stations found: %1$d</string>
     <string name="dialog_edit_station_name">Station name</string>
     <string name="dialog_edit_stream_uri">Stream address</string>
-    <string name="dialog_error_message_default">An error occurred</string>
     <string name="dialog_error_message_no_network">Connect to the Internet.</string>
     <string name="dialog_error_title_no_network">Offline</string>
     <string name="dialog_find_station_button_add">Add</string>
@@ -37,8 +32,6 @@
     <string name="dialog_generic_button_cancel">Cancel</string>
     <string name="dialog_generic_button_done">Done</string>
     <string name="dialog_generic_button_okay">OK</string>
-    <string name="dialog_generic_details_button">Show details</string>
-    <string name="dialog_opml_import_details_default">No details available</string>
     <string name="dialog_restore_collection_replace_existing">Replace current collection of radio stations with the radio station from backup?</string>
     <string name="dialog_station_picker_clear">Clear</string>
     <string name="dialog_station_picker_hint">Tap to select · Long press to preview</string>
@@ -46,21 +39,14 @@
     <string name="dialog_station_picker_selected">%1$d selected</string>
     <string name="dialog_yes_no_message_remove_all_stations">Remove all stations? This cannot be undone.</string>
     <string name="dialog_yes_no_message_remove_station">Remove this station?</string>
-    <string name="dialog_yes_no_message_update_station_images">Download latest version of all station images?</string>
     <string name="dialog_yes_no_positive_button_default">Yes</string>
     <string name="dialog_yes_no_positive_button_remove_all_stations">Remove all</string>
     <string name="dialog_yes_no_positive_button_remove_station">Remove</string>
-    <string name="dialog_yes_no_positive_button_update_covers">Update</string>
 
     <!-- Fragment -->
     <string name="fragment_settings_title">Settings</string>
 
     <!-- Notification -->
-    <string name="notification_now_playing_channel_name">Playback Controls</string>
-    <string name="notification_play">Play</string>
-    <string name="notification_stop">Stop</string>
-    <string name="notification_skip_to_previous">Previous</string>
-    <string name="notification_skip_to_next">Next</string>
 
     <!-- Onboarding -->
     <string name="onboarding_app_description">Immerse yourself in the sound of your choice!</string>
@@ -124,11 +110,6 @@
     <string name="pref_update_station_images_title">Update Station Images</string>
 
     <!-- Sample Text -->
-    <string name="sample_text_sleep_timer_remaining_time" translatable="false">00:00</string>
-    <string name="sample_text_station_metadata" translatable="false">Future - Mask Off</string>
-    <string name="sample_text_station_name" translatable="false">bigFM Deutschland</string>
-    <string name="sample_text_steam_url" translatable="false">https://streams.bigfm.de/bigfm-deutschland-128-mp3</string>
-    <string name="sample_text_steam_bitrate" translatable="false">MP3 | 128kbps</string>
 
     <!-- App Shortcuts -->
     <string name="shortcut_last_station_disabled_message">Shortcut for playback of last station disabled.</string>
@@ -143,21 +124,17 @@
     <string name="toastmessage_connection_failed">The connection could not be established or restored.</string>
     <string name="toastmessage_copied_to_clipboard">Copied to clipboard.</string>
     <string name="toastmessage_error_download_error">Download error</string>
-    <string name="toastmessage_error_restart_playback_failed">Unable to start or restart playback.</string>
     <string name="toastmessage_install_file_helper">Please install a file manager.</string>
     <string name="toastmessage_playlist_import_empty">No supported stations found in this playlist.</string>
     <string name="toastmessage_playlist_import_running">Reading playlist…</string>
     <string name="toastmessage_preview_playback_failed">Preview playback not possible.</string>
-    <string name="toastmessage_preview_playback_started">Preview playback was started.</string>
     <string name="toastmessage_restored">Stations has been successfully restored.</string>
     <string name="toastmessage_save_m3u">Saving radio stations as M3U…</string>
     <string name="toastmessage_save_pls">Saving radio stations as PLS…</string>
     <string name="toastmessage_shortcut_created">Shortcut created.</string>
     <string name="toastmessage_shortcut_not_created">Shortcut not created. This device does not allow the creation of shortcuts.</string>
-    <string name="toastmessage_sleep_timer_unable_to_start">Please start playback first.</string>
     <string name="toastmessage_station_duplicate">This station is a duplicate.</string>
     <string name="toastmessage_station_not_valid">Station is not valid.</string>
-    <string name="toastmessage_updating_collection">Updating collection of stations.</string>
     <string name="toastmessage_updating_station_images">Updating station images.</string>
 
     <!-- Snackbars -->
