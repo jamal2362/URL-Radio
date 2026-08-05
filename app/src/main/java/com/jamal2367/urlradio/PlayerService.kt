@@ -16,17 +16,14 @@ package com.jamal2367.urlradio
 
 import android.app.PendingIntent
 import android.app.TaskStackBuilder
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.media.audiofx.AudioEffect
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.ForwardingPlayer
@@ -58,6 +55,7 @@ import com.google.common.util.concurrent.ListenableFuture
 import com.jamal2367.urlradio.core.Collection
 import com.jamal2367.urlradio.core.Station
 import com.jamal2367.urlradio.helpers.AudioHelper
+import com.jamal2367.urlradio.helpers.CollectionChanges
 import com.jamal2367.urlradio.helpers.CollectionHelper
 import com.jamal2367.urlradio.helpers.FileHelper
 import com.jamal2367.urlradio.helpers.PreferencesHelper
@@ -65,7 +63,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.util.Date
 
@@ -93,6 +93,10 @@ class PlayerService : MediaLibraryService() {
     var sleepTimerTimeRemaining: Long = 0L
     private var sleepTimerEndTime: Long = 0L
     private val librarySessionCallback = CustomMediaLibrarySessionCallback()
+    // Lives as long as the service does. onDestroy cancels it, which is what takes the place
+    // of unregistering the broadcast receiver this replaced.
+    private val serviceScope = CoroutineScope(SupervisorJob() + Main)
+
     private var collection: Collection = Collection()
     private lateinit var metadataHistory: MutableList<String>
     private var bufferSizeMultiplier: Int = PreferencesHelper.loadBufferSizeMultiplier()
@@ -106,11 +110,8 @@ class PlayerService : MediaLibraryService() {
         super.onCreate()
         // load collection
         collection = FileHelper.readCollection(this)
-        // create and register collection changed receiver
-        LocalBroadcastManager.getInstance(application).registerReceiver(
-            collectionChangedReceiver,
-            IntentFilter(Keys.ACTION_COLLECTION_CHANGED)
-        )
+        // start listening for collection changes made elsewhere in the app
+        observeCollectionChanges()
         // initialize player and session
         initializePlayer()
         initializeSession()
@@ -129,8 +130,8 @@ class PlayerService : MediaLibraryService() {
     override fun onDestroy() {
         // stop listening for changes in shared preferences
         PreferencesHelper.unregisterPreferenceChangeListener(sharedPreferenceChangeListener)
-        // unregister the collection changed receiver that onCreate registered
-        LocalBroadcastManager.getInstance(application).unregisterReceiver(collectionChangedReceiver)
+        // stop listening for collection changes
+        serviceScope.cancel()
         // player.removeAnalyticsListener(analyticsListener)
         player.removeListener(playerListener)
         player.release()
@@ -168,7 +169,7 @@ class PlayerService : MediaLibraryService() {
         exoPlayer.addAnalyticsListener(analyticsListener)
         exoPlayer.addListener(playerListener)
 
-        // manually add seek to next and seek to previous since headphones issue them and they are translated to next and previous station
+        // manually add seek to next and seek to previous since headphones issue them, and they are translated to next and previous station
         player = object : ForwardingPlayer(exoPlayer) {
             override fun getAvailableCommands(): Player.Commands {
                 return super.getAvailableCommands().buildUpon().add(COMMAND_SEEK_TO_NEXT)
@@ -703,16 +704,15 @@ class PlayerService : MediaLibraryService() {
 
 
     /*
-     * Custom receiver that handles Keys.ACTION_COLLECTION_CHANGED
+     * Reloads the collection whenever anything else writes it -- the UI adding, editing or
+     * removing a station, or a restored backup.
      */
-    private val collectionChangedReceiver: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            if (intent.hasExtra(Keys.EXTRA_COLLECTION_MODIFICATION_DATE)) {
-                val date = Date(intent.getLongExtra(Keys.EXTRA_COLLECTION_MODIFICATION_DATE, 0L))
-
+    private fun observeCollectionChanges() {
+        serviceScope.launch {
+            CollectionChanges.events.collect { date ->
                 if (date.after(collection.modificationDate)) {
-                    Log.v(tag, "PlayerService - reload collection after broadcast received.")
-                    loadCollection(context)
+                    Log.v(tag, "PlayerService - reload collection after change announced.")
+                    loadCollection(this@PlayerService)
                 }
             }
         }

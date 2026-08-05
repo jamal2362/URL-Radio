@@ -6,38 +6,19 @@ plugins {
 
 android {
     namespace = "com.jamal2367.urlradio"
-    compileSdk = libs.versions.compileSdk.get().toInt()
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.jamal2367.urlradio"
-        minSdk = libs.versions.minSdk.get().toInt()
-        targetSdk = libs.versions.targetSdk.get().toInt()
+        minSdk = 23
+        targetSdk = 37
         versionCode = 128
         versionName = "12.8"
-    }
-
-    androidResources {
-        localeFilters += listOf(
-            "en", "de"
-        )
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
     }
 
     buildFeatures {
         buildConfig = true
         compose = true
-    }
-
-    lint {
-        // Translations are contributed through Crowdin and are legitimately incomplete for
-        // some of the shipped locales; a missing string falls back to English. This is the
-        // only lint check that is downgraded, and it was already failing before the
-        // migration -- everything else has to stay clean.
-        disable += "MissingTranslation"
     }
 
     buildTypes {
@@ -75,10 +56,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.palette.ktx)
-    implementation(libs.androidx.localbroadcastmanager)
-    // Installs src/main/baseline-prof.txt on the device. Without it the profile only ever
-    // reaches devices that install through Play, and never a locally built APK.
-    implementation(libs.androidx.profileinstaller)
 
     // Media3
     implementation(libs.media3.exoplayer)

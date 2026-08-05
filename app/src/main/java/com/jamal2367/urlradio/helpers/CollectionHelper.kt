@@ -15,7 +15,6 @@
 package com.jamal2367.urlradio.helpers
 
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
@@ -23,7 +22,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.core.net.toFile
 import androidx.core.net.toUri
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import com.jamal2367.urlradio.Keys
@@ -428,14 +426,14 @@ object CollectionHelper {
                     // save collection on background thread
                     FileHelper.saveCollectionSuspended(context, collection, date, allowEmpty)
                     // broadcast collection update
-                    sendCollectionBroadcast(context, date)
+                    sendCollectionBroadcast(date)
                 }
             }
             false -> {
                 // save collection
                 FileHelper.saveCollection(context, collection, date, allowEmpty)
                 // broadcast collection update
-                sendCollectionBroadcast(context, date)
+                sendCollectionBroadcast(date)
             }
         }
         // return modification date
@@ -695,16 +693,10 @@ object CollectionHelper {
     }
 
 
-    /* Sends a broadcast containing the collection as parcel */
-    fun sendCollectionBroadcast(context: Context, modificationDate: Date) {
+    /* Announces that the collection on storage has changed */
+    fun sendCollectionBroadcast(modificationDate: Date) {
         Log.v(tag, "Broadcasting that collection has changed.")
-        val collectionChangedIntent = Intent()
-        collectionChangedIntent.action = Keys.ACTION_COLLECTION_CHANGED
-        collectionChangedIntent.putExtra(
-            Keys.EXTRA_COLLECTION_MODIFICATION_DATE,
-            modificationDate.time
-        )
-        LocalBroadcastManager.getInstance(context).sendBroadcast(collectionChangedIntent)
+        CollectionChanges.notifyChanged(modificationDate)
     }
 
 

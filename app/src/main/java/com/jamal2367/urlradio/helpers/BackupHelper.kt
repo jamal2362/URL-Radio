@@ -121,10 +121,7 @@ object BackupHelper {
         zipInputStream.close()
 
         // notify CollectionViewModel that collection has changed
-        CollectionHelper.sendCollectionBroadcast(
-            context,
-            modificationDate = Calendar.getInstance().time
-        )
+        CollectionHelper.sendCollectionBroadcast(modificationDate = Calendar.getInstance().time)
     }
 
 

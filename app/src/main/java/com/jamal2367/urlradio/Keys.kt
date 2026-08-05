@@ -31,11 +31,9 @@ object Keys {
 
     // intent actions
     const val ACTION_SHOW_PLAYER: String = "com.jamal2367.urlradio.action.SHOW_PLAYER"
-    const val ACTION_COLLECTION_CHANGED: String = "com.jamal2367.urlradio.action.COLLECTION_CHANGED"
     const val ACTION_START: String = "com.jamal2367.urlradio.action.START"
 
     // intent extras
-    const val EXTRA_COLLECTION_MODIFICATION_DATE: String = "COLLECTION_MODIFICATION_DATE"
     const val EXTRA_STATION_UUID: String = "STATION_UUID"
     const val EXTRA_STREAM_URI: String = "STREAM_URI"
     const val EXTRA_START_LAST_PLAYED_STATION: String = "START_LAST_PLAYED_STATION"

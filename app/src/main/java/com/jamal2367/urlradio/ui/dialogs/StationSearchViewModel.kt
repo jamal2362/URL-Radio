@@ -213,7 +213,6 @@ class StationSearchViewModel(application: Application) : AndroidViewModel(applic
     }
 
     override fun onCleared() {
-        super.onCleared()
         debounceJob?.cancel()
         radioBrowserSearch.stopSearchRequest()
         stopPreview()

@@ -15,17 +15,13 @@
 package com.jamal2367.urlradio.ui.stations
 
 import android.app.Application
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.core.Collection
 import com.jamal2367.urlradio.core.Station
+import com.jamal2367.urlradio.helpers.CollectionChanges
 import com.jamal2367.urlradio.helpers.CollectionHelper
 import com.jamal2367.urlradio.helpers.FileHelper
 import com.jamal2367.urlradio.helpers.NetworkHelper
@@ -80,26 +76,16 @@ class StationsViewModel(application: Application) : AndroidViewModel(application
     private var lastExportedSize: Int = -1
     private var modificationDate: Date = Date(0L)
 
-    private val collectionChangedReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            if (!intent.hasExtra(Keys.EXTRA_COLLECTION_MODIFICATION_DATE)) return
-            val date = Date(intent.getLongExtra(Keys.EXTRA_COLLECTION_MODIFICATION_DATE, 0L))
-            if (date.after(modificationDate)) loadCollection()
-        }
-    }
-
     init {
-        LocalBroadcastManager.getInstance(application).registerReceiver(
-            collectionChangedReceiver,
-            IntentFilter(Keys.ACTION_COLLECTION_CHANGED),
-        )
+        // Anything else that writes the collection -- the player service, a restored backup --
+        // announces it here. No unregistering to get wrong: viewModelScope cancels the
+        // collector when the view model goes.
+        viewModelScope.launch {
+            CollectionChanges.events.collect { date ->
+                if (date.after(modificationDate)) loadCollection()
+            }
+        }
         loadCollection()
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        LocalBroadcastManager.getInstance(getApplication())
-            .unregisterReceiver(collectionChangedReceiver)
     }
 
     private fun loadCollection() {
@@ -161,7 +147,7 @@ class StationsViewModel(application: Application) : AndroidViewModel(application
     }
 
     /*
-     * Same clean-up as removeStation, for the whole collection at once. Saved with
+     * Same cleanup as removeStation, for the whole collection at once. Saved with
      * allowEmpty: the stored collection is only ever replaced by an empty one when the last
      * station goes, and wiping several at once would otherwise be silently discarded and read
      * straight back off the file.
