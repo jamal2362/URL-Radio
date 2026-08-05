@@ -143,12 +143,6 @@ fun SettingsScreen(
         item { CategoryHeader(stringResource(R.string.pref_backup_import_export_title)) }
         item {
             SettingsGroup {
-                SettingsRow(
-                    title = stringResource(R.string.pref_playlist_import_title),
-                    summary = stringResource(R.string.pref_playlist_import_summary),
-                    icon = R.drawable.ic_playlist_add_24dp,
-                    onClick = callbacks.onImportPlaylist,
-                )
                 // One entry for both playlist formats. Which of the two is written is asked
                 // in a dialog rather than through two near-identical rows.
                 SettingsRow(
@@ -156,6 +150,12 @@ fun SettingsScreen(
                     summary = stringResource(R.string.pref_playlist_export_summary),
                     icon = R.drawable.ic_playlist_export_24dp,
                     onClick = { showExportFormatDialog = true },
+                )
+                SettingsRow(
+                    title = stringResource(R.string.pref_playlist_import_title),
+                    summary = stringResource(R.string.pref_playlist_import_summary),
+                    icon = R.drawable.ic_playlist_add_24dp,
+                    onClick = callbacks.onImportPlaylist,
                 )
                 SettingsRow(
                     title = stringResource(R.string.pref_station_export_title),
