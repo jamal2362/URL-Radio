@@ -32,6 +32,7 @@ import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -240,25 +241,34 @@ private fun SwipeableStationRow(
     modifier: Modifier = Modifier,
     dragModifier: Modifier = Modifier,
 ) {
-    val dismissState = rememberSwipeToDismissBoxState(
-        confirmValueChange = { value ->
-            when (value) {
-                // Swipe towards the end (left in LTR) asks to delete. The row always
-                // springs back; the actual removal waits for the confirmation dialog.
-                SwipeToDismissBoxValue.EndToStart -> {
-                    onDeleteRequest()
-                    false
-                }
-                // Swipe towards the start (right in LTR) toggles the favourite mark.
-                SwipeToDismissBoxValue.StartToEnd -> {
-                    onToggleStarred()
-                    false
-                }
+    val dismissState = rememberSwipeToDismissBoxState()
 
-                SwipeToDismissBoxValue.Settled -> true
+    // Neither swipe ever removes the row: a swipe is a shortcut for an action, and the card
+    // returns to its place afterward.
+    //
+    // This used to be a confirmValueChange that vetoed every state change, which is
+    // deprecated -- the recommendation is to leave disallowed states out of the anchor set
+    // instead, and an anchor set of one would mean the row could not be swiped at all. So the
+    // swipe is let through and undone here: reset animates the card back from wherever the
+    // dismiss left it. settledValue rather than currentValue, so the action fires once the
+    // gesture is over rather than while the finger is still moving across the row.
+    LaunchedEffect(dismissState.settledValue) {
+        when (dismissState.settledValue) {
+            // Towards the end (left in LTR) asks to delete. The removal itself waits for the
+            // confirmation dialog.
+            SwipeToDismissBoxValue.EndToStart -> {
+                onDeleteRequest()
+                dismissState.reset()
             }
-        },
-    )
+            // Towards the start (right in LTR) toggles the favourite mark.
+            SwipeToDismissBoxValue.StartToEnd -> {
+                onToggleStarred()
+                dismissState.reset()
+            }
+
+            SwipeToDismissBoxValue.Settled -> Unit
+        }
+    }
 
     SwipeToDismissBox(
         state = dismissState,
