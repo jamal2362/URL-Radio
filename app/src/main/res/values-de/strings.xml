@@ -3,15 +3,11 @@
     <!-- App Name -->
     <!-- Accessibility Descriptions -->
     <string name="descr_app_icon">App-Symbol in der Form eines alten Radios</string>
-    <string name="descr_card_small_play_button">Start/Stopp</string>
     <string name="descr_card_starred_station">Markierter Sender</string>
-    <string name="descr_card_station_image_change">Senderbild ändern</string>
-    <string name="descr_card_station_image">Senderbild</string>
     <string name="descr_expanded_player_metadata_copy_button">Informationen zur aktuellen Wiedergabe kopieren</string>
     <string name="descr_expanded_player_metadata_next_button">Nächster jetzt abspielender Metadateneintrag</string>
     <string name="descr_expanded_player_metadata_previous_button">Vorheriger abspielender Metadateneintrag</string>
     <string name="descr_expanded_player_sleep_timer_cancel_button">Schlaf-Timer abbrechen</string>
-    <string name="descr_expanded_player_sleep_timer_remaining_time">Verbleibende Zeit des Schlaf-Timers</string>
     <string name="descr_expanded_player_sleep_timer_start_button">Schlaf-Timer starten</string>
     <string name="descr_player_playback_button">Start/Pause</string>
     <string name="descr_player_station_image">Senderbild</string>
@@ -21,7 +17,6 @@
     <string name="dialog_add_station_found">Gefundene Sender: %1$d</string>
     <string name="dialog_edit_station_name">Sendername</string>
     <string name="dialog_edit_stream_uri">Stream-Adresse</string>
-    <string name="dialog_error_message_default">Ein Fehler ist aufgetreten</string>
     <string name="dialog_error_message_no_network">Mit dem Internet verbinden.</string>
     <string name="dialog_error_title_no_network">Offline</string>
     <string name="dialog_find_station_button_add">Hinzufügen</string>
@@ -33,8 +28,6 @@
     <string name="dialog_generic_button_cancel">Abbrechen</string>
     <string name="dialog_generic_button_done">Fertig</string>
     <string name="dialog_generic_button_okay">OK</string>
-    <string name="dialog_generic_details_button">Details anzeigen</string>
-    <string name="dialog_opml_import_details_default">Keine Details verfügbar</string>
     <string name="dialog_restore_collection_replace_existing">Soll die aktuelle Sammlung von Radiostationen durch die Radiostationen aus dem Backup ersetzt werden?</string>
     <string name="dialog_station_picker_clear">Auswahl aufheben</string>
     <string name="dialog_station_picker_hint">Tippen zum Auswählen · Langes Drücken für die Vorschau</string>
@@ -42,19 +35,12 @@
     <string name="dialog_station_picker_selected">%1$d ausgewählt</string>
     <string name="dialog_yes_no_message_remove_all_stations">Alle Sender entfernen? Das kann nicht rückgängig gemacht werden.</string>
     <string name="dialog_yes_no_message_remove_station">Diesen Sender entfernen?</string>
-    <string name="dialog_yes_no_message_update_station_images">Neueste Version aller Senderbilder herunterladen\?</string>
     <string name="dialog_yes_no_positive_button_default">Ja</string>
     <string name="dialog_yes_no_positive_button_remove_all_stations">Alle entfernen</string>
     <string name="dialog_yes_no_positive_button_remove_station">Entfernen</string>
-    <string name="dialog_yes_no_positive_button_update_covers">Aktualisieren</string>
     <!-- Fragment -->
     <string name="fragment_settings_title">Einstellungen</string>
     <!-- Notification -->
-    <string name="notification_now_playing_channel_name">Wiedergabesteuerung</string>
-    <string name="notification_play">Wiedergabe</string>
-    <string name="notification_stop">Stopp</string>
-    <string name="notification_skip_to_previous">Zurück</string>
-    <string name="notification_skip_to_next">Nächste</string>
     <!-- Onboarding -->
     <string name="onboarding_app_description">Tauche ein in den Sound deiner Wahl!</string>
     <string name="onboarding_app_get_started">Jetzt starten</string>
@@ -120,21 +106,17 @@
     <string name="toastmessage_connection_failed">Die Verbindung konnte nicht aufgebaut oder wiederhergestellt werden.</string>
     <string name="toastmessage_copied_to_clipboard">In die Zwischenablage kopiert</string>
     <string name="toastmessage_error_download_error">Fehler beim Herunterladen</string>
-    <string name="toastmessage_error_restart_playback_failed">Die Wiedergabe konnte nicht gestartet oder neu gestartet werden</string>
     <string name="toastmessage_install_file_helper">Bitte installiere einen Dateimanager</string>
     <string name="toastmessage_playlist_import_empty">In dieser Playlist wurden keine unterstützten Sender gefunden.</string>
     <string name="toastmessage_playlist_import_running">Playlist wird gelesen…</string>
     <string name="toastmessage_preview_playback_failed">Die Vorschauwiedergabe ist nicht möglich.</string>
-    <string name="toastmessage_preview_playback_started">Die Vorschauwiedergabe wurde gestartet.</string>
     <string name="toastmessage_restored">Stationen wurden erfolgreich wiederhergestellt.</string>
     <string name="toastmessage_save_m3u">Radiosender als M3U gespeichert…</string>
     <string name="toastmessage_save_pls">Radiosender als PLS gespeichert…</string>
     <string name="toastmessage_shortcut_created">Sender auf Startbildschirm platzieren</string>
     <string name="toastmessage_shortcut_not_created">Sender konnte nicht auf dem Startbildschirm platziert werden. Das Gerät unterbindet das Platzieren von Verknüpfungen.</string>
-    <string name="toastmessage_sleep_timer_unable_to_start">Bitte zuerst die Wiedergabe starten</string>
     <string name="toastmessage_station_duplicate">Dieser Sender ist ein Duplikat</string>
     <string name="toastmessage_station_not_valid">Dieser Sender existiert nicht</string>
-    <string name="toastmessage_updating_collection">Alle Sender werden aktualisiert</string>
     <string name="toastmessage_updating_station_images">Alle Senderbilder werden aktualisiert</string>
     <!-- Snackbars -->
     <string name="snackbar_show">Zeigen</string>
