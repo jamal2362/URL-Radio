@@ -22,7 +22,9 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionCommand
+import androidx.media3.session.SessionResult
 import androidx.media3.session.SessionToken
+import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import com.jamal2367.urlradio.Keys
@@ -38,9 +40,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 /** How often the sleep timer remaining time is polled from the service. */
 private const val SLEEP_TIMER_POLL_INTERVAL_MS = 500L
+
+/**
+ * How many poll ticks pass between two metadata refreshes. PlayerService pushes every change
+ * on its own (see Keys.CMD_METADATA_UPDATED); this is only the safety net for the case where
+ * the broadcast is missed, for example while the controller is reconnecting.
+ */
+private const val METADATA_REFRESH_EVERY_N_TICKS = 8
 
 /*
  * androidx.annotation.OptIn (not Kotlin's) is what the UnsafeOptInUsageError lint check
@@ -66,6 +76,7 @@ class PlaybackConnection(
 
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
             _state.update { it.copy(stationUuid = mediaItem?.mediaId.orEmpty()) }
+            refreshMetadataHistory()
         }
 
         override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -96,11 +107,34 @@ class PlaybackConnection(
         }
     }
 
+    /*
+     * Receives what PlayerService pushes out on its own. The metadata history used to be
+     * pulled only on connect and on a play/pause change, which is why a track change during
+     * playback did not reach the screen until the station was restarted.
+     */
+    private val sessionListener = object : MediaController.Listener {
+        override fun onCustomCommand(
+            controller: MediaController,
+            command: SessionCommand,
+            args: Bundle,
+        ): ListenableFuture<SessionResult> {
+            if (command.customAction == Keys.CMD_METADATA_UPDATED) {
+                val history = args.getStringArrayList(Keys.EXTRA_METADATA_HISTORY).orEmpty()
+                if (history.isNotEmpty()) {
+                    _state.update { it.copy(metadataHistory = history.toList()) }
+                }
+            }
+            return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
+        }
+    }
+
     /* Connects to PlayerService. Safe to call repeatedly. */
     fun connect() {
         if (controllerFuture != null) return
         val token = SessionToken(context, ComponentName(context, PlayerService::class.java))
-        val future = MediaController.Builder(context, token).buildAsync()
+        val future = MediaController.Builder(context, token)
+            .setListener(sessionListener)
+            .buildAsync()
         controllerFuture = future
         future.addListener({ onControllerReady() }, MoreExecutors.directExecutor())
     }
@@ -138,6 +172,7 @@ class PlaybackConnection(
     private fun startPolling() {
         pollJob?.cancel()
         pollJob = scope.launch {
+            var tick = 0
             while (isActive) {
                 val current = _state.value
                 if (current.isPlaying || current.sleepTimerRemaining > 0L) {
@@ -145,7 +180,11 @@ class PlaybackConnection(
                 } else if (current.sleepTimerRemaining != 0L) {
                     _state.update { it.copy(sleepTimerRemaining = 0L) }
                 }
-                delay(SLEEP_TIMER_POLL_INTERVAL_MS)
+                if (current.isPlaying && tick % METADATA_REFRESH_EVERY_N_TICKS == 0) {
+                    refreshMetadataHistory()
+                }
+                tick++
+                delay(SLEEP_TIMER_POLL_INTERVAL_MS.milliseconds)
             }
         }
     }
@@ -195,7 +234,7 @@ class PlaybackConnection(
 
     /*
      * Tapping the station that is currently playing pauses it; tapping any other station
-     * starts that one. Mirrors the behaviour of the old onPlayButtonTapped.
+     * starts that one. Mirrors the behavior of the old onPlayButtonTapped.
      */
     fun togglePlayPause(station: Station) {
         val controller = this.controller ?: return

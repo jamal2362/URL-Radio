@@ -17,7 +17,8 @@ package com.jamal2367.urlradio.helpers
 import android.util.Log
 import com.jamal2367.urlradio.Keys
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 
 /*
@@ -27,12 +28,12 @@ object DateTimeHelper {
 
 
     /* Define log tag */
-    private val TAG: String = DateTimeHelper::class.java.simpleName
+    private val tag: String = DateTimeHelper::class.java.simpleName
 
 
     /* Main class variables */
-    private const val pattern: String = "EEE, dd MMM yyyy HH:mm:ss Z"
-    private val dateFormat: SimpleDateFormat = SimpleDateFormat(pattern, Locale.ENGLISH)
+    private const val PATTERN: String = "EEE, dd MMM yyyy HH:mm:ss Z"
+    private val dateFormat: SimpleDateFormat = SimpleDateFormat(PATTERN, Locale.ENGLISH)
 
 
     /* Converts RFC 2822 string representation of a date to DATE */
@@ -41,7 +42,7 @@ object DateTimeHelper {
             // parse date string using standard pattern
             dateFormat.parse((dateString)) ?: Keys.DEFAULT_DATE
         } catch (e: Exception) {
-            Log.w(TAG, "Unable to parse. Trying an alternative Date format. $e")
+            Log.w(tag, "Unable to parse. Trying an alternative Date format. $e")
             // try alternative parsing patterns
             tryAlternativeRfc2822Parsing(dateString)
         }
@@ -51,7 +52,7 @@ object DateTimeHelper {
 
     /* Converts a DATE to its RFC 2822 string representation */
     fun convertToRfc2822(date: Date): String {
-        val dateFormat = SimpleDateFormat(pattern, Locale.ENGLISH)
+        val dateFormat = SimpleDateFormat(PATTERN, Locale.ENGLISH)
         return dateFormat.format(date)
     }
 
@@ -87,14 +88,14 @@ object DateTimeHelper {
                 ?: Keys.DEFAULT_DATE
         } catch (e: Exception) {
             try {
-                Log.w(TAG, "Unable to parse. Trying an alternative Date format. $e")
+                Log.w(tag, "Unable to parse. Trying an alternative Date format. $e")
                 // try to parse without time zone
                 date = SimpleDateFormat(
                     "EEE, dd MMM yyyy HH:mm:ss",
                     Locale.ENGLISH
                 ).parse((dateString)) ?: Keys.DEFAULT_DATE
             } catch (e: Exception) {
-                Log.e(TAG, "Unable to parse. Returning a default date. $e")
+                Log.e(tag, "Unable to parse. Returning a default date. $e")
             }
         }
         return date

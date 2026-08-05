@@ -20,12 +20,12 @@ import android.util.Log
 import androidx.core.content.edit
 import com.google.gson.Gson
 import com.jamal2367.urlradio.Keys
-import com.jamal2367.urlradio.ui.PlayerState
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.conflate
-import java.util.*
+import java.util.Calendar
+import java.util.Date
 
 
 /*
@@ -35,7 +35,7 @@ object PreferencesHelper {
 
 
     /* Define log tag */
-    private val TAG: String = PreferencesHelper::class.java.simpleName
+    private val tag: String = PreferencesHelper::class.java.simpleName
 
 
     /* The sharedPreferences object to be initialized */
@@ -149,7 +149,7 @@ object PreferencesHelper {
         val activeDownloadsString: String =
             sharedPreferences.getString(Keys.PREF_ACTIVE_DOWNLOADS, Keys.ACTIVE_DOWNLOADS_EMPTY)
                 ?: Keys.ACTIVE_DOWNLOADS_EMPTY
-        Log.v(TAG, "IDs of active downloads: $activeDownloadsString")
+        Log.v(tag, "IDs of active downloads: $activeDownloadsString")
         return activeDownloadsString
     }
 
@@ -158,18 +158,6 @@ object PreferencesHelper {
     fun saveActiveDownloads(activeDownloadsString: String = String()) {
         sharedPreferences.edit {
             putString(Keys.PREF_ACTIVE_DOWNLOADS, activeDownloadsString)
-        }
-    }
-
-
-    /* Loads state of player user interface from shared preferences */
-    fun loadPlayerState(): PlayerState {
-        return PlayerState().apply {
-            stationUuid = sharedPreferences.getString(Keys.PREF_PLAYER_STATE_STATION_UUID, String())
-                ?: String()
-            isPlaying = sharedPreferences.getBoolean(Keys.PREF_PLAYER_STATE_IS_PLAYING, false)
-            sleepTimerRunning =
-                sharedPreferences.getBoolean(Keys.PREF_PLAYER_STATE_SLEEP_TIMER_RUNNING, false)
         }
     }
 

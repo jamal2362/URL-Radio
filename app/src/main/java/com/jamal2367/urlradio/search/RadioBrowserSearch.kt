@@ -19,7 +19,6 @@
 
 package com.jamal2367.urlradio.search
 
-import android.content.Context
 import android.util.Log
 import com.google.gson.GsonBuilder
 import com.jamal2367.urlradio.BuildConfig
@@ -50,7 +49,7 @@ class RadioBrowserSearch(private var radioBrowserSearchListener: RadioBrowserSea
 
 
     /* Define log tag */
-    private val TAG: String = RadioBrowserSearch::class.java.simpleName
+    private val tag: String = RadioBrowserSearch::class.java.simpleName
 
 
     /* Interface used to send back search results */
@@ -79,8 +78,8 @@ class RadioBrowserSearch(private var radioBrowserSearchListener: RadioBrowserSea
 
 
     /* Searches station(s) on radio-browser.info */
-    fun searchStation(context: Context, query: String, searchType: Int) {
-        Log.v(TAG, "Search - Querying $radioBrowserApi for: $query")
+    fun searchStation(query: String, searchType: Int) {
+        Log.v(tag, "Search - Querying $radioBrowserApi for: $query")
 
         // a newer query supersedes whatever is still running
         searchJob?.cancel()
@@ -104,11 +103,11 @@ class RadioBrowserSearch(private var radioBrowserSearchListener: RadioBrowserSea
                     .build()
                 client.newCall(request).execute().use { response ->
                     if (!response.isSuccessful) return@use null
-                    val body = response.body?.string()
-                    if (body.isNullOrEmpty()) null else createRadioBrowserResult(body)
+                    val body = response.body.string()
+                    if (body.isEmpty()) null else createRadioBrowserResult(body)
                 }
             } catch (e: Exception) {
-                Log.w(TAG, "Error: $e")
+                Log.w(tag, "Error: $e")
                 null
             }
             if (results != null) {

@@ -24,7 +24,7 @@ import okhttp3.Request
 
 object UpdateCheckHelper {
 
-    private val TAG: String = UpdateCheckHelper::class.java.simpleName
+    private val tag: String = UpdateCheckHelper::class.java.simpleName
 
     /**
      * Returns the tag name of the latest release when it differs from [currentVersionName],
@@ -36,7 +36,7 @@ object UpdateCheckHelper {
                 val request = Request.Builder().url(releasesApiUrl).build()
                 OkHttpClient().newCall(request).execute().use { response ->
                     if (!response.isSuccessful) return@withContext null
-                    val body = response.body?.string().orEmpty()
+                    val body = response.body.string()
                     if (body.isEmpty()) return@withContext null
                     val latest = Gson().fromJson(body, JsonObject::class.java)
                         ?.get("tag_name")?.asString ?: return@withContext null
@@ -44,7 +44,7 @@ object UpdateCheckHelper {
                 }
             } catch (e: Exception) {
                 // A failed update check must never be visible to the user.
-                Log.w(TAG, "Update check failed", e)
+                Log.w(tag, "Update check failed", e)
                 null
             }
         }

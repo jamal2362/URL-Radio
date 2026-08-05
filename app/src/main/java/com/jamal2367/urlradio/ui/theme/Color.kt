@@ -72,8 +72,3 @@ val BrandOutlineDark = Color(0xFF585E71)
 // res/values-night/colors.xml: list_card_delete_background / list_card_delete_icon
 val BrandErrorDark = Color(0xFFF2B8B5)
 val BrandOnErrorDark = Color(0xFF601410)
-
-/* ---- Fixed, non-themed ---- */
-
-// res/values/colors.xml: splashBackgroundColor
-val SplashBackground = Color(0xFF1D3E66)

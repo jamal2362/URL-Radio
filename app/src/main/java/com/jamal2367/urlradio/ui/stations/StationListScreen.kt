@@ -13,7 +13,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -36,6 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -90,11 +90,19 @@ fun StationListScreen(
 
         val listState = rememberLazyListState()
 
-        // Drag-to-reorder state. The dragged row is tracked by uuid rather than by index:
-        // the index changes underneath us on every successful swap, and reading a stale one
-        // was why only the row that happened to start at the top could be moved.
-        var draggingUuid by remember { mutableStateOf<String?>(null) }
-        var dragOffsetY by remember { mutableFloatStateOf(0f) }
+        // Drag-to-reorder state.
+        //
+        // Everything is measured against the slot the row started in: dragStartOffset plus
+        // the distance the finger has traveled since. That total is never corrected when a
+        // swap goes through, which is the point. Correcting it -- subtracting the distance
+        // between the two slots on every move -- meant a move that the collection had already
+        // applied, but that the list had not been laid out for yet, fed a position back into
+        // the next drag event that no longer described anything on screen. The row then
+        // swapped again off that stale reading, and again, which is what made it jump around.
+        var draggedIndex by remember { mutableStateOf<Int?>(null) }
+        var draggedDistance by remember { mutableFloatStateOf(0f) }
+        var dragStartOffset by remember { mutableIntStateOf(0) }
+        var dragStartSize by remember { mutableIntStateOf(0) }
 
         LazyColumn(
             state = listState,
@@ -107,55 +115,66 @@ fun StationListScreen(
                 key = { _, station -> station.uuid },
             ) { index, station ->
                 val isEditorOpen = station.uuid == expandedStationUuid
-                val isDragging = station.uuid == draggingUuid
+                val isDragging = draggedIndex == index
 
                 // Reordering is disabled while an editor is open, matching the old
                 // isLongPressDragEnabled() rule. Sits on the row as a whole; the cover and
                 // the station name claim their own long-press for opening the editor, so
                 // this only ever fires on the free area around them.
-                val dragModifier = if (isEditorOpen) Modifier else Modifier.pointerInput(station.uuid) {
-                    detectDragGesturesAfterLongPress(
-                        onDragStart = {
-                            draggingUuid = station.uuid
-                            dragOffsetY = 0f
-                        },
-                        onDragEnd = {
-                            draggingUuid = null
-                            dragOffsetY = 0f
-                            onMoveFinished()
-                        },
-                        onDragCancel = {
-                            draggingUuid = null
-                            dragOffsetY = 0f
-                        },
-                        onDrag = { change, dragAmount ->
-                            change.consume()
-                            dragOffsetY += dragAmount.y
+                val dragModifier =
+                    if (isEditorOpen) Modifier else Modifier.pointerInput(station.uuid) {
+                        detectDragGesturesAfterLongPress(
+                            onDragStart = {
+                                val info = listState.layoutInfo.visibleItemsInfo
+                                    .firstOrNull { it.key == station.uuid }
+                                draggedIndex = info?.index ?: index
+                                dragStartOffset = info?.offset ?: 0
+                                dragStartSize = info?.size ?: 0
+                                draggedDistance = 0f
+                            },
+                            onDragEnd = {
+                                draggedIndex = null
+                                draggedDistance = 0f
+                                onMoveFinished()
+                            },
+                            onDragCancel = {
+                                draggedIndex = null
+                                draggedDistance = 0f
+                            },
+                            onDrag = { change, dragAmount ->
+                                change.consume()
+                                draggedDistance += dragAmount.y
 
-                            // Where the dragged row is actually drawn right now: its laid-out
-                            // position plus the offset the finger has added.
-                            val items = listState.layoutInfo.visibleItemsInfo
-                            val dragged = items.firstOrNull { it.key == draggingUuid } ?: return@detectDragGesturesAfterLongPress
-                            val draggedCentre = dragged.offset + dragged.size / 2 + dragOffsetY
+                                val from = draggedIndex ?: return@detectDragGesturesAfterLongPress
+                                val items = listState.layoutInfo.visibleItemsInfo
+                                val dragged = items.firstOrNull { it.index == from }
+                                    ?: return@detectDragGesturesAfterLongPress
 
-                            // Swap with whichever row that centre now sits inside. Comparing
-                            // against real layout positions handles rows of differing height
-                            // and lets a fast drag cross several of them.
-                            val target = items.firstOrNull { other ->
-                                other.index != dragged.index &&
-                                    draggedCentre >= other.offset &&
-                                    draggedCentre <= other.offset + other.size
-                            } ?: return@detectDragGesturesAfterLongPress
+                                // The strip the row now covers on screen.
+                                val top = dragStartOffset + draggedDistance
+                                val bottom = top + dragStartSize
+                                val movingDown = top > dragged.offset
 
-                            if (onMove(dragged.index, target.index)) {
-                                // The row is about to be laid out at the target's position,
-                                // so drop the same amount from the offset and the row stays
-                                // put under the finger.
-                                dragOffsetY -= (target.offset - dragged.offset)
-                            }
-                        },
-                    )
-                }
+                                // A row is taken over only once it has been cleared completely --
+                                // downwards past its bottom edge, upwards past its top one. Going
+                                // by the midpoint instead let a row swap back and forth while the
+                                // finger sat still on the boundary.
+                                items.firstOrNull { other ->
+                                    other.index != from &&
+                                            other.offset + other.size >= top &&
+                                            other.offset <= bottom &&
+                                            (
+                                                    if (movingDown) bottom > other.offset + other.size
+                                                    else top < other.offset
+                                                    )
+                                }?.let { target ->
+                                    // moveStation refuses to mix favourites with the rest, so the
+                                    // index only follows the row where the move was accepted.
+                                    if (onMove(from, target.index)) draggedIndex = target.index
+                                }
+                            },
+                        )
+                    }
 
                 SwipeableStationRow(
                     station = station,
@@ -172,9 +191,32 @@ fun StationListScreen(
                     onDeleteRequest = { onDeleteRequest(station) },
                     onToggleStarred = { onToggleStarred(station) },
                     dragModifier = dragModifier,
-                    modifier = Modifier
-                        .zIndex(if (isDragging) 1f else 0f)
-                        .graphicsLayer { translationY = if (isDragging) dragOffsetY else 0f },
+                    // Everything here is scoped to an actual drag. Ordinary scrolling gets a
+                    // bare Modifier: no render layer, no z-order, and above all no placement
+                    // animation, so the reorder feature costs a plain scroll nothing at all.
+                    modifier = when {
+                        isDragging -> Modifier
+                            .zIndex(1f)
+                            .graphicsLayer {
+                                // Read at draw time, not during composition: the row keeps
+                                // following the finger through the frames where the list is
+                                // still settling into the new order. Once it has been laid
+                                // out in the slot it was dragged to, its own offset cancels
+                                // the distance out and the translation shrinks to nothing.
+                                val laidOut = listState.layoutInfo.visibleItemsInfo
+                                    .firstOrNull { it.index == index }?.offset ?: dragStartOffset
+                                translationY = dragStartOffset + draggedDistance - laidOut
+                            }
+
+                        // Placement only, and only while a row is actually being dragged: the
+                        // rows making way for it slide into their new slot instead of
+                        // snapping. The fade animateItem otherwise adds ran for every row at
+                        // once when the collection finished loading.
+                        draggedIndex != null ->
+                            Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null)
+
+                        else -> Modifier
+                    },
                 )
             }
         }
@@ -199,31 +241,40 @@ private fun SwipeableStationRow(
     modifier: Modifier = Modifier,
     dragModifier: Modifier = Modifier,
 ) {
-    val dismissState = rememberSwipeToDismissBoxState(
-        confirmValueChange = { value ->
-            when (value) {
-                // Swipe towards the end (left in LTR) asks to delete. The row always
-                // springs back; the actual removal waits for the confirmation dialog.
-                SwipeToDismissBoxValue.EndToStart -> {
-                    onDeleteRequest()
-                    false
-                }
-                // Swipe towards the start (right in LTR) toggles the favourite mark.
-                SwipeToDismissBoxValue.StartToEnd -> {
-                    onToggleStarred()
-                    false
-                }
+    val dismissState = rememberSwipeToDismissBoxState()
 
-                SwipeToDismissBoxValue.Settled -> true
+    // Neither swipe ever removes the row: a swipe is a shortcut for an action, and the card
+    // returns to its place afterward.
+    //
+    // This used to be a confirmValueChange that vetoed every state change, which is
+    // deprecated -- the recommendation is to leave disallowed states out of the anchor set
+    // instead, and an anchor set of one would mean the row could not be swiped at all. So the
+    // swipe is let through and undone here: reset animates the card back from wherever the
+    // dismiss left it. settledValue rather than currentValue, so the action fires once the
+    // gesture is over rather than while the finger is still moving across the row.
+    LaunchedEffect(dismissState.settledValue) {
+        when (dismissState.settledValue) {
+            // Towards the end (left in LTR) asks to delete. The removal itself waits for the
+            // confirmation dialog.
+            SwipeToDismissBoxValue.EndToStart -> {
+                onDeleteRequest()
+                dismissState.reset()
             }
-        },
-    )
+            // Towards the start (right in LTR) toggles the favourite mark.
+            SwipeToDismissBoxValue.StartToEnd -> {
+                onToggleStarred()
+                dismissState.reset()
+            }
+
+            SwipeToDismissBoxValue.Settled -> Unit
+        }
+    }
 
     SwipeToDismissBox(
         state = dismissState,
         // dismissDirection follows the raw swipe offset, unlike targetValue which only
         // flips once the row is dragged past the threshold. Keying the background on the
-        // latter is what made the colour appear only from halfway across.
+        // latter is what made the color appear only from halfway across.
         backgroundContent = { SwipeBackground(dismissState.dismissDirection) },
         modifier = modifier,
     ) {

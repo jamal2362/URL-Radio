@@ -16,14 +16,21 @@ package com.jamal2367.urlradio
 
 import android.app.PendingIntent
 import android.app.TaskStackBuilder
-import android.content.*
+import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
 import android.media.audiofx.AudioEffect
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import androidx.media3.common.*
+import androidx.media3.common.AudioAttributes
+import androidx.media3.common.C
+import androidx.media3.common.ForwardingPlayer
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Metadata
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.HttpDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
@@ -33,19 +40,33 @@ import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.upstream.DefaultAllocator
 import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy
 import androidx.media3.exoplayer.upstream.LoadErrorHandlingPolicy
-import androidx.media3.session.*
+import androidx.media3.session.CommandButton
+import androidx.media3.session.DefaultMediaNotificationProvider
+import androidx.media3.session.LibraryResult
+import androidx.media3.session.MediaLibraryService
+import androidx.media3.session.MediaSession
+import androidx.media3.session.SessionCommand
+import androidx.media3.session.SessionCommands
+import androidx.media3.session.SessionError
+import androidx.media3.session.SessionResult
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import com.jamal2367.urlradio.core.Collection
 import com.jamal2367.urlradio.core.Station
 import com.jamal2367.urlradio.helpers.AudioHelper
+import com.jamal2367.urlradio.helpers.CollectionChanges
 import com.jamal2367.urlradio.helpers.CollectionHelper
 import com.jamal2367.urlradio.helpers.FileHelper
 import com.jamal2367.urlradio.helpers.PreferencesHelper
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.Main
-import java.util.*
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 
 
 /*
@@ -59,10 +80,10 @@ class PlayerService : MediaLibraryService() {
      * not need the legacy androidx.media library for a single string constant. The system
      * passes this when it asks for a resumable item after a reboot.
      */
-    private val EXTRA_RECENT: String = "android.service.media.extra.RECENT"
+    private val extraRecent: String = "android.service.media.extra.RECENT"
 
     /* Define log tag */
-    private val TAG: String = PlayerService::class.java.simpleName
+    private val tag: String = PlayerService::class.java.simpleName
 
     /* Main class variables */
     private lateinit var player: Player
@@ -71,6 +92,10 @@ class PlayerService : MediaLibraryService() {
     var sleepTimerTimeRemaining: Long = 0L
     private var sleepTimerEndTime: Long = 0L
     private val librarySessionCallback = CustomMediaLibrarySessionCallback()
+    // Lives as long as the service does. onDestroy cancels it, which is what takes the place
+    // of unregistering the broadcast receiver this replaced.
+    private val serviceScope = CoroutineScope(SupervisorJob() + Main)
+
     private var collection: Collection = Collection()
     private lateinit var metadataHistory: MutableList<String>
     private var bufferSizeMultiplier: Int = PreferencesHelper.loadBufferSizeMultiplier()
@@ -84,11 +109,8 @@ class PlayerService : MediaLibraryService() {
         super.onCreate()
         // load collection
         collection = FileHelper.readCollection(this)
-        // create and register collection changed receiver
-        LocalBroadcastManager.getInstance(application).registerReceiver(
-            collectionChangedReceiver,
-            IntentFilter(Keys.ACTION_COLLECTION_CHANGED)
-        )
+        // start listening for collection changes made elsewhere in the app
+        observeCollectionChanges()
         // initialize player and session
         initializePlayer()
         initializeSession()
@@ -107,8 +129,8 @@ class PlayerService : MediaLibraryService() {
     override fun onDestroy() {
         // stop listening for changes in shared preferences
         PreferencesHelper.unregisterPreferenceChangeListener(sharedPreferenceChangeListener)
-        // unregister the collection changed receiver that onCreate registered
-        LocalBroadcastManager.getInstance(application).unregisterReceiver(collectionChangedReceiver)
+        // stop listening for collection changes
+        serviceScope.cancel()
         // player.removeAnalyticsListener(analyticsListener)
         player.removeListener(playerListener)
         player.release()
@@ -146,7 +168,11 @@ class PlayerService : MediaLibraryService() {
         exoPlayer.addAnalyticsListener(analyticsListener)
         exoPlayer.addListener(playerListener)
 
-        // manually add seek to next and seek to previous since headphones issue them and they are translated to next and previous station
+        // manually add seek to next and seek to previous since headphones issue them, and they are translated to next and previous station
+        //
+        // What those commands then do is shaped here rather than in
+        // MediaSession.Callback.onPlayerCommandRequest, which is deprecated: the replacement
+        // for changing what a player command does is the player itself.
         player = object : ForwardingPlayer(exoPlayer) {
             override fun getAvailableCommands(): Player.Commands {
                 return super.getAvailableCommands().buildUpon().add(COMMAND_SEEK_TO_NEXT)
@@ -159,6 +185,53 @@ class PlayerService : MediaLibraryService() {
 
             override fun getDuration(): Long {
                 return C.TIME_UNSET // this will hide progress bar for HLS stations in the notification
+            }
+
+            /* Headphone "next" means the next station: it is queued up and started. */
+            override fun seekToNext() {
+                addMediaItem(
+                    CollectionHelper.getNextMediaItem(
+                        this@PlayerService,
+                        collection,
+                        currentMediaItem?.mediaId ?: String()
+                    )
+                )
+                // super, not the overrides below: a station queued up here is already at the
+                // live edge, so it neither needs the resumption special case nor the seek.
+                super.prepare()
+                super.play()
+                super.seekToNext()
+            }
+
+            /* Headphone "previous", likewise. */
+            override fun seekToPrevious() {
+                addMediaItem(
+                    CollectionHelper.getPreviousMediaItem(
+                        this@PlayerService,
+                        collection,
+                        currentMediaItem?.mediaId ?: String()
+                    )
+                )
+                super.prepare()
+                super.play()
+                super.seekToPrevious()
+            }
+
+            override fun prepare() {
+                // Special case: the system asked for media resumption (see also
+                // onGetLibraryRoot), so the last station is put in place first.
+                if (playLastStation) {
+                    addMediaItem(CollectionHelper.getRecent(this@PlayerService, collection))
+                    playLastStation = false
+                }
+                super.prepare()
+            }
+
+            override fun play() {
+                // A live stream that was paused would otherwise resume out of a stale buffer,
+                // so playback returns to the start of the live window first.
+                if (!isPlaying) seekTo(0)
+                super.play()
             }
         }
     }
@@ -192,7 +265,7 @@ class PlayerService : MediaLibraryService() {
     }
 
 
-    /* Starts sleep timer / adds default duration to running sleeptimer */
+    /* Starts sleep timer / adds default duration to running sleep timer */
     private fun startSleepTimer(selectedTimeMillis: Long) {
         // stop running timer
         if (sleepTimerTimeRemaining > 0L && this::sleepTimer.isInitialized) {
@@ -205,7 +278,7 @@ class PlayerService : MediaLibraryService() {
         // initialize timer
         sleepTimer = object : CountDownTimer(selectedTimeMillis, 1000) {
             override fun onFinish() {
-                Log.v(TAG, "Sleep timer finished. Sweet dreams.")
+                Log.v(tag, "Sleep timer finished. Sweet dreams.")
                 sleepTimerTimeRemaining = 0L
                 player.stop()
             }
@@ -244,10 +317,17 @@ class PlayerService : MediaLibraryService() {
 
     /* Updates metadata */
     private fun updateMetadata(metadata: String = String()) {
-        // get metadata string
-        val metadataString: String = metadata.ifEmpty {
-            player.currentMediaItem?.mediaMetadata?.artist.toString()
-        }
+        /*
+         * Streams that send no title at all fall back to the name of the station. The name is
+         * carried as the artist of the current media item (see CollectionHelper.buildMediaItem).
+         * Reading it with toString() on a nullable used to put the literal string "null" into
+         * the history whenever there was neither a title nor a loaded media item.
+         */
+        val stationName: String = player.currentMediaItem?.mediaMetadata?.artist?.toString().orEmpty()
+        val metadataString: String = metadata.trim().ifEmpty { stationName.trim() }
+        if (metadataString.isEmpty()) return
+        // nothing to do when the stream repeats the entry that is already at the top
+        if (metadataHistory.lastOrNull() == metadataString) return
         // remove duplicates
         if (metadataHistory.contains(metadataString)) {
             metadataHistory.removeAll { it == metadataString }
@@ -260,12 +340,33 @@ class PlayerService : MediaLibraryService() {
         }
         // save history
         PreferencesHelper.saveMetadataHistory(metadataHistory)
+        // hand the new history to the UI
+        broadcastMetadataHistory()
+    }
+
+
+    /*
+     * Pushes the metadata history to every connected controller.
+     *
+     * Without this the UI only ever asked for the history when playback started or when it
+     * (re)connected, so a track change during playback stayed invisible until the station was
+     * restarted.
+     */
+    private fun broadcastMetadataHistory() {
+        if (!this::mediaLibrarySession.isInitialized) return
+        val extras = Bundle().apply {
+            putStringArrayList(Keys.EXTRA_METADATA_HISTORY, ArrayList(metadataHistory))
+        }
+        mediaLibrarySession.broadcastCustomCommand(
+            SessionCommand(Keys.CMD_METADATA_UPDATED, Bundle.EMPTY),
+            extras
+        )
     }
 
 
     /* Reads collection of stations from storage using GSON */
     private fun loadCollection(context: Context) {
-        Log.v(TAG, "Loading collection of stations from storage")
+        Log.v(tag, "Loading collection of stations from storage")
         CoroutineScope(Main).launch {
             // load collection on background thread
             val deferred: Deferred<Collection> =
@@ -321,6 +422,7 @@ class PlayerService : MediaLibraryService() {
             builder.add(SessionCommand(Keys.CMD_CANCEL_SLEEP_TIMER, Bundle.EMPTY))
             builder.add(SessionCommand(Keys.CMD_REQUEST_SLEEP_TIMER_REMAINING, Bundle.EMPTY))
             builder.add(SessionCommand(Keys.CMD_REQUEST_METADATA_HISTORY, Bundle.EMPTY))
+            builder.add(SessionCommand(Keys.CMD_METADATA_UPDATED, Bundle.EMPTY))
             builder.add(SessionCommand(Keys.CMD_PLAY_STREAM, Bundle.EMPTY))
             return MediaSession.ConnectionResult.accept(builder.build(), connectionResult.availablePlayerCommands)
         }
@@ -353,8 +455,8 @@ class PlayerService : MediaLibraryService() {
             browser: MediaSession.ControllerInfo,
             params: LibraryParams?
         ): ListenableFuture<LibraryResult<MediaItem>> {
-            return if (params?.extras?.containsKey(EXTRA_RECENT) == true) {
-                // special case: system requested media resumption via EXTRA_RECENT
+            return if (params?.extras?.containsKey(extraRecent) == true) {
+                // special case: system requested media resumption via extraRecent
                 playLastStation = true
                 Futures.immediateFuture(LibraryResult.ofItem(CollectionHelper.getRecent(this@PlayerService, collection), params))
             } else {
@@ -429,75 +531,6 @@ class PlayerService : MediaLibraryService() {
             return super.onCustomCommand(session, controller, customCommand, args)
         }
 
-        override fun onPlayerCommandRequest(
-            session: MediaSession,
-            controller: MediaSession.ControllerInfo,
-            playerCommand: Int
-        ): Int {
-            // playerCommand = one of COMMAND_PLAY_PAUSE, COMMAND_PREPARE, COMMAND_STOP, COMMAND_SEEK_TO_DEFAULT_POSITION, COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM, COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM, COMMAND_SEEK_TO_PREVIOUS, COMMAND_SEEK_TO_NEXT_MEDIA_ITEM, COMMAND_SEEK_TO_NEXT, COMMAND_SEEK_TO_MEDIA_ITEM, COMMAND_SEEK_BACK, COMMAND_SEEK_FORWARD, COMMAND_SET_SPEED_AND_PITCH, COMMAND_SET_SHUFFLE_MODE, COMMAND_SET_REPEAT_MODE, COMMAND_GET_CURRENT_MEDIA_ITEM, COMMAND_GET_TIMELINE, COMMAND_GET_MEDIA_ITEMS_METADATA, COMMAND_SET_MEDIA_ITEMS_METADATA, COMMAND_CHANGE_MEDIA_ITEMS, COMMAND_GET_AUDIO_ATTRIBUTES, COMMAND_GET_VOLUME, COMMAND_GET_DEVICE_VOLUME, COMMAND_SET_VOLUME, COMMAND_SET_DEVICE_VOLUME, COMMAND_ADJUST_DEVICE_VOLUME, COMMAND_SET_VIDEO_SURFACE, COMMAND_GET_TEXT, COMMAND_SET_TRACK_SELECTION_PARAMETERS or COMMAND_GET_TRACK_INFOS. */
-            // emulate headphone buttons
-            // start/pause: adb shell input keyevent 85
-            // next: adb shell input keyevent 87
-            // prev: adb shell input keyevent 88
-            when (playerCommand) {
-                Player.COMMAND_SEEK_TO_NEXT -> {
-                    player.addMediaItem(
-                        CollectionHelper.getNextMediaItem(
-                            this@PlayerService,
-                            collection,
-                            player.currentMediaItem?.mediaId ?: String()
-                        )
-                    )
-                    player.prepare()
-                    player.play()
-                    return SessionResult.RESULT_SUCCESS
-                }
-                Player.COMMAND_SEEK_TO_PREVIOUS -> {
-                    player.addMediaItem(
-                        CollectionHelper.getPreviousMediaItem(
-                            this@PlayerService,
-                            collection,
-                            player.currentMediaItem?.mediaId ?: String()
-                        )
-                    )
-                    player.prepare()
-                    player.play()
-                    return SessionResult.RESULT_SUCCESS
-                }
-                Player.COMMAND_PREPARE -> {
-                    return if (playLastStation) {
-                        // special case: system requested media resumption (see also onGetLibraryRoot)
-                        player.addMediaItem(CollectionHelper.getRecent(this@PlayerService, collection))
-                        player.prepare()
-                        playLastStation = false
-                        SessionResult.RESULT_SUCCESS
-                    } else {
-                        super.onPlayerCommandRequest(session, controller, playerCommand)
-                    }
-                }
-                Player.COMMAND_PLAY_PAUSE -> {
-                    return if (player.isPlaying) {
-                        super.onPlayerCommandRequest(session, controller, playerCommand)
-                    } else {
-                        // seek to the start of the "live window"
-                        player.seekTo(0)
-                        SessionResult.RESULT_SUCCESS
-                    }
-                }
-//                Player.COMMAND_PLAY_PAUSE -> {
-//                    // override pause with stop, to prevent unnecessary buffering
-//                    if (player.isPlaying) {
-//                        player.stop()
-//                        return SessionResult.RESULT_INFO_SKIPPED
-//                    } else {
-//                       return super.onPlayerCommandRequest(session, controller, playerCommand)
-//                    }
-//                }
-                else -> {
-                    return super.onPlayerCommandRequest(session, controller, playerCommand)
-                }
-            }
-        }
     }
 
 
@@ -512,21 +545,27 @@ class PlayerService : MediaLibraryService() {
             customLayout: ImmutableList<CommandButton>,
             showPauseButton: Boolean
         ): ImmutableList<CommandButton> {
-            val seekToPreviousCommandButton = CommandButton.Builder().apply {
-                setPlayerCommand(Player.COMMAND_SEEK_TO_PREVIOUS)
-                setIconResId(R.drawable.ic_notification_skip_to_previous_36dp)
-                setEnabled(true)
-            }.build()
-            val playCommandButton = CommandButton.Builder().apply {
+            // ICON_UNDEFINED with a custom resource id, rather than one of the predefined
+            // CommandButton.ICON_* constants: those would take precedence wherever they are
+            // available and the app's own notification icons would stop being used. This is
+            // what the deprecated Builder() + setIconResId pair did, spelled out.
+            val seekToPreviousCommandButton =
+                CommandButton.Builder(CommandButton.ICON_UNDEFINED).apply {
+                    setPlayerCommand(Player.COMMAND_SEEK_TO_PREVIOUS)
+                    setCustomIconResId(R.drawable.ic_notification_skip_to_previous_36dp)
+                    setEnabled(true)
+                }.build()
+            val playCommandButton = CommandButton.Builder(CommandButton.ICON_UNDEFINED).apply {
                 setPlayerCommand(Player.COMMAND_PLAY_PAUSE)
-                setIconResId(if (player.isPlaying) R.drawable.ic_notification_stop_36dp else R.drawable.ic_notification_play_36dp)
+                setCustomIconResId(if (player.isPlaying) R.drawable.ic_notification_stop_36dp else R.drawable.ic_notification_play_36dp)
                 setEnabled(true)
             }.build()
-            val seekToNextCommandButton = CommandButton.Builder().apply {
-                setPlayerCommand(Player.COMMAND_SEEK_TO_NEXT)
-                setIconResId(R.drawable.ic_notification_skip_to_next_36dp)
-                setEnabled(true)
-            }.build()
+            val seekToNextCommandButton =
+                CommandButton.Builder(CommandButton.ICON_UNDEFINED).apply {
+                    setPlayerCommand(Player.COMMAND_SEEK_TO_NEXT)
+                    setCustomIconResId(R.drawable.ic_notification_skip_to_next_36dp)
+                    setEnabled(true)
+                }.build()
             val commandButtons: MutableList<CommandButton> = mutableListOf(
                 seekToPreviousCommandButton,
                 playCommandButton,
@@ -616,7 +655,7 @@ class PlayerService : MediaLibraryService() {
 
         override fun onPlayerError(error: PlaybackException) {
             super.onPlayerError(error)
-            Log.d(TAG, "PlayerError occurred: ${error.errorCodeName}")
+            Log.d(tag, "PlayerError occurred: ${error.errorCodeName}")
             // todo: test if playback needs to be restarted
         }
 
@@ -630,7 +669,7 @@ class PlayerService : MediaLibraryService() {
 
 
     /*
-     * Custom LoadErrorHandlingPolicy that network drop outs
+     * Custom LoadErrorHandlingPolicy that network drop-outs
      */
     private val loadErrorHandlingPolicy: DefaultLoadErrorHandlingPolicy = object: DefaultLoadErrorHandlingPolicy()  {
         override fun getRetryDelayMsFor(loadErrorInfo: LoadErrorHandlingPolicy.LoadErrorInfo): Long {
@@ -652,16 +691,15 @@ class PlayerService : MediaLibraryService() {
 
 
     /*
-     * Custom receiver that handles Keys.ACTION_COLLECTION_CHANGED
+     * Reloads the collection whenever anything else writes it -- the UI adding, editing or
+     * removing a station, or a restored backup.
      */
-    private val collectionChangedReceiver: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            if (intent.hasExtra(Keys.EXTRA_COLLECTION_MODIFICATION_DATE)) {
-                val date = Date(intent.getLongExtra(Keys.EXTRA_COLLECTION_MODIFICATION_DATE, 0L))
-
+    private fun observeCollectionChanges() {
+        serviceScope.launch {
+            CollectionChanges.events.collect { date ->
                 if (date.after(collection.modificationDate)) {
-                    Log.v(TAG, "PlayerService - reload collection after broadcast received.")
-                    loadCollection(context)
+                    Log.v(tag, "PlayerService - reload collection after change announced.")
+                    loadCollection(this@PlayerService)
                 }
             }
         }
@@ -702,7 +740,7 @@ class PlayerService : MediaLibraryService() {
         initializePlayer()
         mediaLibrarySession.player = player
         previousPlayer.release()
-        Log.v(TAG, "Player rebuilt with buffer size multiplier $bufferSizeMultiplier.")
+        Log.v(tag, "Player rebuilt with buffer size multiplier $bufferSizeMultiplier.")
     }
 
 

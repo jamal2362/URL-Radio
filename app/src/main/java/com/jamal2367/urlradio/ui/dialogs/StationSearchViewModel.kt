@@ -6,6 +6,9 @@
  * dialog. The old SearchResultAdapter attached a fresh lifecycle observer to the activity
  * on every preview and never removed any of them.
  *
+ * Selection and preview are two separate gestures: a tap ticks a station off the list, a long
+ * press auditions it. Both dialogs that pick stations share the preview player kept here.
+ *
  * This file is part of URL Radio
  * Licensed under the MIT-License
  * http://opensource.org/licenses/MIT
@@ -30,11 +33,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 data class SearchUiState(
     val query: String = "",
     val results: List<Station> = emptyList(),
-    val selected: Station? = null,
+    /** UUIDs of every station the user ticked. Several stations can be added in one go. */
+    val selectedUuids: Set<String> = emptySet(),
+    /** UUID of the station currently being auditioned, or empty. */
+    val previewUuid: String = "",
     val isSearching: Boolean = false,
     val showNoResults: Boolean = false,
     /** Set when a preview could not be started (HLS), consumed by the UI as a toast. */
@@ -55,7 +62,7 @@ class StationSearchViewModel(application: Application) : AndroidViewModel(applic
     private var previewPlayer: ExoPlayer? = null
     private var debounceJob: Job? = null
 
-    /* Live input, debounced. The old dialog used a 100 ms Handler post. */
+    /* Live input, debounced. The old dialog used a 100 Ms Handler post. */
     fun onQueryChanged(query: String) {
         _state.update { it.copy(query = query) }
         debounceJob?.cancel()
@@ -63,7 +70,12 @@ class StationSearchViewModel(application: Application) : AndroidViewModel(applic
         when {
             query.isEmpty() -> {
                 _state.update {
-                    it.copy(results = emptyList(), selected = null, isSearching = false, showNoResults = false)
+                    it.copy(
+                        results = emptyList(),
+                        selectedUuids = emptySet(),
+                        isSearching = false,
+                        showNoResults = false,
+                    )
                 }
             }
 
@@ -75,8 +87,8 @@ class StationSearchViewModel(application: Application) : AndroidViewModel(applic
             query.contains(" ") || query.length > 2 -> {
                 _state.update { it.copy(isSearching = true, showNoResults = false) }
                 debounceJob = viewModelScope.launch {
-                    delay(300)
-                    radioBrowserSearch.searchStation(getApplication(), query, Keys.SEARCH_TYPE_BY_KEYWORD)
+                    delay(300.milliseconds)
+                    radioBrowserSearch.searchStation(query, Keys.SEARCH_TYPE_BY_KEYWORD)
                 }
             }
         }
@@ -87,7 +99,12 @@ class StationSearchViewModel(application: Application) : AndroidViewModel(applic
         stopPreview()
         when {
             query.isEmpty() -> _state.update {
-                it.copy(results = emptyList(), selected = null, isSearching = false, showNoResults = false)
+                it.copy(
+                    results = emptyList(),
+                    selectedUuids = emptySet(),
+                    isSearching = false,
+                    showNoResults = false,
+                )
             }
 
             query.startsWith("http") -> {
@@ -97,7 +114,7 @@ class StationSearchViewModel(application: Application) : AndroidViewModel(applic
 
             else -> {
                 _state.update { it.copy(isSearching = true, showNoResults = false) }
-                radioBrowserSearch.searchStation(getApplication(), query, Keys.SEARCH_TYPE_BY_KEYWORD)
+                radioBrowserSearch.searchStation(query, Keys.SEARCH_TYPE_BY_KEYWORD)
             }
         }
     }
@@ -117,20 +134,43 @@ class StationSearchViewModel(application: Application) : AndroidViewModel(applic
                 results = stations,
                 isSearching = false,
                 showNoResults = stations.isEmpty(),
-                selected = null,
+                selectedUuids = emptySet(),
             )
         }
     }
 
-    /* Tapping the selected entry again clears the selection, as before. */
-    fun onResultTapped(station: Station) {
-        val alreadySelected = _state.value.selected?.uuid == station.uuid
-        if (alreadySelected) {
+    /* ---- selection ---- */
+
+    /* A tap ticks a station, tapping it again unticks it. */
+    fun toggleSelection(station: Station) {
+        _state.update { current ->
+            val selected = current.selectedUuids
+            current.copy(
+                selectedUuids = if (station.uuid in selected) selected - station.uuid
+                else selected + station.uuid
+            )
+        }
+    }
+
+    fun selectAll() {
+        _state.update { it.copy(selectedUuids = it.results.map { station -> station.uuid }.toSet()) }
+    }
+
+    fun clearSelection() {
+        _state.update { it.copy(selectedUuids = emptySet()) }
+    }
+
+    /* ---- preview ---- */
+
+    /*
+     * A long press auditions a station without adding it. Pressing the station that is already
+     * being auditioned stops the preview again.
+     */
+    fun togglePreview(station: Station) {
+        if (_state.value.previewUuid == station.uuid) {
             stopPreview()
-            _state.update { it.copy(selected = null) }
             return
         }
-        _state.update { it.copy(selected = station) }
         startPreview(station)
     }
 
@@ -147,12 +187,17 @@ class StationSearchViewModel(application: Application) : AndroidViewModel(applic
             prepare()
             play()
         }
-        _state.update { it.copy(previewStartedEvent = System.currentTimeMillis()) }
+        _state.update {
+            it.copy(previewUuid = station.uuid, previewStartedEvent = System.currentTimeMillis())
+        }
     }
 
     fun stopPreview() {
         previewPlayer?.release()
         previewPlayer = null
+        if (_state.value.previewUuid.isNotEmpty()) {
+            _state.update { it.copy(previewUuid = "") }
+        }
     }
 
     fun consumeEvents() {
@@ -168,7 +213,6 @@ class StationSearchViewModel(application: Application) : AndroidViewModel(applic
     }
 
     override fun onCleared() {
-        super.onCleared()
         debounceJob?.cancel()
         radioBrowserSearch.stopSearchRequest()
         stopPreview()

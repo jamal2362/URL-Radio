@@ -15,7 +15,6 @@
 package com.jamal2367.urlradio.helpers
 
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
@@ -23,7 +22,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.core.net.toFile
 import androidx.core.net.toUri
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import com.jamal2367.urlradio.Keys
@@ -31,11 +29,20 @@ import com.jamal2367.urlradio.R
 import com.jamal2367.urlradio.core.Collection
 import com.jamal2367.urlradio.core.Station
 import com.jamal2367.urlradio.search.DirectInputCheck
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import java.io.File
 import java.net.URL
-import java.util.*
+import java.util.Calendar
+import java.util.Date
+import java.util.GregorianCalendar
+import java.util.Locale
 
 
 /*
@@ -44,7 +51,7 @@ import java.util.*
 object CollectionHelper {
 
     /* Define log tag */
-    private val TAG: String = CollectionHelper::class.java.simpleName
+    private val tag: String = CollectionHelper::class.java.simpleName
 
     /* Checks if station is already in collection */
     private fun isNewStation(collection: Collection, station: Station): Boolean {
@@ -288,7 +295,7 @@ object CollectionHelper {
     }
 
 
-    /* Gets MediaIem for next station within collection */
+    /* Gets MediaItem for next station within collection */
     fun getNextMediaItem(context: Context, collection: Collection, stationUuid: String): MediaItem {
         val currentStationPosition: Int = getStationPosition(collection, stationUuid)
         return if (collection.stations.isEmpty() || currentStationPosition == -1) {
@@ -301,7 +308,7 @@ object CollectionHelper {
     }
 
 
-    /* Gets MediaIem for previous station within collection */
+    /* Gets MediaItem for previous station within collection */
     fun getPreviousMediaItem(context: Context, collection: Collection, stationUuid: String): MediaItem {
         val currentStationPosition: Int = getStationPosition(collection, stationUuid)
         return if (collection.stations.isEmpty() || currentStationPosition == -1) {
@@ -325,21 +332,7 @@ object CollectionHelper {
     }
 
 
-    /* Get the position from collection for given radioBrowserStationUuid */
-    fun getStationPositionFromRadioBrowserStationUuid(
-        collection: Collection,
-        radioBrowserStationUuid: String
-    ): Int {
-        collection.stations.forEachIndexed { stationId, station ->
-            if (station.radioBrowserStationUuid == radioBrowserStationUuid) {
-                return stationId
-            }
-        }
-        return -1
-    }
-
-
-    /* Returns the children stations under under root (simple media library structure: root > stations) */
+    /* Returns the children stations under root (simple media library structure: root > stations) */
     fun getChildren(context: Context, collection: Collection): List<MediaItem> {
         val mediaItems: MutableList<MediaItem> = mutableListOf()
         collection.stations.forEach { station ->
@@ -391,6 +384,16 @@ object CollectionHelper {
                 it.isPlaying = isPlaying
             }
         }
+        // The caller here is the player service, which keeps its own copy of the collection
+        // and only refreshes it when the collection-changed broadcast reaches it. Writing an
+        // out-of-date copy back would undo whatever changed the collection in the meantime --
+        // removing every station, say, where the pause that goes with it would otherwise put
+        // them all straight back. The service reloads from the broadcast either way, so
+        // skipping to write here loses nothing but the playback flag.
+        if (PreferencesHelper.loadCollectionModificationDate().after(collection.modificationDate)) {
+            Log.v(tag, "Not saving playback state. Reason: collection on storage is newer.")
+            return collection
+        }
         // save collection and store modification date
         collection.modificationDate = saveCollection(context, collection)
         return collection
@@ -398,9 +401,19 @@ object CollectionHelper {
 
 
     /* Saves collection of radio stations */
-    fun saveCollection(context: Context, collection: Collection, async: Boolean = true): Date {
+    /**
+     * @param allowEmpty lets a deliberately emptied collection through the guard in
+     *   [FileHelper.saveCollection], which otherwise refuses to replace a stored collection
+     *   with an empty one.
+     */
+    fun saveCollection(
+        context: Context,
+        collection: Collection,
+        async: Boolean = true,
+        allowEmpty: Boolean = false,
+    ): Date {
         Log.v(
-            TAG,
+            tag,
             "Saving collection of radio stations to storage. Async = ${async}. Size = ${collection.stations.size}"
         )
         // get modification date
@@ -411,16 +424,16 @@ object CollectionHelper {
             true -> {
                 CoroutineScope(IO).launch {
                     // save collection on background thread
-                    FileHelper.saveCollectionSuspended(context, collection, date)
+                    FileHelper.saveCollectionSuspended(context, collection, date, allowEmpty)
                     // broadcast collection update
-                    sendCollectionBroadcast(context, date)
+                    sendCollectionBroadcast(date)
                 }
             }
             false -> {
                 // save collection
-                FileHelper.saveCollection(context, collection, date)
+                FileHelper.saveCollection(context, collection, date, allowEmpty)
                 // broadcast collection update
-                sendCollectionBroadcast(context, date)
+                sendCollectionBroadcast(date)
             }
         }
         // return modification date
@@ -461,107 +474,129 @@ object CollectionHelper {
     }
 
 
-    /* Creates station from URI pointing to a local file */
-    fun createStationListFromContentUri(context: Context, contentUri: Uri): List<Station> {
-        val stationList: MutableList<Station> = mutableListOf()
+    /*
+     * Creates stations from a URI pointing to a local .m3u or .pls file.
+     *
+     * This is what both the "open playlist" intent and the playlist import in the settings
+     * end up calling.
+     */
+    suspend fun createStationListFromContentUri(context: Context, contentUri: Uri): List<Station> {
         val fileType: String = FileHelper.getContentType(context, contentUri)
-        // CASE: M3U playlist detected
-        if (Keys.MIME_TYPES_M3U.contains(fileType)) {
-            val playlist = FileHelper.readTextFileFromContentUri(context, contentUri)
-            stationList.addAll(readM3uPlaylistContent(playlist))
+        val playlist: List<String> = FileHelper.readTextFileFromContentUri(context, contentUri)
+        return when {
+            // CASE: M3U playlist detected
+            Keys.MIME_TYPES_M3U.contains(fileType) -> readM3uPlaylistContent(playlist)
+            // CASE: PLS playlist detected
+            Keys.MIME_TYPES_PLS.contains(fileType) -> readPlsPlaylistContent(playlist)
+            else -> emptyList()
         }
-        // CASE: PLS playlist detected
-        else if (Keys.MIME_TYPES_PLS.contains(fileType)) {
-            val playlist = FileHelper.readTextFileFromContentUri(context, contentUri)
-            stationList.addAll(readPlsPlaylistContent(playlist))
-        }
-        return stationList
     }
 
 
+    /* A name / stream address pair taken from a playlist, before its type has been checked */
+    private data class PlaylistEntry(val name: String, val streamUri: String)
+
+
     /* Reads a m3u playlist and returns a list of stations */
-    private fun readM3uPlaylistContent(playlist: List<String>): List<Station> {
-        val stations: MutableList<Station> = mutableListOf()
+    private suspend fun readM3uPlaylistContent(playlist: List<String>): List<Station> {
+        val entries: MutableList<PlaylistEntry> = mutableListOf()
         var name = String()
-        var streamUri: String
-        var contentType: String
 
         playlist.forEach { line ->
             // get name of station
             if (line.startsWith("#EXTINF:")) {
                 name = line.substringAfter(",").trim()
             }
-            // get stream uri and check mime type
+            // get stream uri
             else if (line.isNotBlank() && !line.startsWith("#")) {
-                streamUri = line.trim()
+                val streamUri = line.trim()
                 // use the stream address as the name if no name is specified
-                if (name.isEmpty()) {
-                    name = streamUri
-                }
-                contentType = NetworkHelper.detectContentType(streamUri).type.lowercase(Locale.getDefault())
-                // store station in list if mime type is supported
-                if (contentType != Keys.MIME_TYPE_UNSUPPORTED) {
-                    val station = Station(name = name, streamUris = mutableListOf(streamUri), streamContent = contentType, modificationDate = GregorianCalendar.getInstance().time)
-                    stations.add(station)
-                }
+                entries.add(PlaylistEntry(name.ifEmpty { streamUri }, streamUri))
                 // reset name for the next station - useful if playlist does not provide name(s)
                 name = String()
             }
         }
-        return stations
+        return createStationsFromEntries(entries)
     }
 
 
     /* Reads a pls playlist and returns a list of stations */
-    private fun readPlsPlaylistContent(playlist: List<String>): List<Station> {
-        val stations: MutableList<Station> = mutableListOf()
-        var name = String()
-        var streamUri: String
-        var contentType: String
+    private suspend fun readPlsPlaylistContent(playlist: List<String>): List<Station> {
+        val entries: MutableList<PlaylistEntry> = mutableListOf()
 
         playlist.forEachIndexed { index, line ->
-            // get stream uri and check mime type
-            if (line.startsWith("File")) {
-                streamUri = line.substringAfter("=").trim()
-                contentType = NetworkHelper.detectContentType(streamUri).type.lowercase(Locale.getDefault())
-                if (contentType != Keys.MIME_TYPE_UNSUPPORTED) {
-                    // look for the matching station name
-                    val number: String = line.substring(4 /* File */, line.indexOf("="))
-                    val lineBeforeIndex: Int = index - 1
-                    val lineAfterIndex: Int = index + 1
-                    // first: check the line before
-                    if (lineBeforeIndex >= 0) {
-                        val lineBefore: String = playlist[lineBeforeIndex]
-                        if (lineBefore.startsWith("Title$number")) {
-                            name = lineBefore.substringAfter("=").trim()
-                        }
+            // get stream uri
+            if (line.startsWith("File") && line.contains("=")) {
+                var name = String()
+                val streamUri: String = line.substringAfter("=").trim()
+                // look for the matching station name
+                val number: String = line.substring(4 /* File */, line.indexOf("="))
+                val lineBeforeIndex: Int = index - 1
+                val lineAfterIndex: Int = index + 1
+                // first: check the line before
+                if (lineBeforeIndex >= 0) {
+                    val lineBefore: String = playlist[lineBeforeIndex]
+                    if (lineBefore.startsWith("Title$number")) {
+                        name = lineBefore.substringAfter("=").trim()
                     }
-                    // then: check the line after
-                    if (name.isEmpty() && lineAfterIndex < playlist.size) {
-                        val lineAfter: String = playlist[lineAfterIndex]
-                        if (lineAfter.startsWith("Title$number")) {
-                            name = lineAfter.substringAfter("=").trim()
-                        }
-                    }
-                    // fallback: use stream uri as name
-                    if (name.isEmpty()) {
-                        name = streamUri
-                    }
-                    // add station
-                    val station = Station(name = name, streamUris = mutableListOf(streamUri), streamContent = contentType, modificationDate = GregorianCalendar.getInstance().time)
-                    stations.add(station)
                 }
+                // then: check the line after
+                if (name.isEmpty() && lineAfterIndex < playlist.size) {
+                    val lineAfter: String = playlist[lineAfterIndex]
+                    if (lineAfter.startsWith("Title$number")) {
+                        name = lineAfter.substringAfter("=").trim()
+                    }
+                }
+                // fallback: use stream uri as name
+                entries.add(PlaylistEntry(name.ifEmpty { streamUri }, streamUri))
             }
         }
-        return stations
+        return createStationsFromEntries(entries)
     }
+
+
+    /*
+     * Turns playlist entries into stations, dropping everything that does not serve a
+     * supported stream.
+     *
+     * Every entry needs a request of its own to find out what it serves. Those requests run
+     * side by side rather than one after the other -- a playlist with fifty entries used to
+     * take fifty round trips before the app showed anything. The permit count keeps that from
+     * turning into fifty simultaneous connections.
+     */
+    private suspend fun createStationsFromEntries(entries: List<PlaylistEntry>): List<Station> =
+        coroutineScope {
+            val permits = Semaphore(MAX_PARALLEL_CONTENT_TYPE_CHECKS)
+            entries.map { entry ->
+                async(IO) {
+                    permits.withPermit {
+                        val contentType: String = NetworkHelper.detectContentType(entry.streamUri)
+                            .type.lowercase(Locale.getDefault())
+                        if (contentType == Keys.MIME_TYPE_UNSUPPORTED) {
+                            null
+                        } else {
+                            Station(
+                                name = entry.name,
+                                streamUris = mutableListOf(entry.streamUri),
+                                streamContent = contentType,
+                                modificationDate = GregorianCalendar.getInstance().time
+                            )
+                        }
+                    }
+                }
+            }.awaitAll().filterNotNull()
+        }
+
+
+    /* How many playlist entries are checked at the same time */
+    private const val MAX_PARALLEL_CONTENT_TYPE_CHECKS = 8
 
 
     /* Export collection of stations as M3U */
     fun exportCollectionM3u(context: Context, collection: Collection) {
-        Log.v(TAG, "Exporting collection of stations as M3U")
+        Log.v(tag, "Exporting collection of stations as M3U")
         // export collection as M3U - launch = fire & forget (no return value from save collection)
-        if (collection.stations.size > 0) {
+        if (collection.stations.isNotEmpty()) {
             CoroutineScope(IO).launch {
                 FileHelper.backupCollectionAsM3uSuspended(
                     context,
@@ -601,9 +636,9 @@ object CollectionHelper {
 
     /* Export collection of stations as PLS */
     fun exportCollectionPls(context: Context, collection: Collection) {
-        Log.v(TAG, "Exporting collection of stations as PLS")
+        Log.v(tag, "Exporting collection of stations as PLS")
         // export collection as PLS - launch = fire & forget (no return value from save collection)
-        if (collection.stations.size > 0) {
+        if (collection.stations.isNotEmpty()) {
             CoroutineScope(IO).launch {
                 FileHelper.backupCollectionAsPlsSuspended(
                     context,
@@ -658,16 +693,10 @@ object CollectionHelper {
     }
 
 
-    /* Sends a broadcast containing the collection as parcel */
-    fun sendCollectionBroadcast(context: Context, modificationDate: Date) {
-        Log.v(TAG, "Broadcasting that collection has changed.")
-        val collectionChangedIntent = Intent()
-        collectionChangedIntent.action = Keys.ACTION_COLLECTION_CHANGED
-        collectionChangedIntent.putExtra(
-            Keys.EXTRA_COLLECTION_MODIFICATION_DATE,
-            modificationDate.time
-        )
-        LocalBroadcastManager.getInstance(context).sendBroadcast(collectionChangedIntent)
+    /* Announces that the collection on storage has changed */
+    fun sendCollectionBroadcast(modificationDate: Date) {
+        Log.v(tag, "Broadcasting that collection has changed.")
+        CollectionChanges.notifyChanged(modificationDate)
     }
 
 
@@ -765,7 +794,7 @@ object CollectionHelper {
             }
             faviconAddress = "http://$host/favicon.ico"
         } catch (e: Exception) {
-            Log.e(TAG, "Unable to get base URL from $urlString.\n$e ")
+            Log.e(tag, "Unable to get base URL from $urlString.\n$e ")
         }
         return faviconAddress
     }

@@ -15,6 +15,10 @@ package com.jamal2367.urlradio.ui
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -55,12 +59,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -78,6 +86,16 @@ import kotlin.time.Duration.Companion.milliseconds
 
 /** Which top-level surface is showing. */
 enum class AppScreen { Stations, Settings }
+
+/**
+ * Rotation recreates the activity (see the note on the manifest's activity entry), so the
+ * screen has to go through the saved instance state to survive it. Stored by name rather
+ * than by ordinal so reordering the entries cannot silently restore the wrong screen.
+ */
+private val AppScreenSaver = Saver<AppScreen, String>(
+    save = { it.name },
+    restore = { AppScreen.valueOf(it) },
+)
 
 /** Everything the app scaffold needs from the hosting activity. */
 data class AppState(
@@ -124,7 +142,14 @@ fun UrlRadioApp(
     snackbarHostState: SnackbarHostState,
     dialogs: @Composable () -> Unit,
 ) {
-    var screen by remember { mutableStateOf(AppScreen.Stations) }
+    var screen by rememberSaveable(stateSaver = AppScreenSaver) {
+        mutableStateOf(AppScreen.Stations)
+    }
+    // Held here rather than inside StationsPane: the compact and the wide layout call that
+    // composable from two different places, so a savable inside it would be filed under two
+    // different keys and the selection would be dropped on the way from one layout to the
+    // other. 0 = all stations, 1 = favourites only.
+    var selectedTab by rememberSaveable { mutableIntStateOf(0) }
     var playerExpanded by remember { mutableStateOf(false) }
     // Bumped by every interaction with the expanded player so the idle timer below restarts
     // rather than closing the panel while the user is still working in it.
@@ -139,7 +164,7 @@ fun UrlRadioApp(
     else historySize - 1
 
     // Back first collapses the expanded player, then leaves settings, matching the old
-    // onBackPressed behaviour of minimising the sheet before the activity handled back.
+    // onBackPressed behavior of minimizing the sheet before the activity handled back.
     BackHandler(enabled = playerExpanded || screen == AppScreen.Settings) {
         when {
             playerExpanded -> playerExpanded = false
@@ -174,7 +199,31 @@ fun UrlRadioApp(
             }
         },
     ) { padding ->
-        if (isWideLayout) {
+        if (screen == AppScreen.Settings) {
+            // Settings take the whole window in both layouts. Squeezing them into the wide
+            // layout's side column left the station list visible next to a top app bar that
+            // spans the full width, which read as a broken screen rather than a second pane.
+            //
+            // Not wrapped in a verticalScroll Column: SettingsScreen is a LazyColumn and
+            // scrolls itself. Nesting the two measured it with an unbounded height, which
+            // crashed the moment settings were opened in landscape.
+            SettingsScreen(
+                versionSummary = state.versionSummary,
+                themeSelection = state.themeSelection,
+                themeLabel = state.themeLabel,
+                largeBuffer = state.largeBuffer,
+                editStations = state.editStationsEnabled,
+                editStreamUris = state.editStreamUrisEnabled,
+                callbacks = actions.settings,
+                contentPadding = padding,
+                modifier = Modifier.fillMaxSize(),
+            )
+        } else if (isWideLayout) {
+            // The second column only earns its 400dp when there is something to put in it.
+            // With an empty collection there is no station to play, so the column is dropped
+            // and the station pane - onboarding, at that point - gets the whole window.
+            val showSidePane = !state.showOnboarding
+
             Row(
                 modifier = Modifier
                     .fillMaxSize()
@@ -185,30 +234,20 @@ fun UrlRadioApp(
                         state = state,
                         actions = actions,
                         contentPadding = padding,
+                        selectedTab = selectedTab,
+                        onSelectTab = { selectedTab = it },
                         onOpenSettings = { screen = AppScreen.Settings },
                         onDeleteRequest = { pendingDelete = it },
                     )
                 }
-                Surface(
-                    tonalElevation = 3.dp,
-                    modifier = Modifier
-                        .width(400.dp)
-                        .fillMaxHeight(),
-                ) {
-                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                        if (screen == AppScreen.Settings) {
-                            SettingsScreen(
-                                versionSummary = state.versionSummary,
-                                themeSelection = state.themeSelection,
-                                themeLabel = state.themeLabel,
-                                largeBuffer = state.largeBuffer,
-                                editStations = state.editStationsEnabled,
-                                editStreamUris = state.editStreamUrisEnabled,
-                                callbacks = actions.settings,
-                                contentPadding = PaddingValues(0.dp),
-                                modifier = Modifier.fillMaxHeight(),
-                            )
-                        } else {
+                if (showSidePane) {
+                    Surface(
+                        tonalElevation = 3.dp,
+                        modifier = Modifier
+                            .width(400.dp)
+                            .fillMaxHeight(),
+                    ) {
+                        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                             PlayerPane(
                                 station = state.currentStation,
                                 playback = state.playback,
@@ -235,82 +274,97 @@ fun UrlRadioApp(
                 }
             }
         } else {
-            if (screen == AppScreen.Settings) {
-                SettingsScreen(
-                    versionSummary = state.versionSummary,
-                    themeSelection = state.themeSelection,
-                    themeLabel = state.themeLabel,
-                    largeBuffer = state.largeBuffer,
-                    editStations = state.editStationsEnabled,
-                    editStreamUris = state.editStreamUrisEnabled,
-                    callbacks = actions.settings,
-                    contentPadding = padding,
-                )
-            } else {
-                // The scaffold reports the system bar insets but does not apply them, so the
-                // bottom inset is consumed here - otherwise the player and the floating
-                // toolbar end up underneath the gesture bar.
-                Column(
+            // The scaffold reports the system bar insets but does not apply them, so the
+            // bottom inset is consumed here - otherwise the player and the floating
+            // toolbar end up underneath the gesture bar.
+            //
+            // The player floats above the list and nothing ever passes behind or below it.
+            // The list is given the player's whole footprint, margins included, as bottom
+            // padding on its container rather than as content padding: content padding only
+            // decides where the list comes to rest at its end, so a card being scrolled past
+            // would still be drawn underneath the player on its way out.
+            val density = LocalDensity.current
+            var playerHeight by remember { mutableStateOf(0.dp) }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = padding.calculateBottomPadding())
+            ) {
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(bottom = padding.calculateBottomPadding())
+                        .padding(bottom = playerHeight)
                 ) {
-                    Box(modifier = Modifier.weight(1f)) {
-                        StationsPane(
-                            state = state,
-                            actions = actions,
-                            contentPadding = padding,
-                            onOpenSettings = { screen = AppScreen.Settings },
-                            onDeleteRequest = { pendingDelete = it },
+                    StationsPane(
+                        state = state,
+                        actions = actions,
+                        contentPadding = padding,
+                        selectedTab = selectedTab,
+                        onSelectTab = { selectedTab = it },
+                        onOpenSettings = { screen = AppScreen.Settings },
+                        onDeleteRequest = { pendingDelete = it },
+                    )
+                }
+                // The player is hidden entirely while onboarding is showing, which is
+                // what the old bottom sheet did through STATE_HIDDEN.
+                AnimatedVisibility(
+                    visible = !state.showOnboarding,
+                    // Grows out of the bottom edge. The default for a Box-hosted
+                    // AnimatedVisibility expands from the top-start corner instead.
+                    enter = fadeIn() + expandVertically(expandFrom = Alignment.Bottom),
+                    exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Bottom),
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(28.dp),
+                        tonalElevation = 3.dp,
+                        shadowElevation = 6.dp,
+                        // Measured including its own margin, because that is the strip of
+                        // screen the list has to leave free.
+                        modifier = Modifier
+                            .onSizeChanged {
+                                playerHeight = with(density) { it.height.toDp() }
+                            }
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                    ) {
+                        PlayerPane(
+                            station = state.currentStation,
+                            playback = state.playback,
+                            expanded = playerExpanded,
+                            metadataIndex = effectiveMetadataIndex,
+                            onToggleExpanded = {
+                                playerExpanded = !playerExpanded
+                                playerActivity++
+                            },
+                            onSetExpanded = {
+                                playerExpanded = it
+                                playerActivity++
+                            },
+                            onTogglePlayback = {
+                                actions.onTogglePlayback(state.currentStation)
+                                playerActivity++
+                            },
+                            onPreviousMetadata = {
+                                metadataIndex = previousIndex(effectiveMetadataIndex, historySize)
+                                playerActivity++
+                            },
+                            onNextMetadata = {
+                                metadataIndex = nextIndex(effectiveMetadataIndex, historySize)
+                                playerActivity++
+                            },
+                            onCopy = {
+                                actions.onCopy(it)
+                                playerActivity++
+                            },
+                            onCopyFullHistory = {
+                                actions.onCopyFullHistory()
+                                playerActivity++
+                            },
+                            onShare = { actions.onShare(state.currentStation) },
+                            onStartSleepTimer = { showSleepTimerPicker = true },
+                            onCancelSleepTimer = actions.onCancelSleepTimer,
                         )
-                    }
-                    // The player is hidden entirely while onboarding is showing, which is
-                    // what the old bottom sheet did through STATE_HIDDEN.
-                    AnimatedVisibility(visible = !state.showOnboarding) {
-                        Surface(
-                            shape = RoundedCornerShape(28.dp),
-                            tonalElevation = 3.dp,
-                            shadowElevation = 6.dp,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                        ) {
-                            PlayerPane(
-                                station = state.currentStation,
-                                playback = state.playback,
-                                expanded = playerExpanded,
-                                metadataIndex = effectiveMetadataIndex,
-                                onToggleExpanded = {
-                                    playerExpanded = !playerExpanded
-                                    playerActivity++
-                                },
-                                onSetExpanded = {
-                                    playerExpanded = it
-                                    playerActivity++
-                                },
-                                onTogglePlayback = {
-                                    actions.onTogglePlayback(state.currentStation)
-                                    playerActivity++
-                                },
-                                onPreviousMetadata = {
-                                    metadataIndex = previousIndex(effectiveMetadataIndex, historySize)
-                                    playerActivity++
-                                },
-                                onNextMetadata = {
-                                    metadataIndex = nextIndex(effectiveMetadataIndex, historySize)
-                                    playerActivity++
-                                },
-                                onCopy = {
-                                    actions.onCopy(it)
-                                    playerActivity++
-                                },
-                                onCopyFullHistory = {
-                                    actions.onCopyFullHistory()
-                                    playerActivity++
-                                },
-                                onShare = { actions.onShare(state.currentStation) },
-                                onStartSleepTimer = { showSleepTimerPicker = true },
-                                onCancelSleepTimer = actions.onCancelSleepTimer,
-                            )
-                        }
                     }
                 }
             }
@@ -345,14 +399,14 @@ private fun StationsPane(
     state: AppState,
     actions: AppActions,
     contentPadding: PaddingValues,
+    selectedTab: Int,
+    onSelectTab: (Int) -> Unit,
     onOpenSettings: () -> Unit,
     onDeleteRequest: (Station) -> Unit,
 ) {
-    // 0 = all stations, 1 = favourites only. Favourites are always sorted to the front of
-    // the collection (see CollectionHelper.sortCollection), so this filtered list is a plain
-    // prefix of state.stations and its indices line up with the full list -- onMove needs no
-    // remapping.
-    var selectedTab by remember { mutableIntStateOf(0) }
+    // Favourites are always sorted to the front of the collection (see
+    // CollectionHelper.sortCollection), so this filtered list is a plain prefix of
+    // state.stations and its indices line up with the full list -- onMove needs no remapping.
     val visibleStations = if (selectedTab == 1) state.stations.filter { it.starred } else state.stations
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -361,7 +415,7 @@ private fun StationsPane(
         // because adding the first station is the whole point of that screen.
         StationsTopBar(
             selectedTab = selectedTab,
-            onSelect = { selectedTab = it },
+            onSelect = onSelectTab,
             showTabs = !state.showOnboarding,
             onAddStation = actions.onAddStation,
             onOpenSettings = onOpenSettings,
@@ -401,12 +455,12 @@ private fun StationsPane(
                     onToggleStarred = actions.onToggleStarred,
                     onMove = actions.onMove,
                     onMoveFinished = actions.onMoveFinished,
-                    // Nothing floats over the bottom of the list anymore, so the row only
-                    // needs its own breathing room rather than clearance for a toolbar.
                     contentPadding = PaddingValues(
                         start = 12.dp,
                         end = 12.dp,
-                        top = 0.dp,
+                        top = 6.dp,
+                        // No room reserved for the player here: the list's container already
+                        // stops above it.
                         bottom = 0.dp,
                     ),
                 )

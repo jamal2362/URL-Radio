@@ -9,10 +9,8 @@
 
 package com.jamal2367.urlradio
 
-import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -27,7 +25,6 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
@@ -71,10 +68,11 @@ import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.time.Duration.Companion.milliseconds
 
 class MainActivity : ComponentActivity() {
 
-    private val TAG: String = MainActivity::class.java.simpleName
+    private val tag: String = MainActivity::class.java.simpleName
 
     private lateinit var playback: PlaybackConnection
 
@@ -116,26 +114,36 @@ class MainActivity : ComponentActivity() {
 
     private val savePlsLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            copyExport(result, FileHelper.getPlslUri(this), R.string.toastmessage_save_pls, "PLS")
+            copyExport(result, FileHelper.getPlsqlUri(this), R.string.toastmessage_save_pls, "PLS")
         }
 
     private val backupLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             val target = result.data?.data
-            if (result.resultCode == Activity.RESULT_OK && target != null) {
+            if (result.resultCode == RESULT_OK && target != null) {
                 BackupHelper.backup(this, target) { message ->
                     lifecycleScope.launch { snackbarMessages.emit(message) }
                 }
             } else {
-                Log.w(TAG, "Station backup failed.")
+                Log.w(tag, "Station backup failed.")
             }
         }
 
     private val restoreLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             val source = result.data?.data
-            if (result.resultCode == Activity.RESULT_OK && source != null) {
+            if (result.resultCode == RESULT_OK && source != null) {
                 pendingRestoreUri = source
+            }
+        }
+
+    private val importPlaylistLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            val source = result.data?.data
+            if (result.resultCode == RESULT_OK && source != null) {
+                importPlaylist(source)
+            } else {
+                Log.w(tag, "Playlist import cancelled.")
             }
         }
 
@@ -152,7 +160,7 @@ class MainActivity : ComponentActivity() {
             PreferencesHelper.saveHouseKeepingNecessaryState()
         }
 
-        FileHelper.createNomediaFile(getExternalFilesDir(null))
+        FileHelper.createNoMediaFile(getExternalFilesDir(null))
 
         playback = PlaybackConnection(applicationContext, lifecycleScope)
 
@@ -199,7 +207,9 @@ class MainActivity : ComponentActivity() {
         var themeSelection by remember { mutableStateOf(PreferencesHelper.loadThemeSelection()) }
         var largeBuffer by remember { mutableStateOf(PreferencesHelper.loadLargeBufferSize()) }
         var showFindDialog by remember { mutableStateOf(false) }
-        var addSelection by remember { mutableStateOf<Station?>(null) }
+        // Selection of the playlist import dialog. Kept here rather than in the search view
+        // model because the imported list does not come from a search.
+        var importSelection by remember { mutableStateOf<Set<String>>(emptySet()) }
         var errorDialog by remember { mutableStateOf<Pair<Int, Int>?>(null) }
 
         val snackbarHostState = remember { SnackbarHostState() }
@@ -239,7 +249,7 @@ class MainActivity : ComponentActivity() {
         val releasesPageUrl = stringResource(R.string.snackbar_url_app_home_page)
         val appName = stringResource(R.string.app_name)
         LaunchedEffect(Unit) {
-            kotlinx.coroutines.delay(5_000)
+            kotlinx.coroutines.delay(5_000.milliseconds)
             val newer = UpdateCheckHelper.findNewerRelease(releasesApiUrl, BuildConfig.VERSION_NAME)
             if (newer != null) {
                 val result = snackbarHostState.showSnackbar(
@@ -266,19 +276,14 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        val previewStarted = stringResource(R.string.toastmessage_preview_playback_started)
-        val previewFailed = stringResource(R.string.toastmessage_preview_playback_failed)
+        // A snackbar would be drawn behind the dialog's scrim, so preview feedback is a toast.
+        // Only the failure is announced: a running preview is visible on the row itself.
         LaunchedEffect(searchState.previewStartedEvent, searchState.previewUnsupportedEvent) {
-            when {
-                searchState.previewUnsupportedEvent != null -> {
-                    snackbarHostState.showSnackbar(previewFailed)
-                    searchViewModel.consumeEvents()
-                }
-
-                searchState.previewStartedEvent != null -> {
-                    snackbarHostState.showSnackbar(previewStarted)
-                    searchViewModel.consumeEvents()
-                }
+            if (searchState.previewUnsupportedEvent != null) {
+                toast(R.string.toastmessage_preview_playback_failed)
+            }
+            if (searchState.previewUnsupportedEvent != null || searchState.previewStartedEvent != null) {
+                searchViewModel.consumeEvents()
             }
         }
 
@@ -353,6 +358,31 @@ class MainActivity : ComponentActivity() {
                                     R.string.dialog_error_message_no_network
                             }
                         },
+                        onRemoveAllStations = {
+                            // Cleared first, stopped second. Pausing makes the player service
+                            // write its own copy of the collection back (see
+                            // CollectionHelper.savePlaybackState), so the empty collection
+                            // wants to be on its way to storage before that happens.
+                            stationsViewModel.removeAllStations()
+                            playback.pause()
+                        },
+                        onImportPlaylist = {
+                            // "*/*" on purpose: plenty of providers report a playlist as
+                            // application/octet-stream, and a narrow filter grays those out.
+                            // EXTRA_MIME_TYPES still puts the playlist types first.
+                            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                                addCategory(Intent.CATEGORY_OPENABLE)
+                                type = "*/*"
+                                putExtra(
+                                    Intent.EXTRA_MIME_TYPES,
+                                    Keys.MIME_TYPES_M3U + Keys.MIME_TYPES_PLS,
+                                )
+                            }
+                            runCatching { importPlaylistLauncher.launch(intent) }.onFailure {
+                                Log.e(tag, "Unable to open file picker for playlists.\n$it")
+                                toast(R.string.toastmessage_install_file_helper)
+                            }
+                        },
                         onExportM3u = {
                             launchCreateDocument(saveM3uLauncher, Keys.MIME_TYPE_M3U, "collection", "m3u")
                         },
@@ -369,7 +399,7 @@ class MainActivity : ComponentActivity() {
                                 putExtra(Intent.EXTRA_MIME_TYPES, Keys.MIME_TYPES_ZIP)
                             }
                             runCatching { restoreLauncher.launch(intent) }.onFailure {
-                                Log.e(TAG, "Unable to open file picker for ZIP.\n$it")
+                                Log.e(tag, "Unable to open file picker for ZIP.\n$it")
                             }
                         },
                         onLargeBufferChanged = {
@@ -394,8 +424,11 @@ class MainActivity : ComponentActivity() {
                         state = searchState,
                         onQueryChanged = searchViewModel::onQueryChanged,
                         onQuerySubmitted = searchViewModel::onQuerySubmitted,
-                        onResultTapped = searchViewModel::onResultTapped,
-                        onAdd = { station -> addStationChecked(stationsViewModel, station) },
+                        onToggleSelection = searchViewModel::toggleSelection,
+                        onTogglePreview = searchViewModel::togglePreview,
+                        onSelectAll = searchViewModel::selectAll,
+                        onClearSelection = searchViewModel::clearSelection,
+                        onAdd = { stations -> addStationsChecked(stationsViewModel, stations) },
                         onDismiss = {
                             showFindDialog = false
                             searchViewModel.reset()
@@ -404,14 +437,28 @@ class MainActivity : ComponentActivity() {
                 }
 
                 if (pendingImportStations.isNotEmpty()) {
+                    val importedUuids = pendingImportStations.map { it.uuid }.toSet()
                     AddStationDialog(
                         stations = pendingImportStations,
-                        selected = addSelection,
-                        onResultTapped = { addSelection = it },
-                        onAdd = { station -> addStationChecked(stationsViewModel, station) },
+                        selectedUuids = importSelection,
+                        // The preview player is shared with the find dialog; only one of the
+                        // two is ever on screen.
+                        previewUuid = searchState.previewUuid,
+                        onToggleSelection = { station ->
+                            importSelection = if (station.uuid in importSelection) {
+                                importSelection - station.uuid
+                            } else {
+                                importSelection + station.uuid
+                            }
+                        },
+                        onTogglePreview = searchViewModel::togglePreview,
+                        onSelectAll = { importSelection = importedUuids },
+                        onClearSelection = { importSelection = emptySet() },
+                        onAdd = { stations -> addStationsChecked(stationsViewModel, stations) },
                         onDismiss = {
                             pendingImportStations = emptyList()
-                            addSelection = null
+                            importSelection = emptySet()
+                            searchViewModel.stopPreview()
                         },
                     )
                 }
@@ -449,18 +496,24 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    /* Detects the content type before adding, when the search result did not carry one. */
-    private fun addStationChecked(viewModel: StationsViewModel, station: Station) {
-        if (station.streamContent.isNotEmpty() && station.streamContent != Keys.MIME_TYPE_UNSUPPORTED) {
-            viewModel.addStation(station)
-            return
-        }
+    /*
+     * Adds every station the user picked. Entries whose content type is not known yet are
+     * looked up first - search results from a playlist do not always carry one.
+     */
+    private fun addStationsChecked(viewModel: StationsViewModel, stations: List<Station>) {
+        if (stations.isEmpty()) return
         lifecycleScope.launch {
-            val contentType = withContext(Dispatchers.IO) {
-                com.jamal2367.urlradio.helpers.NetworkHelper.detectContentType(station.getStreamUri())
+            stations.forEach { station ->
+                if (station.streamContent.isEmpty() ||
+                    station.streamContent == Keys.MIME_TYPE_UNSUPPORTED
+                ) {
+                    val contentType = withContext(Dispatchers.IO) {
+                        com.jamal2367.urlradio.helpers.NetworkHelper.detectContentType(station.getStreamUri())
+                    }
+                    station.streamContent = contentType.type
+                }
+                viewModel.addStation(station)
             }
-            station.streamContent = contentType.type
-            viewModel.addStation(station)
         }
     }
 
@@ -471,7 +524,7 @@ class MainActivity : ComponentActivity() {
             Intent.ACTION_VIEW -> handleViewIntent(intent)
             // deferred until the controller is connected - see pendingPlaybackIntent
             Keys.ACTION_START -> pendingPlaybackIntent = Intent(intent)
-            Keys.ACTION_SHOW_PLAYER -> Log.i(TAG, "Tap on notification registered.")
+            Keys.ACTION_SHOW_PLAYER -> Log.i(tag, "Tap on notification registered.")
         }
         intent.action = ""
     }
@@ -498,6 +551,32 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    /*
+     * Reads a picked .m3u / .pls file and offers whatever it contains for selection.
+     *
+     * Every entry has to be asked what it actually serves, so this can take a moment on a
+     * long playlist -- hence the toast before the work starts.
+     */
+    private fun importPlaylist(uri: Uri) {
+        toast(R.string.toastmessage_playlist_import_running)
+        lifecycleScope.launch {
+            val stations: List<Station> = withContext(Dispatchers.IO) {
+                runCatching {
+                    CollectionHelper.createStationListFromContentUri(this@MainActivity, uri)
+                }.getOrElse {
+                    Log.e(tag, "Unable to read the picked playlist.\n$it")
+                    emptyList()
+                }
+            }
+            if (stations.isNotEmpty()) {
+                pendingImportStations = stations
+            } else {
+                toast(R.string.toastmessage_playlist_import_empty)
+            }
+        }
+    }
+
 
     /*
      * App shortcut and the exported START action. The stream-URI branch reaches
@@ -529,13 +608,13 @@ class MainActivity : ComponentActivity() {
 
     private fun copyExport(result: ActivityResult, source: Uri?, messageRes: Int, label: String) {
         val target = result.data?.data
-        if (result.resultCode == Activity.RESULT_OK && target != null && source != null) {
+        if (result.resultCode == RESULT_OK && target != null && source != null) {
             lifecycleScope.launch(Dispatchers.IO) {
                 FileHelper.saveCopyOfFileSuspended(this@MainActivity, source, target)
             }
             toast(messageRes)
         } else {
-            Log.w(TAG, "$label export failed.")
+            Log.w(tag, "$label export failed.")
         }
     }
 
@@ -552,14 +631,14 @@ class MainActivity : ComponentActivity() {
             putExtra(Intent.EXTRA_TITLE, "$baseName$timeStamp.$extension")
         }
         runCatching { launcher.launch(intent) }.onFailure {
-            Log.e(TAG, "Unable to open the file picker.\n$it")
+            Log.e(tag, "Unable to open the file picker.\n$it")
             toast(R.string.toastmessage_install_file_helper)
         }
     }
 
     private fun copyToClipboard(text: CharSequence) {
         val clip = ClipData.newPlainText("simple text", text)
-        (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(clip)
+        (getSystemService(CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(clip)
         // Since Android 13 the system shows its own copy confirmation.
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             toast(R.string.toastmessage_copied_to_clipboard)

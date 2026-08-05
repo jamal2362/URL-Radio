@@ -12,8 +12,11 @@
 
 package com.jamal2367.urlradio.ui.settings
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -42,16 +45,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
+import com.jamal2367.urlradio.ui.dialogs.ConfirmDialog
+import com.jamal2367.urlradio.ui.dialogs.WideDialogModifier
+import com.jamal2367.urlradio.ui.dialogs.WideDialogProperties
 
 data class SettingsCallbacks(
     val onThemeSelected: (String) -> Unit,
     val onUpdateStationImages: () -> Unit,
+    val onRemoveAllStations: () -> Unit,
+    val onImportPlaylist: () -> Unit,
     val onExportM3u: () -> Unit,
     val onExportPls: () -> Unit,
     val onBackup: () -> Unit,
@@ -76,6 +85,8 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
 ) {
     var showThemeDialog by remember { mutableStateOf(false) }
+    var showExportFormatDialog by remember { mutableStateOf(false) }
+    var showRemoveAllDialog by remember { mutableStateOf(false) }
 
     LazyColumn(
         contentPadding = contentPadding,
@@ -120,23 +131,31 @@ fun SettingsScreen(
                     icon = R.drawable.ic_image_24dp,
                     onClick = callbacks.onUpdateStationImages,
                 )
+                SettingsRow(
+                    title = stringResource(R.string.pref_remove_all_stations_title),
+                    summary = stringResource(R.string.pref_remove_all_stations_summary),
+                    icon = R.drawable.ic_remove_circle_24dp,
+                    onClick = { showRemoveAllDialog = true },
+                )
             }
         }
 
         item { CategoryHeader(stringResource(R.string.pref_backup_import_export_title)) }
         item {
             SettingsGroup {
+                // One entry for both playlist formats. Which of the two is written is asked
+                // in a dialog rather than through two near-identical rows.
                 SettingsRow(
-                    title = stringResource(R.string.pref_m3u_export_title),
-                    summary = stringResource(R.string.pref_m3u_export_summary),
-                    icon = R.drawable.ic_save_m3u_24dp,
-                    onClick = callbacks.onExportM3u,
+                    title = stringResource(R.string.pref_playlist_export_title),
+                    summary = stringResource(R.string.pref_playlist_export_summary),
+                    icon = R.drawable.ic_playlist_export_24dp,
+                    onClick = { showExportFormatDialog = true },
                 )
                 SettingsRow(
-                    title = stringResource(R.string.pref_pls_export_title),
-                    summary = stringResource(R.string.pref_pls_export_summary),
-                    icon = R.drawable.ic_save_pls_24dp,
-                    onClick = callbacks.onExportPls,
+                    title = stringResource(R.string.pref_playlist_import_title),
+                    summary = stringResource(R.string.pref_playlist_import_summary),
+                    icon = R.drawable.ic_playlist_add_24dp,
+                    onClick = callbacks.onImportPlaylist,
                 )
                 SettingsRow(
                     title = stringResource(R.string.pref_station_export_title),
@@ -212,14 +231,123 @@ fun SettingsScreen(
     }
 
     if (showThemeDialog) {
+        // The dialog stays open on purpose - see ThemeChooserDialog.
         ThemeChooserDialog(
             current = themeSelection,
-            onSelect = {
-                callbacks.onThemeSelected(it)
-                showThemeDialog = false
-            },
+            onSelect = callbacks.onThemeSelected,
             onDismiss = { showThemeDialog = false },
         )
+    }
+
+    if (showExportFormatDialog) {
+        ExportFormatDialog(
+            onExportM3u = {
+                showExportFormatDialog = false
+                callbacks.onExportM3u()
+            },
+            onExportPls = {
+                showExportFormatDialog = false
+                callbacks.onExportPls()
+            },
+            onDismiss = { showExportFormatDialog = false },
+        )
+    }
+
+    if (showRemoveAllDialog) {
+        // Wiping the collection is not undoable and there is no per-station swipe to fall
+        // back on here, so it goes through the same confirmation the single delete uses.
+        ConfirmDialog(
+            title = stringResource(R.string.pref_remove_all_stations_title),
+            message = stringResource(R.string.dialog_yes_no_message_remove_all_stations),
+            confirmLabel = stringResource(R.string.dialog_yes_no_positive_button_remove_all_stations),
+            onConfirm = callbacks.onRemoveAllStations,
+            onDismiss = { showRemoveAllDialog = false },
+        )
+    }
+}
+
+/* Asks which playlist format to write, standing in for the two separate export entries. */
+@Composable
+private fun ExportFormatDialog(
+    onExportM3u: () -> Unit,
+    onExportPls: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        modifier = WideDialogModifier,
+        properties = WideDialogProperties,
+        icon = {
+            Icon(
+                painter = painterResource(R.drawable.ic_playlist_export_24dp),
+                contentDescription = null,
+            )
+        },
+        title = { Text(stringResource(R.string.pref_playlist_export_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                ExportFormatRow(
+                    title = stringResource(R.string.pref_m3u_export_title),
+                    summary = stringResource(R.string.pref_m3u_export_summary),
+                    icon = R.drawable.ic_save_m3u_24dp,
+                    onClick = onExportM3u,
+                )
+                ExportFormatRow(
+                    title = stringResource(R.string.pref_pls_export_title),
+                    summary = stringResource(R.string.pref_pls_export_summary),
+                    icon = R.drawable.ic_save_pls_24dp,
+                    onClick = onExportPls,
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.dialog_generic_button_cancel))
+            }
+        },
+    )
+}
+
+@Composable
+private fun ExportFormatRow(title: String, summary: String, icon: Int, onClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.secondaryContainer),
+        ) {
+            Icon(
+                painter = painterResource(icon),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                modifier = Modifier.size(22.dp),
+            )
+        }
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 12.dp)
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = summary,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 
@@ -332,6 +460,18 @@ private fun SettingsRowLayout(
     }
 }
 
+private data class ThemeOption(
+    val value: String,
+    val label: String,
+    val summary: String,
+    val icon: Int,
+)
+
+/*
+ * Picking a theme applies it straight away and leaves the dialog open, so the three options
+ * can be compared against the live app before settling on one. The old dialog closed on the
+ * first tap and only offered a "cancel" button that did not undo anything.
+ */
 @Composable
 private fun ThemeChooserDialog(
     current: String,
@@ -339,47 +479,106 @@ private fun ThemeChooserDialog(
     onDismiss: () -> Unit,
 ) {
     val options = listOf(
-        Keys.STATE_THEME_FOLLOW_SYSTEM to stringResource(R.string.pref_theme_selection_mode_device_default),
-        Keys.STATE_THEME_LIGHT_MODE to stringResource(R.string.pref_theme_selection_mode_light),
-        Keys.STATE_THEME_DARK_MODE to stringResource(R.string.pref_theme_selection_mode_dark),
+        ThemeOption(
+            value = Keys.STATE_THEME_FOLLOW_SYSTEM,
+            label = stringResource(R.string.pref_theme_selection_mode_device_default),
+            summary = stringResource(R.string.pref_theme_selection_mode_device_default_summary),
+            icon = R.drawable.ic_smartphone_24dp,
+        ),
+        ThemeOption(
+            value = Keys.STATE_THEME_LIGHT_MODE,
+            label = stringResource(R.string.pref_theme_selection_mode_light),
+            summary = stringResource(R.string.pref_theme_selection_mode_light_summary),
+            icon = R.drawable.ic_light_mode_24dp,
+        ),
+        ThemeOption(
+            value = Keys.STATE_THEME_DARK_MODE,
+            label = stringResource(R.string.pref_theme_selection_mode_dark),
+            summary = stringResource(R.string.pref_theme_selection_mode_dark_summary),
+            icon = R.drawable.ic_dark_mode_24dp,
+        ),
     )
+
     AlertDialog(
         onDismissRequest = onDismiss,
+        modifier = WideDialogModifier,
+        properties = WideDialogProperties,
+        icon = {
+            Icon(painter = painterResource(R.drawable.ic_brush_24dp), contentDescription = null)
+        },
         title = { Text(stringResource(R.string.pref_theme_selection_title)) },
         text = {
-            // Plain rows rather than ListItem: ListItem paints its own `surface` colour,
-            // which sat as a lighter block inside the dialog's container colour.
-            Column {
-                options.forEach { (value, label) ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp))
-                            .selectable(
-                                selected = value == current,
-                                role = Role.RadioButton,
-                                onClick = { onSelect(value) },
-                            )
-                            .padding(vertical = 4.dp),
-                    ) {
-                        RadioButton(selected = value == current, onClick = null)
-                        Text(
-                            text = label,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.padding(start = 12.dp),
-                        )
-                    }
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                options.forEach { option ->
+                    ThemeOptionRow(
+                        option = option,
+                        selected = option.value == current,
+                        onClick = { onSelect(option.value) },
+                    )
                 }
             }
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.dialog_generic_button_cancel))
+                Text(stringResource(R.string.dialog_generic_button_done))
             }
         },
     )
+}
+
+@Composable
+private fun ThemeOptionRow(option: ThemeOption, selected: Boolean, onClick: () -> Unit) {
+    val container by animateColorAsState(
+        targetValue = if (selected) MaterialTheme.colorScheme.secondaryContainer
+        else Color.Transparent,
+        label = "themeOptionBackground",
+    )
+    val iconBackground = if (selected) MaterialTheme.colorScheme.primary
+    else MaterialTheme.colorScheme.surfaceContainerHighest
+    val iconTint = if (selected) MaterialTheme.colorScheme.onPrimary
+    else MaterialTheme.colorScheme.onSurfaceVariant
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .background(container)
+            .selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(iconBackground),
+        ) {
+            Icon(
+                painter = painterResource(option.icon),
+                contentDescription = null,
+                tint = iconTint,
+                modifier = Modifier.size(22.dp),
+            )
+        }
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 12.dp)
+        ) {
+            Text(
+                text = option.label,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = option.summary,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        RadioButton(selected = selected, onClick = null)
+    }
 }
 
 private const val GITHUB_URL = "https://github.com/jamal2362/URL-Radio"

@@ -18,6 +18,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.combinedClickable
@@ -26,12 +27,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -40,13 +39,19 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -63,6 +68,7 @@ import com.jamal2367.urlradio.R
 import com.jamal2367.urlradio.core.Station
 import com.jamal2367.urlradio.helpers.DateTimeHelper
 import com.jamal2367.urlradio.playback.PlaybackUiState
+import com.jamal2367.urlradio.playback.sanitizedMetadata
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -83,165 +89,181 @@ fun PlayerPane(
     onCancelSleepTimer: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // Stations that send no track title fall back to their own name rather than to a blank line.
     val shownMetadata = playback.metadataHistory.getOrNull(metadataIndex)
-        ?: station.name.ifEmpty { "" }
+        ?.sanitizedMetadata().orEmpty().ifEmpty { station.name }
     val playbackButtonDescription = stringResource(R.string.descr_player_playback_button)
 
-    Column(
-        // Dragging the player up opens it, dragging down closes it. Sits on the whole panel
-        // rather than the compact row so a downward swipe anywhere over the expanded
-        // controls closes it too. The threshold is in pixels, so it is compared against the
-        // drag total rather than a dp.
-        modifier = modifier
-            .fillMaxWidth()
-            .pointerInput(Unit) {
-                var dragTotal = 0f
-                detectVerticalDragGestures(
-                    onDragStart = { dragTotal = 0f },
-                    onDragEnd = {
-                        if (dragTotal < -SWIPE_THRESHOLD_PX) onSetExpanded(true)
-                        else if (dragTotal > SWIPE_THRESHOLD_PX) onSetExpanded(false)
-                    },
-                    onVerticalDrag = { change, amount ->
-                        change.consume()
-                        dragTotal += amount
-                    },
-                )
-            }
-    ) {
-        // ---- compact row: always visible ----
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
+    // The player stays visually silent under the finger: no ripple, no hover or focus
+    // highlight, anywhere inside it. A null RippleConfiguration switches off the ripple that
+    // the Material components (the play button, the icon buttons) request themselves; the
+    // plain clickable below additionally pass indication = null, which is what the theme's
+    // default indication would otherwise supply.
+    CompositionLocalProvider(LocalRippleConfiguration provides null) {
+        Column(
+            // Dragging the player up opens it, dragging down closes it. Sits on the whole panel
+            // rather than the compact row so a downward swipe anywhere over the expanded
+            // controls closes it too. The threshold is in pixels, so it is compared against the
+            // drag total rather than a dp.
+            modifier = modifier
                 .fillMaxWidth()
-                .combinedClickable(onClick = onToggleExpanded)
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .pointerInput(Unit) {
+                    var dragTotal = 0f
+                    detectVerticalDragGestures(
+                        onDragStart = { dragTotal = 0f },
+                        onDragEnd = {
+                            if (dragTotal < -SWIPE_THRESHOLD_PX) onSetExpanded(true)
+                            else if (dragTotal > SWIPE_THRESHOLD_PX) onSetExpanded(false)
+                        },
+                        onVerticalDrag = { change, amount ->
+                            change.consume()
+                            dragTotal += amount
+                        },
+                    )
+                }
         ) {
-            StationArtwork(station = station, modifier = Modifier.size(56.dp))
-
-            Column(
+            // ---- compact row: always visible ----
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 12.dp)
+                    .fillMaxWidth()
+                    .combinedClickable(
+                        interactionSource = null,
+                        indication = null,
+                        onClick = onToggleExpanded,
+                    )
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
             ) {
-                Text(
-                    text = station.name,
-                    style = MaterialTheme.typography.titleMediumEmphasized,
-                    maxLines = 1,
-                    // The old view enabled marquee only while playing; keep that.
-                    modifier = if (playback.isPlaying) Modifier.basicMarquee() else Modifier,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Text(
-                    text = if (playback.isPlaying) playback.currentMetadata.ifEmpty { station.name }
-                    else station.name,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
+                StationArtwork(station = station, modifier = Modifier.size(56.dp))
 
-            Box(contentAlignment = Alignment.Center) {
-                if (playback.isBuffering) {
-                    ContainedLoadingIndicator()
-                } else {
-                    FilledIconButton(onClick = onTogglePlayback) {
-                        if (playback.isPlaying) {
-                            EqualizerIcon(
-                                color = LocalContentColor.current,
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .semantics {
-                                        contentDescription = playbackButtonDescription
-                                    },
-                            )
-                        } else {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_player_play_symbol_42dp),
-                                contentDescription = playbackButtonDescription,
-                            )
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 12.dp)
+                ) {
+                    Text(
+                        text = station.name,
+                        style = MaterialTheme.typography.titleMediumEmphasized,
+                        maxLines = 1,
+                        // The old view enabled marquee only while playing; keep that.
+                        modifier = if (playback.isPlaying) Modifier.basicMarquee() else Modifier,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Text(
+                        text = if (playback.isPlaying) playback.currentMetadata.ifEmpty { station.name }
+                        else station.name,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+
+                Box(contentAlignment = Alignment.Center) {
+                    if (playback.isBuffering) {
+                        ContainedLoadingIndicator()
+                    } else {
+                        FilledIconButton(onClick = onTogglePlayback) {
+                            if (playback.isPlaying) {
+                                EqualizerIcon(
+                                    color = LocalContentColor.current,
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .semantics {
+                                            contentDescription = playbackButtonDescription
+                                        },
+                                )
+                            } else {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_player_play_symbol_42dp),
+                                    contentDescription = playbackButtonDescription,
+                                )
+                            }
                         }
                     }
                 }
             }
-        }
 
-        // ---- expanded controls ----
-        AnimatedVisibility(visible = expanded) {
-            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-                HorizontalDivider()
+            // ---- expanded controls ----
+            AnimatedVisibility(visible = expanded) {
+                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                    HorizontalDivider()
 
-                LabelledValue(
-                    label = stringResource(R.string.player_sheet_h2_stream_url),
-                    value = station.getStreamUri(),
-                    onClick = { onCopy(station.getStreamUri()) },
-                    trailing = {
-                        IconButton(onClick = onShare) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_share_24dp),
-                                contentDescription = null,
-                            )
-                        }
-                    },
-                )
-
-                LabelledValue(
-                    label = stringResource(R.string.player_sheet_h2_station_metadata),
-                    value = shownMetadata,
-                    onClick = { onCopy(shownMetadata) },
-                    onLongClick = onCopyFullHistory,
-                    leading = {
-                        IconButton(onClick = onPreviousMetadata) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_chevron_left_24dp),
-                                contentDescription = stringResource(R.string.descr_expanded_player_metadata_previous_button),
-                            )
-                        }
-                    },
-                    trailing = {
-                        Row {
-                            IconButton(onClick = onNextMetadata) {
+                    LabelledValue(
+                        label = stringResource(R.string.player_sheet_h2_stream_url),
+                        value = station.getStreamUri(),
+                        onClick = { onCopy(station.getStreamUri()) },
+                        trailing = {
+                            IconButton(onClick = onShare) {
                                 Icon(
-                                    painter = painterResource(R.drawable.ic_chevron_right_24dp),
-                                    contentDescription = stringResource(R.string.descr_expanded_player_metadata_next_button),
+                                    painter = painterResource(R.drawable.ic_share_24dp),
+                                    contentDescription = null,
                                 )
                             }
-                            IconButton(onClick = { onCopy(shownMetadata) }) {
+                        },
+                    )
+
+                    LabelledValue(
+                        label = stringResource(R.string.player_sheet_h2_station_metadata),
+                        value = shownMetadata,
+                        onClick = { onCopy(shownMetadata) },
+                        onLongClick = onCopyFullHistory,
+                        leading = {
+                            IconButton(onClick = onPreviousMetadata) {
                                 Icon(
-                                    painter = painterResource(R.drawable.ic_copy_content_24dp),
-                                    contentDescription = stringResource(R.string.descr_expanded_player_metadata_copy_button),
+                                    painter = painterResource(R.drawable.ic_chevron_left_24dp),
+                                    contentDescription = stringResource(R.string.descr_expanded_player_metadata_previous_button),
                                 )
                             }
-                        }
-                    },
-                )
+                        },
+                        trailing = {
+                            Row {
+                                IconButton(onClick = onNextMetadata) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_chevron_right_24dp),
+                                        contentDescription = stringResource(R.string.descr_expanded_player_metadata_next_button),
+                                    )
+                                }
+                                IconButton(onClick = { onCopy(shownMetadata) }) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_copy_content_24dp),
+                                        contentDescription = stringResource(R.string.descr_expanded_player_metadata_copy_button),
+                                    )
+                                }
+                            }
+                        },
+                    )
 
-                // Codec/bitrate on the left, sleep timer opposite it on the right.
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-                ) {
-                    val bitrateText = bitrateLabel(station)
-                    Text(
-                        text = bitrateText,
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    // Codec/bitrate on the left, sleep timer opposite it on the right.
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier
-                            .weight(1f)
-                            .combinedClickable(onClick = { onCopy(bitrateText) })
-                            .padding(vertical = 8.dp),
-                    )
+                            .fillMaxWidth()
+                            .padding(top = 8.dp),
+                    ) {
+                        val bitrateText = bitrateLabel(station)
+                        Text(
+                            text = bitrateText,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier
+                                .weight(1f)
+                                .combinedClickable(
+                                    interactionSource = null,
+                                    indication = null,
+                                    onClick = { onCopy(bitrateText) },
+                                )
+                                .padding(vertical = 8.dp),
+                        )
 
-                    SleepTimerControls(
-                        isPlaying = playback.isPlaying,
-                        remainingMillis = playback.sleepTimerRemaining,
-                        onStart = onStartSleepTimer,
-                        onCancel = onCancelSleepTimer,
-                    )
+                        SleepTimerControls(
+                            isPlaying = playback.isPlaying,
+                            remainingMillis = playback.sleepTimerRemaining,
+                            onStart = onStartSleepTimer,
+                            onCancel = onCancelSleepTimer,
+                        )
+                    }
                 }
             }
         }
@@ -273,7 +295,12 @@ private fun LabelledValue(
             text = label,
             style = MaterialTheme.typography.labelMediumEmphasized,
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick),
+            modifier = Modifier.combinedClickable(
+                interactionSource = null,
+                indication = null,
+                onClick = onClick,
+                onLongClick = onLongClick,
+            ),
         )
         Row(verticalAlignment = Alignment.CenterVertically) {
             leading?.invoke()
@@ -284,7 +311,12 @@ private fun LabelledValue(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
                     .weight(1f)
-                    .combinedClickable(onClick = onClick, onLongClick = onLongClick),
+                    .combinedClickable(
+                        interactionSource = null,
+                        indication = null,
+                        onClick = onClick,
+                        onLongClick = onLongClick,
+                    ),
             )
             trailing?.invoke()
         }
@@ -344,21 +376,27 @@ private fun EqualizerIcon(color: Color, modifier: Modifier = Modifier) {
         )
     }
 
-    Row(
-        // Centred, not Start: the three bars are narrower than the 24dp icon slot, so
-        // left-aligning them pushed the whole group off-centre inside the round button.
-        horizontalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterHorizontally),
-        verticalAlignment = Alignment.Bottom,
-        modifier = modifier,
-    ) {
+    // Drawn rather than laid out. The bar heights are read here, inside the draw phase, so a
+    // frame of this animation costs one redraw of the icon. Sizing three Boxes by the same
+    // values read them while composing, which recomposed and re-measured the icon on every
+    // frame for as long as a station was playing -- work the main thread was doing while the
+    // station list was trying to scroll.
+    Canvas(modifier = modifier) {
+        val barWidth = 4.dp.toPx()
+        val gap = 2.dp.toPx()
+        val corner = CornerRadius(1.dp.toPx())
+        // Centred, not left-aligned: the three bars are narrower than the 24dp icon slot, so
+        // starting at zero pushed the whole group off-center inside the round button.
+        var x = (size.width - (barWidth * bars.size + gap * (bars.size - 1))) / 2f
         bars.forEach { bar ->
-            Box(
-                modifier = Modifier
-                    .width(4.dp)
-                    .fillMaxHeight(bar.value)
-                    .clip(RoundedCornerShape(1.dp))
-                    .background(color)
+            val barHeight = size.height * bar.value
+            drawRoundRect(
+                color = color,
+                topLeft = Offset(x, size.height - barHeight),
+                size = Size(barWidth, barHeight),
+                cornerRadius = corner,
             )
+            x += barWidth + gap
         }
     }
 }
@@ -367,6 +405,15 @@ private fun EqualizerIcon(color: Color, modifier: Modifier = Modifier) {
 private fun StationArtwork(station: Station, modifier: Modifier = Modifier) {
     // Same default station image the list uses for stations without their own artwork.
     val placeholder = painterResource(R.drawable.ic_default_station_image_72dp)
+    val context = LocalContext.current
+    // The player recomposes on every metadata and sleep-timer tick, so the request is built
+    // once per station rather than once per pass.
+    val request = remember(station.smallImage, station.modificationDate) {
+        ImageRequest.Builder(context)
+            .data(station.smallImage.ifEmpty { null })
+            .memoryCacheKey("${station.smallImage}:${station.modificationDate.time}")
+            .build()
+    }
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(14.dp))
@@ -376,10 +423,7 @@ private fun StationArtwork(station: Station, modifier: Modifier = Modifier) {
             ),
     ) {
         AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(station.smallImage.ifEmpty { null })
-                .memoryCacheKey("${station.smallImage}:${station.modificationDate.time}")
-                .build(),
+            model = request,
             contentDescription = "${stringResource(R.string.descr_player_station_image)}: ${station.name}",
             contentScale = ContentScale.Crop,
             placeholder = placeholder,

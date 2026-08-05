@@ -17,7 +17,6 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -55,7 +54,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
@@ -67,6 +66,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import java.util.Locale
+import kotlin.time.Duration.Companion.milliseconds
 
 private val CardShape = RoundedCornerShape(24.dp)
 
@@ -120,9 +120,15 @@ fun StationCard(
                             // While the editor is open the cover is the shortcut to the image
                             // picker; otherwise a long press on it opens the editor.
                             if (isEditorOpen) {
-                                Modifier.clickable(onClick = onChangeImage)
+                                Modifier.clickable(
+                                    interactionSource = null,
+                                    indication = null,
+                                    onClick = onChangeImage,
+                                )
                             } else {
                                 Modifier.combinedClickable(
+                                    interactionSource = null,
+                                    indication = null,
                                     onClick = onTogglePlayback,
                                     onLongClick = if (editStationsEnabled) onToggleEditor else null,
                                 )
@@ -133,32 +139,40 @@ fun StationCard(
                 Text(
                     text = station.name,
                     style = MaterialTheme.typography.titleMedium,
-                    maxLines = 2,
+                    maxLines = 1,
+                    // Clip would cut the last glyph in half; a name that does not fit ends
+                    // in an ellipsis instead.
+                    overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
                         .weight(1f)
-                        .padding(horizontal = 12.dp)
+                        // With a heart the name stops 8dp short of it; without one there is
+                        // nothing to keep clear of, so the name runs out to the row's own
+                        // 8dp padding.
+                        .padding(start = 8.dp, end = if (station.starred) 8.dp else 0.dp)
+                        // The cover and the name stay visually silent when tapped: no ripple,
+                        // no hover highlight. Only the free area of the row still reacts.
                         .combinedClickable(
+                            interactionSource = null,
+                            indication = null,
                             onClick = onTogglePlayback,
                             onLongClick = if (editStationsEnabled) onToggleEditor else null,
                         ),
                 )
 
+                // Neither the heart nor the padding around the name claims touches -- padding
+                // sits outside the text's clickable -- so a long press to the right of the
+                // name still reaches the row's reorder gesture, however long the name is.
                 if (station.starred) {
                     Icon(
                         painter = painterResource(R.drawable.ic_favorite_default_24dp),
                         contentDescription = stringResource(R.string.descr_card_starred_station),
                         tint = if (station.imageColor != -1) Color(station.imageColor)
                         else MaterialTheme.colorScheme.primary,
-                        modifier = Modifier
-                            .padding(start = 8.dp)
-                            .size(24.dp),
+                        modifier = Modifier.size(24.dp),
                     )
-                }
 
-                // Free strip where the drag handle used to sit. Nothing claims these
-                // touches, so a long press here reaches the row's reorder gesture no matter
-                // how long the station name is.
-                Spacer(modifier = Modifier.width(4.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
+                }
             }
                 }
 
@@ -202,8 +216,20 @@ fun StationCard(
 private fun StationCover(station: Station, modifier: Modifier = Modifier) {
     val description = "${stringResource(R.string.descr_player_station_image)}: ${station.name}"
     // Stations without their own artwork fall back to the app's default station image
-    // rather than showing an empty coloured square.
+    // rather than showing an empty colored square.
     val placeholder = painterResource(R.drawable.ic_default_station_image_72dp)
+    val context = LocalContext.current
+    // Kept across recompositions: the list rebuilds this row whenever playback state or the
+    // collection changes, and assembling a request per row per pass is work the scroll can
+    // feel. The file keeps its name when a station image is replaced, so the modification
+    // date is folded into the cache key -- otherwise Coil would serve the old bitmap.
+    val request = remember(station.smallImage, station.modificationDate) {
+        ImageRequest.Builder(context)
+            .data(station.smallImage.ifEmpty { null })
+            .memoryCacheKey("${station.smallImage}:${station.modificationDate.time}")
+            .diskCacheKey("${station.smallImage}:${station.modificationDate.time}")
+            .build()
+    }
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
@@ -214,13 +240,7 @@ private fun StationCover(station: Station, modifier: Modifier = Modifier) {
             .semantics { contentDescription = description },
     ) {
         AsyncImage(
-            // The file keeps its name when a station image is replaced, so the modification
-            // date is folded into the cache key -- otherwise Coil would serve the old bitmap.
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(station.smallImage.ifEmpty { null })
-                .memoryCacheKey("${station.smallImage}:${station.modificationDate.time}")
-                .diskCacheKey("${station.smallImage}:${station.modificationDate.time}")
-                .build(),
+            model = request,
             contentDescription = null,
             contentScale = ContentScale.Crop,
             placeholder = placeholder,
@@ -252,7 +272,7 @@ private fun StationEditor(
         }
         streamUriAccepted = false
         if (!streamUri.startsWith("http")) return@LaunchedEffect
-        delay(400) // debounce while the user is still typing
+        delay(400.milliseconds) // debounce while the user is still typing
         val contentType = withContext(Dispatchers.IO) {
             NetworkHelper.detectContentTypeSuspended(streamUri).type.lowercase(Locale.getDefault())
         }
@@ -291,7 +311,7 @@ private fun StationEditor(
                 .fillMaxWidth()
                 .padding(top = 8.dp),
         ) {
-            // No image button here any more -- tapping the cover above opens the picker.
+            // No image button here anymore -- tapping the cover above opens the picker.
             IconButton(onClick = onPlaceOnHomeScreen) {
                 Icon(
                     painter = painterResource(R.drawable.ic_home_24dp),
