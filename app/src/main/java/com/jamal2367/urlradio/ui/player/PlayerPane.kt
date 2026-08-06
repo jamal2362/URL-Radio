@@ -26,22 +26,24 @@ import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -199,84 +201,94 @@ fun PlayerPane(
             }
 
             // ---- expanded controls ----
+            // Styled after the settings screen's SettingsGroup/SettingsRow: a rounded card a
+            // shade lighter than the player's own surface, each entry a circular icon badge
+            // plus a label/value pair, so the two places share one visual language instead of
+            // the player looking like a different, older piece of the app.
             AnimatedVisibility(visible = expanded) {
-                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-                    HorizontalDivider()
-
-                    LabelledValue(
-                        label = stringResource(R.string.player_sheet_h2_stream_url),
-                        value = station.getStreamUri(),
-                        onClick = { onCopy(station.getStreamUri()) },
-                        trailing = {
-                            IconButton(onClick = onShare) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_share_24dp),
-                                    contentDescription = null,
-                                )
-                            }
-                        },
-                    )
-
-                    LabelledValue(
-                        label = stringResource(R.string.player_sheet_h2_station_metadata),
-                        value = shownMetadata,
-                        onClick = { onCopy(shownMetadata) },
-                        onLongClick = onCopyFullHistory,
-                        leading = {
-                            IconButton(onClick = onPreviousMetadata) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_chevron_left_24dp),
-                                    contentDescription = stringResource(R.string.descr_expanded_player_metadata_previous_button),
-                                )
-                            }
-                        },
-                        trailing = {
-                            Row {
-                                IconButton(onClick = onNextMetadata) {
+                Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)) {
+                    PlayerInfoGroup {
+                        PlayerInfoRow(
+                            icon = R.drawable.ic_network_check_24dp,
+                            label = stringResource(R.string.player_sheet_h2_stream_url),
+                            value = station.getStreamUri(),
+                            onClick = { onCopy(station.getStreamUri()) },
+                            marqueeValue = true,
+                            trailing = {
+                                IconButton(onClick = onShare) {
                                     Icon(
-                                        painter = painterResource(R.drawable.ic_chevron_right_24dp),
-                                        contentDescription = stringResource(R.string.descr_expanded_player_metadata_next_button),
+                                        painter = painterResource(R.drawable.ic_share_24dp),
+                                        contentDescription = null,
                                     )
                                 }
-                                IconButton(onClick = { onCopy(shownMetadata) }) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.ic_copy_content_24dp),
-                                        contentDescription = stringResource(R.string.descr_expanded_player_metadata_copy_button),
-                                    )
-                                }
-                            }
-                        },
-                    )
+                            },
+                        )
 
-                    // Codec/bitrate on the left, sleep timer opposite it on the right.
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp),
-                    ) {
-                        val bitrateText = bitrateLabel(station)
-                        Text(
-                            text = bitrateText,
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        PlayerInfoRow(
+                            icon = R.drawable.ic_music_note_24dp,
+                            label = stringResource(R.string.player_sheet_h2_station_metadata),
+                            value = shownMetadata,
+                            onClick = { onCopy(shownMetadata) },
+                            onLongClick = onCopyFullHistory,
+                            trailing = {
+                                Row {
+                                    IconButton(onClick = onPreviousMetadata) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.ic_chevron_left_24dp),
+                                            contentDescription = stringResource(R.string.descr_expanded_player_metadata_previous_button),
+                                        )
+                                    }
+                                    IconButton(onClick = onNextMetadata) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.ic_chevron_right_24dp),
+                                            contentDescription = stringResource(R.string.descr_expanded_player_metadata_next_button),
+                                        )
+                                    }
+                                    IconButton(onClick = { onCopy(shownMetadata) }) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.ic_copy_content_24dp),
+                                            contentDescription = stringResource(R.string.descr_expanded_player_metadata_copy_button),
+                                        )
+                                    }
+                                }
+                            },
+                        )
+
+                        // Codec/bitrate on the left, sleep timer opposite it on the right --
+                        // a plain control strip rather than another icon-badged row, since
+                        // neither half is a single labeled value.
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            // No end padding: the sleep timer's own IconButtons already carry
+                            // a 48dp touch target, so the row's own inset was just extra
+                            // space pushing them further from the edge than that.
                             modifier = Modifier
-                                .weight(1f)
-                                .combinedClickable(
-                                    interactionSource = null,
-                                    indication = null,
-                                    onClick = { onCopy(bitrateText) },
-                                )
-                                .padding(vertical = 8.dp),
-                        )
+                                .fillMaxWidth()
+                                .padding(start = 16.dp, top = 4.dp, bottom = 4.dp),
+                        ) {
+                            val bitrateText = bitrateLabel(station)
+                            Text(
+                                text = bitrateText,
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .combinedClickable(
+                                        interactionSource = null,
+                                        indication = null,
+                                        onClick = { onCopy(bitrateText) },
+                                    )
+                                    .padding(vertical = 8.dp),
+                            )
 
-                        SleepTimerControls(
-                            isPlaying = playback.isPlaying,
-                            remainingMillis = playback.sleepTimerRemaining,
-                            onStart = onStartSleepTimer,
-                            onCancel = onCancelSleepTimer,
-                        )
+                            SleepTimerControls(
+                                isPlaying = playback.isPlaying,
+                                remainingMillis = playback.sleepTimerRemaining,
+                                onStart = onStartSleepTimer,
+                                onCancel = onCancelSleepTimer,
+                            )
+                        }
                     }
                 }
             }
@@ -286,54 +298,93 @@ fun PlayerPane(
 
 private const val SWIPE_THRESHOLD_PX = 40f
 
-/* Builds the "codec | bitrate kbps" line. M3U and PLS playlists carry neither, so the
+/* Builds the "codec | bitrate Kb/s" line. M3U and PLS playlists carry neither, so the
    row is left out entirely for them -- same rule the old LayoutHolder used. */
 private fun bitrateLabel(station: Station): String = when {
     station.codec.isEmpty() -> ""
     station.bitrate == 0 -> station.codec
-    else -> "${station.codec} | ${station.bitrate}kbps"
+    else -> "${station.codec} | ${station.bitrate} Kb/s"
 }
 
+/* Groups related entries into one rounded card -- the player's equivalent of the settings
+   screen's SettingsGroup, one shade lighter than the player's own surface so it still reads
+   as sitting on top of it. */
+@Composable
+private fun PlayerInfoGroup(content: @Composable ColumnScope.() -> Unit) {
+    Surface(
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(content = content)
+    }
+}
+
+/* The player's equivalent of the settings screen's SettingsRow: a circular icon badge, then
+   a label/value pair. Unlike a settings row the whole thing is also copy-on-tap, so the
+   label and value keep their own combinedClickable rather than the row claiming one click. */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun LabelledValue(
+private fun PlayerInfoRow(
+    icon: Int,
     label: String,
     value: String,
     onClick: () -> Unit,
     onLongClick: (() -> Unit)? = null,
-    leading: @Composable (() -> Unit)? = null,
+    // The stream URL is the one value here long enough to routinely not fit -- marquee lets
+    // it scroll through on its own rather than being cut down to a fragment with an ellipsis.
+    marqueeValue: Boolean = false,
     trailing: @Composable (() -> Unit)? = null,
 ) {
-    Column(modifier = Modifier.padding(vertical = 8.dp)) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMediumEmphasized,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.combinedClickable(
-                interactionSource = null,
-                indication = null,
-                onClick = onClick,
-                onLongClick = onLongClick,
-            ),
-        )
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            leading?.invoke()
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        // No end padding: trailing's own IconButtons already carry a 48dp touch target, so
+        // the row's own inset was just extra space pushing them further from the edge than
+        // that -- share, copy and the prev/next controls all sit closer to it now.
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, top = 12.dp, bottom = 12.dp),
+    ) {
+        Surface(
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.secondaryContainer,
+        ) {
+            Icon(
+                painter = painterResource(icon),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                modifier = Modifier
+                    .padding(10.dp)
+                    .size(22.dp),
+            )
+        }
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 14.dp)
+                .combinedClickable(
+                    interactionSource = null,
+                    indication = null,
+                    onClick = onClick,
+                    onLongClick = onLongClick,
+                ),
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMediumEmphasized,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             Text(
                 text = value,
                 style = MaterialTheme.typography.bodyMedium,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
                 modifier = Modifier
-                    .weight(1f)
-                    .combinedClickable(
-                        interactionSource = null,
-                        indication = null,
-                        onClick = onClick,
-                        onLongClick = onLongClick,
-                    ),
+                    .fillMaxWidth()
+                    .let { if (marqueeValue) it.basicMarquee() else it },
             )
-            trailing?.invoke()
         }
+        trailing?.invoke()
     }
 }
 

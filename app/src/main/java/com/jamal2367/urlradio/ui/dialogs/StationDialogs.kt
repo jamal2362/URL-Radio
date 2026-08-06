@@ -499,9 +499,9 @@ private fun StationPickerAvatar(previewing: Boolean) {
     }
 }
 
-/* "codec | bitrate kbps" - playlist entries carry neither, so the line is left out for them. */
+/* "codec | bitrate Kb/s" - playlist entries carry neither, so the line is left out for them. */
 private fun bitrateLabel(station: Station): String = when {
     station.codec.isEmpty() -> ""
     station.bitrate == 0 -> station.codec
-    else -> "${station.codec} | ${station.bitrate}kbps"
+    else -> "${station.codec} | ${station.bitrate} Kb/s"
 }
