@@ -294,7 +294,7 @@ fun UrlRadioApp(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(bottom = playerHeight)
+                        .padding(bottom = 58.dp)
                 ) {
                     StationsPane(
                         state = state,
@@ -478,7 +478,7 @@ private fun StationsPane(
                 top = 6.dp,
                 // No room reserved for the player here: the list's container already
                 // stops above it.
-                bottom = 0.dp,
+                bottom = 30.dp,
             ),
             // Scrolls away with the rest of the list instead of staying pinned above it --
             // that pin was the point being complained about. Onboarding has no scrolling
