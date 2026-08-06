@@ -19,6 +19,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -317,11 +318,10 @@ fun UrlRadioApp(
                     modifier = Modifier.align(Alignment.BottomCenter),
                 ) {
                     Surface(
-                        shape = RoundedCornerShape(28.dp),
-                        tonalElevation = 3.dp,
+                        shape = RoundedCornerShape(24.dp),
+                        tonalElevation = 4.dp,
                         shadowElevation = 6.dp,
-                        // Measured including its own margin, because that is the strip of
-                        // screen the list has to leave free.
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                         modifier = Modifier
                             .onSizeChanged {
                                 playerHeight = with(density) { it.height.toDp() }

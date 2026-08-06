@@ -132,6 +132,9 @@ fun PlayerPane(
             // ---- compact row: always visible ----
             Row(
                 verticalAlignment = Alignment.CenterVertically,
+                // Less horizontal inset than before: the artwork sits closer to the start
+                // edge and the play button closer to the end edge instead of both being
+                // pulled in toward the center.
                 modifier = Modifier
                     .fillMaxWidth()
                     .combinedClickable(
@@ -139,7 +142,7 @@ fun PlayerPane(
                         indication = null,
                         onClick = onToggleExpanded,
                     )
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(horizontal = 8.dp, vertical = 8.dp),
             ) {
                 StationArtwork(station = station, modifier = Modifier.size(56.dp))
 
@@ -481,7 +484,7 @@ private fun StationArtwork(station: Station, modifier: Modifier = Modifier) {
     }
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(14.dp))
+            .clip(RoundedCornerShape(16.dp))
             .background(
                 if (station.imageColor != -1) Color(station.imageColor)
                 else MaterialTheme.colorScheme.surfaceVariant
