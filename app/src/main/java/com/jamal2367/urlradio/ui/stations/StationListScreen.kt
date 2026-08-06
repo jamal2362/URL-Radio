@@ -156,6 +156,7 @@ fun StationListScreen(
         var dragStartOffset by remember { mutableIntStateOf(0) }
         var dragStartSize by remember { mutableIntStateOf(0) }
         val density = LocalDensity.current
+        val haptics = LocalHapticFeedback.current
 
         LaunchedEffect(draggedIndex) {
             if (draggedIndex == null) return@LaunchedEffect
@@ -215,6 +216,8 @@ fun StationListScreen(
                                 dragStartOffset = info?.offset ?: 0
                                 dragStartSize = info?.size ?: 0
                                 draggedDistance = 0f
+                                // Confirms the row has been picked up for reordering.
+                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                             },
                             onDragEnd = {
                                 draggedIndex = null
@@ -258,7 +261,12 @@ fun StationListScreen(
                                     // moveStation refuses to mix favourites with the rest, so the
                                     // index only follows the row where the move was accepted.
                                     val targetIndex = target.index - stationsIndexOffset
-                                    if (onMove(from, targetIndex)) draggedIndex = targetIndex
+                                    if (onMove(from, targetIndex)) {
+                                        draggedIndex = targetIndex
+                                        // One tick per swap, same as the pickup -- confirms
+                                        // the reorder actually went through.
+                                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    }
                                 }
                             },
                         )
