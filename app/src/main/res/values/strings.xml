@@ -2,7 +2,7 @@
 <resources>
     <!-- App Name -->
     <string name="app_name" translatable="false">URL Radio</string>
-    <string name="app_version_name" translatable="false">\"Sweet\"</string>
+    <string name="app_version_name" translatable="false">\"Heat\"</string>
 
     <!-- Accessibility Descriptions -->
     <string name="descr_app_icon">App icon depicting an old radio</string>
@@ -45,8 +45,6 @@
 
     <!-- Fragment -->
     <string name="fragment_settings_title">Settings</string>
-
-    <!-- Notification -->
 
     <!-- Onboarding -->
     <string name="onboarding_app_description">Immerse yourself in the sound of your choice!</string>
@@ -108,8 +106,6 @@
     <string name="pref_remove_all_stations_title">Remove All Stations</string>
     <string name="pref_update_station_images_summary">Download latest version of all station images.</string>
     <string name="pref_update_station_images_title">Update Station Images</string>
-
-    <!-- Sample Text -->
 
     <!-- App Shortcuts -->
     <string name="shortcut_last_station_disabled_message">Shortcut for playback of last station disabled.</string>

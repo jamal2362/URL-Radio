@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- App Name -->
     <!-- Accessibility Descriptions -->
     <string name="descr_app_icon">App-Symbol in der Form eines alten Radios</string>
     <string name="descr_card_starred_station">Markierter Sender</string>
@@ -12,6 +11,7 @@
     <string name="descr_player_playback_button">Start/Pause</string>
     <string name="descr_player_station_image">Senderbild</string>
     <string name="descr_station_preview_playing">Vorschau läuft</string>
+
     <!-- Dialogs -->
     <string name="dialog_add_station_title">Sender hinzufügen</string>
     <string name="dialog_add_station_found">Gefundene Sender: %1$d</string>
@@ -38,19 +38,23 @@
     <string name="dialog_yes_no_positive_button_default">Ja</string>
     <string name="dialog_yes_no_positive_button_remove_all_stations">Alle entfernen</string>
     <string name="dialog_yes_no_positive_button_remove_station">Entfernen</string>
+
     <!-- Fragment -->
     <string name="fragment_settings_title">Einstellungen</string>
-    <!-- Notification -->
+
     <!-- Onboarding -->
     <string name="onboarding_app_description">Tauche ein in den Sound deiner Wahl!</string>
     <string name="onboarding_app_get_started">Jetzt starten</string>
+
     <!-- Stations -->
     <string name="tab_stations_all">Alle Sender</string>
     <string name="tab_stations_favorites">Favoriten</string>
     <string name="stations_favorites_empty">Noch keine Favoriten. Wische einen Sender nach rechts, um ihn hier hinzuzufügen.</string>
+
     <!-- Player -->
     <string name="player_sheet_h2_station_metadata">Momentan läuft</string>
     <string name="player_sheet_h2_stream_url">Streaming-Adresse</string>
+
     <!-- Settings -->
     <string name="pref_advanced_title">Erweitert</string>
     <string name="pref_app_version_summary">Version</string>
@@ -94,13 +98,15 @@
     <string name="pref_remove_all_stations_title">Alle Sender entfernen</string>
     <string name="pref_update_station_images_summary">Die neueste Version aller Senderbilder herunterladen.</string>
     <string name="pref_update_station_images_title">Senderbilder aktualisieren</string>
-    <!-- Sample Text -->
+
     <!-- App Shortcuts -->
     <string name="shortcut_last_station_disabled_message">Verknüpfung für Wiedergabe des letzten Senders deaktiviert.</string>
     <string name="shortcut_last_station_long_label">Letzten Sender wiedergeben</string>
     <string name="shortcut_last_station_short_label">Letzter Sender</string>
+
     <!-- Toast Alerts -->
     <string name="toastalert_failed_picking_media">Bildauswahl fehlgeschlagen.</string>
+
     <!-- Toasts -->
     <string name="toastmessage_backed_up">wurde erfolgreich gesichert.</string>
     <string name="toastmessage_connection_failed">Die Verbindung konnte nicht aufgebaut oder wiederhergestellt werden.</string>
@@ -118,6 +124,7 @@
     <string name="toastmessage_station_duplicate">Dieser Sender ist ein Duplikat</string>
     <string name="toastmessage_station_not_valid">Dieser Sender existiert nicht</string>
     <string name="toastmessage_updating_station_images">Alle Senderbilder werden aktualisiert</string>
+
     <!-- Snackbars -->
     <string name="snackbar_show">Zeigen</string>
     <string name="snackbar_update_available">ist verfügbar!</string>
