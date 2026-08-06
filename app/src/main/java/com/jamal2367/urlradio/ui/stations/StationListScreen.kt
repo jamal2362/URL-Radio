@@ -10,8 +10,10 @@
 package com.jamal2367.urlradio.ui.stations
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,6 +22,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -30,10 +33,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,22 +42,32 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.jamal2367.urlradio.R
 import com.jamal2367.urlradio.core.Station
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlin.math.abs
+import kotlin.math.roundToInt
+import kotlin.math.sign
 import kotlin.time.Duration.Companion.milliseconds
 
 /** How close a dragged row has to get to the top/bottom of the viewport to auto-scroll it. */
@@ -66,6 +77,26 @@ private val DragAutoScrollEdge = 64.dp
 private const val DragAutoScrollSpeedFactor = 0.5f
 
 private const val DragAutoScrollIntervalMillis = 16L
+
+/**
+ * How far a swipe on a row has to actually travel before favouriting/deleting locks in. Below
+ * this the row can be dragged back and forth freely without anything committing.
+ */
+private val SwipeCommitDistance = 200.dp
+
+/**
+ * The row visually moves this fraction of the finger's own travel while below
+ * [SwipeCommitDistance] -- resistance, so the swipe feels like it takes real effort rather
+ * than the row just following the finger 1:1 from the first pixel.
+ */
+private const val SwipeResistance = 0.2f
+
+/**
+ * The fraction applied to travel *beyond* [SwipeCommitDistance]. Lighter than [SwipeResistance]
+ * so crossing the threshold feels like breaking through resistance rather than the row locking
+ * in place and refusing to move any further, while still not tracking the finger at full 1:1.
+ */
+private const val SwipePostCommitResistance = 0.9f
 
 /**
  * @param onDeleteRequest asks the host to confirm before anything is removed. Deletion never
@@ -299,52 +330,103 @@ private fun SwipeableStationRow(
     modifier: Modifier = Modifier,
     dragModifier: Modifier = Modifier,
 ) {
-    val dismissState = rememberSwipeToDismissBoxState()
+    // Hand-rolled rather than the material3 SwipeToDismissBox this used to be: that component
+    // has no hook for resistance or for a threshold that arms with haptic feedback, only a
+    // positional/velocity split for where it snaps to once the finger lifts. rawOffset is the
+    // finger's actual, unresisted travel -- what decides direction and whether the commit
+    // distance has been cleared -- while visualOffset is what the row is drawn at, which lags
+    // behind under heavy resistance up to that point and under lighter resistance beyond it,
+    // so the row keeps following the finger the whole time instead of ever stopping dead.
+    val density = LocalDensity.current
+    val layoutDirection = LocalLayoutDirection.current
+    val haptics = LocalHapticFeedback.current
+    val coroutineScope = rememberCoroutineScope()
+    val commitDistancePx = with(density) { SwipeCommitDistance.toPx() }
+    val visualOffsetAtCommitPx = commitDistancePx * SwipeResistance
 
-    // Neither swipe ever removes the row: a swipe is a shortcut for an action, and the card
-    // returns to its place afterward.
-    //
-    // This used to be a confirmValueChange that vetoed every state change, which is
-    // deprecated -- the recommendation is to leave disallowed states out of the anchor set
-    // instead, and an anchor set of one would mean the row could not be swiped at all. So the
-    // swipe is let through and undone here: reset animates the card back from wherever the
-    // dismiss left it. settledValue rather than currentValue, so the action fires once the
-    // gesture is over rather than while the finger is still moving across the row.
-    LaunchedEffect(dismissState.settledValue) {
-        when (dismissState.settledValue) {
-            // Towards the end (left in LTR) asks to delete. The removal itself waits for the
-            // confirmation dialog.
-            SwipeToDismissBoxValue.EndToStart -> {
-                onDeleteRequest()
-                dismissState.reset()
-            }
-            // Towards the start (right in LTR) toggles the favourite mark.
-            SwipeToDismissBoxValue.StartToEnd -> {
-                onToggleStarred()
-                dismissState.reset()
-            }
+    var rawOffset by remember { mutableFloatStateOf(0f) }
+    var lockedIn by remember { mutableStateOf(false) }
+    val visualOffset = remember { Animatable(0f) }
 
-            SwipeToDismissBoxValue.Settled -> Unit
-        }
+    // A function, not a val: pointerInput(Unit) below sets its gesture callbacks up exactly
+    // once and never re-runs that block on recomposition, so anything a callback closes over
+    // has to be re-read live rather than captured as a plain value -- a val computed out here
+    // would freeze at whatever it was on the very first composition (rawOffset == 0f, i.e.
+    // Settled) and every later swipe would still see that same stale Settled. rawOffset and
+    // lockedIn are State, so reading them fresh inside the function itself is what keeps this
+    // one correct instead.
+    fun directionOf(offset: Float): SwipeToDismissBoxValue = when {
+        offset == 0f -> SwipeToDismissBoxValue.Settled
+        (offset > 0f) == (layoutDirection == LayoutDirection.Ltr) -> SwipeToDismissBoxValue.StartToEnd
+        else -> SwipeToDismissBoxValue.EndToStart
     }
 
-    SwipeToDismissBox(
-        state = dismissState,
-        // dismissDirection follows the raw swipe offset, unlike targetValue which only
-        // flips once the row is dragged past the threshold. Keying the background on the
-        // latter is what made the color appear only from halfway across.
-        backgroundContent = {
-            SwipeBackground(
-                direction = dismissState.dismissDirection,
-                // Same rule as the heart/stripe/player button: the station's own accent
-                // color, so swiping to favourite it previews the same color it is about to
-                // pick up in the list.
-                favoriteAccentColor = if (station.imageColor != -1) Color(station.imageColor)
-                else MaterialTheme.colorScheme.primary,
+    // Used by SwipeBackground below, which -- unlike the gesture callbacks -- recomposes
+    // normally on every rawOffset change, so a plain val is live here and fine.
+    val direction = directionOf(rawOffset)
+
+    fun settle(committed: Boolean) {
+        // Towards the start (right in LTR) favourites; towards the end (left in LTR) asks to
+        // delete -- the removal itself still waits for the confirmation dialog.
+        if (committed) {
+            when (directionOf(rawOffset)) {
+                SwipeToDismissBoxValue.StartToEnd -> onToggleStarred()
+                SwipeToDismissBoxValue.EndToStart -> onDeleteRequest()
+                SwipeToDismissBoxValue.Settled -> Unit
+            }
+        }
+        rawOffset = 0f
+        lockedIn = false
+        coroutineScope.launch { visualOffset.animateTo(0f) }
+    }
+
+    Box(
+        modifier = modifier.pointerInput(Unit) {
+            detectHorizontalDragGestures(
+                onDragStart = {
+                    rawOffset = 0f
+                    lockedIn = false
+                },
+                onDragEnd = { settle(committed = lockedIn) },
+                onDragCancel = { settle(committed = false) },
+                onHorizontalDrag = { change, dragAmount ->
+                    change.consume()
+                    rawOffset += dragAmount
+                    val pastCommitDistance = abs(rawOffset) >= commitDistancePx
+                    if (pastCommitDistance && !lockedIn) {
+                        lockedIn = true
+                        // GestureThresholdActivate is documented for exactly this, but the
+                        // underlying platform constant only exists from Android 14 -- silently
+                        // a no-op on everything older, which this app's minSdk 23 has to
+                        // support. LongPress maps to a constant present since API 1.
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    } else if (!pastCommitDistance && lockedIn) {
+                        lockedIn = false
+                    }
+                    // Continuous at the handover on purpose: at exactly commitDistancePx both
+                    // branches agree, so crossing it changes how much further dragging moves
+                    // the row, not where the row already is.
+                    val target = if (lockedIn) {
+                        val excess = abs(rawOffset) - commitDistancePx
+                        sign(rawOffset) * (visualOffsetAtCommitPx + excess * SwipePostCommitResistance)
+                    } else {
+                        rawOffset * SwipeResistance
+                    }
+                    coroutineScope.launch { visualOffset.snapTo(target) }
+                },
             )
         },
-        modifier = modifier,
+        propagateMinConstraints = true,
     ) {
+        SwipeBackground(
+            direction = direction,
+            // Same rule as the heart/stripe/player button: the station's own accent color,
+            // so swiping to favourite it previews the same color it is about to pick up in
+            // the list.
+            favoriteAccentColor = if (station.imageColor != -1) Color(station.imageColor)
+            else MaterialTheme.colorScheme.primary,
+            modifier = Modifier.matchParentSize(),
+        )
         StationCard(
             station = station,
             isPlaying = isPlaying,
@@ -358,12 +440,17 @@ private fun SwipeableStationRow(
             onChangeImage = onChangeImage,
             onPlaceOnHomeScreen = onPlaceOnHomeScreen,
             dragModifier = dragModifier,
+            modifier = Modifier.offset { IntOffset(visualOffset.value.roundToInt(), 0) },
         )
     }
 }
 
 @Composable
-private fun SwipeBackground(direction: SwipeToDismissBoxValue, favoriteAccentColor: Color) {
+private fun SwipeBackground(
+    direction: SwipeToDismissBoxValue,
+    favoriteAccentColor: Color,
+    modifier: Modifier = Modifier,
+) {
     val isDelete = direction == SwipeToDismissBoxValue.EndToStart
     val isStar = direction == SwipeToDismissBoxValue.StartToEnd
     if (!isDelete && !isStar) return
@@ -378,8 +465,7 @@ private fun SwipeBackground(direction: SwipeToDismissBoxValue, favoriteAccentCol
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = if (isDelete) Arrangement.End else Arrangement.Start,
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = modifier
             .clip(RoundedCornerShape(24.dp))
             .background(background)
             .padding(horizontal = 24.dp),
