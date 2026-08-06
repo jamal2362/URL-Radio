@@ -37,6 +37,8 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -44,6 +46,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -247,68 +250,84 @@ private fun StationPickerDialog(
     val selectedStations = stations.filter { it.uuid in selectedUuids }
     val allSelected = stations.isNotEmpty() && selectedStations.size == stations.size
 
-    AlertDialog(
+    BasicAlertDialog(
         onDismissRequest = onDismiss,
         modifier = WideDialogModifier,
         properties = WideDialogProperties,
-        title = {
-            Text(
-                text = title,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        },
-        text = {
-            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                header()
+    ) {
+        Surface(
+            shape = AlertDialogDefaults.shape,
+            color = AlertDialogDefaults.containerColor,
+            tonalElevation = AlertDialogDefaults.TonalElevation,
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.headlineSmall,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp),
+                )
 
-                if (stations.isNotEmpty()) {
-                    SelectionToolbar(
-                        selectedCount = selectedStations.size,
-                        allSelected = allSelected,
-                        onSelectAll = onSelectAll,
-                        onClearSelection = onClearSelection,
-                    )
+                Column(
+                    modifier = Modifier
+                        .weight(weight = 1f, fill = false)
+                        .verticalScroll(rememberScrollState())
+                        .padding(bottom = 12.dp),
+                ) {
+                    header()
 
-                    Text(
-                        text = stringResource(R.string.dialog_station_picker_hint),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                    if (stations.isNotEmpty()) {
+                        SelectionToolbar(
+                            selectedCount = selectedStations.size,
+                            allSelected = allSelected,
+                            onSelectAll = onSelectAll,
+                            onClearSelection = onClearSelection,
+                        )
 
-                    StationPickerList(
-                        stations = stations,
-                        selectedUuids = selectedUuids,
-                        previewUuid = previewUuid,
-                        onToggleSelection = onToggleSelection,
-                        onTogglePreview = onTogglePreview,
-                    )
+                        Text(
+                            text = stringResource(R.string.dialog_station_picker_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+
+                        StationPickerList(
+                            stations = stations,
+                            selectedUuids = selectedUuids,
+                            previewUuid = previewUuid,
+                            onToggleSelection = onToggleSelection,
+                            onTogglePreview = onTogglePreview,
+                        )
+                    }
+                }
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    TextButton(onClick = onDismiss) {
+                        Text(stringResource(R.string.dialog_generic_button_cancel))
+                    }
+                    TextButton(
+                        onClick = { onAdd(selectedStations); onDismiss() },
+                        enabled = selectedStations.isNotEmpty(),
+                    ) {
+                        Text(
+                            if (selectedStations.size > 1) {
+                                stringResource(
+                                    R.string.dialog_find_station_button_add_count,
+                                    selectedStations.size,
+                                )
+                            } else {
+                                stringResource(R.string.dialog_find_station_button_add)
+                            }
+                        )
+                    }
                 }
             }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { onAdd(selectedStations); onDismiss() },
-                enabled = selectedStations.isNotEmpty(),
-            ) {
-                Text(
-                    if (selectedStations.size > 1) {
-                        stringResource(
-                            R.string.dialog_find_station_button_add_count,
-                            selectedStations.size,
-                        )
-                    } else {
-                        stringResource(R.string.dialog_find_station_button_add)
-                    }
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.dialog_generic_button_cancel))
-            }
-        },
-    )
+        }
+    }
 }
 
 /* "n selected" on the left, select-all / clear opposite it. */
