@@ -421,7 +421,7 @@ private fun OnboardingPane(modifier: Modifier = Modifier) {
         Icon(
             painter = painterResource(R.drawable.ic_audio_listening),
             contentDescription = stringResource(R.string.descr_app_icon),
-            tint = androidx.compose.ui.graphics.Color.Unspecified,
+            tint = Color.Unspecified,
             modifier = Modifier
                 .padding(top = 32.dp)
                 .size(192.dp),
