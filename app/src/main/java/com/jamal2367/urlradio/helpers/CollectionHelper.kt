@@ -250,6 +250,7 @@ object CollectionHelper {
                 ).toString()
                 station.imageColor = ImageHelper.getMainColor(context, tempImageFileUri)
                 station.imageManuallySet = imageManuallySet
+                station.modificationDate = GregorianCalendar.getInstance().time
             }
         }
         // save and return collection

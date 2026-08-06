@@ -223,11 +223,13 @@ class StationsViewModel(application: Application) : AndroidViewModel(application
     fun setStationImage(imageUri: Uri, stationUuid: String) {
         _collection.value = CollectionHelper.setStationImageWithStationUuid(
             getApplication(),
-            _collection.value,
+            _collection.value.deepCopy(),
             imageUri,
             stationUuid,
             imageManuallySet = true,
         )
+
+        modificationDate = _collection.value.modificationDate
     }
 
     fun isConnectedToNetwork(): Boolean = NetworkHelper.isConnectedToNetwork(getApplication())
