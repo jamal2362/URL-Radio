@@ -96,9 +96,7 @@ fun PlayerPane(
     val shownMetadata = playback.metadataHistory.getOrNull(metadataIndex)
         ?.sanitizedMetadata().orEmpty().ifEmpty { station.name }
     val playbackButtonDescription = stringResource(R.string.descr_player_playback_button)
-    // Same rule the station list uses for its starred heart and playing-station stripe, so
-    // the playback button reads as the one accent color for a station everywhere it shows up.
-    val accentColor = if (station.imageColor != -1) Color(station.imageColor)
+    val accentColor = if (playback.isPlaying && station.imageColor != -1) Color(station.imageColor)
     else MaterialTheme.colorScheme.primary
 
     // The player stays visually silent under the finger: no ripple, no hover or focus

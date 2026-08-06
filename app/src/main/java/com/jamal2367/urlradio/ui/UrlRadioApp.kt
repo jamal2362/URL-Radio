@@ -409,9 +409,10 @@ private fun StationsPane(
     // state.stations and its indices line up with the full list -- onMove needs no remapping.
     val visibleStations = if (selectedTab == 1) state.stations.filter { it.starred } else state.stations
 
-    // Same rule as the player's playback button and the list's starred heart, so the
-    // selected tab reads as the one accent color the current station shows up in everywhere.
-    val accentColor = if (state.currentStation.imageColor != -1) {
+    // Same rule as the player's playback button and border: the current station's own
+    // accent color, but only while it's actually playing -- once stopped this goes back to
+    // primary instead of staying tinted for a station no longer live.
+    val accentColor = if (state.playback.isPlaying && state.currentStation.imageColor != -1) {
         Color(state.currentStation.imageColor)
     } else {
         MaterialTheme.colorScheme.primary
