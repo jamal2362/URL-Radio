@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearWavyProgressIndicator
@@ -44,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
@@ -331,7 +333,16 @@ private fun SwipeableStationRow(
         // dismissDirection follows the raw swipe offset, unlike targetValue which only
         // flips once the row is dragged past the threshold. Keying the background on the
         // latter is what made the color appear only from halfway across.
-        backgroundContent = { SwipeBackground(dismissState.dismissDirection) },
+        backgroundContent = {
+            SwipeBackground(
+                direction = dismissState.dismissDirection,
+                // Same rule as the heart/stripe/player button: the station's own accent
+                // color, so swiping to favourite it previews the same color it is about to
+                // pick up in the list.
+                favoriteAccentColor = if (station.imageColor != -1) Color(station.imageColor)
+                else MaterialTheme.colorScheme.primary,
+            )
+        },
         modifier = modifier,
     ) {
         StationCard(
@@ -352,15 +363,17 @@ private fun SwipeableStationRow(
 }
 
 @Composable
-private fun SwipeBackground(direction: SwipeToDismissBoxValue) {
+private fun SwipeBackground(direction: SwipeToDismissBoxValue, favoriteAccentColor: Color) {
     val isDelete = direction == SwipeToDismissBoxValue.EndToStart
     val isStar = direction == SwipeToDismissBoxValue.StartToEnd
     if (!isDelete && !isStar) return
 
+    // Delete keeps its own error color -- only the favourite side picks up the station's
+    // accent, in the same light-wash-plus-full-color pattern used everywhere else now.
     val background = if (isDelete) MaterialTheme.colorScheme.errorContainer
-    else MaterialTheme.colorScheme.primaryContainer
+    else favoriteAccentColor.copy(alpha = 0.15f)
     val tint = if (isDelete) MaterialTheme.colorScheme.onErrorContainer
-    else MaterialTheme.colorScheme.onPrimaryContainer
+    else favoriteAccentColor
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -371,14 +384,25 @@ private fun SwipeBackground(direction: SwipeToDismissBoxValue) {
             .background(background)
             .padding(horizontal = 24.dp),
     ) {
-        Icon(
-            painter = painterResource(
-                if (isDelete) R.drawable.ic_remove_circle_24dp else R.drawable.ic_favorite_24dp
-            ),
-            contentDescription = null,
-            tint = tint,
-            modifier = Modifier.size(24.dp),
-        )
+        // Same badge shape a starred station shows in the list: a light circle in the
+        // icon's own color, the icon at full strength on top. Applies to both sides now,
+        // not just the favourite one.
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(36.dp)
+                .clip(CircleShape)
+                .background(tint.copy(alpha = 0.15f)),
+        ) {
+            Icon(
+                painter = painterResource(
+                    if (isDelete) R.drawable.ic_remove_circle_24dp else R.drawable.ic_favorite_24dp
+                ),
+                contentDescription = null,
+                tint = tint,
+                modifier = Modifier.size(24.dp),
+            )
+        }
     }
 }
 
