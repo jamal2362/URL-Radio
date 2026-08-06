@@ -88,7 +88,10 @@ fun StationCard(
     modifier: Modifier = Modifier,
     dragModifier: Modifier = Modifier,
 ) {
-    val accentColor = MaterialTheme.colorScheme.primary
+    // Same rule the starred heart uses, so the playing-station stripe and the favourite
+    // marker read as the one accent color for a station rather than two different ones.
+    val accentColor = if (station.imageColor != -1) Color(station.imageColor)
+    else MaterialTheme.colorScheme.primary
     Card(
         shape = CardShape,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
@@ -164,22 +167,20 @@ fun StationCard(
                 // sits outside the text's clickable -- so a long press to the right of the
                 // name still reaches the row's reorder gesture, however long the name is.
                 if (station.starred) {
-                    val heartTint = if (station.imageColor != -1) Color(station.imageColor)
-                    else MaterialTheme.colorScheme.primary
-
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
                             .size(36.dp)
                             .clip(CircleShape)
-                            // Tinted with the heart's own color rather than a neutral one, kept
-                            // light so the fully-opaque heart on top still stands out against it.
-                            .background(heartTint.copy(alpha = 0.15f)),
+                            // Tinted with the station's own accent color rather than a neutral
+                            // one, kept light so the fully-opaque heart on top still stands out
+                            // against it.
+                            .background(accentColor.copy(alpha = 0.15f)),
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.ic_favorite_default_24dp),
                             contentDescription = stringResource(R.string.descr_card_starred_station),
-                            tint = heartTint,
+                            tint = accentColor,
                             modifier = Modifier.size(24.dp),
                         )
                     }
