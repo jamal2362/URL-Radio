@@ -178,7 +178,7 @@ fun StationListScreen(
                             onDragStart = {
                                 val info = listState.layoutInfo.visibleItemsInfo
                                     .firstOrNull { it.key == station.uuid }
-                                draggedIndex = index
+                                draggedIndex = info?.let { it.index - stationsIndexOffset } ?: index
                                 dragStartOffset = info?.offset ?: 0
                                 dragStartSize = info?.size ?: 0
                                 draggedDistance = 0f

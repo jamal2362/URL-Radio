@@ -141,7 +141,7 @@ class StationsViewModel(application: Application) : AndroidViewModel(application
             val context = getApplication<Application>()
             CollectionHelper.deleteStationImages(context, station)
             withContext(Dispatchers.Main) {
-                CollectionHelper.saveCollection(context, updated)
+                modificationDate = CollectionHelper.saveCollection(context, updated)
             }
         }
     }
@@ -162,8 +162,9 @@ class StationsViewModel(application: Application) : AndroidViewModel(application
         // Written before the images are cleaned up rather than after: the sooner the empty
         // collection reaches storage, the smaller the window in which the player service can
         // save its own copy over it. saveCollection does the file write on a background
-        // thread itself.
-        CollectionHelper.saveCollection(getApplication(), updated, allowEmpty = true)
+        // thread itself. Recorded for the same reason as in removeStation -- so the
+        // resulting broadcast isn't mistaken for someone else's newer write.
+        modificationDate = CollectionHelper.saveCollection(getApplication(), updated, allowEmpty = true)
         viewModelScope.launch(Dispatchers.IO) {
             val context = getApplication<Application>()
             removed.forEach { CollectionHelper.deleteStationImages(context, it) }
@@ -176,7 +177,7 @@ class StationsViewModel(application: Application) : AndroidViewModel(application
         station.starred = !station.starred
         val sorted = CollectionHelper.sortCollection(updated)
         _collection.value = sorted
-        CollectionHelper.saveCollection(getApplication(), sorted)
+        modificationDate = CollectionHelper.saveCollection(getApplication(), sorted)
     }
 
     fun saveStation(stationUuid: String, name: String, streamUri: String) {
@@ -191,7 +192,7 @@ class StationsViewModel(application: Application) : AndroidViewModel(application
         }
         val sorted = CollectionHelper.sortCollection(updated)
         _collection.value = sorted
-        CollectionHelper.saveCollection(getApplication(), sorted)
+        modificationDate = CollectionHelper.saveCollection(getApplication(), sorted)
     }
 
     /*
@@ -212,7 +213,7 @@ class StationsViewModel(application: Application) : AndroidViewModel(application
 
     /* Called once the drag gesture ends, so the file is written once rather than per step. */
     fun persistOrder() {
-        CollectionHelper.saveCollection(getApplication(), _collection.value)
+        modificationDate = CollectionHelper.saveCollection(getApplication(), _collection.value)
     }
 
     fun addStation(station: Station) {
