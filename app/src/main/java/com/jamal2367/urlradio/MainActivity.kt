@@ -26,6 +26,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
@@ -289,7 +290,8 @@ class MainActivity : ComponentActivity() {
 
         UrlRadioTheme(darkTheme = darkTheme) {
             val windowSizeClass = calculateWindowSizeClass(this)
-            val isWide = windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact
+            val isWide = windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact &&
+                windowSizeClass.heightSizeClass != WindowHeightSizeClass.Compact
 
             UrlRadioApp(
                 state = AppState(
