@@ -409,6 +409,14 @@ private fun StationsPane(
     // state.stations and its indices line up with the full list -- onMove needs no remapping.
     val visibleStations = if (selectedTab == 1) state.stations.filter { it.starred } else state.stations
 
+    // Same rule as the player's playback button and the list's starred heart, so the
+    // selected tab reads as the one accent color the current station shows up in everywhere.
+    val accentColor = if (state.currentStation.imageColor != -1) {
+        Color(state.currentStation.imageColor)
+    } else {
+        MaterialTheme.colorScheme.primary
+    }
+
     // Add-station and settings flank the tab selector. The tabs themselves drop out during
     // onboarding -- there is nothing to filter yet -- but the two buttons stay, because
     // adding the first station is the whole point of that screen.
@@ -417,6 +425,7 @@ private fun StationsPane(
             selectedTab = selectedTab,
             onSelect = onSelectTab,
             showTabs = !state.showOnboarding,
+            accentColor = accentColor,
             onAddStation = actions.onAddStation,
             onOpenSettings = onOpenSettings,
             modifier = rowModifier.padding(
@@ -487,6 +496,7 @@ private fun StationsTopBar(
     selectedTab: Int,
     onSelect: (Int) -> Unit,
     showTabs: Boolean,
+    accentColor: Color,
     onAddStation: () -> Unit,
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
@@ -511,6 +521,7 @@ private fun StationsTopBar(
             FloatingTabBar(
                 selectedTab = selectedTab,
                 onSelect = onSelect,
+                accentColor = accentColor,
                 modifier = Modifier.weight(1f),
             )
         } else {
@@ -544,6 +555,7 @@ private fun RoundBarButton(icon: Int, contentDescription: String, onClick: () ->
 private fun FloatingTabBar(
     selectedTab: Int,
     onSelect: (Int) -> Unit,
+    accentColor: Color,
     modifier: Modifier = Modifier,
 ) {
     Surface(
@@ -557,12 +569,14 @@ private fun FloatingTabBar(
                 label = stringResource(R.string.tab_stations_all),
                 selected = selectedTab == 0,
                 onClick = { onSelect(0) },
+                accentColor = accentColor,
                 modifier = Modifier.weight(1f),
             )
             FloatingTabBarItem(
                 label = stringResource(R.string.tab_stations_favorites),
                 selected = selectedTab == 1,
                 onClick = { onSelect(1) },
+                accentColor = accentColor,
                 modifier = Modifier.weight(1f),
             )
         }
@@ -574,15 +588,20 @@ private fun FloatingTabBarItem(
     label: String,
     selected: Boolean,
     onClick: () -> Unit,
+    accentColor: Color,
     modifier: Modifier = Modifier,
 ) {
+    // Same light-wash-plus-full-color treatment as the player's playback button: a
+    // 15%-opacity tint behind the selected tab rather than a solid fill, with the label
+    // itself carrying the full color. accentColor is the current station's own color (its
+    // heart/stripe color), same as the playback button below -- falling back to primary
+    // exactly like that heart does when the station has none of its own.
     val background by animateColorAsState(
-        targetValue = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
+        targetValue = if (selected) accentColor.copy(alpha = 0.15f) else Color.Transparent,
         label = "tabBackground",
     )
     val content by animateColorAsState(
-        targetValue = if (selected) MaterialTheme.colorScheme.onPrimary
-        else MaterialTheme.colorScheme.onSurfaceVariant,
+        targetValue = if (selected) accentColor else MaterialTheme.colorScheme.onSurfaceVariant,
         label = "tabContent",
     )
 
