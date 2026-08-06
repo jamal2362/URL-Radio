@@ -16,10 +16,10 @@ package com.jamal2367.urlradio.search
 
 import android.content.Context
 import android.webkit.URLUtil
-import android.widget.Toast
 import com.jamal2367.urlradio.R
 import com.jamal2367.urlradio.core.Station
 import com.jamal2367.urlradio.helpers.CollectionHelper
+import com.jamal2367.urlradio.helpers.UserMessages
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
@@ -64,7 +64,7 @@ class DirectInputCheck(private var directInputCheckListener: DirectInputCheckLis
                         directInputCheckListener.onDirectInputCheck(stationList)
                     } else {
                         // invalid address
-                        Toast.makeText(context, R.string.toastmessage_station_not_valid, Toast.LENGTH_LONG).show()
+                        UserMessages.notify(context.getString(R.string.snackbar_station_not_valid))
                     }
                 }
             }

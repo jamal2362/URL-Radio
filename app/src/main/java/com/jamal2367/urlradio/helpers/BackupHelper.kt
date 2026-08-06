@@ -52,7 +52,7 @@ object BackupHelper {
         if (sourceFolder != null && sourceFolder.isDirectory) {
             onMessage(
                 "${FileHelper.getFileName(context, destinationUri)} " +
-                    context.getString(R.string.toastmessage_backed_up)
+                    context.getString(R.string.snackbar_backed_up)
             )
             val resolver: ContentResolver = context.contentResolver
             val outputStream: OutputStream? = resolver.openOutputStream(destinationUri)
@@ -69,7 +69,7 @@ object BackupHelper {
 
     /* Extracts zip backup  file and restores files and folders - Credit: https://www.baeldung.com/java-compress-and-uncompress*/
     fun restore(context: Context, sourceUri: Uri, onMessage: (String) -> Unit = {}) {
-        onMessage(context.getString(R.string.toastmessage_restored))
+        onMessage(context.getString(R.string.snackbar_restored))
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             // bypass "ZipException" for Android 14 or above applications when zip file names contain "." or start with "/"

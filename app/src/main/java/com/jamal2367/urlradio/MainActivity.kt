@@ -16,7 +16,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -50,6 +49,7 @@ import com.jamal2367.urlradio.helpers.ImportHelper
 import com.jamal2367.urlradio.helpers.PreferencesHelper
 import com.jamal2367.urlradio.helpers.ShortcutHelper
 import com.jamal2367.urlradio.helpers.UpdateCheckHelper
+import com.jamal2367.urlradio.helpers.UserMessages
 import com.jamal2367.urlradio.playback.PlaybackConnection
 import com.jamal2367.urlradio.ui.AppActions
 import com.jamal2367.urlradio.ui.AppState
@@ -63,7 +63,6 @@ import com.jamal2367.urlradio.ui.settings.SettingsCallbacks
 import com.jamal2367.urlradio.ui.stations.StationsViewModel
 import com.jamal2367.urlradio.ui.theme.UrlRadioTheme
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
@@ -90,9 +89,6 @@ class MainActivity : ComponentActivity() {
      */
     private var pendingPlaybackIntent by mutableStateOf<Intent?>(null)
 
-    /* Messages raised outside the composition (backup/restore) that the UI shows. */
-    private val snackbarMessages = MutableSharedFlow<String>(extraBufferCapacity = 4)
-
     // ---- activity result launchers ----
 
     private val pickImageLauncher =
@@ -100,7 +96,7 @@ class MainActivity : ComponentActivity() {
             val stationUuid = imageTargetStationUuid
             imageTargetStationUuid = ""
             if (uri == null || stationUuid.isEmpty()) {
-                toast(R.string.toastalert_failed_picking_media)
+                showMessage(R.string.snackbar_failed_picking_media)
             } else {
                 stationsViewModelRef?.setStationImage(uri, stationUuid)
             }
@@ -110,21 +106,19 @@ class MainActivity : ComponentActivity() {
 
     private val saveM3uLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            copyExport(result, FileHelper.getM3ulUri(this), R.string.toastmessage_save_m3u, "M3U")
+            copyExport(result, FileHelper.getM3ulUri(this), R.string.snackbar_save_m3u, "M3U")
         }
 
     private val savePlsLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            copyExport(result, FileHelper.getPlsqlUri(this), R.string.toastmessage_save_pls, "PLS")
+            copyExport(result, FileHelper.getPlsqlUri(this), R.string.snackbar_save_pls, "PLS")
         }
 
     private val backupLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             val target = result.data?.data
             if (result.resultCode == RESULT_OK && target != null) {
-                BackupHelper.backup(this, target) { message ->
-                    lifecycleScope.launch { snackbarMessages.emit(message) }
-                }
+                BackupHelper.backup(this, target) { message -> UserMessages.notify(message) }
             } else {
                 Log.w(tag, "Station backup failed.")
             }
@@ -233,8 +227,7 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // Playback errors surface as a snackbar rather than a toast.
-        val connectionFailed = stringResource(R.string.toastmessage_connection_failed)
+        val connectionFailed = stringResource(R.string.snackbar_connection_failed)
         LaunchedEffect(playbackState.errorEvent) {
             if (playbackState.errorEvent != null) {
                 snackbarHostState.showSnackbar(connectionFailed)
@@ -264,8 +257,11 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        // Every snackbar the app shows funnels through here -- including from plain helper
+        // objects (CollectionHelper, DownloadHelper, ShortcutHelper, ...) that have no View
+        // or coroutine scope of their own to show one through.
         LaunchedEffect(Unit) {
-            snackbarMessages.collect { snackbarHostState.showSnackbar(it) }
+            UserMessages.messages.collect { snackbarHostState.showSnackbar(it) }
         }
 
         // Runs a start intent only once the controller is live.
@@ -277,11 +273,10 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // A snackbar would be drawn behind the dialog's scrim, so preview feedback is a toast.
         // Only the failure is announced: a running preview is visible on the row itself.
         LaunchedEffect(searchState.previewStartedEvent, searchState.previewUnsupportedEvent) {
             if (searchState.previewUnsupportedEvent != null) {
-                toast(R.string.toastmessage_preview_playback_failed)
+                showMessage(R.string.snackbar_preview_playback_failed)
             }
             if (searchState.previewUnsupportedEvent != null || searchState.previewStartedEvent != null) {
                 searchViewModel.consumeEvents()
@@ -352,7 +347,7 @@ class MainActivity : ComponentActivity() {
                                 DownloadHelper.updateStationImages(this)
                                 lifecycleScope.launch {
                                     snackbarHostState.showSnackbar(
-                                        getString(R.string.toastmessage_updating_station_images)
+                                        getString(R.string.snackbar_updating_station_images)
                                     )
                                 }
                             } else {
@@ -382,7 +377,7 @@ class MainActivity : ComponentActivity() {
                             }
                             runCatching { importPlaylistLauncher.launch(intent) }.onFailure {
                                 Log.e(tag, "Unable to open file picker for playlists.\n$it")
-                                toast(R.string.toastmessage_install_file_helper)
+                                showMessage(R.string.snackbar_install_file_helper)
                             }
                         },
                         onExportM3u = {
@@ -472,7 +467,7 @@ class MainActivity : ComponentActivity() {
                             confirmLabel = stringResource(R.string.dialog_yes_no_positive_button_default),
                             onConfirm = {
                                 BackupHelper.restore(this@MainActivity, uri) { message ->
-                                    lifecycleScope.launch { snackbarMessages.emit(message) }
+                                    UserMessages.notify(message)
                                 }
                             },
                             onDismiss = { pendingRestoreUri = null },
@@ -480,7 +475,7 @@ class MainActivity : ComponentActivity() {
                     } else {
                         LaunchedEffect(uri) {
                             BackupHelper.restore(this@MainActivity, uri) { message ->
-                                lifecycleScope.launch { snackbarMessages.emit(message) }
+                                UserMessages.notify(message)
                             }
                             pendingRestoreUri = null
                         }
@@ -549,7 +544,7 @@ class MainActivity : ComponentActivity() {
             if (stations.isNotEmpty()) {
                 pendingImportStations = stations
             } else {
-                toast(R.string.toastmessage_station_not_valid)
+                showMessage(R.string.snackbar_station_not_valid)
             }
         }
     }
@@ -558,10 +553,10 @@ class MainActivity : ComponentActivity() {
      * Reads a picked .m3u / .pls file and offers whatever it contains for selection.
      *
      * Every entry has to be asked what it actually serves, so this can take a moment on a
-     * long playlist -- hence the toast before the work starts.
+     * long playlist -- hence the snackbar before the work starts.
      */
     private fun importPlaylist(uri: Uri) {
-        toast(R.string.toastmessage_playlist_import_running)
+        showMessage(R.string.snackbar_playlist_import_running)
         lifecycleScope.launch {
             val stations: List<Station> = withContext(Dispatchers.IO) {
                 runCatching {
@@ -574,7 +569,7 @@ class MainActivity : ComponentActivity() {
             if (stations.isNotEmpty()) {
                 pendingImportStations = stations
             } else {
-                toast(R.string.toastmessage_playlist_import_empty)
+                showMessage(R.string.snackbar_playlist_import_empty)
             }
         }
     }
@@ -614,7 +609,7 @@ class MainActivity : ComponentActivity() {
             lifecycleScope.launch(Dispatchers.IO) {
                 FileHelper.saveCopyOfFileSuspended(this@MainActivity, source, target)
             }
-            toast(messageRes)
+            showMessage(messageRes)
         } else {
             Log.w(tag, "$label export failed.")
         }
@@ -634,7 +629,7 @@ class MainActivity : ComponentActivity() {
         }
         runCatching { launcher.launch(intent) }.onFailure {
             Log.e(tag, "Unable to open the file picker.\n$it")
-            toast(R.string.toastmessage_install_file_helper)
+            showMessage(R.string.snackbar_install_file_helper)
         }
     }
 
@@ -643,7 +638,7 @@ class MainActivity : ComponentActivity() {
         (getSystemService(CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(clip)
         // Since Android 13 the system shows its own copy confirmation.
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            toast(R.string.toastmessage_copied_to_clipboard)
+            showMessage(R.string.snackbar_copied_to_clipboard)
         }
     }
 
@@ -661,7 +656,7 @@ class MainActivity : ComponentActivity() {
         runCatching { startActivity(Intent(Intent.ACTION_VIEW, url.toUri())) }
     }
 
-    private fun toast(messageRes: Int) {
-        Toast.makeText(this, messageRes, Toast.LENGTH_LONG).show()
+    private fun showMessage(messageRes: Int) {
+        UserMessages.notify(getString(messageRes))
     }
 }

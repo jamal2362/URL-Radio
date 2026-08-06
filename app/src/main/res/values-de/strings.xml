@@ -104,28 +104,24 @@
     <string name="shortcut_last_station_long_label">Letzten Sender wiedergeben</string>
     <string name="shortcut_last_station_short_label">Letzter Sender</string>
 
-    <!-- Toast Alerts -->
-    <string name="toastalert_failed_picking_media">Bildauswahl fehlgeschlagen.</string>
-
-    <!-- Toasts -->
-    <string name="toastmessage_backed_up">wurde erfolgreich gesichert.</string>
-    <string name="toastmessage_connection_failed">Die Verbindung konnte nicht aufgebaut oder wiederhergestellt werden.</string>
-    <string name="toastmessage_copied_to_clipboard">In die Zwischenablage kopiert</string>
-    <string name="toastmessage_error_download_error">Fehler beim Herunterladen</string>
-    <string name="toastmessage_install_file_helper">Bitte installiere einen Dateimanager</string>
-    <string name="toastmessage_playlist_import_empty">In dieser Playlist wurden keine unterstützten Sender gefunden.</string>
-    <string name="toastmessage_playlist_import_running">Playlist wird gelesen…</string>
-    <string name="toastmessage_preview_playback_failed">Die Vorschauwiedergabe ist nicht möglich.</string>
-    <string name="toastmessage_restored">Stationen wurden erfolgreich wiederhergestellt.</string>
-    <string name="toastmessage_save_m3u">Radiosender als M3U gespeichert…</string>
-    <string name="toastmessage_save_pls">Radiosender als PLS gespeichert…</string>
-    <string name="toastmessage_shortcut_created">Sender auf Startbildschirm platzieren</string>
-    <string name="toastmessage_shortcut_not_created">Sender konnte nicht auf dem Startbildschirm platziert werden. Das Gerät unterbindet das Platzieren von Verknüpfungen.</string>
-    <string name="toastmessage_station_duplicate">Dieser Sender ist ein Duplikat</string>
-    <string name="toastmessage_station_not_valid">Dieser Sender existiert nicht</string>
-    <string name="toastmessage_updating_station_images">Alle Senderbilder werden aktualisiert</string>
-
     <!-- Snackbars -->
+    <string name="snackbar_failed_picking_media">Bildauswahl fehlgeschlagen.</string>
+    <string name="snackbar_backed_up">wurde erfolgreich gesichert.</string>
+    <string name="snackbar_connection_failed">Die Verbindung konnte nicht aufgebaut oder wiederhergestellt werden.</string>
+    <string name="snackbar_copied_to_clipboard">In die Zwischenablage kopiert</string>
+    <string name="snackbar_error_download_error">Fehler beim Herunterladen</string>
+    <string name="snackbar_install_file_helper">Bitte installiere einen Dateimanager</string>
+    <string name="snackbar_playlist_import_empty">In dieser Playlist wurden keine unterstützten Sender gefunden.</string>
+    <string name="snackbar_playlist_import_running">Playlist wird gelesen…</string>
+    <string name="snackbar_preview_playback_failed">Die Vorschauwiedergabe ist nicht möglich.</string>
+    <string name="snackbar_restored">Stationen wurden erfolgreich wiederhergestellt.</string>
+    <string name="snackbar_save_m3u">Radiosender als M3U gespeichert…</string>
+    <string name="snackbar_save_pls">Radiosender als PLS gespeichert…</string>
+    <string name="snackbar_shortcut_created">Sender auf Startbildschirm platzieren</string>
+    <string name="snackbar_shortcut_not_created">Sender konnte nicht auf dem Startbildschirm platziert werden. Das Gerät unterbindet das Platzieren von Verknüpfungen.</string>
+    <string name="snackbar_station_duplicate">Dieser Sender ist ein Duplikat</string>
+    <string name="snackbar_station_not_valid">Dieser Sender existiert nicht</string>
+    <string name="snackbar_updating_station_images">Alle Senderbilder werden aktualisiert</string>
     <string name="snackbar_show">Zeigen</string>
     <string name="snackbar_update_available">ist verfügbar!</string>
 </resources>

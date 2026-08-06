@@ -19,7 +19,6 @@ import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 import android.util.Log
-import android.widget.Toast
 import androidx.core.net.toUri
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
@@ -107,11 +106,9 @@ object DownloadHelper {
         if (downloadResult == null) {
             val downloadErrorCode: Int = getDownloadError(downloadId)
             val downloadErrorFileName: String = getDownloadFileName(downloadManager, downloadId)
-            Toast.makeText(
-                context,
-                "${context.getString(R.string.toastmessage_error_download_error)}: $downloadErrorFileName ($downloadErrorCode)",
-                Toast.LENGTH_LONG
-            ).show()
+            UserMessages.notify(
+                "${context.getString(R.string.snackbar_error_download_error)}: $downloadErrorFileName ($downloadErrorCode)"
+            )
             Log.w(
                 tag,
                 "Download not successful: File name = $downloadErrorFileName Error code = $downloadErrorCode"

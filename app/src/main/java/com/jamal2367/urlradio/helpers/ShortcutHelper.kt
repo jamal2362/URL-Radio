@@ -18,7 +18,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Build
-import android.widget.Toast
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
@@ -45,11 +44,9 @@ object ShortcutHelper {
                 .setIntent(createShortcutIntent(context, station.uuid))
                 .build()
             ShortcutManagerCompat.requestPinShortcut(context, shortcut, null)
-            Toast.makeText(context, R.string.toastmessage_shortcut_created, Toast.LENGTH_LONG)
-                .show()
+            UserMessages.notify(context.getString(R.string.snackbar_shortcut_created))
         } else {
-            Toast.makeText(context, R.string.toastmessage_shortcut_not_created, Toast.LENGTH_LONG)
-                .show()
+            UserMessages.notify(context.getString(R.string.snackbar_shortcut_not_created))
         }
     }
 

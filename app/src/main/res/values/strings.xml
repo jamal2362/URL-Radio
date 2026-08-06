@@ -112,28 +112,24 @@
     <string name="shortcut_last_station_long_label">Play last station</string>
     <string name="shortcut_last_station_short_label">Last station</string>
 
-    <!-- Toast Alerts -->
-    <string name="toastalert_failed_picking_media">Image selection failed.</string>
-
-    <!-- Toasts -->
-    <string name="toastmessage_backed_up">has been successfully backed up.</string>
-    <string name="toastmessage_connection_failed">The connection could not be established or restored.</string>
-    <string name="toastmessage_copied_to_clipboard">Copied to clipboard.</string>
-    <string name="toastmessage_error_download_error">Download error</string>
-    <string name="toastmessage_install_file_helper">Please install a file manager.</string>
-    <string name="toastmessage_playlist_import_empty">No supported stations found in this playlist.</string>
-    <string name="toastmessage_playlist_import_running">Reading playlist…</string>
-    <string name="toastmessage_preview_playback_failed">Preview playback not possible.</string>
-    <string name="toastmessage_restored">Stations has been successfully restored.</string>
-    <string name="toastmessage_save_m3u">Saving radio stations as M3U…</string>
-    <string name="toastmessage_save_pls">Saving radio stations as PLS…</string>
-    <string name="toastmessage_shortcut_created">Shortcut created.</string>
-    <string name="toastmessage_shortcut_not_created">Shortcut not created. This device does not allow the creation of shortcuts.</string>
-    <string name="toastmessage_station_duplicate">This station is a duplicate.</string>
-    <string name="toastmessage_station_not_valid">Station is not valid.</string>
-    <string name="toastmessage_updating_station_images">Updating station images.</string>
-
     <!-- Snackbars -->
+    <string name="snackbar_failed_picking_media">Image selection failed.</string>
+    <string name="snackbar_backed_up">has been successfully backed up.</string>
+    <string name="snackbar_connection_failed">The connection could not be established or restored.</string>
+    <string name="snackbar_copied_to_clipboard">Copied to clipboard.</string>
+    <string name="snackbar_error_download_error">Download error</string>
+    <string name="snackbar_install_file_helper">Please install a file manager.</string>
+    <string name="snackbar_playlist_import_empty">No supported stations found in this playlist.</string>
+    <string name="snackbar_playlist_import_running">Reading playlist…</string>
+    <string name="snackbar_preview_playback_failed">Preview playback not possible.</string>
+    <string name="snackbar_restored">Stations has been successfully restored.</string>
+    <string name="snackbar_save_m3u">Saving radio stations as M3U…</string>
+    <string name="snackbar_save_pls">Saving radio stations as PLS…</string>
+    <string name="snackbar_shortcut_created">Shortcut created.</string>
+    <string name="snackbar_shortcut_not_created">Shortcut not created. This device does not allow the creation of shortcuts.</string>
+    <string name="snackbar_station_duplicate">This station is a duplicate.</string>
+    <string name="snackbar_station_not_valid">Station is not valid.</string>
+    <string name="snackbar_updating_station_images">Updating station images.</string>
     <string name="snackbar_show">Show</string>
     <string name="snackbar_update_available">is available!</string>
     <string name="snackbar_url_app_home_page" translatable="false">https://github.com/jamal2362/URL-Radio/releases/latest</string>

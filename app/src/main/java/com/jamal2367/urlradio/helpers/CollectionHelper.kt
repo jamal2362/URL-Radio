@@ -16,10 +16,7 @@ package com.jamal2367.urlradio.helpers
 
 import android.content.Context
 import android.net.Uri
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
-import android.widget.Toast
 import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
@@ -154,17 +151,13 @@ object CollectionHelper {
     fun addStation(context: Context, collection: Collection, newStation: Station): Collection {
         // check validity
         if (!newStation.isValid()) {
-            Toast.makeText(context, R.string.toastmessage_station_not_valid, Toast.LENGTH_LONG)
-                .show()
+            UserMessages.notify(context.getString(R.string.snackbar_station_not_valid))
             return collection
         }
         // duplicate check
         else if (!isNewStation(collection, newStation)) {
             // update station
-            Handler(Looper.getMainLooper()).post {
-                Toast.makeText(context, R.string.toastmessage_station_duplicate, Toast.LENGTH_LONG)
-                    .show()
-            }
+            UserMessages.notify(context.getString(R.string.snackbar_station_duplicate))
             return collection
         }
         // all clear -> add station
