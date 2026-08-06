@@ -12,6 +12,7 @@ package com.jamal2367.urlradio.ui.stations
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,12 +46,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.jamal2367.urlradio.R
 import com.jamal2367.urlradio.core.Station
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlin.time.Duration.Companion.milliseconds
+
+/** How close a dragged row has to get to the top/bottom of the viewport to auto-scroll it. */
+private val DragAutoScrollEdge = 64.dp
+
+/** Pixels of underlying scroll per pixel the dragged row sits inside the edge strip. */
+private const val DragAutoScrollSpeedFactor = 0.5f
+
+private const val DragAutoScrollIntervalMillis = 16L
 
 /**
  * @param onDeleteRequest asks the host to confirm before anything is removed. Deletion never
@@ -109,11 +122,34 @@ fun StationListScreen(
         var draggedDistance by remember { mutableFloatStateOf(0f) }
         var dragStartOffset by remember { mutableIntStateOf(0) }
         var dragStartSize by remember { mutableIntStateOf(0) }
+        val density = LocalDensity.current
+
+        LaunchedEffect(draggedIndex) {
+            if (draggedIndex == null) return@LaunchedEffect
+            val edgePx = with(density) { DragAutoScrollEdge.toPx() }
+            while (isActive) {
+                val viewportHeight = listState.layoutInfo.viewportSize.height
+                val top = dragStartOffset + draggedDistance
+                val bottom = top + dragStartSize
+                val intoTopEdge = (edgePx - top).coerceAtLeast(0f)
+                val intoBottomEdge = (edgePx - (viewportHeight - bottom)).coerceAtLeast(0f)
+                val scrollAmount = when {
+                    intoTopEdge > 0f -> -intoTopEdge
+                    intoBottomEdge > 0f -> intoBottomEdge
+                    else -> 0f
+                }
+                if (scrollAmount != 0f) {
+                    listState.scrollBy(scrollAmount * DragAutoScrollSpeedFactor)
+                }
+                delay(DragAutoScrollIntervalMillis.milliseconds)
+            }
+        }
 
         LazyColumn(
             state = listState,
             contentPadding = contentPadding,
             verticalArrangement = Arrangement.spacedBy(8.dp),
+            userScrollEnabled = draggedIndex == null,
             modifier = Modifier.fillMaxSize(),
         ) {
             item(key = "header") { header() }
