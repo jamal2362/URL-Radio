@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -286,12 +287,6 @@ private fun StationPickerDialog(
                             onClearSelection = onClearSelection,
                         )
 
-                        Text(
-                            text = stringResource(R.string.dialog_station_picker_hint),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-
                         StationPickerList(
                             stations = stations,
                             selectedUuids = selectedUuids,
@@ -303,9 +298,21 @@ private fun StationPickerDialog(
                 }
 
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
+                    if (stations.isNotEmpty()) {
+                        Text(
+                            text = stringResource(R.string.dialog_station_picker_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.weight(1f),
+                        )
+                    } else {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+
                     TextButton(onClick = onDismiss) {
                         Text(stringResource(R.string.dialog_generic_button_cancel))
                     }

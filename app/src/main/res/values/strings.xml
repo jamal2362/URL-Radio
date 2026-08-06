@@ -34,7 +34,7 @@
     <string name="dialog_generic_button_okay">OK</string>
     <string name="dialog_restore_collection_replace_existing">Replace current collection of radio stations with the radio station from backup?</string>
     <string name="dialog_station_picker_clear">Clear</string>
-    <string name="dialog_station_picker_hint">Tap to select · Long press to preview</string>
+    <string name="dialog_station_picker_hint">Long press to preview the station</string>
     <string name="dialog_station_picker_select_all">Select all</string>
     <string name="dialog_station_picker_selected">%1$d selected</string>
     <string name="dialog_yes_no_message_remove_all_stations">Remove all stations? This cannot be undone.</string>
