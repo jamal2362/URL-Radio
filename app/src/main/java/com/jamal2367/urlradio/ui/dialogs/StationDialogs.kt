@@ -30,10 +30,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -52,6 +54,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.jamal2367.urlradio.R
@@ -135,7 +138,6 @@ fun FindStationDialog(
 ) {
     StationPickerDialog(
         title = stringResource(R.string.dialog_find_station_title),
-        icon = R.drawable.ic_add_24dp,
         stations = state.results,
         selectedUuids = state.selectedUuids,
         previewUuid = state.previewUuid,
@@ -205,7 +207,6 @@ fun AddStationDialog(
 ) {
     StationPickerDialog(
         title = stringResource(R.string.dialog_add_station_title),
-        icon = R.drawable.ic_playlist_add_24dp,
         stations = stations,
         selectedUuids = selectedUuids,
         previewUuid = previewUuid,
@@ -232,7 +233,6 @@ fun AddStationDialog(
 @Composable
 private fun StationPickerDialog(
     title: String,
-    icon: Int,
     stations: List<Station>,
     selectedUuids: Set<String>,
     previewUuid: String,
@@ -251,10 +251,15 @@ private fun StationPickerDialog(
         onDismissRequest = onDismiss,
         modifier = WideDialogModifier,
         properties = WideDialogProperties,
-        icon = { Icon(painter = painterResource(icon), contentDescription = null) },
-        title = { Text(title) },
+        title = {
+            Text(
+                text = title,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        },
         text = {
-            Column {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 header()
 
                 if (stations.isNotEmpty()) {
