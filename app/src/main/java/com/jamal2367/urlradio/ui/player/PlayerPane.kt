@@ -38,6 +38,7 @@ import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
@@ -93,6 +94,10 @@ fun PlayerPane(
     val shownMetadata = playback.metadataHistory.getOrNull(metadataIndex)
         ?.sanitizedMetadata().orEmpty().ifEmpty { station.name }
     val playbackButtonDescription = stringResource(R.string.descr_player_playback_button)
+    // Same rule the station list uses for its starred heart and playing-station stripe, so
+    // the playback button reads as the one accent color for a station everywhere it shows up.
+    val accentColor = if (station.imageColor != -1) Color(station.imageColor)
+    else MaterialTheme.colorScheme.primary
 
     // The player stays visually silent under the finger: no ripple, no hover or focus
     // highlight, anywhere inside it. A null RippleConfiguration switches off the ripple that
@@ -163,7 +168,16 @@ fun PlayerPane(
                     if (playback.isBuffering) {
                         ContainedLoadingIndicator()
                     } else {
-                        FilledIconButton(onClick = onTogglePlayback) {
+                        FilledIconButton(
+                            onClick = onTogglePlayback,
+                            // Same light-circle-plus-full-color-icon treatment as the starred
+                            // heart in the station list: a 33%-opacity wash of the accent color
+                            // behind it, the icon itself at full strength on top.
+                            colors = IconButtonDefaults.filledIconButtonColors(
+                                containerColor = accentColor.copy(alpha = 0.33f),
+                                contentColor = accentColor,
+                            ),
+                        ) {
                             if (playback.isPlaying) {
                                 EqualizerIcon(
                                     color = LocalContentColor.current,
