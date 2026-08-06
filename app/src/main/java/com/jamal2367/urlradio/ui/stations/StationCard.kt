@@ -9,6 +9,7 @@
 
 package com.jamal2367.urlradio.ui.stations
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -118,6 +119,10 @@ fun StationCard(
             ) {
                 StationCover(
                     station = station,
+                    // The cover becomes the shortcut to the image picker while the editor is
+                    // open (see the clickable below it) -- this is what shows that, rather
+                    // than leaving it looking like a plain, inert cover.
+                    showChangeImageHint = isEditorOpen,
                     modifier = Modifier
                         .size(64.dp)
                         .then(
@@ -227,7 +232,11 @@ fun StationCard(
 }
 
 @Composable
-private fun StationCover(station: Station, modifier: Modifier = Modifier) {
+private fun StationCover(
+    station: Station,
+    showChangeImageHint: Boolean = false,
+    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier,
+) {
     val description = "${stringResource(R.string.descr_player_station_image)}: ${station.name}"
     // Stations without their own artwork fall back to the app's default station image
     // rather than showing an empty colored square.
@@ -262,6 +271,24 @@ private fun StationCover(station: Station, modifier: Modifier = Modifier) {
             fallback = placeholder,
             modifier = Modifier.fillMaxSize(),
         )
+
+        if (showChangeImageHint) {
+            // A scrim first: without it the icon can disappear into a light cover image or
+            // a light accent color. Dark and semi-transparent works over either.
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(Color.Black.copy(alpha = 0.50f)),
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_image_24dp),
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp),
+                )
+            }
+        }
     }
 }
 
