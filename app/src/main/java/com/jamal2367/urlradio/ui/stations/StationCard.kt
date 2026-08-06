@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -163,13 +164,25 @@ fun StationCard(
                 // sits outside the text's clickable -- so a long press to the right of the
                 // name still reaches the row's reorder gesture, however long the name is.
                 if (station.starred) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_favorite_default_24dp),
-                        contentDescription = stringResource(R.string.descr_card_starred_station),
-                        tint = if (station.imageColor != -1) Color(station.imageColor)
-                        else MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp),
-                    )
+                    val heartTint = if (station.imageColor != -1) Color(station.imageColor)
+                    else MaterialTheme.colorScheme.primary
+
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            // Tinted with the heart's own color rather than a neutral one, kept
+                            // light so the fully-opaque heart on top still stands out against it.
+                            .background(heartTint.copy(alpha = 0.15f)),
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_favorite_default_24dp),
+                            contentDescription = stringResource(R.string.descr_card_starred_station),
+                            tint = heartTint,
+                            modifier = Modifier.size(24.dp),
+                        )
+                    }
 
                     Spacer(modifier = Modifier.width(12.dp))
                 }

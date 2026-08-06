@@ -13,6 +13,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -77,6 +78,7 @@ fun StationListScreen(
     onMoveFinished: () -> Unit,
     contentPadding: PaddingValues,
     modifier: Modifier = Modifier,
+    header: @Composable () -> Unit,
 ) {
     Column(modifier = modifier.fillMaxSize()) {
         AnimatedVisibility(visible = hasActiveDownloads) {
@@ -84,6 +86,10 @@ fun StationListScreen(
         }
 
         if (showOnboarding) {
+            // Nothing here scrolls, so there is no "sticky" to avoid -- the header just sits
+            // above it like any other fixed screen. It carries no horizontal padding of its
+            // own (see StationsTopBar), hence the explicit padding here.
+            Box(modifier = Modifier.padding(horizontal = 12.dp)) { header() }
             OnboardingPane(modifier = Modifier.fillMaxSize())
             return@Column
         }
@@ -110,6 +116,15 @@ fun StationListScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.fillMaxSize(),
         ) {
+            item(key = "header") { header() }
+
+            // The header above is lazy item 0, which pushes every station row one slot further
+            // down in the list's own (absolute) item indices. draggedIndex, `index` from
+            // itemsIndexed and the indices onMove expects all stay in "stations list" terms --
+            // this offset is only added back in when reading or matching against
+            // visibleItemsInfo, which counts the header.
+            val stationsIndexOffset = 1
+
             itemsIndexed(
                 items = stations,
                 key = { _, station -> station.uuid },
@@ -127,7 +142,7 @@ fun StationListScreen(
                             onDragStart = {
                                 val info = listState.layoutInfo.visibleItemsInfo
                                     .firstOrNull { it.key == station.uuid }
-                                draggedIndex = info?.index ?: index
+                                draggedIndex = index
                                 dragStartOffset = info?.offset ?: 0
                                 dragStartSize = info?.size ?: 0
                                 draggedDistance = 0f
@@ -146,8 +161,9 @@ fun StationListScreen(
                                 draggedDistance += dragAmount.y
 
                                 val from = draggedIndex ?: return@detectDragGesturesAfterLongPress
+                                val fromLayoutIndex = from + stationsIndexOffset
                                 val items = listState.layoutInfo.visibleItemsInfo
-                                val dragged = items.firstOrNull { it.index == from }
+                                val dragged = items.firstOrNull { it.index == fromLayoutIndex }
                                     ?: return@detectDragGesturesAfterLongPress
 
                                 // The strip the row now covers on screen.
@@ -158,9 +174,11 @@ fun StationListScreen(
                                 // A row is taken over only once it has been cleared completely --
                                 // downwards past its bottom edge, upwards past its top one. Going
                                 // by the midpoint instead let a row swap back and forth while the
-                                // finger sat still on the boundary.
+                                // finger sat still on the boundary. The header (layout index 0)
+                                // can never be a target -- there is nothing to swap it with.
                                 items.firstOrNull { other ->
-                                    other.index != from &&
+                                    other.index != fromLayoutIndex &&
+                                            other.index >= stationsIndexOffset &&
                                             other.offset + other.size >= top &&
                                             other.offset <= bottom &&
                                             (
@@ -170,7 +188,8 @@ fun StationListScreen(
                                 }?.let { target ->
                                     // moveStation refuses to mix favourites with the rest, so the
                                     // index only follows the row where the move was accepted.
-                                    if (onMove(from, target.index)) draggedIndex = target.index
+                                    val targetIndex = target.index - stationsIndexOffset
+                                    if (onMove(from, targetIndex)) draggedIndex = targetIndex
                                 }
                             },
                         )
@@ -204,7 +223,8 @@ fun StationListScreen(
                                 // out in the slot it was dragged to, its own offset cancels
                                 // the distance out and the translation shrinks to nothing.
                                 val laidOut = listState.layoutInfo.visibleItemsInfo
-                                    .firstOrNull { it.index == index }?.offset ?: dragStartOffset
+                                    .firstOrNull { it.index == index + stationsIndexOffset }
+                                    ?.offset ?: dragStartOffset
                                 translationY = dragStartOffset + draggedDistance - laidOut
                             }
 

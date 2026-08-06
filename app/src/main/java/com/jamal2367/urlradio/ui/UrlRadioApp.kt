@@ -409,24 +409,30 @@ private fun StationsPane(
     // state.stations and its indices line up with the full list -- onMove needs no remapping.
     val visibleStations = if (selectedTab == 1) state.stations.filter { it.starred } else state.stations
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        // Add-station and settings flank the tab selector. The tabs themselves drop out
-        // during onboarding -- there is nothing to filter yet -- but the two buttons stay,
-        // because adding the first station is the whole point of that screen.
+    // Add-station and settings flank the tab selector. The tabs themselves drop out during
+    // onboarding -- there is nothing to filter yet -- but the two buttons stay, because
+    // adding the first station is the whole point of that screen.
+    val topBar: @Composable (Modifier) -> Unit = { rowModifier ->
         StationsTopBar(
             selectedTab = selectedTab,
             onSelect = onSelectTab,
             showTabs = !state.showOnboarding,
             onAddStation = actions.onAddStation,
             onOpenSettings = onOpenSettings,
-            modifier = Modifier.padding(
+            modifier = rowModifier.padding(
                 top = contentPadding.calculateTopPadding() + 8.dp,
                 bottom = 4.dp,
             ),
         )
+    }
 
-        Box(modifier = Modifier.weight(1f)) {
-            if (selectedTab == 1 && visibleStations.isEmpty() && !state.showOnboarding) {
+    if (selectedTab == 1 && visibleStations.isEmpty() && !state.showOnboarding) {
+        // A static message, not a scrolling list -- there is nothing here for the header to
+        // scroll away from, so it stays fixed above it like it used to everywhere.
+        Column(modifier = Modifier.fillMaxSize()) {
+            topBar(Modifier.padding(horizontal = 12.dp))
+
+            Box(modifier = Modifier.weight(1f)) {
                 Text(
                     text = stringResource(R.string.stations_favorites_empty),
                     style = MaterialTheme.typography.bodyLarge,
@@ -436,36 +442,42 @@ private fun StationsPane(
                         .align(Alignment.Center)
                         .padding(horizontal = 32.dp),
                 )
-            } else {
-                StationListScreen(
-                    stations = visibleStations,
-                    playingStationUuid = if (state.playback.isPlaying) state.playback.stationUuid else "",
-                    expandedStationUuid = state.expandedStationUuid,
-                    editStationsEnabled = state.editStationsEnabled,
-                    editStreamUrisEnabled = state.editStreamUrisEnabled,
-                    showOnboarding = state.showOnboarding,
-                    hasActiveDownloads = state.hasActiveDownloads,
-                    onTogglePlayback = actions.onTogglePlayback,
-                    onToggleEditor = actions.onToggleEditor,
-                    onSaveStation = actions.onSaveStation,
-                    onCancelEdit = actions.onCancelEdit,
-                    onChangeImage = actions.onChangeImage,
-                    onPlaceOnHomeScreen = actions.onPlaceOnHomeScreen,
-                    onDeleteRequest = onDeleteRequest,
-                    onToggleStarred = actions.onToggleStarred,
-                    onMove = actions.onMove,
-                    onMoveFinished = actions.onMoveFinished,
-                    contentPadding = PaddingValues(
-                        start = 12.dp,
-                        end = 12.dp,
-                        top = 6.dp,
-                        // No room reserved for the player here: the list's container already
-                        // stops above it.
-                        bottom = 0.dp,
-                    ),
-                )
             }
         }
+    } else {
+        StationListScreen(
+            stations = visibleStations,
+            playingStationUuid = if (state.playback.isPlaying) state.playback.stationUuid else "",
+            expandedStationUuid = state.expandedStationUuid,
+            editStationsEnabled = state.editStationsEnabled,
+            editStreamUrisEnabled = state.editStreamUrisEnabled,
+            showOnboarding = state.showOnboarding,
+            hasActiveDownloads = state.hasActiveDownloads,
+            onTogglePlayback = actions.onTogglePlayback,
+            onToggleEditor = actions.onToggleEditor,
+            onSaveStation = actions.onSaveStation,
+            onCancelEdit = actions.onCancelEdit,
+            onChangeImage = actions.onChangeImage,
+            onPlaceOnHomeScreen = actions.onPlaceOnHomeScreen,
+            onDeleteRequest = onDeleteRequest,
+            onToggleStarred = actions.onToggleStarred,
+            onMove = actions.onMove,
+            onMoveFinished = actions.onMoveFinished,
+            contentPadding = PaddingValues(
+                start = 12.dp,
+                end = 12.dp,
+                top = 6.dp,
+                // No room reserved for the player here: the list's container already
+                // stops above it.
+                bottom = 0.dp,
+            ),
+            // Scrolls away with the rest of the list instead of staying pinned above it --
+            // that pin was the point being complained about. Onboarding has no scrolling
+            // content to speak of, so StationListScreen keeps it fixed there instead; this
+            // same lambda covers both, with no horizontal padding of its own so the list's
+            // contentPadding is the single source of that margin when it lands as a row.
+            header = { topBar(Modifier) },
+        )
     }
 }
 
@@ -479,12 +491,15 @@ private fun StationsTopBar(
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // No horizontal padding of its own: it sits inside the station list now, and the list's
+    // own contentPadding already insets every row -- including this one -- by the same
+    // amount. Adding it here too doubled the margin. The two other places this is used
+    // (onboarding, the empty-favourites message) are not list items, so they supply that
+    // padding themselves through the modifier they pass in.
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp),
+        modifier = modifier.fillMaxWidth(),
     ) {
         RoundBarButton(
             icon = R.drawable.ic_add_24dp,
