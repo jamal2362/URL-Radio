@@ -101,6 +101,7 @@ class PlayerService : MediaLibraryService() {
     private var bufferSizeMultiplier: Int = PreferencesHelper.loadBufferSizeMultiplier()
     private var playbackRestartCounter: Int = 0
     private var playLastStation: Boolean = false
+    private var chip: String? = null // the tag tab (or voice tag) the station was played from
     private var manuallyCancelledSleepTimer = false
 
 
@@ -193,7 +194,7 @@ class PlayerService : MediaLibraryService() {
                 setMediaItem(
                     CollectionHelper.getNextMediaItem(
                         this@PlayerService,
-                        collection,
+                        collection.copy(stations = CollectionHelper.getStations(collection, chip).toMutableList()),
                         currentMediaItem?.mediaId ?: String()
                     )
                 )
@@ -208,7 +209,7 @@ class PlayerService : MediaLibraryService() {
                 setMediaItem(
                     CollectionHelper.getPreviousMediaItem(
                         this@PlayerService,
-                        collection,
+                        collection.copy(stations = CollectionHelper.getStations(collection, chip).toMutableList()),
                         currentMediaItem?.mediaId ?: String()
                     )
                 )
@@ -395,16 +396,19 @@ class PlayerService : MediaLibraryService() {
                 mediaItems.map { mediaItem ->
                     val query: String? = mediaItem.requestMetadata.searchQuery
                     if (query == null) {
+                        chip = mediaItem.mediaId.substringBefore("/", "").ifEmpty { null }
                         CollectionHelper.getItem(this@PlayerService, collection, mediaItem.mediaId)
                     } else {
-                        // Voice request ("play Lush on URL Radio"): the station whose name
-                        // matches, ignoring spaces and punctuation, otherwise the last played one.
+                        // Voice request: "play jazz" plays the first #jazz station, "play Lush"
+                        // the station whose name matches, otherwise the last played one.
                         Log.v(tag, "Voice search: $query")
+                        val words: List<String> = query.lowercase().split(Regex("[^\\p{L}\\d]+")).map { "#$it" }
+                        chip = collection.stations.flatMap { CollectionHelper.getTags(it.name) }.firstOrNull { it in words }
                         val q: String = query.filter(Char::isLetterOrDigit)
-                        collection.stations.firstOrNull {
+                        (chip?.let { CollectionHelper.getStations(collection, it).firstOrNull() } ?: collection.stations.firstOrNull {
                             val name: String = it.name.filter(Char::isLetterOrDigit)
                             q.isNotEmpty() && name.isNotEmpty() && (q.contains(name, true) || name.contains(q, true))
-                        }?.let { CollectionHelper.buildMediaItem(this@PlayerService, it) }
+                        })?.let { CollectionHelper.buildMediaItem(this@PlayerService, it) }
                             ?: CollectionHelper.getRecent(this@PlayerService, collection)
                     }
                 }
@@ -442,7 +446,7 @@ class PlayerService : MediaLibraryService() {
             parentId: String,
             params: LibraryParams?
         ): ListenableFuture<LibraryResult<Void>> {
-            val children: List<MediaItem> = CollectionHelper.getChildren(this@PlayerService, collection)
+            val children: List<MediaItem> = CollectionHelper.getChildren(this@PlayerService, collection, parentId)
             session.notifyChildrenChanged(browser, parentId, children.size, params)
             return Futures.immediateFuture(LibraryResult.ofVoid())
         }
@@ -455,7 +459,7 @@ class PlayerService : MediaLibraryService() {
             pageSize: Int,
             params: LibraryParams?
         ): ListenableFuture<LibraryResult<ImmutableList<MediaItem>>> {
-            val children: List<MediaItem> = CollectionHelper.getChildren(this@PlayerService, collection)
+            val children: List<MediaItem> = CollectionHelper.getChildren(this@PlayerService, collection, parentId)
             return Futures.immediateFuture(LibraryResult.ofItemList(children, params))
         }
 
