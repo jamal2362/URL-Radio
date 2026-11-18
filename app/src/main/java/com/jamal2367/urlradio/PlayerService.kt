@@ -401,13 +401,15 @@ class PlayerService : MediaLibraryService() {
                     } else {
                         // Voice request: "play jazz" plays the first #jazz station, "play Lush"
                         // the station whose name matches, "WFPK Louisville" the station sharing
-                        // the most words, otherwise the last played one.
+                        // the most words (a word one letter off counts, "Lsh" -> "Lush"),
+                        // otherwise the last played one.
                         // Either way next/previous then runs through all stations.
                         Log.v(tag, "Voice search: $query")
                         chip = null
                         val wordsOf = { s: String -> s.lowercase().split(Regex("[^\\p{L}\\d]+")).filter(String::isNotEmpty) }
                         val said: List<String> = wordsOf(query)
-                        val shared = { s: Station -> wordsOf(s.name).count { it in said } }
+                        val words: List<String> = said - setOf("radio", "fm", "am", "the", "station") // too common to pick a station
+                        val shared = { s: Station -> wordsOf(s.name).count { w -> words.any { it == w || it.length >= 3 && CollectionHelper.distance(it, w) <= it.length / 6 + 1 } } }
                         val voiceTag: String? = collection.stations.flatMap { CollectionHelper.getTags(it.name) }.firstOrNull { it.drop(1) in said }
                         val q: String = query.filter(Char::isLetterOrDigit)
                         (voiceTag?.let { CollectionHelper.getStations(collection, it).firstOrNull() } ?: collection.stations.firstOrNull {

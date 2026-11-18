@@ -330,6 +330,17 @@ object CollectionHelper {
     fun getTags(name: String): List<String> = tagRegex.findAll(name).map { it.value.lowercase() }.toList()
     private val tagRegex = Regex("#\\p{L}[\\p{L}\\d_-]*")
 
+    /* Levenshtein edit distance between two words, for misheard station names */
+    fun distance(a: String, b: String): Int {
+        var prev = IntArray(b.length + 1) { it }
+        for (i in a.indices) {
+            val cur = IntArray(b.length + 1).also { it[0] = i + 1 }
+            for (j in b.indices) cur[j + 1] = minOf(prev[j + 1] + 1, cur[j] + 1, prev[j] + if (a[i] == b[j]) 0 else 1)
+            prev = cur
+        }
+        return prev[b.length]
+    }
+
     /* Stations carrying the tag, or all of them for no tag */
     fun getStations(collection: Collection, tag: String?): List<Station> =
         if (tag == null) collection.stations else collection.stations.filter { tag in getTags(it.name) }
