@@ -175,8 +175,9 @@ class PlayerService : MediaLibraryService() {
         // for changing what a player command does is the player itself.
         player = object : ForwardingPlayer(exoPlayer) {
             override fun getAvailableCommands(): Player.Commands {
+                // No GET_TIMELINE: a radio has no queue, so Android Auto shows no queue button.
                 return super.getAvailableCommands().buildUpon().add(COMMAND_SEEK_TO_NEXT)
-                    .add(COMMAND_SEEK_TO_PREVIOUS).build()
+                    .add(COMMAND_SEEK_TO_PREVIOUS).remove(COMMAND_GET_TIMELINE).build()
             }
 
             override fun isCommandAvailable(command: Int): Boolean {
@@ -187,25 +188,24 @@ class PlayerService : MediaLibraryService() {
                 return C.TIME_UNSET // this will hide progress bar for HLS stations in the notification
             }
 
-            /* Headphone "next" means the next station: it is queued up and started. */
+            /* Headphone "next" means the next station: it replaces the current one and starts. */
             override fun seekToNext() {
-                addMediaItem(
+                setMediaItem(
                     CollectionHelper.getNextMediaItem(
                         this@PlayerService,
                         collection,
                         currentMediaItem?.mediaId ?: String()
                     )
                 )
-                // super, not the overrides below: a station queued up here is already at the
+                // super, not the overrides below: a fresh station is already at the
                 // live edge, so it neither needs the resumption special case nor the seek.
                 super.prepare()
                 super.play()
-                super.seekToNext()
             }
 
             /* Headphone "previous", likewise. */
             override fun seekToPrevious() {
-                addMediaItem(
+                setMediaItem(
                     CollectionHelper.getPreviousMediaItem(
                         this@PlayerService,
                         collection,
@@ -214,7 +214,6 @@ class PlayerService : MediaLibraryService() {
                 )
                 super.prepare()
                 super.play()
-                super.seekToPrevious()
             }
 
             override fun prepare() {
@@ -394,10 +393,20 @@ class PlayerService : MediaLibraryService() {
         ): ListenableFuture<List<MediaItem>> {
             val updatedMediaItems: List<MediaItem> =
                 mediaItems.map { mediaItem ->
-                    CollectionHelper.getItem(this@PlayerService, collection, mediaItem.mediaId)
-//                    if (mediaItem.requestMetadata.searchQuery != null)
-//                        getMediaItemFromSearchQuery(mediaItem.requestMetadata.searchQuery!!)
-//                    else MediaItemTree.getItem(mediaItem.mediaId) ?: mediaItem
+                    val query: String? = mediaItem.requestMetadata.searchQuery
+                    if (query == null) {
+                        CollectionHelper.getItem(this@PlayerService, collection, mediaItem.mediaId)
+                    } else {
+                        // Voice request ("play Lush on URL Radio"): the station whose name
+                        // matches, ignoring spaces and punctuation, otherwise the last played one.
+                        Log.v(tag, "Voice search: $query")
+                        val q: String = query.filter(Char::isLetterOrDigit)
+                        collection.stations.firstOrNull {
+                            val name: String = it.name.filter(Char::isLetterOrDigit)
+                            q.isNotEmpty() && name.isNotEmpty() && (q.contains(name, true) || name.contains(q, true))
+                        }?.let { CollectionHelper.buildMediaItem(this@PlayerService, it) }
+                            ?: CollectionHelper.getRecent(this@PlayerService, collection)
+                    }
                 }
             return Futures.immediateFuture(updatedMediaItems)
 
