@@ -326,19 +326,52 @@ object CollectionHelper {
     }
 
 
-    /* Returns the children stations under root (simple media library structure: root > stations) */
-    fun getChildren(context: Context, collection: Collection): List<MediaItem> {
-        val mediaItems: MutableList<MediaItem> = mutableListOf()
-        collection.stations.forEach { station ->
-            mediaItems.add(buildMediaItem(context, station))
+    /* Hashtags in a station name: "WFPK #local #indie" -> [#local, #indie] */
+    fun getTags(name: String): List<String> = tagRegex.findAll(name).map { it.value.lowercase() }.toList()
+    private val tagRegex = Regex("#\\p{L}[\\p{L}\\d_-]*")
+
+    /* Levenshtein edit distance between two words, for misheard station names */
+    fun distance(a: String, b: String): Int {
+        var prev = IntArray(b.length + 1) { it }
+        for (i in a.indices) {
+            val cur = IntArray(b.length + 1).also { it[0] = i + 1 }
+            for (j in b.indices) cur[j + 1] = minOf(prev[j + 1] + 1, cur[j] + 1, prev[j] + if (a[i] == b[j]) 0 else 1)
+            prev = cur
         }
-        return mediaItems
+        return prev[b.length]
+    }
+
+    /* Stations carrying the tag, or all of them for no tag */
+    fun getStations(collection: Collection, tag: String?): List<Station> =
+        if (tag == null) collection.stations else collection.stations.filter { tag in getTags(it.name) }
+
+    /* The car shows All plus the three most used tags as tabs; the rest work by voice */
+    private fun getTopTags(collection: Collection): List<String> = collection.stations
+        .flatMap { getTags(it.name) }.groupingBy { it }.eachCount().entries
+        .sortedByDescending { it.value }.take(3).map { it.key }
+
+    /* Root > tabs (All, #tag...) > stations, or root > stations when nothing is tagged.
+     * Stations under a tab get the id "#tag/uuid" so playing one remembers the tab. */
+    fun getChildren(context: Context, collection: Collection, parentId: String): List<MediaItem> {
+        val tabs: List<String> = getTopTags(collection)
+        return if (parentId == "[rootID]" && tabs.isNotEmpty()) {
+            (listOf("[all]") + tabs).map { id ->
+                val title: String = if (id == "[all]") "All" else id.drop(1).replaceFirstChar(Char::uppercase)
+                MediaItem.Builder().setMediaId(id).setMediaMetadata(MediaMetadata.Builder().setTitle(title)
+                    .setIsPlayable(false).setIsBrowsable(true).setMediaType(MediaMetadata.MEDIA_TYPE_FOLDER_RADIO_STATIONS).build()).build()
+            }
+        } else {
+            val tag: String? = parentId.takeIf { it.startsWith("#") }
+            getStations(collection, tag).map { station ->
+                buildMediaItem(context, station).let { if (tag == null) it else it.buildUpon().setMediaId("$tag/${station.uuid}").build() }
+            }
+        }
     }
 
 
-    /* Returns media item for given station id */
+    /* Returns media item for given station id ("uuid" or "#tag/uuid") */
     fun getItem(context: Context, collection: Collection, stationUuid: String): MediaItem {
-        return buildMediaItem(context, getStation(collection, stationUuid))
+        return buildMediaItem(context, getStation(collection, stationUuid.substringAfter("/")))
     }
 
 
@@ -744,7 +777,9 @@ object CollectionHelper {
         }.build()
         // build MediaMetadata
         val mediaMetadata = MediaMetadata.Builder().apply {
-            setArtist(station.name)
+            // name without its hashtags; the tags show underneath
+            setArtist(station.name.replace(tagRegex, "").trim())
+            setAlbumTitle(getTags(station.name).joinToString("  ").ifEmpty { null })
             //setTitle(station.name)
             /* check for "file://" prevents a crash when an old backup was restored */
             if (station.image.isNotEmpty() && station.image.startsWith("file://")) {
