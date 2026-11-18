@@ -400,17 +400,21 @@ class PlayerService : MediaLibraryService() {
                         CollectionHelper.getItem(this@PlayerService, collection, mediaItem.mediaId)
                     } else {
                         // Voice request: "play jazz" plays the first #jazz station, "play Lush"
-                        // the station whose name matches, otherwise the last played one.
+                        // the station whose name matches, "WFPK Louisville" the station sharing
+                        // the most words, otherwise the last played one.
                         // Either way next/previous then runs through all stations.
                         Log.v(tag, "Voice search: $query")
                         chip = null
-                        val words: List<String> = query.lowercase().split(Regex("[^\\p{L}\\d]+")).map { "#$it" }
-                        val voiceTag: String? = collection.stations.flatMap { CollectionHelper.getTags(it.name) }.firstOrNull { it in words }
+                        val wordsOf = { s: String -> s.lowercase().split(Regex("[^\\p{L}\\d]+")).filter(String::isNotEmpty) }
+                        val said: List<String> = wordsOf(query)
+                        val shared = { s: Station -> wordsOf(s.name).count { it in said } }
+                        val voiceTag: String? = collection.stations.flatMap { CollectionHelper.getTags(it.name) }.firstOrNull { it.drop(1) in said }
                         val q: String = query.filter(Char::isLetterOrDigit)
                         (voiceTag?.let { CollectionHelper.getStations(collection, it).firstOrNull() } ?: collection.stations.firstOrNull {
                             val name: String = it.name.filter(Char::isLetterOrDigit)
                             q.isNotEmpty() && name.isNotEmpty() && (q.contains(name, true) || name.contains(q, true))
-                        })?.let { CollectionHelper.buildMediaItem(this@PlayerService, it) }
+                        } ?: collection.stations.maxByOrNull(shared)?.takeIf { shared(it) > 0 })
+                            ?.let { CollectionHelper.buildMediaItem(this@PlayerService, it) }
                             ?: CollectionHelper.getRecent(this@PlayerService, collection)
                     }
                 }
