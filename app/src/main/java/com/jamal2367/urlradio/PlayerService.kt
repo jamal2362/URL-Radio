@@ -401,11 +401,13 @@ class PlayerService : MediaLibraryService() {
                     } else {
                         // Voice request: "play jazz" plays the first #jazz station, "play Lush"
                         // the station whose name matches, otherwise the last played one.
+                        // Either way next/previous then runs through all stations.
                         Log.v(tag, "Voice search: $query")
+                        chip = null
                         val words: List<String> = query.lowercase().split(Regex("[^\\p{L}\\d]+")).map { "#$it" }
-                        chip = collection.stations.flatMap { CollectionHelper.getTags(it.name) }.firstOrNull { it in words }
+                        val voiceTag: String? = collection.stations.flatMap { CollectionHelper.getTags(it.name) }.firstOrNull { it in words }
                         val q: String = query.filter(Char::isLetterOrDigit)
-                        (chip?.let { CollectionHelper.getStations(collection, it).firstOrNull() } ?: collection.stations.firstOrNull {
+                        (voiceTag?.let { CollectionHelper.getStations(collection, it).firstOrNull() } ?: collection.stations.firstOrNull {
                             val name: String = it.name.filter(Char::isLetterOrDigit)
                             q.isNotEmpty() && name.isNotEmpty() && (q.contains(name, true) || name.contains(q, true))
                         })?.let { CollectionHelper.buildMediaItem(this@PlayerService, it) }
