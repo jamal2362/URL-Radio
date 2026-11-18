@@ -175,9 +175,8 @@ class PlayerService : MediaLibraryService() {
         // for changing what a player command does is the player itself.
         player = object : ForwardingPlayer(exoPlayer) {
             override fun getAvailableCommands(): Player.Commands {
-                // No GET_TIMELINE: a radio has no queue, so Android Auto shows no queue button.
                 return super.getAvailableCommands().buildUpon().add(COMMAND_SEEK_TO_NEXT)
-                    .add(COMMAND_SEEK_TO_PREVIOUS).remove(COMMAND_GET_TIMELINE).build()
+                    .add(COMMAND_SEEK_TO_PREVIOUS).build()
             }
 
             override fun isCommandAvailable(command: Int): Boolean {
@@ -433,7 +432,13 @@ class PlayerService : MediaLibraryService() {
             builder.add(SessionCommand(Keys.CMD_REQUEST_METADATA_HISTORY, Bundle.EMPTY))
             builder.add(SessionCommand(Keys.CMD_METADATA_UPDATED, Bundle.EMPTY))
             builder.add(SessionCommand(Keys.CMD_PLAY_STREAM, Bundle.EMPTY))
-            return MediaSession.ConnectionResult.accept(builder.build(), connectionResult.availablePlayerCommands)
+            // A radio has no queue: Android Auto and the system (whose commands the media
+            // notification controller sets) get no GET_TIMELINE, so no queue button. The app's
+            // own screen keeps it, since it needs the current station to show and pause it.
+            val ownScreen: Boolean = controller.packageName == packageName && !session.isMediaNotificationController(controller)
+            val playerCommands: Player.Commands = if (ownScreen) connectionResult.availablePlayerCommands
+                else connectionResult.availablePlayerCommands.buildUpon().remove(Player.COMMAND_GET_TIMELINE).build()
+            return MediaSession.ConnectionResult.accept(builder.build(), playerCommands)
         }
 
         override fun onSubscribe(
