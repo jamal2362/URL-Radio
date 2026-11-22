@@ -1,34 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Accessibility Descriptions -->
-    <string name="descr_app_icon">App-Symbol in der Form eines alten Radios</string>
-    <string name="descr_card_starred_station">Markierter Sender</string>
-    <string name="descr_expanded_player_metadata_copy_button">Informationen zur aktuellen Wiedergabe kopieren</string>
-    <string name="descr_expanded_player_metadata_next_button">Nächster jetzt abspielender Metadateneintrag</string>
-    <string name="descr_expanded_player_metadata_previous_button">Vorheriger abspielender Metadateneintrag</string>
+    <string name="descr_app_icon">App-Symbol mit einem alten Radio</string>
+    <string name="descr_card_starred_station">Favorisierter Sender</string>
+    <string name="descr_expanded_player_metadata_copy_button">Aktuelle Titelinformation kopieren</string>
+    <string name="descr_expanded_player_metadata_next_button">Nächster Eintrag im Titelverlauf</string>
+    <string name="descr_expanded_player_metadata_previous_button">Vorheriger Eintrag im Titelverlauf</string>
     <string name="descr_expanded_player_sleep_timer_cancel_button">Schlaf-Timer abbrechen</string>
     <string name="descr_expanded_player_sleep_timer_start_button">Schlaf-Timer starten</string>
-    <string name="descr_player_playback_button">Start/Pause</string>
+    <string name="descr_player_playback_button">Wiedergabe/Pause</string>
     <string name="descr_player_station_image">Senderbild</string>
     <string name="descr_station_preview_playing">Vorschau läuft</string>
-
-    <!-- Dialogs -->
     <string name="dialog_add_station_title">Sender hinzufügen</string>
     <string name="dialog_add_station_found">Gefundene Sender: %1$d</string>
     <string name="dialog_edit_station_name">Sendername</string>
     <string name="dialog_edit_stream_uri">Stream-Adresse</string>
-    <string name="dialog_error_message_no_network">Mit dem Internet verbinden.</string>
+    <string name="dialog_error_message_no_network">Keine Internetverbindung.</string>
     <string name="dialog_error_title_no_network">Offline</string>
     <string name="dialog_find_station_button_add">Hinzufügen</string>
     <string name="dialog_find_station_button_add_count">Hinzufügen (%1$d)</string>
-    <string name="dialog_find_station_empty_hint">Suche nach einem Sendernamen oder füge eine Stream-Adresse ein.</string>
+    <string name="dialog_find_station_empty_hint">Nach einem Sendernamen suchen oder eine Stream-Adresse einfügen.</string>
     <string name="dialog_find_station_hint">Name oder Stream-Adresse</string>
     <string name="dialog_find_station_no_results">Keine Ergebnisse gefunden.</string>
     <string name="dialog_find_station_title">Sender finden</string>
     <string name="dialog_generic_button_cancel">Abbrechen</string>
     <string name="dialog_generic_button_done">Fertig</string>
     <string name="dialog_generic_button_okay">OK</string>
-    <string name="dialog_restore_collection_replace_existing">Soll die aktuelle Sammlung von Radiostationen durch die Radiostationen aus dem Backup ersetzt werden?</string>
+    <string name="dialog_restore_collection_replace_existing">Aktuelle Sammlung von Radiosendern durch die Sender aus der Sicherung ersetzen?</string>
     <string name="dialog_station_picker_clear">Auswahl aufheben</string>
     <string name="dialog_station_picker_hint">Gedrückt halten, um den Sender vorzuhören</string>
     <string name="dialog_station_picker_select_all">Alle auswählen</string>
@@ -38,24 +35,14 @@
     <string name="dialog_yes_no_positive_button_default">Ja</string>
     <string name="dialog_yes_no_positive_button_remove_all_stations">Alle entfernen</string>
     <string name="dialog_yes_no_positive_button_remove_station">Entfernen</string>
-
-    <!-- Fragment -->
     <string name="fragment_settings_title">Einstellungen</string>
-
-    <!-- Onboarding -->
-    <string name="onboarding_app_description">Tauche ein in den Sound deiner Wahl!</string>
-    <string name="onboarding_app_get_started">Jetzt starten</string>
-
-    <!-- Stations -->
+    <string name="onboarding_app_description">Radio nach Wahl – einfach eintauchen!</string>
+    <string name="onboarding_app_get_started">Los geht’s</string>
     <string name="tab_stations_all">Alle Sender</string>
     <string name="tab_stations_favorites">Favoriten</string>
-    <string name="stations_favorites_empty">Noch keine Favoriten. Wische einen Sender nach rechts, um ihn hier hinzuzufügen.</string>
-
-    <!-- Player -->
-    <string name="player_sheet_h2_station_metadata">Momentan läuft</string>
-    <string name="player_sheet_h2_stream_url">Streaming-Adresse</string>
-
-    <!-- Settings -->
+    <string name="stations_favorites_empty">Noch keine Favoriten. Einen Sender nach rechts wischen, um ihn hier hinzuzufügen.</string>
+    <string name="player_sheet_h2_station_metadata">Läuft gerade</string>
+    <string name="player_sheet_h2_stream_url">Streaming-Link</string>
     <string name="pref_advanced_title">Erweitert</string>
     <string name="pref_app_version_summary">Version</string>
     <string name="pref_app_version_title">App-Version</string>
@@ -63,66 +50,62 @@
     <string name="pref_buffer_size_summary_disabled">Standardpuffergröße für die Wiedergabe eines Radiostreams wird verwendet.</string>
     <string name="pref_buffer_size_summary_enabled">Größerer Puffer für die Wiedergabe eines Radiostreams ist aktiviert. Es kann länger dauern, bis die Wiedergabe beginnt.</string>
     <string name="pref_buffer_size_title">Größeren Puffer verwenden</string>
-    <string name="pref_edit_station_stream_summary_disabled">Die Bearbeitung von Streaming-Links ist deaktiviert.</string>
-    <string name="pref_edit_station_stream_summary_enabled">Die Bearbeitung von Streaming-Links ist aktiviert. Stelle sicher, dass du eine korrekte Stream-Adresse eingibst.</string>
+    <string name="pref_edit_station_stream_summary_disabled">Bearbeiten von Streaming-Links deaktiviert.</string>
+    <string name="pref_edit_station_stream_summary_enabled">Bearbeiten von Streaming-Links aktiviert. Auf eine korrekte Stream-Adresse achten.</string>
     <string name="pref_edit_station_stream_title">Streaming-Links bearbeiten</string>
-    <string name="pref_edit_station_summary_disabled">Die Bearbeitung von Senderinformationen ist deaktiviert.</string>
-    <string name="pref_edit_station_summary_enabled">Die Bearbeitung von Senderinformationen ist aktiviert. Drücke lange, um den Bearbeitungsmodus aufzurufen.</string>
+    <string name="pref_edit_station_summary_disabled">Bearbeiten von Senderinformationen deaktiviert.</string>
+    <string name="pref_edit_station_summary_enabled">Bearbeiten von Senderinformationen aktiviert. Langes Drücken öffnet den Bearbeitungsmodus.</string>
     <string name="pref_edit_station_title">Sender bearbeiten</string>
     <string name="pref_general_title">Allgemein</string>
     <string name="pref_license_title">Diese Anwendung ist Open Source</string>
     <string name="pref_license_summary">Lizenziert unter der MIT License</string>
     <string name="pref_links_title">Links</string>
-    <string name="pref_m3u_export_summary">Radiosender in einer M3U-Playlistdatei sichern, die in andere Player importiert werden können.</string>
-    <string name="pref_m3u_export_title">M3U-Playlist exportieren</string>
+    <string name="pref_m3u_export_summary">Radiosender in einer M3U-Playlist speichern, die sich in andere Player importieren lässt.</string>
+    <string name="pref_m3u_export_title">M3U exportieren</string>
     <string name="pref_maintenance_title">Wartung</string>
-    <string name="pref_playlist_export_summary">Radiosender in einer M3U- oder PLS-Playlistdatei sichern, die in andere Player importiert werden können.</string>
+    <string name="pref_playlist_export_summary">Radiosender in einer M3U- oder PLS-Playlist speichern, die sich in andere Player importieren lässt.</string>
     <string name="pref_playlist_export_title">Playlist exportieren</string>
-    <string name="pref_playlist_import_summary">Radiosender aus einer M3U- oder PLS-Playlistdatei hinzufügen.</string>
+    <string name="pref_playlist_import_summary">Radiosender aus einer M3U- oder PLS-Playlist hinzufügen.</string>
     <string name="pref_playlist_import_title">Playlist importieren</string>
-    <string name="pref_pls_export_summary">Radiosender in einer PLS-Playlistdatei sichern, die in andere Player importiert werden können.</string>
-    <string name="pref_pls_export_title">PLS-Playlist exportieren</string>
-    <string name="pref_station_export_summary">Die gesamte Sammlung von Radiosendern einschließlich der Bilder im Gerätespeicher sichern.</string>
-    <string name="pref_station_export_title">Stationen exportieren</string>
+    <string name="pref_pls_export_summary">Radiosender in einer PLS-Playlist speichern, die sich in andere Player importieren lässt.</string>
+    <string name="pref_pls_export_title">PLS exportieren</string>
+    <string name="pref_station_export_summary">Gesamte Sammlung von Radiosendern einschließlich der Bilder im Gerätespeicher sichern.</string>
+    <string name="pref_station_export_title">Sender sichern</string>
     <string name="pref_station_restore_summary">Sammlung von Radiosendern aus der Sicherung wiederherstellen. Vorhandene Sender werden ersetzt.</string>
-    <string name="pref_station_restore_title">Stationen importieren</string>
-    <string name="pref_theme_selection_mode_dark">Dunkles Design</string>
+    <string name="pref_station_restore_title">Sender wiederherstellen</string>
+    <string name="pref_theme_selection_mode_dark">Dunkel</string>
     <string name="pref_theme_selection_mode_dark_summary">Immer das dunkle Farbschema verwenden.</string>
-    <string name="pref_theme_selection_mode_device_default">Systemstandard</string>
+    <string name="pref_theme_selection_mode_device_default">Wie das Gerät</string>
     <string name="pref_theme_selection_mode_device_default_summary">Folgt der Hell-/Dunkel-Einstellung des Systems.</string>
-    <string name="pref_theme_selection_mode_light">Helles Design</string>
+    <string name="pref_theme_selection_mode_light">Hell</string>
     <string name="pref_theme_selection_mode_light_summary">Immer das helle Farbschema verwenden.</string>
     <string name="pref_theme_selection_summary">Aktuell:</string>
     <string name="pref_theme_selection_title">App-Design</string>
-    <string name="pref_remove_all_stations_summary">Alle Radiosender der Sammlung samt ihrer Bilder löschen.</string>
+    <string name="pref_remove_all_stations_summary">Alle Radiosender der Sammlung einschließlich der Bilder löschen.</string>
     <string name="pref_remove_all_stations_title">Alle Sender entfernen</string>
     <string name="pref_update_station_images_summary">Die neueste Version aller Senderbilder herunterladen.</string>
     <string name="pref_update_station_images_title">Senderbilder aktualisieren</string>
-
-    <!-- App Shortcuts -->
-    <string name="shortcut_last_station_disabled_message">Verknüpfung für Wiedergabe des letzten Senders deaktiviert.</string>
-    <string name="shortcut_last_station_long_label">Letzten Sender wiedergeben</string>
+    <string name="shortcut_last_station_disabled_message">Verknüpfung zur Wiedergabe des letzten Senders deaktiviert.</string>
+    <string name="shortcut_last_station_long_label">Letzten Sender abspielen</string>
     <string name="shortcut_last_station_short_label">Letzter Sender</string>
-
-    <!-- Snackbars -->
     <string name="snackbar_failed_picking_media">Bildauswahl fehlgeschlagen.</string>
     <string name="snackbar_backed_up">wurde erfolgreich gesichert.</string>
-    <string name="snackbar_connection_failed">Die Verbindung konnte nicht aufgebaut oder wiederhergestellt werden.</string>
-    <string name="snackbar_copied_to_clipboard">In die Zwischenablage kopiert</string>
-    <string name="snackbar_error_download_error">Fehler beim Herunterladen</string>
-    <string name="snackbar_install_file_helper">Bitte installiere einen Dateimanager</string>
+    <string name="snackbar_connection_failed">Die Verbindung konnte nicht hergestellt oder wiederhergestellt werden.</string>
+    <string name="snackbar_copied_to_clipboard">In die Zwischenablage kopiert.</string>
+    <string name="snackbar_error_download_error">Downloadfehler</string>
+    <string name="snackbar_install_file_helper">Kein Dateimanager installiert.</string>
     <string name="snackbar_playlist_import_empty">In dieser Playlist wurden keine unterstützten Sender gefunden.</string>
     <string name="snackbar_playlist_import_running">Playlist wird gelesen…</string>
-    <string name="snackbar_preview_playback_failed">Die Vorschauwiedergabe ist nicht möglich.</string>
-    <string name="snackbar_restored">Stationen wurden erfolgreich wiederhergestellt.</string>
-    <string name="snackbar_save_m3u">Radiosender als M3U gespeichert…</string>
-    <string name="snackbar_save_pls">Radiosender als PLS gespeichert…</string>
-    <string name="snackbar_shortcut_created">Sender auf Startbildschirm platzieren</string>
-    <string name="snackbar_shortcut_not_created">Sender konnte nicht auf dem Startbildschirm platziert werden. Das Gerät unterbindet das Platzieren von Verknüpfungen.</string>
-    <string name="snackbar_station_duplicate">Dieser Sender ist ein Duplikat</string>
-    <string name="snackbar_station_not_valid">Dieser Sender existiert nicht</string>
-    <string name="snackbar_updating_station_images">Alle Senderbilder werden aktualisiert</string>
-    <string name="snackbar_show">Zeigen</string>
+    <string name="snackbar_preview_playback_failed">Vorschau nicht möglich.</string>
+    <string name="snackbar_restored">Sender wurden erfolgreich wiederhergestellt.</string>
+    <string name="snackbar_save_m3u">Radiosender werden als M3U gespeichert…</string>
+    <string name="snackbar_save_pls">Radiosender werden als PLS gespeichert…</string>
+    <string name="snackbar_shortcut_created">Verknüpfung erstellt.</string>
+    <string name="snackbar_shortcut_not_created">Verknüpfung nicht erstellt. Dieses Gerät erlaubt keine Verknüpfungen.</string>
+    <string name="snackbar_station_duplicate">Dieser Sender ist bereits vorhanden.</string>
+    <string name="snackbar_station_not_valid">Sender ist ungültig.</string>
+    <string name="snackbar_updating_station_images">Senderbilder werden aktualisiert.</string>
+    <string name="snackbar_show">Anzeigen</string>
     <string name="snackbar_update_available">ist verfügbar!</string>
     <string name="descr_expanded_player_recording_start_button">Aufnahme starten</string>
     <string name="descr_expanded_player_recording_stop_button">Aufnahme beenden</string>
@@ -141,7 +124,7 @@
     <string name="pref_recording_bitrate_value">%1$d kbit/s</string>
     <string name="pref_recording_bitrate_size">Etwa %1$d MB pro Stunde</string>
     <string name="pref_recording_bitrate_not_applicable">Entfällt: WAV wird unkomprimiert gespeichert.</string>
-    <string name="dialog_find_station_error_search">Suche fehlgeschlagen. radio-browser.info ist gerade nicht erreichbar – bitte später erneut versuchen.</string>
+    <string name="dialog_find_station_error_search">Suche fehlgeschlagen. radio-browser.info ist gerade nicht erreichbar – später erneut versuchen.</string>
     <string name="dialog_find_station_error_invalid_address">Das ist keine gültige Adresse.</string>
     <string name="dialog_find_station_error_unreachable">Die Adresse ist nicht erreichbar.</string>
     <string name="dialog_find_station_error_not_audio">Unter dieser Adresse wurde kein Radiostream gefunden.</string>
@@ -151,23 +134,23 @@
     <string name="station_image_from_gallery">Bild aus der Galerie</string>
     <string name="station_image_from_address">Logo von Adresse laden</string>
     <string name="dialog_logo_url_title">Logo von Adresse</string>
-    <string name="dialog_logo_url_message">Gib die Adresse eines Logos für „%1$s“ ein. Sie wird vor dem Übernehmen geprüft, und „Senderbilder aktualisieren“ lädt das Logo später neu.</string>
+    <string name="dialog_logo_url_message">Adresse eines Logos für „%1$s“. Die Adresse wird vor dem Übernehmen geprüft; „Senderbilder aktualisieren“ lädt das Logo später neu.</string>
     <string name="dialog_logo_url_hint">Logo-Adresse</string>
     <string name="dialog_logo_url_error_not_image">Unter dieser Adresse gibt es kein verwendbares Bild (PNG, JPEG, WebP, GIF, BMP oder ICO).</string>
-    <plurals name="dialog_station_picker_clicks">
-        <item quantity="one">%1$s Klick (24 h)</item>
-        <item quantity="other">%1$s Klicks (24 h)</item>
-    </plurals>
-    <string name="stations_search_hint">In deinen Sendern suchen</string>
+    <string name="stations_search_hint">In den Sendern suchen</string>
     <string name="stations_search_clear">Suche löschen</string>
     <string name="stations_search_no_results">Kein Sender passt zu „%1$s“.</string>
     <string name="widget_description">Sender, aktueller Titel und Play / Stopp</string>
     <string name="widget_nothing_playing">Pausiert</string>
-    <string name="widget_no_station">Füge in der App einen Sender hinzu</string>
+    <string name="widget_no_station">Noch kein Sender – in der App hinzufügen</string>
     <string name="widget_playing">Läuft</string>
     <string name="pref_station_search_title">Suche in der Senderliste</string>
-    <string name="pref_station_search_summary_enabled">Ein Suchfeld über deinen Sendern filtert sie nach Name und Tag.</string>
-    <string name="pref_station_search_summary_disabled">Kein Suchfeld über deinen Sendern.</string>
+    <string name="pref_station_search_summary_enabled">Ein Suchfeld über der Senderliste filtert nach Name und Tag.</string>
+    <string name="pref_station_search_summary_disabled">Kein Suchfeld über der Senderliste.</string>
+    <plurals name="dialog_station_picker_clicks">
+        <item quantity="one">%1$s Klick (24 h)</item>
+        <item quantity="other">%1$s Klicks (24 h)</item>
+    </plurals>
     <plurals name="stations_added">
         <item quantity="one">%1$d Sender hinzugefügt</item>
         <item quantity="other">%1$d Sender hinzugefügt</item>
