@@ -12,6 +12,8 @@
 
 package com.jamal2367.urlradio.ui.settings
 
+import android.content.Context
+import android.text.format.DateFormat
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,10 +30,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -39,8 +44,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.TimePickerDialog
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -48,16 +57,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
+import com.jamal2367.urlradio.alarm.AlarmSettings
+import com.jamal2367.urlradio.alarm.RadioAlarm
 import com.jamal2367.urlradio.recording.RecordingFormat
 import com.jamal2367.urlradio.ui.dialogs.ConfirmDialog
 import com.jamal2367.urlradio.ui.dialogs.WideDialogModifier
 import com.jamal2367.urlradio.ui.dialogs.WideDialogProperties
+import java.text.DateFormatSymbols
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 data class SettingsCallbacks(
     val onThemeSelected: (String) -> Unit,
@@ -71,6 +88,8 @@ data class SettingsCallbacks(
     val onLargeBufferChanged: (Boolean) -> Unit,
     val onRecordingFormatChanged: (RecordingFormat) -> Unit,
     val onRecordingBitrateChanged: (Int) -> Unit,
+    val onAlarmChanged: (AlarmSettings) -> Unit,
+    val onRequestAlarmPermission: () -> Unit,
     val onEditStationsChanged: (Boolean) -> Unit,
     val onEditStreamUrisChanged: (Boolean) -> Unit,
     val onOpenUrl: (String) -> Unit,
@@ -85,6 +104,9 @@ fun SettingsScreen(
     largeBuffer: Boolean,
     recordingFormat: RecordingFormat,
     recordingBitrate: Int,
+    alarm: AlarmSettings,
+    /** UUID and name of every station, for picking the one to wake up with. */
+    stations: List<Pair<String, String>>,
     editStations: Boolean,
     editStreamUris: Boolean,
     callbacks: SettingsCallbacks,
@@ -96,6 +118,10 @@ fun SettingsScreen(
     var showRemoveAllDialog by remember { mutableStateOf(false) }
     var showRecordingFormatDialog by remember { mutableStateOf(false) }
     var showRecordingBitrateDialog by remember { mutableStateOf(false) }
+    var showAlarmTimeDialog by remember { mutableStateOf(false) }
+    var showAlarmDaysDialog by remember { mutableStateOf(false) }
+    var showAlarmStationDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     LazyColumn(
         contentPadding = contentPadding,
@@ -181,6 +207,53 @@ fun SettingsScreen(
             }
         }
 
+        item { CategoryHeader(stringResource(R.string.pref_alarm_title)) }
+        item {
+            // Android 12 lets the user take the right to set exact alarms away again.
+            val permissionMissing: Boolean = alarm.enabled && !RadioAlarm.canSchedule(context)
+            val nextTrigger: Long? = RadioAlarm.nextTrigger(alarm)
+            SettingsGroup {
+                SettingsSwitchRow(
+                    title = stringResource(R.string.pref_alarm_enabled_title),
+                    summary = when {
+                        permissionMissing -> stringResource(R.string.pref_alarm_permission_missing)
+                        nextTrigger != null -> stringResource(R.string.pref_alarm_next, formatAlarmTrigger(context, nextTrigger))
+                        else -> stringResource(R.string.pref_alarm_off)
+                    },
+                    icon = R.drawable.ic_alarm_24dp,
+                    checked = alarm.enabled,
+                    onCheckedChange = { callbacks.onAlarmChanged(alarm.copy(enabled = it)) },
+                )
+                if (permissionMissing) {
+                    SettingsRow(
+                        title = stringResource(R.string.pref_alarm_permission_title),
+                        summary = stringResource(R.string.pref_alarm_permission_summary),
+                        icon = R.drawable.ic_alarm_24dp,
+                        onClick = callbacks.onRequestAlarmPermission,
+                    )
+                }
+                SettingsRow(
+                    title = stringResource(R.string.pref_alarm_time_title),
+                    summary = formatAlarmTime(context, alarm.hour, alarm.minute),
+                    icon = R.drawable.ic_sleep_timer_24dp,
+                    onClick = { showAlarmTimeDialog = true },
+                )
+                SettingsRow(
+                    title = stringResource(R.string.pref_alarm_days_title),
+                    summary = alarmDaysLabel(alarm.days),
+                    icon = R.drawable.ic_alarm_24dp,
+                    onClick = { showAlarmDaysDialog = true },
+                )
+                SettingsRow(
+                    title = stringResource(R.string.pref_alarm_station_title),
+                    summary = stations.firstOrNull { it.first == alarm.stationUuid }?.second
+                        ?: stringResource(R.string.pref_alarm_station_last_played),
+                    icon = R.drawable.ic_music_note_24dp,
+                    onClick = { showAlarmStationDialog = true },
+                )
+            }
+        }
+
         item { CategoryHeader(stringResource(R.string.pref_recording_title)) }
         item {
             SettingsGroup {
@@ -258,6 +331,53 @@ fun SettingsScreen(
                 )
             }
         }
+    }
+
+    if (showAlarmTimeDialog) {
+        AlarmTimeDialog(
+            hour = alarm.hour,
+            minute = alarm.minute,
+            onConfirm = { hour, minute ->
+                showAlarmTimeDialog = false
+                // setting a time is taken as wanting the alarm
+                callbacks.onAlarmChanged(alarm.copy(hour = hour, minute = minute, enabled = true))
+            },
+            onDismiss = { showAlarmTimeDialog = false },
+        )
+    }
+
+    if (showAlarmDaysDialog) {
+        AlarmDaysDialog(
+            days = alarm.days,
+            onConfirm = { days ->
+                showAlarmDaysDialog = false
+                callbacks.onAlarmChanged(alarm.copy(days = days))
+            },
+            onDismiss = { showAlarmDaysDialog = false },
+        )
+    }
+
+    if (showAlarmStationDialog) {
+        ChoiceDialog(
+            title = stringResource(R.string.pref_alarm_station_title),
+            icon = R.drawable.ic_alarm_24dp,
+            options = listOf(
+                ThemeOption(
+                    value = "",
+                    label = stringResource(R.string.pref_alarm_station_last_played),
+                    summary = stringResource(R.string.pref_alarm_station_last_played_summary),
+                    icon = R.drawable.ic_sleep_timer_24dp,
+                )
+            ) + stations.map { (uuid, name) ->
+                ThemeOption(value = uuid, label = name, summary = "", icon = R.drawable.ic_music_note_24dp)
+            },
+            selected = alarm.stationUuid.takeIf { uuid -> stations.any { it.first == uuid } }.orEmpty(),
+            onSelect = { uuid ->
+                showAlarmStationDialog = false
+                callbacks.onAlarmChanged(alarm.copy(stationUuid = uuid))
+            },
+            onDismiss = { showAlarmStationDialog = false },
+        )
     }
 
     if (showRecordingFormatDialog) {
@@ -539,6 +659,111 @@ private fun SettingsRowLayout(
         }
         trailing?.invoke()
     }
+}
+
+/* The alarm time the way the device shows times - "06:30" or "6:30 AM" */
+private fun formatAlarmTime(context: Context, hour: Int, minute: Int): String {
+    val calendar: Calendar = Calendar.getInstance().apply {
+        set(Calendar.HOUR_OF_DAY, hour)
+        set(Calendar.MINUTE, minute)
+    }
+    return DateFormat.getTimeFormat(context).format(calendar.time)
+}
+
+/* "Mon, 24 Nov, 06:30" - the weekday matters most for an alarm */
+private fun formatAlarmTrigger(context: Context, millis: Long): String {
+    val pattern: String = DateFormat.getBestDateTimePattern(Locale.getDefault(), "EEEdMMM")
+    return SimpleDateFormat(pattern, Locale.getDefault()).format(Date(millis)) + ", " +
+        DateFormat.getTimeFormat(context).format(Date(millis))
+}
+
+/* Short weekday names from Monday to Sunday, in the user's language */
+private fun weekdayNames(style: Int): List<String> {
+    val names: Array<String> = DateFormatSymbols.getInstance(Locale.getDefault()).let {
+        if (style == Calendar.SHORT) it.shortWeekdays else it.weekdays
+    }
+    // DateFormatSymbols counts from Sunday = 1
+    return listOf(Calendar.MONDAY, Calendar.TUESDAY, Calendar.WEDNESDAY, Calendar.THURSDAY,
+        Calendar.FRIDAY, Calendar.SATURDAY, Calendar.SUNDAY).map { names[it] }
+}
+
+/* "Mon – Fri", "Every day", "Once" or a list of days */
+@Composable
+private fun alarmDaysLabel(days: Int): String = when (days) {
+    0 -> stringResource(R.string.pref_alarm_days_once)
+    AlarmSettings.EVERY_DAY -> stringResource(R.string.pref_alarm_days_every_day)
+    AlarmSettings.WEEKDAYS -> stringResource(R.string.pref_alarm_days_weekdays)
+    else -> weekdayNames(Calendar.SHORT).filterIndexed { index, _ -> days and (1 shl index) != 0 }.joinToString(", ")
+}
+
+/* The alarm time, in the device's 12 or 24 hour style */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AlarmTimeDialog(hour: Int, minute: Int, onConfirm: (Int, Int) -> Unit, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val state = rememberTimePickerState(initialHour = hour, initialMinute = minute, is24Hour = DateFormat.is24HourFormat(context))
+    TimePickerDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.pref_alarm_time_title)) },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(state.hour, state.minute) }) {
+                Text(stringResource(R.string.dialog_generic_button_okay))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.dialog_generic_button_cancel)) }
+        },
+    ) {
+        TimePicker(state = state)
+    }
+}
+
+/* Which weekdays the alarm repeats on - none ticked means once */
+@Composable
+private fun AlarmDaysDialog(days: Int, onConfirm: (Int) -> Unit, onDismiss: () -> Unit) {
+    var selected by remember { mutableIntStateOf(days) }
+    val names: List<String> = weekdayNames(Calendar.LONG)
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        modifier = WideDialogModifier,
+        properties = WideDialogProperties,
+        icon = { Icon(painter = painterResource(R.drawable.ic_alarm_24dp), contentDescription = null) },
+        title = { Text(stringResource(R.string.pref_alarm_days_title)) },
+        text = {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                names.forEachIndexed { index, name ->
+                    val bit: Int = 1 shl index
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .toggleable(
+                                value = selected and bit != 0,
+                                role = Role.Checkbox,
+                                onValueChange = { selected = selected xor bit },
+                            )
+                            .padding(vertical = 4.dp),
+                    ) {
+                        Checkbox(checked = selected and bit != 0, onCheckedChange = null)
+                        Text(text = name, modifier = Modifier.padding(start = 12.dp))
+                    }
+                }
+                Text(
+                    text = stringResource(R.string.pref_alarm_days_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(selected) }) { Text(stringResource(R.string.dialog_generic_button_okay)) }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.dialog_generic_button_cancel)) }
+        },
+    )
 }
 
 /* "AAC (.m4a)" and so on. */

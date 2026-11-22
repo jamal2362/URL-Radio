@@ -18,4 +18,11 @@
     <color name="player_sheet_background">@android:color/system_neutral2_800</color>
     <color name="player_sheet_icon">@android:color/system_neutral1_50</color>
 
+
+    <!-- home screen widget -->
+    <color name="widget_background">@android:color/system_neutral1_900</color>
+    <color name="widget_text">@android:color/system_neutral1_100</color>
+    <color name="widget_text_secondary">@android:color/system_neutral2_200</color>
+    <color name="widget_button">@android:color/system_accent1_700</color>
+    <color name="widget_button_icon">@android:color/system_accent1_100</color>
 </resources>

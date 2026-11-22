@@ -39,7 +39,15 @@ object NetworkHelper {
 
     /* Data class: holder for content type information */
     /* error stays empty unless the address could not be reached - then it says why */
-    data class ContentType(var type: String = String(), var charset: String = String(), var error: String = String())
+    /* error stays empty unless the address could not be reached - then it says why.
+       icyName and icyBitrate (kbit/s) are what an Icecast / Shoutcast server says about itself. */
+    data class ContentType(
+        var type: String = String(),
+        var charset: String = String(),
+        var error: String = String(),
+        var icyName: String = String(),
+        var icyBitrate: Int = 0,
+    )
 
 
     /* Checks if the active network connection is connected to any network */
@@ -62,6 +70,10 @@ object NetworkHelper {
             null
         }
         if (connection != null) {
+            // the server's own name for its stream and its bitrate, if it sends them
+            contentType.icyName = connection.getHeaderField("icy-name")?.trim().orEmpty()
+            contentType.icyBitrate = connection.getHeaderField("icy-br")
+                ?.substringBefore(",")?.trim()?.toIntOrNull() ?: 0
             val contentTypeHeader: String = connection.contentType ?: String()
             Log.v(tag, "Raw content type header: $contentTypeHeader")
             val contentTypeHeaderParts: List<String> = contentTypeHeader.split(";")

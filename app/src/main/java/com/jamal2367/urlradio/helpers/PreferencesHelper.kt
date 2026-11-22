@@ -20,6 +20,7 @@ import android.util.Log
 import androidx.core.content.edit
 import com.google.gson.Gson
 import com.jamal2367.urlradio.Keys
+import com.jamal2367.urlradio.alarm.AlarmSettings
 import com.jamal2367.urlradio.recording.RecordingFormat
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -74,6 +75,12 @@ object PreferencesHelper {
 
 
     /* Saves state of playback for player to shared preferences */
+    /* Loads whether a station was playing when the state was last saved */
+    fun loadIsPlaying(): Boolean {
+        return sharedPreferences.getBoolean(Keys.PREF_PLAYER_STATE_IS_PLAYING, false)
+    }
+
+
     fun saveIsPlaying(isPlaying: Boolean) {
         sharedPreferences.edit {
             putBoolean(Keys.PREF_PLAYER_STATE_IS_PLAYING, isPlaying)
@@ -300,6 +307,31 @@ object PreferencesHelper {
         sharedPreferences.edit {
             putBoolean(Keys.PREF_EDIT_STREAMS_URIS, enabled)
         }
+    }
+
+
+    /* Saves the radio alarm */
+    fun saveAlarmSettings(settings: AlarmSettings) {
+        sharedPreferences.edit {
+            putBoolean(Keys.PREF_ALARM_ENABLED, settings.enabled)
+            putInt(Keys.PREF_ALARM_HOUR, settings.hour)
+            putInt(Keys.PREF_ALARM_MINUTE, settings.minute)
+            putInt(Keys.PREF_ALARM_DAYS, settings.days)
+            putString(Keys.PREF_ALARM_STATION_UUID, settings.stationUuid)
+        }
+    }
+
+
+    /* Loads the radio alarm */
+    fun loadAlarmSettings(): AlarmSettings {
+        val defaults = AlarmSettings()
+        return AlarmSettings(
+            enabled = sharedPreferences.getBoolean(Keys.PREF_ALARM_ENABLED, defaults.enabled),
+            hour = sharedPreferences.getInt(Keys.PREF_ALARM_HOUR, defaults.hour),
+            minute = sharedPreferences.getInt(Keys.PREF_ALARM_MINUTE, defaults.minute),
+            days = sharedPreferences.getInt(Keys.PREF_ALARM_DAYS, defaults.days),
+            stationUuid = sharedPreferences.getString(Keys.PREF_ALARM_STATION_UUID, defaults.stationUuid).orEmpty(),
+        )
     }
 
 

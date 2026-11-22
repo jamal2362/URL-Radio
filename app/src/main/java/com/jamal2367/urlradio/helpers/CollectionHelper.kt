@@ -333,6 +333,8 @@ object CollectionHelper {
 
     /* Hashtags in a station name: "WFPK #local #indie" -> [#local, #indie] */
     fun getTags(name: String): List<String> = tagRegex.findAll(name).map { it.value.lowercase() }.toList()
+    /* The name without its #tags - as the notification, the widget and the tile show it */
+    fun nameWithoutTags(name: String): String = name.replace(tagRegex, "").trim().ifEmpty { name }
     private val tagRegex = Regex("#\\p{L}[\\p{L}\\d_-]*")
 
     /* Levenshtein edit distance between two words, for misheard station names */
@@ -533,7 +535,11 @@ object CollectionHelper {
 
         // CASE: stream address
         if (isStreamContentType(contentType)) {
-            return UrlCheck(listOf(createStationFromStreamUrl(query, contentType)))
+            // named and rated the way the server announces itself, rather than by its address
+            val station: Station = createStationFromStreamUrl(query, contentType)
+            if (detected.icyName.isNotEmpty()) station.name = detected.icyName
+            if (detected.icyBitrate > 0) station.bitrate = detected.icyBitrate
+            return UrlCheck(listOf(station))
         }
         return UrlCheck(emptyList(), UrlProblem.NOT_AUDIO, detected.type)
     }

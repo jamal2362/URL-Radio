@@ -32,6 +32,9 @@ object Keys {
     // intent actions
     const val ACTION_SHOW_PLAYER: String = "com.jamal2367.urlradio.action.SHOW_PLAYER"
     const val ACTION_START: String = "com.jamal2367.urlradio.action.START"
+    // sent to PlayerService by the radio alarm, and by the widget / quick settings tile
+    const val ACTION_RADIO_ALARM: String = "com.jamal2367.urlradio.action.RADIO_ALARM"
+    const val ACTION_TOGGLE_PLAYBACK: String = "com.jamal2367.urlradio.action.TOGGLE_PLAYBACK"
 
     // intent extras
     const val EXTRA_STATION_UUID: String = "STATION_UUID"
@@ -82,6 +85,11 @@ object Keys {
     const val PREF_PLAYER_STATE_SLEEP_TIMER_RUNNING: String = "PLAYER_STATE_SLEEP_TIMER_RUNNING"
     const val PREF_LARGE_BUFFER_SIZE: String = "LARGE_BUFFER_SIZE"
     const val PREF_RECORDING_FORMAT: String = "RECORDING_FORMAT"
+    const val PREF_ALARM_ENABLED: String = "ALARM_ENABLED"
+    const val PREF_ALARM_HOUR: String = "ALARM_HOUR"
+    const val PREF_ALARM_MINUTE: String = "ALARM_MINUTE"
+    const val PREF_ALARM_DAYS: String = "ALARM_DAYS"
+    const val PREF_ALARM_STATION_UUID: String = "ALARM_STATION_UUID"
     const val PREF_RECORDING_BITRATE: String = "RECORDING_BITRATE"
     const val PREF_EDIT_STATIONS: String = "EDIT_STATIONS"
     const val PREF_EDIT_STREAMS_URIS: String = "EDIT_STREAMS_URIS"

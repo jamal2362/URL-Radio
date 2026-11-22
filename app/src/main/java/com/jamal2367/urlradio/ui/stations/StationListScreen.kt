@@ -56,6 +56,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -125,6 +126,12 @@ fun StationListScreen(
     onMoveFinished: () -> Unit,
     contentPadding: PaddingValues,
     modifier: Modifier = Modifier,
+    // Off while the list is filtered: its indices then no longer line up with the
+    // collection that onMove works on.
+    reorderEnabled: Boolean = true,
+    // Shown under the header when there are no stations to list, e.g. for a search
+    // without results.
+    emptyMessage: String? = null,
     header: @Composable () -> Unit,
 ) {
     Column(modifier = modifier.fillMaxSize()) {
@@ -189,6 +196,20 @@ fun StationListScreen(
         ) {
             item(key = "header") { header() }
 
+            if (stations.isEmpty() && emptyMessage != null) {
+                item(key = "empty") {
+                    Text(
+                        text = emptyMessage,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 32.dp),
+                    )
+                }
+            }
+
             // The header above is lazy item 0, which pushes every station row one slot further
             // down in the list's own (absolute) item indices. draggedIndex, `index` from
             // itemsIndexed and the indices onMove expects all stay in "stations list" terms --
@@ -208,7 +229,7 @@ fun StationListScreen(
                 // the station name claim their own long-press for opening the editor, so
                 // this only ever fires on the free area around them.
                 val dragModifier =
-                    if (isEditorOpen) Modifier else Modifier.pointerInput(station.uuid) {
+                    if (isEditorOpen || !reorderEnabled) Modifier else Modifier.pointerInput(station.uuid) {
                         detectDragGesturesAfterLongPress(
                             onDragStart = {
                                 val info = listState.layoutInfo.visibleItemsInfo

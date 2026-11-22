@@ -31,11 +31,13 @@ import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.ForwardingPlayer
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Metadata
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.HttpDataSource
+import androidx.media3.datasource.RawResourceDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
@@ -47,6 +49,8 @@ import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.upstream.DefaultAllocator
 import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy
 import androidx.media3.exoplayer.upstream.LoadErrorHandlingPolicy
+import androidx.media3.extractor.metadata.icy.IcyHeaders
+import androidx.media3.extractor.metadata.icy.IcyInfo
 import androidx.media3.session.CommandButton
 import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.LibraryResult
@@ -59,6 +63,8 @@ import androidx.media3.session.SessionResult
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
+import com.jamal2367.urlradio.alarm.AlarmSettings
+import com.jamal2367.urlradio.alarm.RadioAlarm
 import com.jamal2367.urlradio.core.Collection
 import com.jamal2367.urlradio.core.Station
 import com.jamal2367.urlradio.helpers.AudioHelper
@@ -67,14 +73,30 @@ import com.jamal2367.urlradio.helpers.CollectionHelper
 import com.jamal2367.urlradio.helpers.FileHelper
 import com.jamal2367.urlradio.helpers.PreferencesHelper
 import com.jamal2367.urlradio.recording.StreamRecorder
+import com.jamal2367.urlradio.widget.requestTileUpdate
+import com.jamal2367.urlradio.widget.RadioWidget
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
+
+/* Radio alarm */
+private const val ALARM_FALLBACK_ID: String = "radio_alarm_fallback"
+private const val ALARM_START_VOLUME: Float = 0.15f
+private const val ALARM_FADE_STEPS: Int = 30
+private const val ALARM_FADE_STEP_MS: Long = 1000L
+private const val ALARM_FALLBACK_DELAY_MS: Long = 30_000L
+private val ALARM_AUDIO_ATTRIBUTES: AudioAttributes = AudioAttributes.Builder()
+    .setUsage(C.USAGE_ALARM)
+    .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
+    .build()
 
 
 /*
@@ -116,6 +138,14 @@ class PlayerService : MediaLibraryService() {
     private var recordingEndsAt: Long = 0L
     private val recordingTimerHandler = Handler(Looper.getMainLooper())
     private val recordingTimerRunnable = Runnable { stopRecording() }
+    // radio alarm: set while a wake-up is running, until the user pauses or switches station
+    private var alarmActive: Boolean = false
+    private var alarmStationUuid: String = String()
+    private var alarmFadeJob: Job? = null
+    private val alarmFallbackRunnable = Runnable {
+        // the station did not start - no network, or the station is gone: wake up anyway
+        if (alarmActive && !player.isPlaying) playAlarmFallback()
+    }
 
 
     /* Overrides onCreate from Service */
@@ -155,6 +185,122 @@ class PlayerService : MediaLibraryService() {
         player.release()
         mediaLibrarySession.release()
         super.onDestroy()
+    }
+
+
+    /*
+     * The radio alarm and the widget start the service with an action of their own; anything
+     * else - media buttons among it - goes to MediaSessionService as before.
+     */
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        when (intent?.action) {
+            Keys.ACTION_RADIO_ALARM -> {
+                startAlarmPlayback()
+                return START_NOT_STICKY
+            }
+            Keys.ACTION_TOGGLE_PLAYBACK -> {
+                togglePlayback()
+                return START_NOT_STICKY
+            }
+        }
+        return super.onStartCommand(intent, flags, startId)
+    }
+
+
+    /* Play / pause - starting the station played last when nothing is loaded yet */
+    private fun togglePlayback() {
+        if (player.playWhenReady) {
+            player.pause()
+            return
+        }
+        if (player.currentMediaItem == null || player.playbackState == Player.STATE_IDLE) {
+            if (collection.stations.isEmpty()) return
+            player.setMediaItem(CollectionHelper.getRecent(this, collection))
+        }
+        player.prepare()
+        player.play()
+    }
+
+
+    /*
+     * The radio alarm went off. The station plays as an alarm - so it is heard even with the
+     * media volume turned down - and grows louder over half a minute. If it has not started
+     * after ALARM_FALLBACK_DELAY (no network, station gone), a built-in tone takes over.
+     */
+    private fun startAlarmPlayback() {
+        RadioAlarm.onFired(this)
+        val settings: AlarmSettings = PreferencesHelper.loadAlarmSettings()
+        alarmActive = true
+        player.setAudioAttributes(ALARM_AUDIO_ATTRIBUTES, true)
+        player.volume = ALARM_START_VOLUME
+        if (collection.stations.isEmpty()) {
+            playAlarmFallback()
+            return
+        }
+        val station: Station = CollectionHelper.getStation(
+            collection,
+            settings.stationUuid.ifEmpty { PreferencesHelper.loadLastPlayedStationUuid() }
+        )
+        alarmStationUuid = station.uuid
+        player.setMediaItem(CollectionHelper.buildMediaItem(this, station))
+        player.prepare()
+        player.play()
+        alarmFadeJob?.cancel()
+        alarmFadeJob = serviceScope.launch {
+            for (step in 1..ALARM_FADE_STEPS) {
+                delay(ALARM_FADE_STEP_MS)
+                if (!alarmActive) return@launch
+                player.volume = ALARM_START_VOLUME + (1f - ALARM_START_VOLUME) * step / ALARM_FADE_STEPS
+            }
+        }
+        recordingTimerHandler.removeCallbacks(alarmFallbackRunnable)
+        recordingTimerHandler.postDelayed(alarmFallbackRunnable, ALARM_FALLBACK_DELAY_MS)
+    }
+
+
+    /* The built-in alarm tone, repeated until the user stops it */
+    private fun playAlarmFallback() {
+        Log.w(tag, "Radio alarm: station did not start - playing the fallback tone.")
+        alarmFadeJob?.cancel()
+        player.volume = 1f
+        val item: MediaItem = MediaItem.Builder()
+            .setMediaId(ALARM_FALLBACK_ID)
+            .setUri(RawResourceDataSource.buildRawResourceUri(R.raw.alarm_fallback))
+            .setMediaMetadata(
+                MediaMetadata.Builder()
+                    .setArtist(getString(R.string.alarm_fallback_title))
+                    .setIsPlayable(true)
+                    .build()
+            )
+            .build()
+        player.repeatMode = Player.REPEAT_MODE_ONE
+        player.setMediaItem(item)
+        player.prepare()
+        player.play()
+    }
+
+
+    /* Shows the current station, state and title in the home screen widget and the quick settings tile */
+    private fun updateWidgets() {
+        val mediaId: String = player.currentMediaItem?.mediaId ?: PreferencesHelper.loadLastPlayedStationUuid()
+        val station: Station? = collection.stations.firstOrNull { it.uuid == mediaId }
+            ?: collection.stations.takeIf { it.isNotEmpty() }?.let { CollectionHelper.getStation(collection, mediaId) }
+        val isPlaying: Boolean = player.isPlaying || (player.playWhenReady && player.playbackState == Player.STATE_BUFFERING)
+        RadioWidget.update(this, station, isPlaying, metadataHistory.lastOrNull().orEmpty())
+        requestTileUpdate(this)
+    }
+
+
+    /* Back to normal playback: media volume and audio attributes, no repeat */
+    private fun endAlarmSession() {
+        if (!alarmActive) return
+        alarmActive = false
+        alarmStationUuid = String()
+        alarmFadeJob?.cancel()
+        recordingTimerHandler.removeCallbacks(alarmFallbackRunnable)
+        player.volume = 1f
+        player.repeatMode = Player.REPEAT_MODE_OFF
+        player.setAudioAttributes(AudioAttributes.DEFAULT, true)
     }
 
 
@@ -424,6 +570,33 @@ class PlayerService : MediaLibraryService() {
     }
 
 
+    /*
+     * Gives the playing station the name and bitrate its server announces - but only where
+     * the station has none of its own: a station added by its bare address is called by that
+     * address until now, and a name the user typed in is never replaced.
+     */
+    private fun adoptStreamInfo(headers: IcyHeaders) {
+        val stationUuid: String = player.currentMediaItem?.mediaId ?: return
+        val station: Station = collection.stations.firstOrNull { it.uuid == stationUuid } ?: return
+        var changed = false
+        val name: String = headers.name?.trim().orEmpty()
+        if (name.isNotEmpty() && !station.nameManuallySet && station.name == station.getStreamUri()) {
+            station.name = name
+            changed = true
+        }
+        // IcyHeaders carries the bitrate in bit/s, the station keeps kbit/s
+        if (station.bitrate == 0 && headers.bitrate > 0) {
+            station.bitrate = headers.bitrate / 1000
+            changed = true
+        }
+        if (changed) {
+            updateWidgets()
+            Log.i(tag, "Adopted stream info for ${station.uuid}: name=${station.name}, bitrate=${station.bitrate}")
+            CollectionHelper.saveCollection(this, collection)
+        }
+    }
+
+
     /* Updates metadata */
     private fun updateMetadata(metadata: String = String()) {
         /*
@@ -451,6 +624,7 @@ class PlayerService : MediaLibraryService() {
         PreferencesHelper.saveMetadataHistory(metadataHistory)
         // hand the new history to the UI
         broadcastMetadataHistory()
+        if (this::metadataHistory.isInitialized && this::player.isInitialized) updateWidgets()
     }
 
 
@@ -482,6 +656,8 @@ class PlayerService : MediaLibraryService() {
                 async(Dispatchers.Default) { FileHelper.readCollectionSuspended(context) }
             // wait for result and update collection
             collection = deferred.await()
+            // a new logo or name shows in the widget right away
+            updateWidgets()
 //            // special case: trigger metadata view update for stations that have no metadata
 //            if (player.isPlaying && station.name == getCurrentMetadata()) {
 //                station = CollectionHelper.getStation(collection, station.uuid)
@@ -736,8 +912,15 @@ class PlayerService : MediaLibraryService() {
             super.onIsPlayingChanged(isPlaying)
             // store state of playback
             val currentMediaId: String = player.currentMediaItem?.mediaId ?: String()
+            // the alarm's fallback tone is no station - nothing to remember about it
+            if (currentMediaId == ALARM_FALLBACK_ID) {
+                updateWidgets()
+                return
+            }
             PreferencesHelper.saveIsPlaying(isPlaying)
             PreferencesHelper.saveCurrentStationId(currentMediaId)
+            // after saving: the quick settings tile reads the saved state
+            updateWidgets()
             // reset restart counter
             playbackRestartCounter = 0
             // save collection and player state
@@ -790,6 +973,8 @@ class PlayerService : MediaLibraryService() {
                 // paused by the user, the system or the end of the stream: the recording ends
                 // here. A mere rebuffer does not change playWhenReady and keeps it running.
                 stopRecording()
+                // pausing also ends a wake-up: volume and audio attributes go back to normal
+                endAlarmSession()
                 when (reason) {
                     Player.PLAY_WHEN_READY_CHANGE_REASON_END_OF_MEDIA_ITEM -> {
                         // playback reached end: stop / end playback
@@ -819,18 +1004,38 @@ class PlayerService : MediaLibraryService() {
             super.onMediaItemTransition(mediaItem, reason)
             // a recording belongs to one station
             stopRecording()
+            // switching to another station ends a wake-up - the fallback tone does not
+            val mediaId: String = mediaItem?.mediaId.orEmpty()
+            if (alarmActive && mediaId != alarmStationUuid && mediaId != ALARM_FALLBACK_ID) {
+                endAlarmSession()
+            }
         }
 
         override fun onPlayerError(error: PlaybackException) {
             super.onPlayerError(error)
             Log.d(tag, "PlayerError occurred: ${error.errorCodeName}")
+            // a wake-up must not end in silence
+            if (alarmActive && player.currentMediaItem?.mediaId != ALARM_FALLBACK_ID) {
+                playAlarmFallback()
+            }
             // todo: test if playback needs to be restarted
         }
 
 
         override fun onMetadata(metadata: Metadata) {
             super.onMetadata(metadata)
-            updateMetadata(AudioHelper.getMetadataString(metadata))
+            // what an Icecast / Shoutcast server says about itself, at the start of the stream
+            (0 until metadata.length()).map { metadata.get(it) }.filterIsInstance<IcyHeaders>().firstOrNull()?.let {
+                adoptStreamInfo(it)
+            }
+            val metadataString: String = AudioHelper.getMetadataString(metadata)
+            // HLS segments also carry ID3 data without a title (timestamps and the like).
+            // Only an actual title - or an Icecast title update, which may deliberately be
+            // empty - changes what is shown; otherwise the display would flip back to the
+            // station name with every such segment.
+            if (metadataString.isNotEmpty() || (0 until metadata.length()).any { metadata.get(it) is IcyInfo }) {
+                updateMetadata(metadataString)
+            }
         }
 
     }

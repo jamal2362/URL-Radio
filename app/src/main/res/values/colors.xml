@@ -27,4 +27,11 @@
     <!-- window background used by the XML theme before Compose draws -->
     <color name="window_background">#FFFEFBFF</color>
 
+
+    <!-- home screen widget -->
+    <color name="widget_background">#FFF3F3FA</color>
+    <color name="widget_text">#FF1A1B21</color>
+    <color name="widget_text_secondary">#FF45464F</color>
+    <color name="widget_button">#FFDCE1FF</color>
+    <color name="widget_button_icon">#FF2D3E70</color>
 </resources>

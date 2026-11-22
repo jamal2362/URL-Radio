@@ -15,6 +15,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -41,6 +42,7 @@ import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.jamal2367.urlradio.alarm.RadioAlarm
 import com.jamal2367.urlradio.core.Station
 import com.jamal2367.urlradio.helpers.AppThemeHelper
 import com.jamal2367.urlradio.helpers.BackupHelper
@@ -208,6 +210,7 @@ class MainActivity : ComponentActivity() {
         var largeBuffer by remember { mutableStateOf(PreferencesHelper.loadLargeBufferSize()) }
         var recordingFormat by remember { mutableStateOf(PreferencesHelper.loadRecordingFormat()) }
         var recordingBitrate by remember { mutableIntStateOf(PreferencesHelper.loadRecordingBitrate()) }
+        var alarmSettings by remember { mutableStateOf(PreferencesHelper.loadAlarmSettings()) }
         var showFindDialog by remember { mutableStateOf(false) }
         // the station whose logo address is being entered, by UUID so it survives recreation
         var logoUrlStationUuid by rememberSaveable { mutableStateOf<String?>(null) }
@@ -330,6 +333,7 @@ class MainActivity : ComponentActivity() {
                     largeBuffer = largeBuffer,
                     recordingFormat = recordingFormat,
                     recordingBitrate = recordingBitrate,
+                    alarm = alarmSettings,
                 ),
                 actions = AppActions(
                     onTogglePlayback = { playback.togglePlayPause(it) },
@@ -439,6 +443,21 @@ class MainActivity : ComponentActivity() {
                             // keeps the bit rate if the new format offers it, else its default
                             recordingBitrate = it.coerceBitrate(recordingBitrate)
                             PreferencesHelper.saveRecordingBitrate(recordingBitrate)
+                        },
+                        onAlarmChanged = {
+                            alarmSettings = it
+                            PreferencesHelper.saveAlarmSettings(it)
+                            RadioAlarm.schedule(this)
+                        },
+                        onRequestAlarmPermission = {
+                            // only offered on Android 12, see RadioAlarm.canSchedule
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                runCatching {
+                                    startActivity(
+                                        Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, "package:$packageName".toUri())
+                                    )
+                                }
+                            }
                         },
                         onRecordingBitrateChanged = {
                             recordingBitrate = it
