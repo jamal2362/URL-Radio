@@ -23,6 +23,9 @@ import android.media.audiofx.AudioEffect
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.os.Handler
+import android.os.Looper
+import android.os.SystemClock
 import android.util.Log
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
@@ -109,6 +112,10 @@ class PlayerService : MediaLibraryService() {
     private var chip: String? = null // the tag tab (or voice tag) the station was played from
     private var manuallyCancelledSleepTimer = false
     private lateinit var recorder: StreamRecorder
+    // set while a recording runs with a timer: when it ends (SystemClock.elapsedRealtime)
+    private var recordingEndsAt: Long = 0L
+    private val recordingTimerHandler = Handler(Looper.getMainLooper())
+    private val recordingTimerRunnable = Runnable { stopRecording() }
 
 
     /* Overrides onCreate from Service */
@@ -141,6 +148,7 @@ class PlayerService : MediaLibraryService() {
         // stop listening for collection changes
         serviceScope.cancel()
         // saves a recording that is still running
+        recordingTimerHandler.removeCallbacks(recordingTimerRunnable)
         recorder.release()
         // player.removeAnalyticsListener(analyticsListener)
         player.removeListener(playerListener)
@@ -324,18 +332,33 @@ class PlayerService : MediaLibraryService() {
     }
 
 
-    /* Starts recording the station that is playing */
-    private fun startRecording() {
+    /*
+     * Starts recording the station that is playing. With a duration greater than zero the
+     * recording stops on its own once that much time has passed.
+     */
+    private fun startRecording(durationMillis: Long = 0L) {
         if (recorder.isRecording || !player.playWhenReady) return
         val stationName: String = player.currentMediaItem?.mediaMetadata?.artist?.toString().orEmpty()
         val title: String = metadataHistory.lastOrNull().orEmpty()
-        recorder.start(stationName, title, PreferencesHelper.loadRecordingSplitByTitle())
+        recorder.start(
+            stationName = stationName,
+            title = title,
+            splitByTitle = PreferencesHelper.loadRecordingSplitByTitle(),
+            format = PreferencesHelper.loadRecordingFormat(),
+            bitrateKbps = PreferencesHelper.loadRecordingBitrate(),
+        )
+        if (durationMillis > 0L) {
+            recordingEndsAt = SystemClock.elapsedRealtime() + durationMillis
+            recordingTimerHandler.postDelayed(recordingTimerRunnable, durationMillis)
+        }
         broadcastRecordingState()
     }
 
 
     /* Stops a running recording - what was recorded so far is saved */
     private fun stopRecording() {
+        recordingTimerHandler.removeCallbacks(recordingTimerRunnable)
+        recordingEndsAt = 0L
         if (!recorder.isRecording) return
         recorder.stop()
         broadcastRecordingState()
@@ -344,8 +367,14 @@ class PlayerService : MediaLibraryService() {
 
     /* The recording state as handed to controllers */
     private fun recordingStateBundle(): Bundle = Bundle().apply {
+        val remaining: Long = if (recorder.isRecording && recordingEndsAt > 0L) {
+            (recordingEndsAt - SystemClock.elapsedRealtime()).coerceAtLeast(0L)
+        } else {
+            0L
+        }
         putBoolean(Keys.EXTRA_RECORDING_ACTIVE, recorder.isRecording)
         putLong(Keys.EXTRA_RECORDING_ELAPSED, recorder.elapsedMillis)
+        putLong(Keys.EXTRA_RECORDING_REMAINING, remaining)
     }
 
 
@@ -370,6 +399,11 @@ class PlayerService : MediaLibraryService() {
         }
 
         override fun onRecordingFailed() {
+            // the recorder has stopped itself - a timer has nothing left to stop
+            if (!recorder.isRecording) {
+                recordingTimerHandler.removeCallbacks(recordingTimerRunnable)
+                recordingEndsAt = 0L
+            }
             broadcastRecordingState(failed = true)
         }
     }
@@ -597,7 +631,7 @@ class PlayerService : MediaLibraryService() {
                     manuallyCancelSleepTimer()
                 }
                 Keys.CMD_START_RECORDING -> {
-                    startRecording()
+                    startRecording(args.getLong(Keys.EXTRA_RECORDING_DURATION, 0L))
                     return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS, recordingStateBundle()))
                 }
                 Keys.CMD_STOP_RECORDING -> {

@@ -30,16 +30,15 @@ object RecordingStorage {
     private val tag: String = RecordingStorage::class.java.simpleName
 
     private const val FOLDER_NAME = "URL Radio"
-    private const val MIME_TYPE = "audio/mp4"
 
 
     /* Copies a finished recording into the recordings folder. Returns whether that worked. */
-    fun save(context: Context, source: File, displayName: String): Boolean {
+    fun save(context: Context, source: File, displayName: String, mimeType: String): Boolean {
         return try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                saveToMediaStore(context, source, displayName)
+                saveToMediaStore(context, source, displayName, mimeType)
             } else {
-                saveToAppFolder(context, source, displayName)
+                saveToAppFolder(context, source, displayName, mimeType)
             }
         } catch (e: Exception) {
             Log.e(tag, "Unable to save recording $displayName.", e)
@@ -59,11 +58,11 @@ object RecordingStorage {
 
 
     @RequiresApi(Build.VERSION_CODES.Q)
-    private fun saveToMediaStore(context: Context, source: File, displayName: String): Boolean {
+    private fun saveToMediaStore(context: Context, source: File, displayName: String, mimeType: String): Boolean {
         val resolver = context.contentResolver
         val values = ContentValues().apply {
             put(MediaStore.Audio.Media.DISPLAY_NAME, displayName)
-            put(MediaStore.Audio.Media.MIME_TYPE, MIME_TYPE)
+            put(MediaStore.Audio.Media.MIME_TYPE, mimeType)
             put(MediaStore.Audio.Media.RELATIVE_PATH, "${Environment.DIRECTORY_MUSIC}/$FOLDER_NAME")
             put(MediaStore.Audio.Media.IS_PENDING, 1)
         }
@@ -83,7 +82,7 @@ object RecordingStorage {
     }
 
 
-    private fun saveToAppFolder(context: Context, source: File, displayName: String): Boolean {
+    private fun saveToAppFolder(context: Context, source: File, displayName: String, mimeType: String): Boolean {
         val folder: File = context.getExternalFilesDir(Environment.DIRECTORY_MUSIC) ?: return false
         folder.mkdirs()
         var target = File(folder, displayName)
@@ -93,7 +92,7 @@ object RecordingStorage {
             counter++
         }
         source.copyTo(target)
-        MediaScannerConnection.scanFile(context, arrayOf(target.absolutePath), arrayOf(MIME_TYPE), null)
+        MediaScannerConnection.scanFile(context, arrayOf(target.absolutePath), arrayOf(mimeType), null)
         return true
     }
 }

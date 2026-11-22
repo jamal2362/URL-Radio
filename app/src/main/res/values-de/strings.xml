@@ -131,4 +131,17 @@
     <string name="pref_recording_split_title">Aufnahmen nach Titel aufteilen</string>
     <string name="pref_recording_split_summary_enabled">Bei jedem neuen Titel, den der Sender meldet, beginnt eine neue Datei.</string>
     <string name="pref_recording_split_summary_disabled">Jede Aufnahme wird als eine Datei gespeichert.</string>
+    <string name="descr_expanded_player_recording_timer_button">Aufnahme mit Timer starten</string>
+    <string name="pref_recording_title">Aufnahme</string>
+    <string name="pref_recording_format_title">Format</string>
+    <string name="pref_recording_format_aac">AAC (.m4a)</string>
+    <string name="pref_recording_format_aac_summary">Kompakt und überall abspielbar.</string>
+    <string name="pref_recording_format_opus">Opus (.ogg)</string>
+    <string name="pref_recording_format_opus_summary">Besserer Klang bei gleicher Dateigröße.</string>
+    <string name="pref_recording_format_wav">WAV (.wav)</string>
+    <string name="pref_recording_format_wav_summary">Verlustfrei, aber groß: etwa 630 MB pro Stunde.</string>
+    <string name="pref_recording_bitrate_title">Bitrate</string>
+    <string name="pref_recording_bitrate_value">%1$d kbit/s</string>
+    <string name="pref_recording_bitrate_size">Etwa %1$d MB pro Stunde</string>
+    <string name="pref_recording_bitrate_not_applicable">Entfällt: WAV wird unkomprimiert gespeichert.</string>
 </resources>

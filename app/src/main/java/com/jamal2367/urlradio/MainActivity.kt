@@ -31,6 +31,7 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -204,6 +205,8 @@ class MainActivity : ComponentActivity() {
         var themeSelection by remember { mutableStateOf(PreferencesHelper.loadThemeSelection()) }
         var largeBuffer by remember { mutableStateOf(PreferencesHelper.loadLargeBufferSize()) }
         var recordingSplitByTitle by remember { mutableStateOf(PreferencesHelper.loadRecordingSplitByTitle()) }
+        var recordingFormat by remember { mutableStateOf(PreferencesHelper.loadRecordingFormat()) }
+        var recordingBitrate by remember { mutableIntStateOf(PreferencesHelper.loadRecordingBitrate()) }
         var showFindDialog by remember { mutableStateOf(false) }
         // Selection of the playlist import dialog. Kept here rather than in the search view
         // model because the imported list does not come from a search.
@@ -323,6 +326,8 @@ class MainActivity : ComponentActivity() {
                     themeLabel = AppThemeHelper.getCurrentTheme(this),
                     largeBuffer = largeBuffer,
                     recordingSplitByTitle = recordingSplitByTitle,
+                    recordingFormat = recordingFormat,
+                    recordingBitrate = recordingBitrate,
                 ),
                 actions = AppActions(
                     onTogglePlayback = { playback.togglePlayPause(it) },
@@ -357,7 +362,7 @@ class MainActivity : ComponentActivity() {
                     onShare = { station -> shareStation(station) },
                     onStartSleepTimer = { playback.startSleepTimer(it) },
                     onCancelSleepTimer = { playback.cancelSleepTimer() },
-                    onStartRecording = { playback.startRecording() },
+                    onStartRecording = { playback.startRecording(it) },
                     onStopRecording = { playback.stopRecording() },
                     settings = SettingsCallbacks(
                         onThemeSelected = {
@@ -428,6 +433,17 @@ class MainActivity : ComponentActivity() {
                         onRecordingSplitByTitleChanged = {
                             recordingSplitByTitle = it
                             PreferencesHelper.saveRecordingSplitByTitle(it)
+                        },
+                        onRecordingFormatChanged = {
+                            recordingFormat = it
+                            PreferencesHelper.saveRecordingFormat(it)
+                            // keeps the bit rate if the new format offers it, else its default
+                            recordingBitrate = it.coerceBitrate(recordingBitrate)
+                            PreferencesHelper.saveRecordingBitrate(recordingBitrate)
+                        },
+                        onRecordingBitrateChanged = {
+                            recordingBitrate = it
+                            PreferencesHelper.saveRecordingBitrate(it)
                         },
                         onEditStationsChanged = {
                             PreferencesHelper.saveEditStationsEnabled(it)

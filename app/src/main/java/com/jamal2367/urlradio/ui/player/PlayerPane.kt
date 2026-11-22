@@ -61,6 +61,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
@@ -91,6 +92,7 @@ fun PlayerPane(
     onStartSleepTimer: () -> Unit,
     onCancelSleepTimer: () -> Unit,
     onStartRecording: () -> Unit,
+    onStartRecordingWithTimer: () -> Unit,
     onStopRecording: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -290,7 +292,9 @@ fun PlayerPane(
                                 isPlaying = playback.isPlaying,
                                 isRecording = playback.isRecording,
                                 elapsedMillis = playback.recordingElapsed,
+                                remainingMillis = playback.recordingRemaining,
                                 onStart = onStartRecording,
+                                onStartWithTimer = onStartRecordingWithTimer,
                                 onStop = onStopRecording,
                             )
 
@@ -405,7 +409,9 @@ private fun RecordingControls(
     isPlaying: Boolean,
     isRecording: Boolean,
     elapsedMillis: Long,
+    remainingMillis: Long,
     onStart: () -> Unit,
+    onStartWithTimer: () -> Unit,
     onStop: () -> Unit,
 ) {
     Row(
@@ -413,10 +419,13 @@ private fun RecordingControls(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         if (isRecording) {
-            // Red while recording, with the running time next to the stop button -- the same
-            // time-plus-button pairing the sleep timer uses.
+            // Red while recording, with the time next to the stop button -- the same
+            // time-plus-button pairing the sleep timer uses. A recording started with a timer
+            // counts down what is left, any other counts up.
             Text(
-                text = DateTimeHelper.convertToHoursMinutesSeconds(elapsedMillis),
+                text = DateTimeHelper.convertToHoursMinutesSeconds(
+                    if (remainingMillis > 0L) remainingMillis else elapsedMillis
+                ),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.error,
             )
@@ -429,7 +438,21 @@ private fun RecordingControls(
             }
         } else if (isPlaying) {
             // Like the sleep timer: only something that is playing can be recorded.
-            IconButton(onClick = onStart) {
+            // A tap records right away, a long press asks for how long first. IconButton has
+            // no long press, so this is its 48dp round touch target rebuilt by hand.
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .combinedClickable(
+                        onClick = onStart,
+                        onLongClick = onStartWithTimer,
+                        onClickLabel = stringResource(R.string.descr_expanded_player_recording_start_button),
+                        onLongClickLabel = stringResource(R.string.descr_expanded_player_recording_timer_button),
+                        role = Role.Button,
+                    ),
+            ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_record_24dp),
                     contentDescription = stringResource(R.string.descr_expanded_player_recording_start_button),

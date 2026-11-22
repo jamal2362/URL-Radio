@@ -79,6 +79,7 @@ import kotlinx.coroutines.delay
 import com.jamal2367.urlradio.R
 import com.jamal2367.urlradio.core.Station
 import com.jamal2367.urlradio.playback.PlaybackUiState
+import com.jamal2367.urlradio.recording.RecordingFormat
 import com.jamal2367.urlradio.ui.player.PlayerPane
 import com.jamal2367.urlradio.ui.settings.SettingsCallbacks
 import com.jamal2367.urlradio.ui.settings.SettingsScreen
@@ -113,6 +114,8 @@ data class AppState(
     val themeLabel: String,
     val largeBuffer: Boolean,
     val recordingSplitByTitle: Boolean,
+    val recordingFormat: RecordingFormat,
+    val recordingBitrate: Int,
 )
 
 data class AppActions(
@@ -132,7 +135,8 @@ data class AppActions(
     val onShare: (Station) -> Unit,
     val onStartSleepTimer: (Long) -> Unit,
     val onCancelSleepTimer: () -> Unit,
-    val onStartRecording: () -> Unit,
+    /** Starts recording; with a duration greater than zero it stops on its own after that long. */
+    val onStartRecording: (Long) -> Unit,
     val onStopRecording: () -> Unit,
     val settings: SettingsCallbacks,
 )
@@ -160,6 +164,7 @@ fun UrlRadioApp(
     var playerActivity by remember { mutableIntStateOf(0) }
     var metadataIndex by remember { mutableIntStateOf(-1) }
     var showSleepTimerPicker by remember { mutableStateOf(false) }
+    var showRecordingTimerPicker by remember { mutableStateOf(false) }
     var pendingDelete by remember { mutableStateOf<Station?>(null) }
 
     // Metadata carousel index follows the newest entry unless the user paged away.
@@ -217,6 +222,8 @@ fun UrlRadioApp(
                 themeLabel = state.themeLabel,
                 largeBuffer = state.largeBuffer,
                 recordingSplitByTitle = state.recordingSplitByTitle,
+                recordingFormat = state.recordingFormat,
+                recordingBitrate = state.recordingBitrate,
                 editStations = state.editStationsEnabled,
                 editStreamUris = state.editStreamUrisEnabled,
                 callbacks = actions.settings,
@@ -272,7 +279,8 @@ fun UrlRadioApp(
                                 onShare = { actions.onShare(state.currentStation) },
                                 onStartSleepTimer = { showSleepTimerPicker = true },
                                 onCancelSleepTimer = actions.onCancelSleepTimer,
-                                onStartRecording = actions.onStartRecording,
+                                onStartRecording = { actions.onStartRecording(0L) },
+                                onStartRecordingWithTimer = { showRecordingTimerPicker = true },
                                 onStopRecording = actions.onStopRecording,
                                 modifier = Modifier.padding(top = padding.calculateTopPadding()),
                             )
@@ -370,7 +378,8 @@ fun UrlRadioApp(
                             onShare = { actions.onShare(state.currentStation) },
                             onStartSleepTimer = { showSleepTimerPicker = true },
                             onCancelSleepTimer = actions.onCancelSleepTimer,
-                                onStartRecording = actions.onStartRecording,
+                                onStartRecording = { actions.onStartRecording(0L) },
+                                onStartRecordingWithTimer = { showRecordingTimerPicker = true },
                                 onStopRecording = actions.onStopRecording,
                         )
                     }
@@ -395,6 +404,19 @@ fun UrlRadioApp(
                 showSleepTimerPicker = false
             },
             onDismiss = { showSleepTimerPicker = false },
+        )
+    }
+
+    if (showRecordingTimerPicker) {
+        TimerPicker(
+            title = stringResource(R.string.descr_expanded_player_recording_timer_button),
+            initialMinute = 30,
+            onConfirm = { millis ->
+                // 00:00 means no timer: the picker adds a second to every value, see TimerPicker
+                actions.onStartRecording(if (millis > 1000L) millis else 0L)
+                showRecordingTimerPicker = false
+            },
+            onDismiss = { showRecordingTimerPicker = false },
         )
     }
 
@@ -635,7 +657,24 @@ private fun FloatingTabBarItem(
 @Composable
 private fun SleepTimerPicker(onConfirm: (Long) -> Unit, onDismiss: () -> Unit) {
     // Defaults to one minute, 24-hour clock -- same as the old MaterialTimePicker setup.
-    val timeState = rememberTimePickerState(initialHour = 0, initialMinute = 1, is24Hour = true)
+    TimerPicker(
+        title = stringResource(R.string.descr_expanded_player_sleep_timer_start_button),
+        initialMinute = 1,
+        onConfirm = onConfirm,
+        onDismiss = onDismiss,
+    )
+}
+
+/* Asks for a duration in hours and minutes - used by the sleep timer and the recording timer. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TimerPicker(
+    title: String,
+    initialMinute: Int,
+    onConfirm: (Long) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val timeState = rememberTimePickerState(initialHour = 0, initialMinute = initialMinute, is24Hour = true)
     TimePickerDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
@@ -644,7 +683,7 @@ private fun SleepTimerPicker(onConfirm: (Long) -> Unit, onDismiss: () -> Unit) {
                 onConfirm(millis)
             }) { Text(stringResource(R.string.dialog_generic_button_okay)) }
         },
-        title = { Text(stringResource(R.string.descr_expanded_player_sleep_timer_start_button)) },
+        title = { Text(title) },
         dismissButton = {
             TextButton(onClick = onDismiss) {
                 Text(stringResource(R.string.dialog_generic_button_cancel))

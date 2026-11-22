@@ -20,6 +20,7 @@ import android.util.Log
 import androidx.core.content.edit
 import com.google.gson.Gson
 import com.jamal2367.urlradio.Keys
+import com.jamal2367.urlradio.recording.RecordingFormat
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -313,6 +314,34 @@ object PreferencesHelper {
     /* Loads value of the option: Split Recordings By Title */
     fun loadRecordingSplitByTitle(): Boolean {
         return sharedPreferences.getBoolean(Keys.PREF_RECORDING_SPLIT_BY_TITLE, false)
+    }
+
+
+    /* Saves value of the option: Recording Format */
+    fun saveRecordingFormat(format: RecordingFormat) {
+        sharedPreferences.edit {
+            putString(Keys.PREF_RECORDING_FORMAT, format.key)
+        }
+    }
+
+
+    /* Loads value of the option: Recording Format */
+    fun loadRecordingFormat(): RecordingFormat {
+        return RecordingFormat.fromKey(sharedPreferences.getString(Keys.PREF_RECORDING_FORMAT, null))
+    }
+
+
+    /* Saves value of the option: Recording Bit Rate (kbit/s) */
+    fun saveRecordingBitrate(kbps: Int) {
+        sharedPreferences.edit {
+            putInt(Keys.PREF_RECORDING_BITRATE, kbps)
+        }
+    }
+
+
+    /* Loads value of the option: Recording Bit Rate (kbit/s) - always one the current format offers */
+    fun loadRecordingBitrate(): Int {
+        return loadRecordingFormat().coerceBitrate(sharedPreferences.getInt(Keys.PREF_RECORDING_BITRATE, 0))
     }
 
 

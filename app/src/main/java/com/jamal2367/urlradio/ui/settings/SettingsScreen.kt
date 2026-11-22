@@ -26,9 +26,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -52,6 +54,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
+import com.jamal2367.urlradio.recording.RecordingFormat
 import com.jamal2367.urlradio.ui.dialogs.ConfirmDialog
 import com.jamal2367.urlradio.ui.dialogs.WideDialogModifier
 import com.jamal2367.urlradio.ui.dialogs.WideDialogProperties
@@ -67,6 +70,8 @@ data class SettingsCallbacks(
     val onRestore: () -> Unit,
     val onLargeBufferChanged: (Boolean) -> Unit,
     val onRecordingSplitByTitleChanged: (Boolean) -> Unit,
+    val onRecordingFormatChanged: (RecordingFormat) -> Unit,
+    val onRecordingBitrateChanged: (Int) -> Unit,
     val onEditStationsChanged: (Boolean) -> Unit,
     val onEditStreamUrisChanged: (Boolean) -> Unit,
     val onOpenUrl: (String) -> Unit,
@@ -80,6 +85,8 @@ fun SettingsScreen(
     themeLabel: String,
     largeBuffer: Boolean,
     recordingSplitByTitle: Boolean,
+    recordingFormat: RecordingFormat,
+    recordingBitrate: Int,
     editStations: Boolean,
     editStreamUris: Boolean,
     callbacks: SettingsCallbacks,
@@ -89,6 +96,8 @@ fun SettingsScreen(
     var showThemeDialog by remember { mutableStateOf(false) }
     var showExportFormatDialog by remember { mutableStateOf(false) }
     var showRemoveAllDialog by remember { mutableStateOf(false) }
+    var showRecordingFormatDialog by remember { mutableStateOf(false) }
+    var showRecordingBitrateDialog by remember { mutableStateOf(false) }
 
     LazyColumn(
         contentPadding = contentPadding,
@@ -174,6 +183,37 @@ fun SettingsScreen(
             }
         }
 
+        item { CategoryHeader(stringResource(R.string.pref_recording_title)) }
+        item {
+            SettingsGroup {
+                SettingsRow(
+                    title = stringResource(R.string.pref_recording_format_title),
+                    summary = recordingFormatLabel(recordingFormat),
+                    icon = R.drawable.ic_music_note_24dp,
+                    onClick = { showRecordingFormatDialog = true },
+                )
+                // An uncompressed format has no bit rate to choose.
+                SettingsRow(
+                    title = stringResource(R.string.pref_recording_bitrate_title),
+                    summary = if (recordingFormat.hasBitrate) stringResource(R.string.pref_recording_bitrate_value, recordingBitrate)
+                        else stringResource(R.string.pref_recording_bitrate_not_applicable),
+                    icon = R.drawable.ic_network_check_24dp,
+                    enabled = recordingFormat.hasBitrate,
+                    onClick = { showRecordingBitrateDialog = true },
+                )
+                SettingsSwitchRow(
+                    title = stringResource(R.string.pref_recording_split_title),
+                    summary = stringResource(
+                        if (recordingSplitByTitle) R.string.pref_recording_split_summary_enabled
+                        else R.string.pref_recording_split_summary_disabled
+                    ),
+                    icon = R.drawable.ic_record_24dp,
+                    checked = recordingSplitByTitle,
+                    onCheckedChange = callbacks.onRecordingSplitByTitleChanged,
+                )
+            }
+        }
+
         item { CategoryHeader(stringResource(R.string.pref_advanced_title)) }
         item {
             SettingsGroup {
@@ -186,16 +226,6 @@ fun SettingsScreen(
                     icon = R.drawable.ic_network_check_24dp,
                     checked = largeBuffer,
                     onCheckedChange = callbacks.onLargeBufferChanged,
-                )
-                SettingsSwitchRow(
-                    title = stringResource(R.string.pref_recording_split_title),
-                    summary = stringResource(
-                        if (recordingSplitByTitle) R.string.pref_recording_split_summary_enabled
-                        else R.string.pref_recording_split_summary_disabled
-                    ),
-                    icon = R.drawable.ic_record_24dp,
-                    checked = recordingSplitByTitle,
-                    onCheckedChange = callbacks.onRecordingSplitByTitleChanged,
                 )
                 SettingsSwitchRow(
                     title = stringResource(R.string.pref_edit_station_title),
@@ -240,6 +270,55 @@ fun SettingsScreen(
                 )
             }
         }
+    }
+
+    if (showRecordingFormatDialog) {
+        ChoiceDialog(
+            title = stringResource(R.string.pref_recording_format_title),
+            icon = R.drawable.ic_record_24dp,
+            options = RecordingFormat.available.map { format ->
+                ThemeOption(
+                    value = format.key,
+                    label = recordingFormatLabel(format),
+                    summary = stringResource(
+                        when (format) {
+                            RecordingFormat.AAC -> R.string.pref_recording_format_aac_summary
+                            RecordingFormat.OPUS -> R.string.pref_recording_format_opus_summary
+                            RecordingFormat.WAV -> R.string.pref_recording_format_wav_summary
+                        }
+                    ),
+                    icon = R.drawable.ic_music_note_24dp,
+                )
+            },
+            selected = recordingFormat.key,
+            onSelect = { key ->
+                showRecordingFormatDialog = false
+                callbacks.onRecordingFormatChanged(RecordingFormat.fromKey(key))
+            },
+            onDismiss = { showRecordingFormatDialog = false },
+        )
+    }
+
+    if (showRecordingBitrateDialog) {
+        ChoiceDialog(
+            title = stringResource(R.string.pref_recording_bitrate_title),
+            icon = R.drawable.ic_network_check_24dp,
+            options = recordingFormat.bitratesKbps.map { kbps ->
+                ThemeOption(
+                    value = kbps.toString(),
+                    label = stringResource(R.string.pref_recording_bitrate_value, kbps),
+                    // kbit/s * 3600 s / 8 bit / 1000 kB = MB per hour
+                    summary = stringResource(R.string.pref_recording_bitrate_size, kbps * 3600 / 8 / 1000),
+                    icon = R.drawable.ic_network_check_24dp,
+                )
+            },
+            selected = recordingBitrate.toString(),
+            onSelect = { value ->
+                showRecordingBitrateDialog = false
+                callbacks.onRecordingBitrateChanged(value.toInt())
+            },
+            onDismiss = { showRecordingBitrateDialog = false },
+        )
     }
 
     if (showThemeDialog) {
@@ -393,12 +472,14 @@ private fun SettingsRow(
     summary: String,
     icon: Int,
     onClick: () -> Unit,
+    enabled: Boolean = true,
 ) {
     SettingsRowLayout(
         title = title,
         summary = summary,
         icon = icon,
-        modifier = Modifier.clickable(onClick = onClick),
+        enabled = enabled,
+        modifier = Modifier.clickable(enabled = enabled, onClick = onClick),
     )
 }
 
@@ -470,6 +551,55 @@ private fun SettingsRowLayout(
         }
         trailing?.invoke()
     }
+}
+
+/* "AAC (.m4a)" and so on. */
+@Composable
+private fun recordingFormatLabel(format: RecordingFormat): String = stringResource(
+    when (format) {
+        RecordingFormat.AAC -> R.string.pref_recording_format_aac
+        RecordingFormat.OPUS -> R.string.pref_recording_format_opus
+        RecordingFormat.WAV -> R.string.pref_recording_format_wav
+    }
+)
+
+/* A list of options to pick one from; picking closes the dialog. */
+@Composable
+private fun ChoiceDialog(
+    title: String,
+    icon: Int,
+    options: List<ThemeOption>,
+    selected: String,
+    onSelect: (String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        modifier = WideDialogModifier,
+        properties = WideDialogProperties,
+        icon = { Icon(painter = painterResource(icon), contentDescription = null) },
+        title = { Text(title) },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                // seven bit rates do not fit on every screen
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+            ) {
+                options.forEach { option ->
+                    ThemeOptionRow(
+                        option = option,
+                        selected = option.value == selected,
+                        onClick = { onSelect(option.value) },
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.dialog_generic_button_cancel))
+            }
+        },
+    )
 }
 
 private data class ThemeOption(

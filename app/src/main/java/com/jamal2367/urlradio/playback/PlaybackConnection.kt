@@ -234,15 +234,18 @@ class PlaybackConnection(
             it.copy(
                 isRecording = extras.getBoolean(Keys.EXTRA_RECORDING_ACTIVE),
                 recordingElapsed = extras.getLong(Keys.EXTRA_RECORDING_ELAPSED),
+                recordingRemaining = extras.getLong(Keys.EXTRA_RECORDING_REMAINING),
             )
         }
     }
 
-    fun startRecording() {
+    /* Starts recording - with a duration greater than zero it stops on its own after that long. */
+    fun startRecording(durationMillis: Long = 0L) {
         val controller = this.controller ?: return
+        val args = Bundle().apply { putLong(Keys.EXTRA_RECORDING_DURATION, durationMillis) }
         val future = controller.sendCustomCommand(
             SessionCommand(Keys.CMD_START_RECORDING, Bundle.EMPTY),
-            Bundle.EMPTY,
+            args,
         )
         future.addListener({
             runCatching { future.get().extras }.getOrNull()?.let { applyRecordingState(it) }
@@ -255,7 +258,7 @@ class PlaybackConnection(
             SessionCommand(Keys.CMD_STOP_RECORDING, Bundle.EMPTY),
             Bundle.EMPTY,
         )
-        _state.update { it.copy(isRecording = false, recordingElapsed = 0L) }
+        _state.update { it.copy(isRecording = false, recordingElapsed = 0L, recordingRemaining = 0L) }
     }
 
     /* Clears the one-shot recording event after the UI has shown it. */

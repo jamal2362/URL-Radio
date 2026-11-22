@@ -36,6 +36,8 @@ data class PlaybackUiState(
     val isRecording: Boolean = false,
     /** Milliseconds the running recording has been going for, 0 when not recording. */
     val recordingElapsed: Long = 0L,
+    /** Milliseconds left on the recording timer, 0 when the recording runs without one. */
+    val recordingRemaining: Long = 0L,
     /** Set when a recording was saved or failed; cleared once the UI has shown it. */
     val recordingEvent: RecordingEvent? = null,
 ) {
