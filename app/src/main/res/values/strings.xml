@@ -151,4 +151,11 @@
     <string name="pref_recording_bitrate_value">%1$d kbit/s</string>
     <string name="pref_recording_bitrate_size">About %1$d MB per hour</string>
     <string name="pref_recording_bitrate_not_applicable">Not applicable: WAV is saved uncompressed.</string>
+    <string name="dialog_find_station_error_search">Search failed. radio-browser.info cannot be reached right now – please try again later.</string>
+    <string name="dialog_find_station_error_invalid_address">This is not a valid address.</string>
+    <string name="dialog_find_station_error_unreachable">The address could not be reached.</string>
+    <string name="dialog_find_station_error_not_audio">No radio stream found at this address.</string>
+    <string name="dialog_find_station_error_empty_playlist">The playlist contains no playable stations.</string>
+    <string name="dialog_find_station_error_detail">Error: %1$s</string>
+    <string name="dialog_find_station_error_content_type">The server sends: %1$s</string>
 </resources>

@@ -57,6 +57,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -184,7 +187,11 @@ fun FindStationDialog(
                 )
             }
 
-            if (state.results.isEmpty() && !state.isSearching && !state.showNoResults) {
+            state.error?.let { error ->
+                SearchErrorHint(error = error, modifier = Modifier.padding(top = 12.dp))
+            }
+
+            if (state.results.isEmpty() && !state.isSearching && !state.showNoResults && state.error == null) {
                 Text(
                     text = stringResource(R.string.dialog_find_station_empty_hint),
                     style = MaterialTheme.typography.bodyMedium,
@@ -194,6 +201,62 @@ fun FindStationDialog(
             }
         },
     )
+}
+
+/*
+ * Explains why a search or an address check came back empty-handed: what went wrong in
+ * plain words, and below it the reason exactly as the network or the server reported it -
+ * that second line is what helps when someone files a bug report.
+ */
+@Composable
+internal fun SearchErrorHint(error: SearchError, modifier: Modifier = Modifier) {
+    val message: String = stringResource(
+        when (error.kind) {
+            SearchError.Kind.SEARCH_FAILED -> R.string.dialog_find_station_error_search
+            SearchError.Kind.INVALID_ADDRESS -> R.string.dialog_find_station_error_invalid_address
+            SearchError.Kind.ADDRESS_UNREACHABLE -> R.string.dialog_find_station_error_unreachable
+            SearchError.Kind.NOT_AUDIO -> R.string.dialog_find_station_error_not_audio
+            SearchError.Kind.EMPTY_PLAYLIST -> R.string.dialog_find_station_error_empty_playlist
+        }
+    )
+    val detail: String = when {
+        error.detail.isBlank() -> ""
+        error.kind == SearchError.Kind.NOT_AUDIO -> stringResource(R.string.dialog_find_station_error_content_type, error.detail)
+        error.kind == SearchError.Kind.INVALID_ADDRESS -> error.detail
+        else -> stringResource(R.string.dialog_find_station_error_detail, error.detail)
+    }
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.errorContainer,
+        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+        modifier = modifier
+            .fillMaxWidth()
+            .semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite },
+    ) {
+        Row(
+            verticalAlignment = Alignment.Top,
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_error_24dp),
+                contentDescription = null,
+                modifier = Modifier.size(22.dp),
+            )
+            Column(modifier = Modifier.padding(start = 12.dp)) {
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                if (detail.isNotEmpty()) {
+                    Text(
+                        text = detail,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(top = 4.dp),
+                    )
+                }
+            }
+        }
+    }
 }
 
 /* Pick stations found in an opened or imported playlist. Replaces AddStationDialog. */

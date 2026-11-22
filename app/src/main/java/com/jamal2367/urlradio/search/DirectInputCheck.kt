@@ -3,6 +3,9 @@
  * Implements the DirectInputCheck class
  * A DirectInputCheck checks if a station url is valid and returns station via a listener
  *
+ * Every check reports back - stations, or why there are none - so the search dialog never
+ * waits forever. A newer check supersedes one that is still running.
+ *
  * This file is part of
  * TRANSISTOR - Radio App for Android
  *
@@ -14,26 +17,18 @@
 
 package com.jamal2367.urlradio.search
 
-import android.content.Context
 import android.webkit.URLUtil
-import com.jamal2367.urlradio.R
 import com.jamal2367.urlradio.core.Station
 import com.jamal2367.urlradio.helpers.CollectionHelper
-import com.jamal2367.urlradio.helpers.UserMessages
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import java.util.GregorianCalendar
 
 
-data class IcecastMetadata(
-    val title: String?
-)
 /*
  * DirectInputCheck class
  */
@@ -43,69 +38,50 @@ class DirectInputCheck(private var directInputCheckListener: DirectInputCheckLis
     interface DirectInputCheckListener {
         fun onDirectInputCheck(stationList: MutableList<Station>) {
         }
+
+        /* The address yielded no station - problem says why, detail is the technical reason */
+        fun onDirectInputError(problem: CollectionHelper.UrlProblem?, detail: String) {
+        }
     }
 
 
     /* Main class variables */
-    private var lastCheckedAddress: String = String()
+    private val scope = CoroutineScope(SupervisorJob() + IO)
+    private var checkJob: Job? = null
 
 
-    /* Searches station(s) on radio-browser.info */
-    fun checkStationAddress(context: Context, query: String) {
-        // check if valid URL
-        if (URLUtil.isValidUrl(query)) {
-            val stationList: MutableList<Station> = mutableListOf()
-            CoroutineScope(IO).launch {
-                stationList.addAll(CollectionHelper.createStationsFromUrl(query, lastCheckedAddress))
-                lastCheckedAddress = query
-                withContext(Main) {
-                    if (stationList.isNotEmpty()) {
-                        // hand over station is to listener
-                        directInputCheckListener.onDirectInputCheck(stationList)
-                    } else {
-                        // invalid address
-                        UserMessages.notify(context.getString(R.string.snackbar_station_not_valid))
-                    }
+    /* Checks whether the given address is a stream or a playlist */
+    fun checkStationAddress(query: String) {
+        checkJob?.cancel()
+        if (!URLUtil.isValidUrl(query)) {
+            // null: the address itself is malformed
+            directInputCheckListener.onDirectInputError(null, query)
+            return
+        }
+        checkJob = scope.launch {
+            val result: CollectionHelper.UrlCheck = try {
+                CollectionHelper.checkStationsFromUrl(query)
+            } catch (e: Exception) {
+                CollectionHelper.UrlCheck(
+                    emptyList(),
+                    CollectionHelper.UrlProblem.UNREACHABLE,
+                    e.localizedMessage ?: e.javaClass.simpleName
+                )
+            }
+            withContext(Main) {
+                if (result.stations.isNotEmpty()) {
+                    directInputCheckListener.onDirectInputCheck(result.stations.toMutableList())
+                } else {
+                    directInputCheckListener.onDirectInputError(result.problem, result.detail)
                 }
             }
         }
     }
 
 
-    private suspend fun extractIcecastMetadata(streamUri: String): IcecastMetadata {
-        return withContext(IO) {
-            // make an HTTP request at the stream URL to get Icecast metadata.
-            val client = OkHttpClient()
-            val request = Request.Builder()
-                .url(streamUri)
-                .build()
-
-            val response = client.newCall(request).execute()
-            val icecastHeaders = response.headers
-
-            // analyze the Icecast metadata and extract information like title, description, bitrate, etc.
-            val title = icecastHeaders["icy-name"]
-
-            IcecastMetadata(title?.takeIf { it.isNotEmpty() } ?: streamUri)
-        }
+    /* Cancels a check that is still running */
+    fun stopCheck() {
+        checkJob?.cancel()
+        checkJob = null
     }
-
-
-    private suspend fun updateStationWithIcecastMetadata(station: Station, icecastMetadata: IcecastMetadata) {
-        withContext(Dispatchers.Default) {
-            station.name = icecastMetadata.title.toString()
-        }
-    }
-
-    suspend fun processIcecastStream(streamUri: String, stationList: MutableList<Station>) {
-        val icecastMetadata = extractIcecastMetadata(streamUri)
-        val station = Station(name = icecastMetadata.title.toString(), streamUris = mutableListOf(streamUri), modificationDate = GregorianCalendar.getInstance().time)
-        updateStationWithIcecastMetadata(station, icecastMetadata)
-        // create station and add to collection
-        if (lastCheckedAddress != streamUri) {
-            stationList.add(station)
-        }
-        lastCheckedAddress = streamUri
-    }
-
 }

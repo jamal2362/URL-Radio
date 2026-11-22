@@ -25,7 +25,6 @@ import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.R
 import com.jamal2367.urlradio.core.Collection
 import com.jamal2367.urlradio.core.Station
-import com.jamal2367.urlradio.search.DirectInputCheck
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.async
@@ -468,37 +467,91 @@ object CollectionHelper {
     }
 
 
-    /* Creates station from playlist URLs and stream address URLs */
-    suspend fun createStationsFromUrl(query: String, lastCheckedAddress: String = String()): List<Station> {
-        val stationList: MutableList<Station> = mutableListOf()
-        val contentType: String = NetworkHelper.detectContentType(query).type.lowercase(Locale.getDefault())
-        val directInputCheck: DirectInputCheck? = null
-
-        // CASE: M3U playlist detected
-        if (Keys.MIME_TYPES_M3U.contains(contentType)) {
-            val lines: List<String> = NetworkHelper.downloadPlaylist(query)
-            stationList.addAll(readM3uPlaylistContent(lines))
-        }
-        // CASE: PLS playlist detected
-        else if (Keys.MIME_TYPES_PLS.contains(contentType)) {
-            val lines: List<String> = NetworkHelper.downloadPlaylist(query)
-            stationList.addAll(readPlsPlaylistContent(lines))
-        }
-        // CASE: stream address detected
-        else if (Keys.MIME_TYPES_MPEG.contains(contentType) or
-            Keys.MIME_TYPES_OGG.contains(contentType) or
-            Keys.MIME_TYPES_AAC.contains(contentType) or
-            Keys.MIME_TYPES_HLS.contains(contentType)) {
-            // process Icecast stream and extract metadata
-            directInputCheck?.processIcecastStream(query, stationList)
-            // create station and add to collection
-            val station = Station(name = query, streamUris = mutableListOf(query), streamContent = contentType, modificationDate = GregorianCalendar.getInstance().time)
-            if (lastCheckedAddress != query) {
-                stationList.add(station)
-            }
-        }
-        return stationList
+    /* Why an address the user entered did not yield any station */
+    enum class UrlProblem {
+        /** The address could not be reached, or did not answer with 200 OK. */
+        UNREACHABLE,
+        /** The address answered, but with something that is neither a stream nor a playlist. */
+        NOT_AUDIO,
+        /** A playlist without a single playable entry. */
+        EMPTY_PLAYLIST,
     }
+
+
+    /* The outcome of checking an address: stations, or the problem and its technical detail */
+    data class UrlCheck(
+        val stations: List<Station>,
+        val problem: UrlProblem? = null,
+        val detail: String = String(),
+    )
+
+
+    /* Creates station from playlist URLs and stream address URLs */
+    suspend fun createStationsFromUrl(query: String): List<Station> = checkStationsFromUrl(query).stations
+
+
+    /*
+     * Checks a playlist or stream address. Unlike createStationsFromUrl it also tells why an
+     * address yielded nothing, so the search dialog can show it.
+     */
+    suspend fun checkStationsFromUrl(query: String): UrlCheck {
+        val detected: NetworkHelper.ContentType = NetworkHelper.detectContentType(query)
+        if (detected.error.isNotEmpty()) {
+            return UrlCheck(emptyList(), UrlProblem.UNREACHABLE, detected.error)
+        }
+        val contentType: String = detected.type.lowercase(Locale.getDefault())
+
+        // CASE: M3U or PLS playlist
+        if (Keys.MIME_TYPES_M3U.contains(contentType) || Keys.MIME_TYPES_PLS.contains(contentType)) {
+            val lines: List<String> = try {
+                NetworkHelper.downloadPlaylist(query)
+            } catch (e: Exception) {
+                return UrlCheck(emptyList(), UrlProblem.UNREACHABLE, e.localizedMessage ?: e.javaClass.simpleName)
+            }
+            // HLS playlists are often sent as plain M3U - they are a stream, not a station list
+            if (lines.any { it.startsWith("#EXT-X-") }) {
+                return UrlCheck(listOf(createStationFromStreamUrl(query, Keys.MIME_TYPES_HLS.first())))
+            }
+            val stations: List<Station> = if (Keys.MIME_TYPES_M3U.contains(contentType)) {
+                readM3uPlaylistContent(lines)
+            } else {
+                readPlsPlaylistContent(lines)
+            }
+            return if (stations.isNotEmpty()) UrlCheck(stations)
+            else UrlCheck(emptyList(), UrlProblem.EMPTY_PLAYLIST)
+        }
+
+        // CASE: stream address
+        if (isStreamContentType(contentType)) {
+            return UrlCheck(listOf(createStationFromStreamUrl(query, contentType)))
+        }
+        return UrlCheck(emptyList(), UrlProblem.NOT_AUDIO, detected.type)
+    }
+
+
+    /*
+     * Whether a content type stands for something the player can stream. Beyond the types
+     * the app has always known this takes any audio type (FLAC, MP4 audio, x-aac ...), MPEG
+     * transport streams and octet-stream, which many radio servers send for their stream -
+     * these used to be turned away even though they play fine.
+     */
+    private fun isStreamContentType(contentType: String): Boolean =
+        Keys.MIME_TYPES_MPEG.contains(contentType) ||
+            Keys.MIME_TYPES_OGG.contains(contentType) ||
+            Keys.MIME_TYPES_AAC.contains(contentType) ||
+            Keys.MIME_TYPES_HLS.contains(contentType) ||
+            contentType.startsWith("audio/") ||
+            contentType == "video/mp2t" ||
+            contentType == Keys.MIME_TYPE_OCTET_STREAM
+
+
+    private fun createStationFromStreamUrl(streamUri: String, contentType: String): Station =
+        Station(
+            name = streamUri,
+            streamUris = mutableListOf(streamUri),
+            streamContent = contentType,
+            modificationDate = GregorianCalendar.getInstance().time
+        )
 
 
     /*

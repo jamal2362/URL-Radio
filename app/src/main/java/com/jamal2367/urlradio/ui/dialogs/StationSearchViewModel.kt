@@ -17,12 +17,14 @@
 package com.jamal2367.urlradio.ui.dialogs
 
 import android.app.Application
+import android.webkit.URLUtil
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import com.jamal2367.urlradio.Keys
 import com.jamal2367.urlradio.core.Station
+import com.jamal2367.urlradio.helpers.CollectionHelper
 import com.jamal2367.urlradio.search.DirectInputCheck
 import com.jamal2367.urlradio.search.RadioBrowserResult
 import com.jamal2367.urlradio.search.RadioBrowserSearch
@@ -44,10 +46,31 @@ data class SearchUiState(
     val previewUuid: String = "",
     val isSearching: Boolean = false,
     val showNoResults: Boolean = false,
+    /** Set when a search or an address check failed - shown in the dialog with its reason. */
+    val error: SearchError? = null,
     /** Set when a preview could not be started (HLS), consumed by the UI as a toast. */
     val previewUnsupportedEvent: Long? = null,
     val previewStartedEvent: Long? = null,
 )
+
+/** What went wrong, and the technical reason as reported by the network or the server. */
+data class SearchError(val kind: Kind, val detail: String) {
+    enum class Kind {
+        /** radio-browser.info could not be reached or answered with an error. */
+        SEARCH_FAILED,
+        /** The text starts like an address but is not a valid one. */
+        INVALID_ADDRESS,
+        /** The address could not be reached, or did not answer with 200 OK. */
+        ADDRESS_UNREACHABLE,
+        /** The address answered with something that is neither a stream nor a playlist. */
+        NOT_AUDIO,
+        /** A playlist without a single playable entry. */
+        EMPTY_PLAYLIST,
+    }
+}
+
+/* How long typing has to pause before an address is checked - every check opens a connection. */
+private const val ADDRESS_CHECK_DELAY_MS = 800L
 
 class StationSearchViewModel(application: Application) : AndroidViewModel(application),
     RadioBrowserSearch.RadioBrowserSearchListener,
@@ -75,17 +98,28 @@ class StationSearchViewModel(application: Application) : AndroidViewModel(applic
                         selectedUuids = emptySet(),
                         isSearching = false,
                         showNoResults = false,
+                        error = null,
                     )
                 }
             }
 
             query.startsWith("htt") -> {
-                _state.update { it.copy(isSearching = true, showNoResults = false) }
-                directInputCheck.checkStationAddress(getApplication(), query)
+                directInputCheck.stopCheck()
+                // A half-typed address is not worth a connection, nor an error message:
+                // it is only checked once it is a valid address and typing has paused.
+                if (!URLUtil.isValidUrl(query)) {
+                    _state.update { it.copy(isSearching = false, showNoResults = false, error = null) }
+                    return
+                }
+                _state.update { it.copy(isSearching = true, showNoResults = false, error = null) }
+                debounceJob = viewModelScope.launch {
+                    delay(ADDRESS_CHECK_DELAY_MS.milliseconds)
+                    directInputCheck.checkStationAddress(query)
+                }
             }
 
             query.contains(" ") || query.length > 2 -> {
-                _state.update { it.copy(isSearching = true, showNoResults = false) }
+                _state.update { it.copy(isSearching = true, showNoResults = false, error = null) }
                 debounceJob = viewModelScope.launch {
                     delay(300.milliseconds)
                     radioBrowserSearch.searchStation(query, Keys.SEARCH_TYPE_BY_KEYWORD)
@@ -104,16 +138,17 @@ class StationSearchViewModel(application: Application) : AndroidViewModel(applic
                     selectedUuids = emptySet(),
                     isSearching = false,
                     showNoResults = false,
+                    error = null,
                 )
             }
 
             query.startsWith("http") -> {
-                _state.update { it.copy(isSearching = true, showNoResults = false) }
-                directInputCheck.checkStationAddress(getApplication(), query)
+                _state.update { it.copy(isSearching = true, showNoResults = false, error = null) }
+                directInputCheck.checkStationAddress(query)
             }
 
             else -> {
-                _state.update { it.copy(isSearching = true, showNoResults = false) }
+                _state.update { it.copy(isSearching = true, showNoResults = false, error = null) }
                 radioBrowserSearch.searchStation(query, Keys.SEARCH_TYPE_BY_KEYWORD)
             }
         }
@@ -124,8 +159,35 @@ class StationSearchViewModel(application: Application) : AndroidViewModel(applic
         publishResults(stations)
     }
 
+    override fun onRadioBrowserSearchError(message: String) {
+        publishError(SearchError(SearchError.Kind.SEARCH_FAILED, message))
+    }
+
     override fun onDirectInputCheck(stationList: MutableList<Station>) {
         publishResults(stationList)
+    }
+
+    override fun onDirectInputError(problem: CollectionHelper.UrlProblem?, detail: String) {
+        val kind: SearchError.Kind = when (problem) {
+            null -> SearchError.Kind.INVALID_ADDRESS
+            CollectionHelper.UrlProblem.UNREACHABLE -> SearchError.Kind.ADDRESS_UNREACHABLE
+            CollectionHelper.UrlProblem.NOT_AUDIO -> SearchError.Kind.NOT_AUDIO
+            CollectionHelper.UrlProblem.EMPTY_PLAYLIST -> SearchError.Kind.EMPTY_PLAYLIST
+        }
+        publishError(SearchError(kind, detail))
+    }
+
+    /* Ends the search with an error instead of results - the list is emptied. */
+    private fun publishError(error: SearchError) {
+        _state.update {
+            it.copy(
+                results = emptyList(),
+                isSearching = false,
+                showNoResults = false,
+                selectedUuids = emptySet(),
+                error = error,
+            )
+        }
     }
 
     private fun publishResults(stations: List<Station>) {
@@ -135,6 +197,7 @@ class StationSearchViewModel(application: Application) : AndroidViewModel(applic
                 isSearching = false,
                 showNoResults = stations.isEmpty(),
                 selectedUuids = emptySet(),
+                error = null,
             )
         }
     }
@@ -208,6 +271,7 @@ class StationSearchViewModel(application: Application) : AndroidViewModel(applic
     fun reset() {
         debounceJob?.cancel()
         radioBrowserSearch.stopSearchRequest()
+        directInputCheck.stopCheck()
         stopPreview()
         _state.value = SearchUiState()
     }
@@ -215,6 +279,7 @@ class StationSearchViewModel(application: Application) : AndroidViewModel(applic
     override fun onCleared() {
         debounceJob?.cancel()
         radioBrowserSearch.stopSearchRequest()
+        directInputCheck.stopCheck()
         stopPreview()
     }
 }

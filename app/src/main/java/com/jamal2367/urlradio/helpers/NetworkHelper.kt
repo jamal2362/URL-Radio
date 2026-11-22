@@ -20,6 +20,7 @@ import android.net.Network
 import android.util.Log
 import com.jamal2367.urlradio.Keys
 import kotlinx.coroutines.suspendCancellableCoroutine
+import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.InetAddress
 import java.net.URL
@@ -37,7 +38,8 @@ object NetworkHelper {
     private val tag: String = NetworkHelper::class.java.simpleName
 
     /* Data class: holder for content type information */
-    data class ContentType(var type: String = String(), var charset: String = String())
+    /* error stays empty unless the address could not be reached - then it says why */
+    data class ContentType(var type: String = String(), var charset: String = String(), var error: String = String())
 
 
     /* Checks if the active network connection is connected to any network */
@@ -52,7 +54,13 @@ object NetworkHelper {
     fun detectContentType(urlString: String): ContentType {
         Log.v(tag, "Determining content type - Thread: ${Thread.currentThread().name}")
         val contentType = ContentType(Keys.MIME_TYPE_UNSUPPORTED, Keys.CHARSET_UNDEFINDED)
-        val connection: HttpURLConnection? = createConnection(urlString)
+        val connection: HttpURLConnection? = try {
+            openConnection(urlString)
+        } catch (e: Exception) {
+            Log.w(tag, "Unable to open http connection to $urlString: $e")
+            contentType.error = e.localizedMessage?.takeIf { it.isNotBlank() } ?: e.javaClass.simpleName
+            null
+        }
         if (connection != null) {
             val contentTypeHeader: String = connection.contentType ?: String()
             Log.v(tag, "Raw content type header: $contentTypeHeader")
@@ -78,6 +86,13 @@ object NetworkHelper {
                     contentType.type = FileHelper.getContentTypeFromExtension(fileName)
                 } else {
                     Log.i(tag, "Unable to get file name from \"Content-Disposition\" header field.")
+                    // the address itself may end in .m3u or .pls
+                    contentType.type = FileHelper.getContentTypeFromExtension(connection.url.path)
+                }
+                // Nothing more specific to go by: keep octet-stream. Many radio servers send it
+                // for the stream itself, and the player sorts out the actual format.
+                if (contentType.type == Keys.MIME_TYPE_UNSUPPORTED) {
+                    contentType.type = Keys.MIME_TYPE_OCTET_STREAM
                 }
             }
 
@@ -91,13 +106,17 @@ object NetworkHelper {
     /* Download playlist - up to 100 lines, with max. 200 characters */
     fun downloadPlaylist(playlistUrlString: String): List<String> {
         val lines = mutableListOf<String>()
-        val connection = URL(playlistUrlString).openConnection()
-        val reader = connection.getInputStream().bufferedReader()
-        reader.useLines { sequence ->
-            sequence.take(100).forEach { line ->
-                val trimmedLine = line.take(2000)
-                lines.add(trimmedLine)
+        // same redirect handling and timeouts as the content type check
+        val connection: HttpURLConnection = openConnection(playlistUrlString)
+        try {
+            connection.inputStream.bufferedReader().useLines { sequence ->
+                sequence.take(100).forEach { line ->
+                    val trimmedLine = line.take(2000)
+                    lines.add(trimmedLine)
+                }
             }
+        } finally {
+            connection.disconnect()
         }
         return lines
     }
@@ -129,39 +148,44 @@ object NetworkHelper {
     }
 
 
-    /* Creates an http connection from given url string */
-    private fun createConnection(urlString: String, redirectCount: Int = 0): HttpURLConnection? {
-        var connection: HttpURLConnection? = null
-
-        try {
-            // try to open connection and get status
-            Log.i(tag, "Opening http connection.")
-            connection = URL(urlString).openConnection() as HttpURLConnection
-            val status = connection.responseCode
-
-            // CHECK for non-HTTP_OK status
-            if (status != HttpURLConnection.HTTP_OK) {
-                // CHECK for redirect status
-                if (status == HttpURLConnection.HTTP_MOVED_TEMP || status == HttpURLConnection.HTTP_MOVED_PERM || status == HttpURLConnection.HTTP_SEE_OTHER) {
-                    val redirectUrl: String = connection.getHeaderField("Location")
-                    connection.disconnect()
-                    if (redirectCount < 5) {
-                        Log.i(tag, "Following redirect to $redirectUrl")
-                        connection = createConnection(redirectUrl, redirectCount + 1)
-                    } else {
-                        connection = null
-                        Log.e(tag, "Too many redirects.")
-                    }
-                }
-            }
-
+    /*
+     * Opens an http connection to the given address and follows redirects - also the ones
+     * between http and https, which HttpURLConnection will not follow on its own.
+     * Throws when the address cannot be reached or does not answer with 200 OK, with a
+     * message that says why.
+     */
+    private fun openConnection(urlString: String, redirectCount: Int = 0): HttpURLConnection {
+        Log.i(tag, "Opening http connection.")
+        val connection: HttpURLConnection = URL(urlString).openConnection() as HttpURLConnection
+        // without these a server that never answers kept the check running forever
+        connection.connectTimeout = CONNECTION_TIMEOUT_MS
+        connection.readTimeout = CONNECTION_TIMEOUT_MS
+        val status: Int = try {
+            connection.responseCode
         } catch (e: Exception) {
-            Log.e(tag, "Unable to open http connection.")
-            e.printStackTrace()
+            connection.disconnect()
+            throw e
         }
+        if (status == HttpURLConnection.HTTP_OK) return connection
 
-        return connection
+        val location: String? = connection.getHeaderField("Location")
+        val message: String = connection.responseMessage.orEmpty()
+        connection.disconnect()
+        if (status in REDIRECT_CODES && location != null) {
+            if (redirectCount >= MAX_REDIRECTS) throw IOException("Too many redirects")
+            // the location may be relative to the address that sent it
+            val redirectUrl: String = URL(URL(urlString), location).toString()
+            Log.i(tag, "Following redirect to $redirectUrl")
+            return openConnection(redirectUrl, redirectCount + 1)
+        }
+        throw IOException("HTTP $status $message".trim())
     }
+
+
+    private const val CONNECTION_TIMEOUT_MS = 15_000
+    private const val MAX_REDIRECTS = 5
+    // 301, 302, 303 and the method-keeping 307 and 308
+    private val REDIRECT_CODES = setOf(301, 302, 303, 307, 308)
 
 
 }

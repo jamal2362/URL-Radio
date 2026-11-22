@@ -28,12 +28,15 @@ import com.jamal2367.urlradio.helpers.PreferencesHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import java.io.IOException
 import java.net.URLEncoder
 import java.util.concurrent.TimeUnit
 
@@ -56,6 +59,10 @@ class RadioBrowserSearch(private var radioBrowserSearchListener: RadioBrowserSea
     interface RadioBrowserSearchListener {
         fun onRadioBrowserSearchResults(results: Array<RadioBrowserResult>) {
         }
+
+        /* Every server failed - message says how, e.g. "de1.api.radio-browser.info: HTTP 503" */
+        fun onRadioBrowserSearchError(message: String) {
+        }
     }
 
 
@@ -65,7 +72,8 @@ class RadioBrowserSearch(private var radioBrowserSearchListener: RadioBrowserSea
     private var searchJob: Job? = null
 
     private val client: OkHttpClient = OkHttpClient.Builder()
-        .callTimeout(30, TimeUnit.SECONDS)
+        // three servers are tried in turn, so each one gets less than the old 30 seconds
+        .callTimeout(15, TimeUnit.SECONDS)
         .build()
 
 
@@ -84,37 +92,58 @@ class RadioBrowserSearch(private var radioBrowserSearchListener: RadioBrowserSea
         // a newer query supersedes whatever is still running
         searchJob?.cancel()
 
-        val requestUrl: String = when (searchType) {
+        val path: String = when (searchType) {
             // CASE: single station search - by radio browser UUID
-            Keys.SEARCH_TYPE_BY_UUID -> "https://${radioBrowserApi}/json/stations/byuuid/${query}"
+            Keys.SEARCH_TYPE_BY_UUID -> "/json/stations/byuuid/${query}"
             // CASE: multiple results search by search term
-            else -> "https://${radioBrowserApi}/json/stations/search?name=" +
-                URLEncoder.encode(query, "UTF-8")
+            else -> "/json/stations/search?name=" + URLEncoder.encode(query, "UTF-8")
         }
+        // The chosen server first, then the others: radio-browser.info is down to very few
+        // servers, and one that is gone or failing used to leave the search empty for good.
+        val servers: List<String> = listOf(
+            radioBrowserApi,
+            Keys.RADIO_BROWSER_API_BASE,
+            Keys.RADIO_BROWSER_API_DEFAULT,
+        ).distinct()
 
         searchJob = scope.launch {
-            val results: Array<RadioBrowserResult>? = try {
-                val request = Request.Builder()
-                    .url(requestUrl)
-                    // The previous code read "$Keys.APPLICATION_NAME ...", which Kotlin
-                    // parses as Keys.toString() + ".APPLICATION_NAME", so radio-browser.info
-                    // was told the client was "com.jamal2367.urlradio.Keys@1a2b3c.APPLICATION_NAME".
-                    .header("User-Agent", "$USER_AGENT_NAME/${BuildConfig.VERSION_NAME}")
-                    .build()
-                client.newCall(request).execute().use { response ->
-                    if (!response.isSuccessful) return@use null
-                    val body = response.body.string()
-                    if (body.isEmpty()) null else createRadioBrowserResult(body)
-                }
-            } catch (e: Exception) {
-                Log.w(tag, "Error: $e")
-                null
-            }
-            if (results != null) {
-                withContext(Main) {
-                    radioBrowserSearchListener.onRadioBrowserSearchResults(results)
+            var lastError = String()
+            for (server in servers) {
+                ensureActive()
+                try {
+                    val results: Array<RadioBrowserResult> = fetch("https://${server}${path}")
+                    withContext(Main) {
+                        radioBrowserSearchListener.onRadioBrowserSearchResults(results)
+                    }
+                    return@launch
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    lastError = "$server: ${e.localizedMessage?.takeIf { it.isNotBlank() } ?: e.javaClass.simpleName}"
+                    Log.w(tag, "Search failed on $server: $e")
                 }
             }
+            withContext(Main) {
+                radioBrowserSearchListener.onRadioBrowserSearchError(lastError)
+            }
+        }
+    }
+
+
+    /* Runs one request - throws when the server cannot be reached or does not answer 200 OK */
+    private fun fetch(requestUrl: String): Array<RadioBrowserResult> {
+        val request = Request.Builder()
+            .url(requestUrl)
+            // The previous code read "$Keys.APPLICATION_NAME ...", which Kotlin
+            // parses as Keys.toString() + ".APPLICATION_NAME", so radio-browser.info
+            // was told the client was "com.jamal2367.urlradio.Keys@1a2b3c.APPLICATION_NAME".
+            .header("User-Agent", "$USER_AGENT_NAME/${BuildConfig.VERSION_NAME}")
+            .build()
+        client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) throw IOException("HTTP ${response.code} ${response.message}".trim())
+            val body: String = response.body.string()
+            // an empty answer is an empty result, not an error
+            return if (body.isBlank()) emptyArray() else createRadioBrowserResult(body)
         }
     }
 
