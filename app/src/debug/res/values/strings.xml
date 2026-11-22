@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug build only: a name of its own, so it can be told apart from the release app installed next to it. -->
+<resources>
+    <string name="app_name" translatable="false">URL Radio Debug</string>
+</resources>
