@@ -31,13 +31,11 @@ import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.ForwardingPlayer
 import androidx.media3.common.MediaItem
-import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Metadata
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.HttpDataSource
-import androidx.media3.datasource.RawResourceDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
@@ -63,9 +61,6 @@ import androidx.media3.session.SessionResult
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
-import com.jamal2367.urlradio.alarm.AlarmNotification
-import com.jamal2367.urlradio.alarm.AlarmSettings
-import com.jamal2367.urlradio.alarm.RadioAlarm
 import com.jamal2367.urlradio.core.Collection
 import com.jamal2367.urlradio.core.Station
 import com.jamal2367.urlradio.helpers.AudioHelper
@@ -80,24 +75,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.Main
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
-
-/* Radio alarm */
-private const val ALARM_FALLBACK_ID: String = "radio_alarm_fallback"
-private const val ALARM_START_VOLUME: Float = 0.15f
-private const val ALARM_FADE_STEPS: Int = 30
-private const val ALARM_FADE_STEP_MS: Long = 1000L
-private const val ALARM_FALLBACK_DELAY_MS: Long = 30_000L
-private val ALARM_AUDIO_ATTRIBUTES: AudioAttributes = AudioAttributes.Builder()
-    .setUsage(C.USAGE_ALARM)
-    .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
-    .build()
 
 
 /*
@@ -139,14 +120,6 @@ class PlayerService : MediaLibraryService() {
     private var recordingEndsAt: Long = 0L
     private val recordingTimerHandler = Handler(Looper.getMainLooper())
     private val recordingTimerRunnable = Runnable { stopRecording() }
-    // radio alarm: set while a wake-up is running, until the user pauses or switches station
-    private var alarmActive: Boolean = false
-    private var alarmStationUuid: String = String()
-    private var alarmFadeJob: Job? = null
-    private val alarmFallbackRunnable = Runnable {
-        // the station did not start - no network, or the station is gone: wake up anyway
-        if (alarmActive && !player.isPlaying) playAlarmFallback()
-    }
 
 
     /* Overrides onCreate from Service */
@@ -190,23 +163,11 @@ class PlayerService : MediaLibraryService() {
 
 
     /*
-     * The radio alarm and the widget start the service with an action of their own; anything
+     * The widget and the quick settings tile start the service with an action of their own; anything
      * else - media buttons among it - goes to MediaSessionService as before.
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
-            Keys.ACTION_RADIO_ALARM -> {
-                startAlarmPlayback(snoozed = intent.getBooleanExtra(Keys.EXTRA_ALARM_SNOOZED, false))
-                return START_NOT_STICKY
-            }
-            Keys.ACTION_ALARM_STOP -> {
-                stopAlarm()
-                return START_NOT_STICKY
-            }
-            Keys.ACTION_ALARM_SNOOZE -> {
-                snoozeAlarm()
-                return START_NOT_STICKY
-            }
             Keys.ACTION_TOGGLE_PLAYBACK -> {
                 togglePlayback()
                 return START_NOT_STICKY
@@ -231,72 +192,6 @@ class PlayerService : MediaLibraryService() {
     }
 
 
-    /*
-     * The radio alarm went off. The station plays as an alarm - so it is heard even with the
-     * media volume turned down - and grows louder over half a minute. If it has not started
-     * after ALARM_FALLBACK_DELAY (no network, station gone), a built-in tone takes over.
-     */
-    private fun startAlarmPlayback(snoozed: Boolean = false) {
-        // A snooze is a one-time extra: the regular schedule only moves on for the real alarm.
-        if (!snoozed) RadioAlarm.onFired(this)
-        RadioAlarm.cancelSnooze(this)
-        val settings: AlarmSettings = PreferencesHelper.loadAlarmSettings()
-        alarmActive = true
-        player.setAudioAttributes(ALARM_AUDIO_ATTRIBUTES, true)
-        player.volume = ALARM_START_VOLUME
-        if (collection.stations.isEmpty()) {
-            playAlarmFallback()
-            return
-        }
-        val station: Station = CollectionHelper.getStation(
-            collection,
-            settings.stationUuid.ifEmpty { PreferencesHelper.loadLastPlayedStationUuid() }
-        )
-        alarmStationUuid = station.uuid
-        // "Off" and "Snooze" on the lock screen, without opening the app
-        AlarmNotification.showRinging(this, CollectionHelper.nameWithoutTags(station.name))
-        player.setMediaItem(CollectionHelper.buildMediaItem(this, station))
-        player.prepare()
-        player.play()
-        alarmFadeJob?.cancel()
-        alarmFadeJob = serviceScope.launch {
-            for (step in 1..ALARM_FADE_STEPS) {
-                delay(ALARM_FADE_STEP_MS)
-                if (!alarmActive) return@launch
-                player.volume = ALARM_START_VOLUME + (1f - ALARM_START_VOLUME) * step / ALARM_FADE_STEPS
-            }
-        }
-        recordingTimerHandler.removeCallbacks(alarmFallbackRunnable)
-        recordingTimerHandler.postDelayed(alarmFallbackRunnable, ALARM_FALLBACK_DELAY_MS)
-    }
-
-
-    /* The built-in alarm tone, repeated until the user stops it */
-    private fun playAlarmFallback() {
-        Log.w(tag, "Radio alarm: station did not start - playing the fallback tone.")
-        if (alarmStationUuid.isEmpty()) {
-            // no station at all - the notification still needs to offer "Off"
-            AlarmNotification.showRinging(this, getString(R.string.alarm_fallback_title))
-        }
-        alarmFadeJob?.cancel()
-        player.volume = 1f
-        val item: MediaItem = MediaItem.Builder()
-            .setMediaId(ALARM_FALLBACK_ID)
-            .setUri(RawResourceDataSource.buildRawResourceUri(R.raw.alarm_fallback))
-            .setMediaMetadata(
-                MediaMetadata.Builder()
-                    .setArtist(getString(R.string.alarm_fallback_title))
-                    .setIsPlayable(true)
-                    .build()
-            )
-            .build()
-        player.repeatMode = Player.REPEAT_MODE_ONE
-        player.setMediaItem(item)
-        player.prepare()
-        player.play()
-    }
-
-
     /* Shows the current station, state and title in the home screen widget and the quick settings tile */
     private fun updateWidgets() {
         val mediaId: String = player.currentMediaItem?.mediaId ?: PreferencesHelper.loadLastPlayedStationUuid()
@@ -305,40 +200,6 @@ class PlayerService : MediaLibraryService() {
         val isPlaying: Boolean = player.isPlaying || (player.playWhenReady && player.playbackState == Player.STATE_BUFFERING)
         RadioWidget.update(this, station, isPlaying, metadataHistory.lastOrNull().orEmpty())
         requestTileUpdate(this)
-    }
-
-
-    /* "Off": the radio stops, and a pending snooze is called off too */
-    private fun stopAlarm() {
-        RadioAlarm.cancelSnooze(this)
-        player.pause()
-        endAlarmSession()
-        AlarmNotification.cancel(this)
-    }
-
-
-    /* "Snooze": the radio stops and the alarm goes off again in a few minutes */
-    private fun snoozeAlarm() {
-        if (!alarmActive) return
-        val until: Long? = RadioAlarm.scheduleSnooze(this)
-        player.pause()
-        endAlarmSession()
-        if (until != null) AlarmNotification.showSnoozed(this, until)
-    }
-
-
-    /* Back to normal playback: media volume and audio attributes, no repeat */
-    private fun endAlarmSession() {
-        if (!alarmActive) return
-        // the alarm notification goes with it - snoozeAlarm puts up its own afterwards
-        AlarmNotification.cancel(this)
-        alarmActive = false
-        alarmStationUuid = String()
-        alarmFadeJob?.cancel()
-        recordingTimerHandler.removeCallbacks(alarmFallbackRunnable)
-        player.volume = 1f
-        player.repeatMode = Player.REPEAT_MODE_OFF
-        player.setAudioAttributes(AudioAttributes.DEFAULT, true)
     }
 
 
@@ -772,7 +633,6 @@ class PlayerService : MediaLibraryService() {
             builder.add(SessionCommand(Keys.CMD_STOP_RECORDING, Bundle.EMPTY))
             builder.add(SessionCommand(Keys.CMD_REQUEST_RECORDING_STATE, Bundle.EMPTY))
             builder.add(SessionCommand(Keys.CMD_RECORDING_UPDATED, Bundle.EMPTY))
-            builder.add(SessionCommand(Keys.CMD_ALARM_SNOOZE, Bundle.EMPTY))
             // A radio has no queue: Android Auto and the system (whose commands the media
             // notification controller sets) get no GET_TIMELINE, so no queue button. The app's
             // own screen keeps it, since it needs the current station to show and pause it.
@@ -841,10 +701,6 @@ class PlayerService : MediaLibraryService() {
                 }
                 Keys.CMD_CANCEL_SLEEP_TIMER -> {
                     manuallyCancelSleepTimer()
-                }
-                Keys.CMD_ALARM_SNOOZE -> {
-                    snoozeAlarm()
-                    return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
                 }
                 Keys.CMD_START_RECORDING -> {
                     startRecording(args.getLong(Keys.EXTRA_RECORDING_DURATION, 0L))
@@ -941,17 +797,6 @@ class PlayerService : MediaLibraryService() {
                 playCommandButton,
                 seekToNextCommandButton
             )
-            // while the alarm plays: snooze right next to the stop button
-            if (alarmActive) {
-                commandButtons.add(
-                    CommandButton.Builder(CommandButton.ICON_UNDEFINED).apply {
-                        setSessionCommand(SessionCommand(Keys.CMD_ALARM_SNOOZE, Bundle.EMPTY))
-                        setCustomIconResId(R.drawable.ic_alarm_24dp)
-                        setDisplayName(getString(R.string.alarm_action_snooze))
-                        setEnabled(true)
-                    }.build()
-                )
-            }
             return ImmutableList.copyOf(commandButtons)
         }
     }
@@ -966,11 +811,6 @@ class PlayerService : MediaLibraryService() {
             super.onIsPlayingChanged(isPlaying)
             // store state of playback
             val currentMediaId: String = player.currentMediaItem?.mediaId ?: String()
-            // the alarm's fallback tone is no station - nothing to remember about it
-            if (currentMediaId == ALARM_FALLBACK_ID) {
-                updateWidgets()
-                return
-            }
             PreferencesHelper.saveIsPlaying(isPlaying)
             PreferencesHelper.saveCurrentStationId(currentMediaId)
             // after saving: the quick settings tile reads the saved state
@@ -1027,8 +867,6 @@ class PlayerService : MediaLibraryService() {
                 // paused by the user, the system or the end of the stream: the recording ends
                 // here. A mere rebuffer does not change playWhenReady and keeps it running.
                 stopRecording()
-                // pausing also ends a wake-up: volume and audio attributes go back to normal
-                endAlarmSession()
                 when (reason) {
                     Player.PLAY_WHEN_READY_CHANGE_REASON_END_OF_MEDIA_ITEM -> {
                         // playback reached end: stop / end playback
@@ -1058,20 +896,11 @@ class PlayerService : MediaLibraryService() {
             super.onMediaItemTransition(mediaItem, reason)
             // a recording belongs to one station
             stopRecording()
-            // switching to another station ends a wake-up - the fallback tone does not
-            val mediaId: String = mediaItem?.mediaId.orEmpty()
-            if (alarmActive && mediaId != alarmStationUuid && mediaId != ALARM_FALLBACK_ID) {
-                endAlarmSession()
-            }
         }
 
         override fun onPlayerError(error: PlaybackException) {
             super.onPlayerError(error)
             Log.d(tag, "PlayerError occurred: ${error.errorCodeName}")
-            // a wake-up must not end in silence
-            if (alarmActive && player.currentMediaItem?.mediaId != ALARM_FALLBACK_ID) {
-                playAlarmFallback()
-            }
             // todo: test if playback needs to be restarted
         }
 

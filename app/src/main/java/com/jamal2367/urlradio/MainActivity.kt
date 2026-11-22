@@ -9,15 +9,12 @@
 
 package com.jamal2367.urlradio
 
-import android.Manifest
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -40,13 +37,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
-import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.jamal2367.urlradio.alarm.AlarmSettings
-import com.jamal2367.urlradio.alarm.RadioAlarm
 import com.jamal2367.urlradio.core.Station
 import com.jamal2367.urlradio.helpers.AppThemeHelper
 import com.jamal2367.urlradio.helpers.BackupHelper
@@ -112,27 +106,7 @@ class MainActivity : ComponentActivity() {
                 stationsViewModelRef?.setStationImage(uri, stationUuid)
             }
         }
-    // the radio alarm's "Off" / "Snooze" notification needs this from Android 13 on
-    private var notificationsAllowed by mutableStateOf(true)
-    // held here rather than in the composition: onResume re-reads it, since a one-time
-    // alarm turns itself off after it went off
-    private var alarmSettings by mutableStateOf(AlarmSettings())
     private var stationSearchEnabled by mutableStateOf(PreferencesHelper.loadStationSearchEnabled())
-    private val notificationPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            notificationsAllowed = granted
-        }
-
-    private fun refreshNotificationPermission() {
-        notificationsAllowed = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
-    }
-
-    private fun requestNotificationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-        }
-    }
 
     private var imageTargetStationUuid: String = ""
     private var stationsViewModelRef: StationsViewModel? = null
@@ -174,13 +148,6 @@ class MainActivity : ComponentActivity() {
                 Log.w(tag, "Playlist import cancelled.")
             }
         }
-
-    override fun onResume() {
-        super.onResume()
-        refreshNotificationPermission()
-        alarmSettings = PreferencesHelper.loadAlarmSettings()
-    }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -365,8 +332,6 @@ class MainActivity : ComponentActivity() {
                     largeBuffer = largeBuffer,
                     recordingFormat = recordingFormat,
                     recordingBitrate = recordingBitrate,
-                    alarm = alarmSettings,
-                    notificationsAllowed = notificationsAllowed,
                     stationSearchEnabled = stationSearchEnabled,
                 ),
                 actions = AppActions(
@@ -478,27 +443,9 @@ class MainActivity : ComponentActivity() {
                             recordingBitrate = it.coerceBitrate(recordingBitrate)
                             PreferencesHelper.saveRecordingBitrate(recordingBitrate)
                         },
-                        onAlarmChanged = {
-                            // asked once, when the alarm is switched on
-                            if (it.enabled && !alarmSettings.enabled && !notificationsAllowed) requestNotificationPermission()
-                            alarmSettings = it
-                            PreferencesHelper.saveAlarmSettings(it)
-                            RadioAlarm.schedule(this)
-                        },
-                        onRequestNotificationPermission = { requestNotificationPermission() },
                         onStationSearchChanged = {
                             stationSearchEnabled = it
                             PreferencesHelper.saveStationSearchEnabled(it)
-                        },
-                        onRequestAlarmPermission = {
-                            // only offered on Android 12, see RadioAlarm.canSchedule
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                runCatching {
-                                    startActivity(
-                                        Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, "package:$packageName".toUri())
-                                    )
-                                }
-                            }
                         },
                         onRecordingBitrateChanged = {
                             recordingBitrate = it

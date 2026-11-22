@@ -81,7 +81,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.jamal2367.urlradio.alarm.AlarmSettings
 import java.text.Normalizer
 import kotlinx.coroutines.delay
 import com.jamal2367.urlradio.R
@@ -123,8 +122,6 @@ data class AppState(
     val largeBuffer: Boolean,
     val recordingFormat: RecordingFormat,
     val recordingBitrate: Int,
-    val alarm: AlarmSettings,
-    val notificationsAllowed: Boolean,
     val stationSearchEnabled: Boolean,
 )
 
@@ -236,10 +233,7 @@ fun UrlRadioApp(
                 largeBuffer = state.largeBuffer,
                 recordingFormat = state.recordingFormat,
                 recordingBitrate = state.recordingBitrate,
-                alarm = state.alarm,
-                notificationsAllowed = state.notificationsAllowed,
                 stationSearchEnabled = state.stationSearchEnabled,
-                stations = state.stations.map { it.uuid to it.name },
                 editStations = state.editStationsEnabled,
                 editStreamUris = state.editStreamUrisEnabled,
                 callbacks = actions.settings,

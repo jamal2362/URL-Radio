@@ -20,7 +20,6 @@ import android.util.Log
 import androidx.core.content.edit
 import com.google.gson.Gson
 import com.jamal2367.urlradio.Keys
-import com.jamal2367.urlradio.alarm.AlarmSettings
 import com.jamal2367.urlradio.recording.RecordingFormat
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -321,33 +320,6 @@ object PreferencesHelper {
     /* Loads value of the option: Search In Station List - off unless switched on */
     fun loadStationSearchEnabled(): Boolean {
         return sharedPreferences.getBoolean(Keys.PREF_STATION_SEARCH_ENABLED, false)
-    }
-
-
-    /* Saves the radio alarm */
-    fun saveAlarmSettings(settings: AlarmSettings) {
-        sharedPreferences.edit {
-            putBoolean(Keys.PREF_ALARM_ENABLED, settings.enabled)
-            putInt(Keys.PREF_ALARM_HOUR, settings.hour)
-            putInt(Keys.PREF_ALARM_MINUTE, settings.minute)
-            putInt(Keys.PREF_ALARM_DAYS, settings.days)
-            putString(Keys.PREF_ALARM_STATION_UUID, settings.stationUuid)
-            putInt(Keys.PREF_ALARM_SNOOZE_MINUTES, settings.snoozeMinutes)
-        }
-    }
-
-
-    /* Loads the radio alarm */
-    fun loadAlarmSettings(): AlarmSettings {
-        val defaults = AlarmSettings()
-        return AlarmSettings(
-            enabled = sharedPreferences.getBoolean(Keys.PREF_ALARM_ENABLED, defaults.enabled),
-            hour = sharedPreferences.getInt(Keys.PREF_ALARM_HOUR, defaults.hour),
-            minute = sharedPreferences.getInt(Keys.PREF_ALARM_MINUTE, defaults.minute),
-            days = sharedPreferences.getInt(Keys.PREF_ALARM_DAYS, defaults.days),
-            stationUuid = sharedPreferences.getString(Keys.PREF_ALARM_STATION_UUID, defaults.stationUuid).orEmpty(),
-            snoozeMinutes = sharedPreferences.getInt(Keys.PREF_ALARM_SNOOZE_MINUTES, defaults.snoozeMinutes),
-        )
     }
 
 
