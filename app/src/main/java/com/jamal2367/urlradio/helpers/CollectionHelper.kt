@@ -86,13 +86,16 @@ object CollectionHelper {
     ): Station {
         // read station playlist
         val station: Station =
-            FileHelper.readStationPlaylist(context.contentResolver.openInputStream(localFileUri))
+            FileHelper.readStationPlaylist(context.contentResolver.openInputStream(localFileUri), remoteFileLocation)
         if (station.name.isEmpty()) {
             // construct name from file name - strips file extension
             station.name = FileHelper.getFileName(context, localFileUri).substringBeforeLast(".")
         }
         station.remoteStationLocation = remoteFileLocation
-        station.remoteImageLocation = getFaviconAddress(remoteFileLocation)
+        // the logo the playlist names, otherwise the favicon of the server it came from
+        if (station.remoteImageLocation.isEmpty()) {
+            station.remoteImageLocation = getFaviconAddress(remoteFileLocation)
+        }
         station.modificationDate = GregorianCalendar.getInstance().time
         return station
     }
@@ -130,7 +133,10 @@ object CollectionHelper {
                     // update stream uri, mime type and station image url
                     it.streamUris[it.stream] = station.getStreamUri()
                     it.streamContent = station.streamContent
-                    it.remoteImageLocation = station.remoteImageLocation
+                    // a playlist without a logo keeps the one the station has
+                    if (station.remoteImageLocation.isNotEmpty()) {
+                        it.remoteImageLocation = station.remoteImageLocation
+                    }
                     // update name - if not changed previously by user
                     if (!it.nameManuallySet) it.name = station.name
                     // re-download station image - if not changed previously by user
@@ -501,19 +507,23 @@ object CollectionHelper {
         }
         val contentType: String = detected.type.lowercase(Locale.getDefault())
 
-        // CASE: M3U or PLS playlist
-        if (Keys.MIME_TYPES_M3U.contains(contentType) || Keys.MIME_TYPES_PLS.contains(contentType)) {
+        // CASE: M3U or PLS playlist - or an M3U8 address, which can be either an HLS stream
+        // or a plain station list (often with logos), and only its content tells which
+        val isHls: Boolean = Keys.MIME_TYPES_HLS.contains(contentType)
+        if (isHls || Keys.MIME_TYPES_M3U.contains(contentType) || Keys.MIME_TYPES_PLS.contains(contentType)) {
             val lines: List<String> = try {
                 NetworkHelper.downloadPlaylist(query)
             } catch (e: Exception) {
+                // an HLS stream that cannot be read as text is still worth a try in the player
+                if (isHls) return UrlCheck(listOf(createStationFromStreamUrl(query, contentType)))
                 return UrlCheck(emptyList(), UrlProblem.UNREACHABLE, e.localizedMessage ?: e.javaClass.simpleName)
             }
             // HLS playlists are often sent as plain M3U - they are a stream, not a station list
             if (lines.any { it.startsWith("#EXT-X-") }) {
                 return UrlCheck(listOf(createStationFromStreamUrl(query, Keys.MIME_TYPES_HLS.first())))
             }
-            val stations: List<Station> = if (Keys.MIME_TYPES_M3U.contains(contentType)) {
-                readM3uPlaylistContent(lines)
+            val stations: List<Station> = if (isHls || Keys.MIME_TYPES_M3U.contains(contentType)) {
+                readM3uPlaylistContent(lines, query)
             } else {
                 readPlsPlaylistContent(lines)
             }
@@ -573,27 +583,39 @@ object CollectionHelper {
     }
 
 
-    /* A name / stream address pair taken from a playlist, before its type has been checked */
-    private data class PlaylistEntry(val name: String, val streamUri: String)
+    /* A playlist entry - name, stream address and logo - before its type has been checked */
+    private data class PlaylistEntry(val name: String, val streamUri: String, val logo: String = String())
 
 
-    /* Reads a m3u playlist and returns a list of stations */
-    private suspend fun readM3uPlaylistContent(playlist: List<String>): List<Station> {
+    /*
+     * Reads a m3u playlist and returns a list of stations. With the playlist's own address,
+     * relative stream and logo addresses in it are resolved against that address.
+     */
+    private suspend fun readM3uPlaylistContent(playlist: List<String>, playlistAddress: String? = null): List<Station> {
         val entries: MutableList<PlaylistEntry> = mutableListOf()
         var name = String()
+        var logo = String()
 
-        playlist.forEach { line ->
-            // get name of station
-            if (line.startsWith("#EXTINF:")) {
-                name = line.substringAfter(",").trim()
-            }
-            // get stream uri
-            else if (line.isNotBlank() && !line.startsWith("#")) {
-                val streamUri = line.trim()
-                // use the stream address as the name if no name is specified
-                entries.add(PlaylistEntry(name.ifEmpty { streamUri }, streamUri))
-                // reset name for the next station - useful if playlist does not provide name(s)
-                name = String()
+        playlist.forEach { rawLine ->
+            val line: String = rawLine.trim()
+            when {
+                // name and logo of the next station
+                line.startsWith("#EXTINF:") -> {
+                    val extInf: M3uHelper.ExtInf = M3uHelper.parseExtInf(line)
+                    name = extInf.name
+                    if (extInf.logo.isNotEmpty()) logo = extInf.logo
+                }
+                // logo of the next station, in a line of its own
+                line.startsWith("#EXTIMG:") -> logo = M3uHelper.parseExtImg(line)
+                // stream address
+                line.isNotEmpty() && !line.startsWith("#") -> {
+                    val streamUri: String = M3uHelper.resolveAddress(line, playlistAddress).ifEmpty { line }
+                    // use the stream address as the name if no name is specified
+                    entries.add(PlaylistEntry(name.ifEmpty { streamUri }, streamUri, M3uHelper.resolveAddress(logo, playlistAddress)))
+                    // reset for the next station - useful if the playlist does not name every one
+                    name = String()
+                    logo = String()
+                }
             }
         }
         return createStationsFromEntries(entries)
@@ -659,6 +681,7 @@ object CollectionHelper {
                                 name = entry.name,
                                 streamUris = mutableListOf(entry.streamUri),
                                 streamContent = contentType,
+                                remoteImageLocation = entry.logo,
                                 modificationDate = GregorianCalendar.getInstance().time
                             )
                         }
@@ -692,7 +715,7 @@ object CollectionHelper {
         val m3uString = StringBuilder()
         /* Extended M3U Format
         #EXTM3U
-        #EXTINF:-1,My Cool Stream
+        #EXTINF:-1 tvg-logo="https://www.site.com/logo.png",My Cool Stream
         http://www.site.com:8000/listen.pls
          */
 
@@ -703,8 +726,8 @@ object CollectionHelper {
         // add name and stream address
         collection.stations.forEach { station ->
             m3uString.append("\n")
-            m3uString.append("#EXTINF:-1,")
-            m3uString.append(station.name)
+            // the logo goes along as tvg-logo, so a re-import brings it back
+            m3uString.append(M3uHelper.createExtInf(station.name, station.remoteImageLocation))
             m3uString.append("\n")
             m3uString.append(station.getStreamUri())
             m3uString.append("\n")

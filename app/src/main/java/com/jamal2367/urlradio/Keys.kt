@@ -118,7 +118,8 @@ object Keys {
     val MIME_TYPES_MPEG = arrayOf("audio/mpeg")
     val MIME_TYPES_OGG = arrayOf("audio/ogg", "application/ogg", "audio/opus")
     val MIME_TYPES_AAC = arrayOf("audio/aac", "audio/aacp")
-    val MIME_TYPES_IMAGE = arrayOf("image/png", "image/jpeg")
+    // everything BitmapFactory decodes - WebP and GIF logos used to be dropped after download
+    val MIME_TYPES_IMAGE = arrayOf("image/png", "image/jpeg", "image/webp", "image/gif", "image/bmp")
     val MIME_TYPES_FAVICON = arrayOf("image/x-icon", "image/vnd.microsoft.icon")
     val MIME_TYPES_ZIP = arrayOf("application/zip", "application/x-zip-compressed", "multipart/x-zip")
 

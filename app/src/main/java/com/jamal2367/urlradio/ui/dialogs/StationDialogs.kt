@@ -52,20 +52,31 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
 import com.jamal2367.urlradio.R
 import com.jamal2367.urlradio.core.Station
+import kotlinx.coroutines.launch
 
 /** How much of the dialog the result list is allowed to claim. */
 private val ResultListMaxHeight = 340.dp
@@ -225,6 +236,12 @@ internal fun SearchErrorHint(error: SearchError, modifier: Modifier = Modifier) 
         error.kind == SearchError.Kind.INVALID_ADDRESS -> error.detail
         else -> stringResource(R.string.dialog_find_station_error_detail, error.detail)
     }
+    ErrorHint(message = message, detail = detail, modifier = modifier)
+}
+
+/* A plain-words message with the technical reason below it, on the error color. */
+@Composable
+internal fun ErrorHint(message: String, detail: String, modifier: Modifier = Modifier) {
     Surface(
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.errorContainer,
@@ -257,6 +274,116 @@ internal fun SearchErrorHint(error: SearchError, modifier: Modifier = Modifier) 
             }
         }
     }
+}
+
+/** Why a logo address was not taken, with the technical reason. */
+data class LogoUrlError(val kind: Kind, val detail: String) {
+    enum class Kind {
+        /** Not an http(s) address at all. */
+        INVALID,
+        /** The address could not be reached, or did not answer with 200 OK. */
+        UNREACHABLE,
+        /** The address answered with something that is not a usable image. */
+        NOT_IMAGE,
+    }
+}
+
+/*
+ * Asks for the address of a station logo. The address is checked before the dialog
+ * closes: onSubmit returns null when the logo was taken, otherwise why it was not - which
+ * is then shown under the field, the same way the station search shows its errors.
+ */
+@Composable
+fun LogoUrlDialog(
+    stationName: String,
+    currentUrl: String,
+    onSubmit: suspend (String) -> LogoUrlError?,
+    onDismiss: () -> Unit,
+) {
+    var url by rememberSaveable { mutableStateOf(currentUrl) }
+    var checking by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<LogoUrlError?>(null) }
+    val scope = rememberCoroutineScope()
+    val submit: () -> Unit = {
+        if (url.isNotBlank() && !checking) {
+            checking = true
+            error = null
+            scope.launch {
+                val result: LogoUrlError? = onSubmit(url)
+                checking = false
+                if (result == null) onDismiss() else error = result
+            }
+        }
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        modifier = WideDialogModifier,
+        properties = WideDialogProperties,
+        icon = { Icon(painter = painterResource(R.drawable.ic_link_24dp), contentDescription = null) },
+        title = { Text(stringResource(R.string.dialog_logo_url_title)) },
+        text = {
+            Column {
+                Text(
+                    text = stringResource(R.string.dialog_logo_url_message, stationName),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                OutlinedTextField(
+                    value = url,
+                    onValueChange = {
+                        url = it
+                        error = null
+                    },
+                    label = { Text(stringResource(R.string.dialog_logo_url_hint)) },
+                    placeholder = { Text("https://…/logo.png") },
+                    singleLine = true,
+                    enabled = !checking,
+                    isError = error != null,
+                    shape = RoundedCornerShape(16.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { submit() }),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp),
+                )
+                if (checking) {
+                    LinearWavyProgressIndicator(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 12.dp)
+                    )
+                }
+                error?.let {
+                    ErrorHint(
+                        message = stringResource(
+                            when (it.kind) {
+                                LogoUrlError.Kind.INVALID -> R.string.dialog_find_station_error_invalid_address
+                                LogoUrlError.Kind.UNREACHABLE -> R.string.dialog_find_station_error_unreachable
+                                LogoUrlError.Kind.NOT_IMAGE -> R.string.dialog_logo_url_error_not_image
+                            }
+                        ),
+                        detail = when (it.kind) {
+                            LogoUrlError.Kind.INVALID -> ""
+                            LogoUrlError.Kind.UNREACHABLE -> stringResource(R.string.dialog_find_station_error_detail, it.detail)
+                            LogoUrlError.Kind.NOT_IMAGE -> stringResource(R.string.dialog_find_station_error_content_type, it.detail)
+                        },
+                        modifier = Modifier.padding(top = 12.dp),
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = submit, enabled = url.isNotBlank() && !checking) {
+                Text(stringResource(R.string.dialog_generic_button_okay))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.dialog_generic_button_cancel))
+            }
+        },
+    )
 }
 
 /* Pick stations found in an opened or imported playlist. Replaces AddStationDialog. */
@@ -492,7 +619,7 @@ private fun StationPickerRow(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(12.dp),
         ) {
-            StationPickerAvatar(previewing = previewing)
+            StationPickerAvatar(station = station, previewing = previewing)
 
             Column(
                 modifier = Modifier
@@ -531,34 +658,59 @@ private fun StationPickerRow(
     }
 }
 
-/* Shows what the row is: a station, or the station that is currently being auditioned. */
+/*
+ * Shows what the row is: the station's logo when it has one - from radio-browser.info or
+ * from the playlist - otherwise a note symbol, and a play symbol over either while the
+ * station is being auditioned. A logo that fails to load leaves the note symbol showing.
+ */
 @Composable
-private fun StationPickerAvatar(previewing: Boolean) {
-    val background = if (previewing) MaterialTheme.colorScheme.primary
-    else MaterialTheme.colorScheme.surfaceContainerHigh
-    val tint = if (previewing) MaterialTheme.colorScheme.onPrimary
-    else MaterialTheme.colorScheme.onSurfaceVariant
+private fun StationPickerAvatar(station: Station, previewing: Boolean) {
+    val context = LocalContext.current
+    val logo: String = station.remoteImageLocation
+    val request = remember(logo) {
+        if (logo.isEmpty()) null
+        else ImageRequest.Builder(context).data(logo).build()
+    }
 
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .size(40.dp)
             .clip(CircleShape)
-            .background(background),
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh),
     ) {
-        Icon(
-            painter = painterResource(
-                if (previewing) R.drawable.ic_player_play_symbol_42dp
-                else R.drawable.ic_music_note_24dp
-            ),
-            contentDescription = if (previewing) {
-                stringResource(R.string.descr_station_preview_playing)
-            } else {
-                null
-            },
-            tint = tint,
-            modifier = Modifier.size(20.dp),
-        )
+        if (!previewing) {
+            Icon(
+                painter = painterResource(R.drawable.ic_music_note_24dp),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp),
+            )
+        }
+        if (request != null) {
+            // drawn over the note, so the note is what remains while loading or on failure
+            AsyncImage(
+                model = request,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.matchParentSize(),
+            )
+        }
+        if (previewing) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.85f)),
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_player_play_symbol_42dp),
+                    contentDescription = stringResource(R.string.descr_station_preview_playing),
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(20.dp),
+                )
+            }
+        }
     }
 }
 

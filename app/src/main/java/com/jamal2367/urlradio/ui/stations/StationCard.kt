@@ -33,6 +33,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -85,6 +87,7 @@ fun StationCard(
     onSave: (name: String, streamUri: String) -> Unit,
     onCancelEdit: () -> Unit,
     onChangeImage: () -> Unit,
+    onEnterLogoUrl: () -> Unit,
     onPlaceOnHomeScreen: () -> Unit,
     modifier: Modifier = Modifier,
     dragModifier: Modifier = Modifier,
@@ -117,6 +120,10 @@ fun StationCard(
                     .fillMaxWidth()
                     .padding(12.dp),
             ) {
+                // While the editor is open a tap on the cover offers the two ways to change
+                // the image: a picture from the gallery or a logo from an address.
+                var showImageMenu by remember { mutableStateOf(false) }
+                Box {
                 StationCover(
                     station = station,
                     // The cover becomes the shortcut to the image picker while the editor is
@@ -132,7 +139,7 @@ fun StationCard(
                                 Modifier.clickable(
                                     interactionSource = null,
                                     indication = null,
-                                    onClick = onChangeImage,
+                                    onClick = { showImageMenu = true },
                                 )
                             } else {
                                 Modifier.combinedClickable(
@@ -144,6 +151,28 @@ fun StationCard(
                             }
                         ),
                 )
+                DropdownMenu(
+                    expanded = showImageMenu && isEditorOpen,
+                    onDismissRequest = { showImageMenu = false },
+                ) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.station_image_from_gallery)) },
+                        leadingIcon = { Icon(painterResource(R.drawable.ic_image_24dp), contentDescription = null) },
+                        onClick = {
+                            showImageMenu = false
+                            onChangeImage()
+                        },
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.station_image_from_address)) },
+                        leadingIcon = { Icon(painterResource(R.drawable.ic_link_24dp), contentDescription = null) },
+                        onClick = {
+                            showImageMenu = false
+                            onEnterLogoUrl()
+                        },
+                    )
+                }
+                }
 
                 Text(
                     text = station.name,

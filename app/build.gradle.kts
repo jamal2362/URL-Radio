@@ -90,4 +90,6 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.okhttp)
     implementation(libs.coil.compose)
+    // lets Coil load station logos straight from the web - used for the search results
+    implementation(libs.coil.network.okhttp)
 }

@@ -90,6 +90,8 @@ object FileHelper {
         if (fileName.endsWith("png", true)) return Keys.MIME_TYPE_PNG
         if (fileName.endsWith("jpg", true)) return Keys.MIME_TYPE_JPG
         if (fileName.endsWith("jpeg", true)) return Keys.MIME_TYPE_JPG
+        if (fileName.endsWith("webp", true)) return "image/webp"
+        if (fileName.endsWith("gif", true)) return "image/gif"
         // default return
         return Keys.MIME_TYPE_UNSUPPORTED
     }
@@ -185,17 +187,23 @@ object FileHelper {
     }
 
 
-    /* Reads m3u or pls playlists */
-    fun readStationPlaylist(playlistInputStream: InputStream?): Station {
+    /* Reads m3u or pls playlists - playlistAddress resolves a relative logo address */
+    fun readStationPlaylist(playlistInputStream: InputStream?, playlistAddress: String? = null): Station {
         val station = Station()
         if (playlistInputStream != null) {
             val reader = BufferedReader(InputStreamReader(playlistInputStream))
             // until last line reached: read station name and stream address(es)
             reader.forEachLine { line ->
                 when {
-                    // M3U: found station name
-                    line.contains("#EXTINF:-1,") -> station.name = line.substring(11).trim()
-                    line.contains("#EXTINF:0,") -> station.name = line.substring(10).trim()
+                    // M3U: found station name - and maybe its logo
+                    line.startsWith("#EXTINF:") -> {
+                        val extInf: M3uHelper.ExtInf = M3uHelper.parseExtInf(line.trim())
+                        if (extInf.name.isNotEmpty()) station.name = extInf.name
+                        if (extInf.logo.isNotEmpty()) station.remoteImageLocation = M3uHelper.resolveAddress(extInf.logo, playlistAddress)
+                    }
+                    // M3U: found the logo in a line of its own
+                    line.startsWith("#EXTIMG:") ->
+                        station.remoteImageLocation = M3uHelper.resolveAddress(M3uHelper.parseExtImg(line), playlistAddress)
                     // M3U: found stream URL
                     line.startsWith("http") -> station.streamUris.add(0, line.trim())
                     // PLS: found station name

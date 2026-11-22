@@ -34,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
@@ -61,6 +62,7 @@ import com.jamal2367.urlradio.ui.dialogs.AddStationDialog
 import com.jamal2367.urlradio.ui.dialogs.ConfirmDialog
 import com.jamal2367.urlradio.ui.dialogs.ErrorDialog
 import com.jamal2367.urlradio.ui.dialogs.FindStationDialog
+import com.jamal2367.urlradio.ui.dialogs.LogoUrlDialog
 import com.jamal2367.urlradio.ui.dialogs.StationSearchViewModel
 import com.jamal2367.urlradio.ui.settings.SettingsCallbacks
 import com.jamal2367.urlradio.ui.stations.StationsViewModel
@@ -207,6 +209,8 @@ class MainActivity : ComponentActivity() {
         var recordingFormat by remember { mutableStateOf(PreferencesHelper.loadRecordingFormat()) }
         var recordingBitrate by remember { mutableIntStateOf(PreferencesHelper.loadRecordingBitrate()) }
         var showFindDialog by remember { mutableStateOf(false) }
+        // the station whose logo address is being entered, by UUID so it survives recreation
+        var logoUrlStationUuid by rememberSaveable { mutableStateOf<String?>(null) }
         // Selection of the playlist import dialog. Kept here rather than in the search view
         // model because the imported list does not come from a search.
         var importSelection by remember { mutableStateOf<Set<String>>(emptySet()) }
@@ -341,6 +345,7 @@ class MainActivity : ComponentActivity() {
                             PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                         )
                     },
+                    onEnterLogoUrl = { station -> logoUrlStationUuid = station.uuid },
                     onPlaceOnHomeScreen = { station ->
                         ShortcutHelper.placeShortcut(this, station)
                         stationsViewModel.closeEditor()
@@ -452,6 +457,20 @@ class MainActivity : ComponentActivity() {
                 isWideLayout = isWide,
                 snackbarHostState = snackbarHostState,
             ) {
+                logoUrlStationUuid?.let { uuid ->
+                    val station: Station? = collection.stations.firstOrNull { it.uuid == uuid }
+                    if (station == null) {
+                        logoUrlStationUuid = null
+                    } else {
+                        LogoUrlDialog(
+                            stationName = station.name,
+                            currentUrl = station.remoteImageLocation,
+                            onSubmit = { url -> stationsViewModel.applyLogoUrl(uuid, url) },
+                            onDismiss = { logoUrlStationUuid = null },
+                        )
+                    }
+                }
+
                 if (showFindDialog) {
                     FindStationDialog(
                         state = searchState,

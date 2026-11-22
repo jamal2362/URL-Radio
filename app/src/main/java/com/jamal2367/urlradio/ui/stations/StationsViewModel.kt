@@ -16,6 +16,7 @@ package com.jamal2367.urlradio.ui.stations
 
 import android.app.Application
 import android.net.Uri
+import android.webkit.URLUtil
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.jamal2367.urlradio.Keys
@@ -23,9 +24,12 @@ import com.jamal2367.urlradio.core.Collection
 import com.jamal2367.urlradio.core.Station
 import com.jamal2367.urlradio.helpers.CollectionChanges
 import com.jamal2367.urlradio.helpers.CollectionHelper
+import com.jamal2367.urlradio.helpers.DownloadHelper
 import com.jamal2367.urlradio.helpers.FileHelper
 import com.jamal2367.urlradio.helpers.NetworkHelper
 import com.jamal2367.urlradio.helpers.PreferencesHelper
+import com.jamal2367.urlradio.ui.dialogs.LogoUrlError
+import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -230,6 +234,36 @@ class StationsViewModel(application: Application) : AndroidViewModel(application
         )
 
         modificationDate = _collection.value.modificationDate
+    }
+
+    /*
+     * Gives a station the logo at the given address - after checking that the address
+     * actually serves an image. Returns null when the logo was taken, otherwise why not.
+     * The logo is then downloaded like one from radio-browser.info, so "update station
+     * images" refreshes it later on, unlike a picture taken from the gallery.
+     */
+    suspend fun applyLogoUrl(stationUuid: String, address: String): LogoUrlError? {
+        val url: String = address.trim()
+        if (!URLUtil.isNetworkUrl(url) || !URLUtil.isValidUrl(url)) {
+            return LogoUrlError(LogoUrlError.Kind.INVALID, url)
+        }
+        val contentType: NetworkHelper.ContentType = withContext(Dispatchers.IO) { NetworkHelper.detectContentType(url) }
+        if (contentType.error.isNotEmpty()) {
+            return LogoUrlError(LogoUrlError.Kind.UNREACHABLE, contentType.error)
+        }
+        val type: String = contentType.type.lowercase(Locale.ROOT)
+        if (type !in Keys.MIME_TYPES_IMAGE && type !in Keys.MIME_TYPES_FAVICON) {
+            return LogoUrlError(LogoUrlError.Kind.NOT_IMAGE, contentType.type)
+        }
+        val updated = _collection.value.deepCopy()
+        val station = updated.stations.firstOrNull { it.uuid == stationUuid } ?: return null
+        station.remoteImageLocation = url
+        station.imageManuallySet = false
+        _collection.value = updated
+        modificationDate = CollectionHelper.saveCollection(getApplication(), updated)
+        // the download lands in the collection on its own, see DownloadHelper.processDownload
+        DownloadHelper.updateStationImage(getApplication(), station)
+        return null
     }
 
     fun isConnectedToNetwork(): Boolean = NetworkHelper.isConnectedToNetwork(getApplication())

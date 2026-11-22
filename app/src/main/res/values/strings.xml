@@ -158,4 +158,10 @@
     <string name="dialog_find_station_error_empty_playlist">The playlist contains no playable stations.</string>
     <string name="dialog_find_station_error_detail">Error: %1$s</string>
     <string name="dialog_find_station_error_content_type">The server sends: %1$s</string>
+    <string name="station_image_from_gallery">Picture from gallery</string>
+    <string name="station_image_from_address">Logo from address</string>
+    <string name="dialog_logo_url_title">Logo from Address</string>
+    <string name="dialog_logo_url_message">Enter the address of a logo for “%1$s”. It is checked before it is used, and “Update Station Images” refreshes it later on.</string>
+    <string name="dialog_logo_url_hint">Logo address</string>
+    <string name="dialog_logo_url_error_not_image">There is no usable image at this address (PNG, JPEG, WebP, GIF, BMP or ICO).</string>
 </resources>
