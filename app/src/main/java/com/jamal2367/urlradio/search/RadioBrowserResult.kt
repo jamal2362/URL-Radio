@@ -32,7 +32,9 @@ data class RadioBrowserResult(
     @Expose val homepage: String,
     @Expose val favicon: String,
     @Expose val bitrate: Int,
-    @Expose val codec: String
+    @Expose val codec: String,
+    /* clicks within the last 24 hours - missing in an answer means 0 */
+    @Expose val clickcount: Int = 0
 ) {
 
     /* Converts RadioBrowserResult to Station  */
@@ -55,7 +57,8 @@ data class RadioBrowserResult(
         radioBrowserStationUuid = stationuuid,
         radioBrowserChangeUuid = changeuuid,
         bitrate = bitrate,
-        codec = codec
+        codec = codec,
+        clickCount = clickcount
     )
 
 }

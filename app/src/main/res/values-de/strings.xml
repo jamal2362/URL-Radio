@@ -154,4 +154,8 @@
     <string name="dialog_logo_url_message">Gib die Adresse eines Logos für „%1$s“ ein. Sie wird vor dem Übernehmen geprüft, und „Senderbilder aktualisieren“ lädt das Logo später neu.</string>
     <string name="dialog_logo_url_hint">Logo-Adresse</string>
     <string name="dialog_logo_url_error_not_image">Unter dieser Adresse gibt es kein verwendbares Bild (PNG, JPEG, WebP, GIF, BMP oder ICO).</string>
+    <plurals name="dialog_station_picker_clicks">
+        <item quantity="one">%1$s Klick (24 h)</item>
+        <item quantity="other">%1$s Klicks (24 h)</item>
+    </plurals>
 </resources>

@@ -96,7 +96,10 @@ class RadioBrowserSearch(private var radioBrowserSearchListener: RadioBrowserSea
             // CASE: single station search - by radio browser UUID
             Keys.SEARCH_TYPE_BY_UUID -> "/json/stations/byuuid/${query}"
             // CASE: multiple results search by search term
-            else -> "/json/stations/search?name=" + URLEncoder.encode(query, "UTF-8")
+            // Stations radio-browser.info found unreachable are left out, and the most
+            // listened-to come first instead of the order the database happens to return.
+            else -> "/json/stations/search?name=" + URLEncoder.encode(query, "UTF-8") +
+                "&hidebroken=true&order=clickcount&reverse=true"
         }
         // The chosen server first, then the others: radio-browser.info is down to very few
         // servers, and one that is gone or failing used to leave the search empty for good.

@@ -164,4 +164,8 @@
     <string name="dialog_logo_url_message">Enter the address of a logo for “%1$s”. It is checked before it is used, and “Update Station Images” refreshes it later on.</string>
     <string name="dialog_logo_url_hint">Logo address</string>
     <string name="dialog_logo_url_error_not_image">There is no usable image at this address (PNG, JPEG, WebP, GIF, BMP or ICO).</string>
+    <plurals name="dialog_station_picker_clicks">
+        <item quantity="one">%1$s click (24 h)</item>
+        <item quantity="other">%1$s clicks (24 h)</item>
+    </plurals>
 </resources>

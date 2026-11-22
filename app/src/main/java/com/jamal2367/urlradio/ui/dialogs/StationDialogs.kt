@@ -63,6 +63,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
@@ -76,6 +77,7 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.jamal2367.urlradio.R
 import com.jamal2367.urlradio.core.Station
+import java.text.NumberFormat
 import kotlinx.coroutines.launch
 
 /** How much of the dialog the result list is allowed to claim. */
@@ -640,10 +642,21 @@ private fun StationPickerRow(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                val bitrate = bitrateLabel(station)
-                if (bitrate.isNotEmpty()) {
+                // Codec and bitrate, then how many listened in the last 24 hours - the
+                // latter only for stations from radio-browser.info, the only source of it.
+                val clicks: String = if (station.radioBrowserStationUuid.isNotEmpty()) {
+                    pluralStringResource(
+                        R.plurals.dialog_station_picker_clicks,
+                        station.clickCount,
+                        NumberFormat.getIntegerInstance().format(station.clickCount),
+                    )
+                } else {
+                    ""
+                }
+                val details = listOf(bitrateLabel(station), clicks).filter { it.isNotEmpty() }.joinToString("  ·  ")
+                if (details.isNotEmpty()) {
                     Text(
-                        text = bitrate,
+                        text = details,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = 2.dp),

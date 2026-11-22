@@ -48,7 +48,10 @@ data class Station(
     @Expose var radioBrowserStationUuid: String = String(),
     @Expose var radioBrowserChangeUuid: String = String(),
     @Expose var bitrate: Int = 0,
-    @Expose var codec: String = String()
+    @Expose var codec: String = String(),
+    // Clicks on radio-browser.info within the last 24 hours. Only shown in the search
+    // results - without @Expose it is not written to the collection, so it never goes stale.
+    var clickCount: Int = 0
 ) : Parcelable {
 
 
