@@ -35,6 +35,14 @@ android {
         compose = true
     }
 
+    // Leaves out the dependency metadata block that AGP otherwise adds to the signing block.
+    // It is encrypted with a key only Google holds, so nobody else can check what it contains;
+    // F-Droid and IzzyOnDroid flag it (see issue #96).
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
+
     buildTypes {
         debug {
             isMinifyEnabled = false
