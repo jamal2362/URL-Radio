@@ -118,6 +118,16 @@ class PlaybackConnection(
             command: SessionCommand,
             args: Bundle,
         ): ListenableFuture<SessionResult> {
+            if (command.customAction == Keys.CMD_RECORDING_UPDATED) {
+                applyRecordingState(args)
+                val savedFile: String? = args.getString(Keys.EXTRA_RECORDING_SAVED_FILE)
+                val event: RecordingEvent? = when {
+                    args.getBoolean(Keys.EXTRA_RECORDING_FAILED) -> RecordingEvent.Failed
+                    savedFile != null -> RecordingEvent.Saved(savedFile)
+                    else -> null
+                }
+                if (event != null) _state.update { it.copy(recordingEvent = event) }
+            }
             if (command.customAction == Keys.CMD_METADATA_UPDATED) {
                 val history = args.getStringArrayList(Keys.EXTRA_METADATA_HISTORY).orEmpty()
                 if (history.isNotEmpty()) {
@@ -161,6 +171,7 @@ class PlaybackConnection(
             )
         }
         refreshMetadataHistory()
+        refreshRecordingState()
         startPolling()
     }
 
@@ -179,6 +190,9 @@ class PlaybackConnection(
                     refreshSleepTimer()
                 } else if (current.sleepTimerRemaining != 0L) {
                     _state.update { it.copy(sleepTimerRemaining = 0L) }
+                }
+                if (current.isRecording) {
+                    refreshRecordingState()
                 }
                 if (current.isPlaying && tick % METADATA_REFRESH_EVERY_N_TICKS == 0) {
                     refreshMetadataHistory()
@@ -201,6 +215,52 @@ class PlaybackConnection(
             }.getOrDefault(0L)
             _state.update { it.copy(sleepTimerRemaining = remaining) }
         }, MoreExecutors.directExecutor())
+    }
+
+    private fun refreshRecordingState() {
+        val controller = this.controller ?: return
+        val future = controller.sendCustomCommand(
+            SessionCommand(Keys.CMD_REQUEST_RECORDING_STATE, Bundle.EMPTY),
+            Bundle.EMPTY,
+        )
+        future.addListener({
+            runCatching { future.get().extras }.getOrNull()?.let { applyRecordingState(it) }
+        }, MoreExecutors.directExecutor())
+    }
+
+    private fun applyRecordingState(extras: Bundle) {
+        if (!extras.containsKey(Keys.EXTRA_RECORDING_ACTIVE)) return
+        _state.update {
+            it.copy(
+                isRecording = extras.getBoolean(Keys.EXTRA_RECORDING_ACTIVE),
+                recordingElapsed = extras.getLong(Keys.EXTRA_RECORDING_ELAPSED),
+            )
+        }
+    }
+
+    fun startRecording() {
+        val controller = this.controller ?: return
+        val future = controller.sendCustomCommand(
+            SessionCommand(Keys.CMD_START_RECORDING, Bundle.EMPTY),
+            Bundle.EMPTY,
+        )
+        future.addListener({
+            runCatching { future.get().extras }.getOrNull()?.let { applyRecordingState(it) }
+        }, MoreExecutors.directExecutor())
+    }
+
+    fun stopRecording() {
+        val controller = this.controller ?: return
+        controller.sendCustomCommand(
+            SessionCommand(Keys.CMD_STOP_RECORDING, Bundle.EMPTY),
+            Bundle.EMPTY,
+        )
+        _state.update { it.copy(isRecording = false, recordingElapsed = 0L) }
+    }
+
+    /* Clears the one-shot recording event after the UI has shown it. */
+    fun consumeRecordingEvent() {
+        _state.update { it.copy(recordingEvent = null) }
     }
 
     fun refreshMetadataHistory() {

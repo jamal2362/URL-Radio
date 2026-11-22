@@ -34,8 +34,12 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.HttpDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
+import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.analytics.AnalyticsListener
+import androidx.media3.exoplayer.audio.AudioSink
+import androidx.media3.exoplayer.audio.DefaultAudioSink
+import androidx.media3.exoplayer.audio.TeeAudioProcessor
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.upstream.DefaultAllocator
 import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy
@@ -59,6 +63,7 @@ import com.jamal2367.urlradio.helpers.CollectionChanges
 import com.jamal2367.urlradio.helpers.CollectionHelper
 import com.jamal2367.urlradio.helpers.FileHelper
 import com.jamal2367.urlradio.helpers.PreferencesHelper
+import com.jamal2367.urlradio.recording.StreamRecorder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -103,6 +108,7 @@ class PlayerService : MediaLibraryService() {
     private var playLastStation: Boolean = false
     private var chip: String? = null // the tag tab (or voice tag) the station was played from
     private var manuallyCancelledSleepTimer = false
+    private lateinit var recorder: StreamRecorder
 
 
     /* Overrides onCreate from Service */
@@ -110,6 +116,8 @@ class PlayerService : MediaLibraryService() {
         super.onCreate()
         // load collection
         collection = FileHelper.readCollection(this)
+        // the recorder has to exist before the player, whose audio chain feeds it
+        recorder = StreamRecorder(this, recorderListener)
         // start listening for collection changes made elsewhere in the app
         observeCollectionChanges()
         // initialize player and session
@@ -132,6 +140,8 @@ class PlayerService : MediaLibraryService() {
         PreferencesHelper.unregisterPreferenceChangeListener(sharedPreferenceChangeListener)
         // stop listening for collection changes
         serviceScope.cancel()
+        // saves a recording that is still running
+        recorder.release()
         // player.removeAnalyticsListener(analyticsListener)
         player.removeListener(playerListener)
         player.release()
@@ -156,7 +166,7 @@ class PlayerService : MediaLibraryService() {
 
     /* Initializes the ExoPlayer */
     private fun initializePlayer() {
-        val exoPlayer: ExoPlayer = ExoPlayer.Builder(this).apply {
+        val exoPlayer: ExoPlayer = ExoPlayer.Builder(this, RecordingRenderersFactory()).apply {
             setAudioAttributes(AudioAttributes.DEFAULT, true)
             setHandleAudioBecomingNoisy(true)
             setLoadControl(createDefaultLoadControl(bufferSizeMultiplier))
@@ -314,6 +324,75 @@ class PlayerService : MediaLibraryService() {
     }
 
 
+    /* Starts recording the station that is playing */
+    private fun startRecording() {
+        if (recorder.isRecording || !player.playWhenReady) return
+        val stationName: String = player.currentMediaItem?.mediaMetadata?.artist?.toString().orEmpty()
+        val title: String = metadataHistory.lastOrNull().orEmpty()
+        recorder.start(stationName, title, PreferencesHelper.loadRecordingSplitByTitle())
+        broadcastRecordingState()
+    }
+
+
+    /* Stops a running recording - what was recorded so far is saved */
+    private fun stopRecording() {
+        if (!recorder.isRecording) return
+        recorder.stop()
+        broadcastRecordingState()
+    }
+
+
+    /* The recording state as handed to controllers */
+    private fun recordingStateBundle(): Bundle = Bundle().apply {
+        putBoolean(Keys.EXTRA_RECORDING_ACTIVE, recorder.isRecording)
+        putLong(Keys.EXTRA_RECORDING_ELAPSED, recorder.elapsedMillis)
+    }
+
+
+    /* Pushes the recording state - plus an optional event - to every connected controller */
+    private fun broadcastRecordingState(savedFile: String? = null, failed: Boolean = false) {
+        if (!this::mediaLibrarySession.isInitialized) return
+        val extras: Bundle = recordingStateBundle().apply {
+            savedFile?.let { putString(Keys.EXTRA_RECORDING_SAVED_FILE, it) }
+            putBoolean(Keys.EXTRA_RECORDING_FAILED, failed)
+        }
+        mediaLibrarySession.broadcastCustomCommand(
+            SessionCommand(Keys.CMD_RECORDING_UPDATED, Bundle.EMPTY),
+            extras
+        )
+    }
+
+
+    /* Hears back from the recorder - main thread */
+    private val recorderListener = object : StreamRecorder.Listener {
+        override fun onRecordingSaved(fileName: String) {
+            broadcastRecordingState(savedFile = fileName)
+        }
+
+        override fun onRecordingFailed() {
+            broadcastRecordingState(failed = true)
+        }
+    }
+
+
+    /*
+     * Builds the player's renderers with a TeeAudioProcessor in the audio chain: it hands the
+     * decoded audio to the recorder on its way to the speaker. Without a running recording
+     * the recorder ignores it, so playback is unaffected.
+     */
+    private inner class RecordingRenderersFactory : DefaultRenderersFactory(this@PlayerService) {
+        override fun buildAudioSink(
+            context: Context,
+            enableFloatOutput: Boolean,
+            enableAudioOutputPlaybackParams: Boolean
+        ): AudioSink {
+            return DefaultAudioSink.Builder(context)
+                .setAudioProcessors(arrayOf(TeeAudioProcessor(recorder)))
+                .build()
+        }
+    }
+
+
     /* Updates metadata */
     private fun updateMetadata(metadata: String = String()) {
         /*
@@ -444,6 +523,10 @@ class PlayerService : MediaLibraryService() {
             builder.add(SessionCommand(Keys.CMD_REQUEST_METADATA_HISTORY, Bundle.EMPTY))
             builder.add(SessionCommand(Keys.CMD_METADATA_UPDATED, Bundle.EMPTY))
             builder.add(SessionCommand(Keys.CMD_PLAY_STREAM, Bundle.EMPTY))
+            builder.add(SessionCommand(Keys.CMD_START_RECORDING, Bundle.EMPTY))
+            builder.add(SessionCommand(Keys.CMD_STOP_RECORDING, Bundle.EMPTY))
+            builder.add(SessionCommand(Keys.CMD_REQUEST_RECORDING_STATE, Bundle.EMPTY))
+            builder.add(SessionCommand(Keys.CMD_RECORDING_UPDATED, Bundle.EMPTY))
             // A radio has no queue: Android Auto and the system (whose commands the media
             // notification controller sets) get no GET_TIMELINE, so no queue button. The app's
             // own screen keeps it, since it needs the current station to show and pause it.
@@ -512,6 +595,17 @@ class PlayerService : MediaLibraryService() {
                 }
                 Keys.CMD_CANCEL_SLEEP_TIMER -> {
                     manuallyCancelSleepTimer()
+                }
+                Keys.CMD_START_RECORDING -> {
+                    startRecording()
+                    return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS, recordingStateBundle()))
+                }
+                Keys.CMD_STOP_RECORDING -> {
+                    stopRecording()
+                    return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS, recordingStateBundle()))
+                }
+                Keys.CMD_REQUEST_RECORDING_STATE -> {
+                    return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS, recordingStateBundle()))
                 }
                 Keys.CMD_PLAY_STREAM -> {
                     // plays a stream address that is not part of the collection - used by the
@@ -662,6 +756,9 @@ class PlayerService : MediaLibraryService() {
         override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
             super.onPlayWhenReadyChanged(playWhenReady, reason)
             if (!playWhenReady) {
+                // paused by the user, the system or the end of the stream: the recording ends
+                // here. A mere rebuffer does not change playWhenReady and keeps it running.
+                stopRecording()
                 when (reason) {
                     Player.PLAY_WHEN_READY_CHANGE_REASON_END_OF_MEDIA_ITEM -> {
                         // playback reached end: stop / end playback
@@ -679,6 +776,20 @@ class PlayerService : MediaLibraryService() {
         }
 
 
+        override fun onPlaybackStateChanged(playbackState: Int) {
+            super.onPlaybackStateChanged(playbackState)
+            // stopped (also by the sleep timer), failed or ended
+            if (playbackState == Player.STATE_IDLE || playbackState == Player.STATE_ENDED) {
+                stopRecording()
+            }
+        }
+
+        override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+            super.onMediaItemTransition(mediaItem, reason)
+            // a recording belongs to one station
+            stopRecording()
+        }
+
         override fun onPlayerError(error: PlaybackException) {
             super.onPlayerError(error)
             Log.d(tag, "PlayerError occurred: ${error.errorCodeName}")
@@ -688,7 +799,11 @@ class PlayerService : MediaLibraryService() {
 
         override fun onMetadata(metadata: Metadata) {
             super.onMetadata(metadata)
-            updateMetadata(AudioHelper.getMetadataString(metadata))
+            val metadataString: String = AudioHelper.getMetadataString(metadata)
+            updateMetadata(metadataString)
+            // only titles the stream actually sent - updateMetadata falls back to the station
+            // name, which would split a recording on every rebuffer
+            recorder.onTitleChanged(metadataString.trim())
         }
 
     }

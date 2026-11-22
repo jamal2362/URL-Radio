@@ -112,6 +112,7 @@ data class AppState(
     val themeSelection: String,
     val themeLabel: String,
     val largeBuffer: Boolean,
+    val recordingSplitByTitle: Boolean,
 )
 
 data class AppActions(
@@ -131,6 +132,8 @@ data class AppActions(
     val onShare: (Station) -> Unit,
     val onStartSleepTimer: (Long) -> Unit,
     val onCancelSleepTimer: () -> Unit,
+    val onStartRecording: () -> Unit,
+    val onStopRecording: () -> Unit,
     val settings: SettingsCallbacks,
 )
 
@@ -213,6 +216,7 @@ fun UrlRadioApp(
                 themeSelection = state.themeSelection,
                 themeLabel = state.themeLabel,
                 largeBuffer = state.largeBuffer,
+                recordingSplitByTitle = state.recordingSplitByTitle,
                 editStations = state.editStationsEnabled,
                 editStreamUris = state.editStreamUrisEnabled,
                 callbacks = actions.settings,
@@ -268,6 +272,8 @@ fun UrlRadioApp(
                                 onShare = { actions.onShare(state.currentStation) },
                                 onStartSleepTimer = { showSleepTimerPicker = true },
                                 onCancelSleepTimer = actions.onCancelSleepTimer,
+                                onStartRecording = actions.onStartRecording,
+                                onStopRecording = actions.onStopRecording,
                                 modifier = Modifier.padding(top = padding.calculateTopPadding()),
                             )
                         }
@@ -364,6 +370,8 @@ fun UrlRadioApp(
                             onShare = { actions.onShare(state.currentStation) },
                             onStartSleepTimer = { showSleepTimerPicker = true },
                             onCancelSleepTimer = actions.onCancelSleepTimer,
+                                onStartRecording = actions.onStartRecording,
+                                onStopRecording = actions.onStopRecording,
                         )
                     }
                 }

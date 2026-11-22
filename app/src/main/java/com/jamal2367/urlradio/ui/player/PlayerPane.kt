@@ -90,6 +90,8 @@ fun PlayerPane(
     onShare: () -> Unit,
     onStartSleepTimer: () -> Unit,
     onCancelSleepTimer: () -> Unit,
+    onStartRecording: () -> Unit,
+    onStopRecording: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     // Stations that send no track title fall back to their own name rather than to a blank line.
@@ -283,6 +285,15 @@ fun PlayerPane(
                                     .padding(vertical = 8.dp),
                             )
 
+                            // Recording sits directly left of the sleep timer.
+                            RecordingControls(
+                                isPlaying = playback.isPlaying,
+                                isRecording = playback.isRecording,
+                                elapsedMillis = playback.recordingElapsed,
+                                onStart = onStartRecording,
+                                onStop = onStopRecording,
+                            )
+
                             SleepTimerControls(
                                 isPlaying = playback.isPlaying,
                                 remainingMillis = playback.sleepTimerRemaining,
@@ -386,6 +397,45 @@ private fun PlayerInfoRow(
             )
         }
         trailing?.invoke()
+    }
+}
+
+@Composable
+private fun RecordingControls(
+    isPlaying: Boolean,
+    isRecording: Boolean,
+    elapsedMillis: Long,
+    onStart: () -> Unit,
+    onStop: () -> Unit,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        if (isRecording) {
+            // Red while recording, with the running time next to the stop button -- the same
+            // time-plus-button pairing the sleep timer uses.
+            Text(
+                text = DateTimeHelper.convertToHoursMinutesSeconds(elapsedMillis),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.error,
+            )
+            IconButton(onClick = onStop) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_stop_record_24dp),
+                    contentDescription = stringResource(R.string.descr_expanded_player_recording_stop_button),
+                    tint = MaterialTheme.colorScheme.error,
+                )
+            }
+        } else if (isPlaying) {
+            // Like the sleep timer: only something that is playing can be recorded.
+            IconButton(onClick = onStart) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_record_24dp),
+                    contentDescription = stringResource(R.string.descr_expanded_player_recording_start_button),
+                )
+            }
+        }
     }
 }
 

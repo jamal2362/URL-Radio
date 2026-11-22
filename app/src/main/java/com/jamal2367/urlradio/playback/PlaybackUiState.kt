@@ -32,10 +32,25 @@ data class PlaybackUiState(
     val sleepTimerRemaining: Long = 0L,
     /** Set when playback failed; cleared once the UI has shown it. */
     val errorEvent: Long? = null,
+    /** True while the playing stream is being recorded. */
+    val isRecording: Boolean = false,
+    /** Milliseconds the running recording has been going for, 0 when not recording. */
+    val recordingElapsed: Long = 0L,
+    /** Set when a recording was saved or failed; cleared once the UI has shown it. */
+    val recordingEvent: RecordingEvent? = null,
 ) {
 
     /** The newest metadata line, falling back to an empty string. */
     val currentMetadata: String get() = metadataHistory.lastOrNull().orEmpty().sanitizedMetadata()
+}
+
+/** Something the UI should tell the user about a recording. */
+@Immutable
+sealed interface RecordingEvent {
+    /** A recording was saved under [fileName]. */
+    data class Saved(val fileName: String) : RecordingEvent
+    /** A recording could not be made or saved. */
+    data object Failed : RecordingEvent
 }
 
 /**

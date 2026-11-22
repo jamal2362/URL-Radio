@@ -302,6 +302,20 @@ object PreferencesHelper {
     }
 
 
+    /* Saves value of the option: Split Recordings By Title */
+    fun saveRecordingSplitByTitle(enabled: Boolean) {
+        sharedPreferences.edit {
+            putBoolean(Keys.PREF_RECORDING_SPLIT_BY_TITLE, enabled)
+        }
+    }
+
+
+    /* Loads value of the option: Split Recordings By Title */
+    fun loadRecordingSplitByTitle(): Boolean {
+        return sharedPreferences.getBoolean(Keys.PREF_RECORDING_SPLIT_BY_TITLE, false)
+    }
+
+
     /* Loads value of the option: Buffer Size */
     fun loadLargeBufferSize(): Boolean {
         return sharedPreferences.getBoolean(Keys.PREF_LARGE_BUFFER_SIZE, false)

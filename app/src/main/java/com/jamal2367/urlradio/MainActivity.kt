@@ -51,6 +51,8 @@ import com.jamal2367.urlradio.helpers.ShortcutHelper
 import com.jamal2367.urlradio.helpers.UpdateCheckHelper
 import com.jamal2367.urlradio.helpers.UserMessages
 import com.jamal2367.urlradio.playback.PlaybackConnection
+import com.jamal2367.urlradio.playback.RecordingEvent
+import com.jamal2367.urlradio.recording.RecordingStorage
 import com.jamal2367.urlradio.ui.AppActions
 import com.jamal2367.urlradio.ui.AppState
 import com.jamal2367.urlradio.ui.UrlRadioApp
@@ -201,6 +203,7 @@ class MainActivity : ComponentActivity() {
 
         var themeSelection by remember { mutableStateOf(PreferencesHelper.loadThemeSelection()) }
         var largeBuffer by remember { mutableStateOf(PreferencesHelper.loadLargeBufferSize()) }
+        var recordingSplitByTitle by remember { mutableStateOf(PreferencesHelper.loadRecordingSplitByTitle()) }
         var showFindDialog by remember { mutableStateOf(false) }
         // Selection of the playlist import dialog. Kept here rather than in the search view
         // model because the imported list does not come from a search.
@@ -232,6 +235,22 @@ class MainActivity : ComponentActivity() {
             if (playbackState.errorEvent != null) {
                 snackbarHostState.showSnackbar(connectionFailed)
                 playback.consumeError()
+            }
+        }
+
+        val recordingFailed = stringResource(R.string.snackbar_recording_failed)
+        LaunchedEffect(playbackState.recordingEvent) {
+            when (val event = playbackState.recordingEvent) {
+                is RecordingEvent.Saved -> {
+                    val folder = RecordingStorage.folderDescription(this@MainActivity)
+                    playback.consumeRecordingEvent()
+                    snackbarHostState.showSnackbar(getString(R.string.snackbar_recording_saved, folder, event.fileName))
+                }
+                RecordingEvent.Failed -> {
+                    playback.consumeRecordingEvent()
+                    snackbarHostState.showSnackbar(recordingFailed)
+                }
+                null -> Unit
             }
         }
 
@@ -303,6 +322,7 @@ class MainActivity : ComponentActivity() {
                     themeSelection = themeSelection,
                     themeLabel = AppThemeHelper.getCurrentTheme(this),
                     largeBuffer = largeBuffer,
+                    recordingSplitByTitle = recordingSplitByTitle,
                 ),
                 actions = AppActions(
                     onTogglePlayback = { playback.togglePlayPause(it) },
@@ -337,6 +357,8 @@ class MainActivity : ComponentActivity() {
                     onShare = { station -> shareStation(station) },
                     onStartSleepTimer = { playback.startSleepTimer(it) },
                     onCancelSleepTimer = { playback.cancelSleepTimer() },
+                    onStartRecording = { playback.startRecording() },
+                    onStopRecording = { playback.stopRecording() },
                     settings = SettingsCallbacks(
                         onThemeSelected = {
                             themeSelection = it
@@ -402,6 +424,10 @@ class MainActivity : ComponentActivity() {
                         onLargeBufferChanged = {
                             largeBuffer = it
                             PreferencesHelper.saveLargeBufferSize(it)
+                        },
+                        onRecordingSplitByTitleChanged = {
+                            recordingSplitByTitle = it
+                            PreferencesHelper.saveRecordingSplitByTitle(it)
                         },
                         onEditStationsChanged = {
                             PreferencesHelper.saveEditStationsEnabled(it)

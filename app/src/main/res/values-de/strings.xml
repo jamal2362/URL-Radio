@@ -124,4 +124,11 @@
     <string name="snackbar_updating_station_images">Alle Senderbilder werden aktualisiert</string>
     <string name="snackbar_show">Zeigen</string>
     <string name="snackbar_update_available">ist verfügbar!</string>
+    <string name="descr_expanded_player_recording_start_button">Aufnahme starten</string>
+    <string name="descr_expanded_player_recording_stop_button">Aufnahme beenden</string>
+    <string name="snackbar_recording_saved">Aufnahme gespeichert in %1$s: %2$s</string>
+    <string name="snackbar_recording_failed">Aufnahme fehlgeschlagen.</string>
+    <string name="pref_recording_split_title">Aufnahmen nach Titel aufteilen</string>
+    <string name="pref_recording_split_summary_enabled">Bei jedem neuen Titel, den der Sender meldet, beginnt eine neue Datei.</string>
+    <string name="pref_recording_split_summary_disabled">Jede Aufnahme wird als eine Datei gespeichert.</string>
 </resources>

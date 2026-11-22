@@ -66,6 +66,7 @@ data class SettingsCallbacks(
     val onBackup: () -> Unit,
     val onRestore: () -> Unit,
     val onLargeBufferChanged: (Boolean) -> Unit,
+    val onRecordingSplitByTitleChanged: (Boolean) -> Unit,
     val onEditStationsChanged: (Boolean) -> Unit,
     val onEditStreamUrisChanged: (Boolean) -> Unit,
     val onOpenUrl: (String) -> Unit,
@@ -78,6 +79,7 @@ fun SettingsScreen(
     themeSelection: String,
     themeLabel: String,
     largeBuffer: Boolean,
+    recordingSplitByTitle: Boolean,
     editStations: Boolean,
     editStreamUris: Boolean,
     callbacks: SettingsCallbacks,
@@ -184,6 +186,16 @@ fun SettingsScreen(
                     icon = R.drawable.ic_network_check_24dp,
                     checked = largeBuffer,
                     onCheckedChange = callbacks.onLargeBufferChanged,
+                )
+                SettingsSwitchRow(
+                    title = stringResource(R.string.pref_recording_split_title),
+                    summary = stringResource(
+                        if (recordingSplitByTitle) R.string.pref_recording_split_summary_enabled
+                        else R.string.pref_recording_split_summary_disabled
+                    ),
+                    icon = R.drawable.ic_record_24dp,
+                    checked = recordingSplitByTitle,
+                    onCheckedChange = callbacks.onRecordingSplitByTitleChanged,
                 )
                 SettingsSwitchRow(
                     title = stringResource(R.string.pref_edit_station_title),

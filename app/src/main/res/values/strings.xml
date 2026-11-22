@@ -134,4 +134,11 @@
     <string name="snackbar_update_available">is available!</string>
     <string name="snackbar_url_app_home_page" translatable="false">https://github.com/jamal2362/URL-Radio/releases/latest</string>
     <string name="snackbar_github_update_check_url" translatable="false">https://api.github.com/repos/jamal2362/URL-Radio/releases/latest</string>
+    <string name="descr_expanded_player_recording_start_button">Start recording</string>
+    <string name="descr_expanded_player_recording_stop_button">Stop recording</string>
+    <string name="snackbar_recording_saved">Recording saved to %1$s: %2$s</string>
+    <string name="snackbar_recording_failed">Recording failed.</string>
+    <string name="pref_recording_split_title">Split Recordings by Title</string>
+    <string name="pref_recording_split_summary_enabled">A new file is started whenever the station announces a new title.</string>
+    <string name="pref_recording_split_summary_disabled">Each recording is saved as a single file.</string>
 </resources>

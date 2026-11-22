@@ -39,6 +39,10 @@ object Keys {
     const val EXTRA_START_LAST_PLAYED_STATION: String = "START_LAST_PLAYED_STATION"
     const val EXTRA_SLEEP_TIMER_REMAINING: String = "SLEEP_TIMER_REMAINING"
     const val EXTRA_METADATA_HISTORY: String = "METADATA_HISTORY"
+    const val EXTRA_RECORDING_ACTIVE: String = "RECORDING_ACTIVE"
+    const val EXTRA_RECORDING_ELAPSED: String = "RECORDING_ELAPSED"
+    const val EXTRA_RECORDING_SAVED_FILE: String = "RECORDING_SAVED_FILE"
+    const val EXTRA_RECORDING_FAILED: String = "RECORDING_FAILED"
 
     // keys
     const val KEY_STREAM_URI: String = "STREAM_URI"
@@ -52,6 +56,13 @@ object Keys {
 
     // broadcast from PlayerService to every connected controller - carries EXTRA_METADATA_HISTORY
     const val CMD_METADATA_UPDATED: String = "METADATA_UPDATED"
+
+    // recording of the stream that is playing
+    const val CMD_START_RECORDING: String = "START_RECORDING"
+    const val CMD_STOP_RECORDING: String = "STOP_RECORDING"
+    const val CMD_REQUEST_RECORDING_STATE: String = "REQUEST_RECORDING_STATE"
+    // broadcast from PlayerService to every connected controller - carries the EXTRA_RECORDING_* values
+    const val CMD_RECORDING_UPDATED: String = "RECORDING_UPDATED"
 
     // preferences
     const val PREF_RADIO_BROWSER_API: String = "RADIO_BROWSER_API"
@@ -68,6 +79,7 @@ object Keys {
     const val PREF_PLAYER_METADATA_HISTORY: String = "PLAYER_METADATA_HISTORY"
     const val PREF_PLAYER_STATE_SLEEP_TIMER_RUNNING: String = "PLAYER_STATE_SLEEP_TIMER_RUNNING"
     const val PREF_LARGE_BUFFER_SIZE: String = "LARGE_BUFFER_SIZE"
+    const val PREF_RECORDING_SPLIT_BY_TITLE: String = "RECORDING_SPLIT_BY_TITLE"
     const val PREF_EDIT_STATIONS: String = "EDIT_STATIONS"
     const val PREF_EDIT_STREAMS_URIS: String = "EDIT_STREAMS_URIS"
 
