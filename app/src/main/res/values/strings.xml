@@ -192,4 +192,13 @@
     <string name="widget_no_station">Add a station in the app</string>
     <string name="widget_playing">Playing</string>
     <string name="pref_alarm_enabled_title">Alarm</string>
+    <string name="alarm_notification_title">Radio alarm · %1$s</string>
+    <string name="alarm_notification_snoozed">Radio alarm snoozing until %1$s</string>
+    <string name="alarm_action_snooze">Snooze</string>
+    <string name="alarm_action_stop">Off</string>
+    <string name="alarm_channel_ringing">Radio alarm</string>
+    <string name="alarm_channel_snoozed">Radio alarm snoozing</string>
+    <string name="pref_alarm_snooze_title">Snooze</string>
+    <string name="pref_alarm_snooze_value">%1$d minutes</string>
+    <string name="pref_alarm_notification_hint">Allow notifications so that “Off” and “Snooze” show on the lock screen when the alarm goes off.</string>
 </resources>

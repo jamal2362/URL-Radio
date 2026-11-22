@@ -124,6 +124,7 @@ data class AppState(
     val recordingFormat: RecordingFormat,
     val recordingBitrate: Int,
     val alarm: AlarmSettings,
+    val notificationsAllowed: Boolean,
 )
 
 data class AppActions(
@@ -235,6 +236,7 @@ fun UrlRadioApp(
                 recordingFormat = state.recordingFormat,
                 recordingBitrate = state.recordingBitrate,
                 alarm = state.alarm,
+                notificationsAllowed = state.notificationsAllowed,
                 stations = state.stations.map { it.uuid to it.name },
                 editStations = state.editStationsEnabled,
                 editStreamUris = state.editStreamUrisEnabled,

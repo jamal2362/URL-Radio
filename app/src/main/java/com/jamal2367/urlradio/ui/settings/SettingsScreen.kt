@@ -90,6 +90,7 @@ data class SettingsCallbacks(
     val onRecordingBitrateChanged: (Int) -> Unit,
     val onAlarmChanged: (AlarmSettings) -> Unit,
     val onRequestAlarmPermission: () -> Unit,
+    val onRequestNotificationPermission: () -> Unit,
     val onEditStationsChanged: (Boolean) -> Unit,
     val onEditStreamUrisChanged: (Boolean) -> Unit,
     val onOpenUrl: (String) -> Unit,
@@ -105,6 +106,8 @@ fun SettingsScreen(
     recordingFormat: RecordingFormat,
     recordingBitrate: Int,
     alarm: AlarmSettings,
+    /** Whether the app may post notifications - needed for the alarm's "Off" and "Snooze". */
+    notificationsAllowed: Boolean,
     /** UUID and name of every station, for picking the one to wake up with. */
     stations: List<Pair<String, String>>,
     editStations: Boolean,
@@ -121,6 +124,7 @@ fun SettingsScreen(
     var showAlarmTimeDialog by remember { mutableStateOf(false) }
     var showAlarmDaysDialog by remember { mutableStateOf(false) }
     var showAlarmStationDialog by remember { mutableStateOf(false) }
+    var showAlarmSnoozeDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
     LazyColumn(
@@ -232,6 +236,16 @@ fun SettingsScreen(
                         onClick = callbacks.onRequestAlarmPermission,
                     )
                 }
+                // Without notifications the alarm still rings, but "Off" and "Snooze" only
+                // show in the media controls - worth a word while the alarm is on.
+                if (alarm.enabled && !notificationsAllowed) {
+                    SettingsRow(
+                        title = stringResource(R.string.pref_alarm_permission_title),
+                        summary = stringResource(R.string.pref_alarm_notification_hint),
+                        icon = R.drawable.ic_alarm_24dp,
+                        onClick = callbacks.onRequestNotificationPermission,
+                    )
+                }
                 SettingsRow(
                     title = stringResource(R.string.pref_alarm_time_title),
                     summary = formatAlarmTime(context, alarm.hour, alarm.minute),
@@ -243,6 +257,12 @@ fun SettingsScreen(
                     summary = alarmDaysLabel(alarm.days),
                     icon = R.drawable.ic_alarm_24dp,
                     onClick = { showAlarmDaysDialog = true },
+                )
+                SettingsRow(
+                    title = stringResource(R.string.pref_alarm_snooze_title),
+                    summary = stringResource(R.string.pref_alarm_snooze_value, alarm.snoozeMinutes),
+                    icon = R.drawable.ic_sleep_timer_24dp,
+                    onClick = { showAlarmSnoozeDialog = true },
                 )
                 SettingsRow(
                     title = stringResource(R.string.pref_alarm_station_title),
@@ -354,6 +374,27 @@ fun SettingsScreen(
                 callbacks.onAlarmChanged(alarm.copy(days = days))
             },
             onDismiss = { showAlarmDaysDialog = false },
+        )
+    }
+
+    if (showAlarmSnoozeDialog) {
+        ChoiceDialog(
+            title = stringResource(R.string.pref_alarm_snooze_title),
+            icon = R.drawable.ic_alarm_24dp,
+            options = AlarmSettings.SNOOZE_OPTIONS.map { minutes ->
+                ThemeOption(
+                    value = minutes.toString(),
+                    label = stringResource(R.string.pref_alarm_snooze_value, minutes),
+                    summary = "",
+                    icon = R.drawable.ic_sleep_timer_24dp,
+                )
+            },
+            selected = alarm.snoozeMinutes.toString(),
+            onSelect = { value ->
+                showAlarmSnoozeDialog = false
+                callbacks.onAlarmChanged(alarm.copy(snoozeMinutes = value.toInt()))
+            },
+            onDismiss = { showAlarmSnoozeDialog = false },
         )
     }
 

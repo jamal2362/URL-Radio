@@ -182,4 +182,13 @@
     <string name="widget_no_station">Füge in der App einen Sender hinzu</string>
     <string name="widget_playing">Läuft</string>
     <string name="pref_alarm_enabled_title">Wecker</string>
+    <string name="alarm_notification_title">Radiowecker · %1$s</string>
+    <string name="alarm_notification_snoozed">Radiowecker schlummert bis %1$s</string>
+    <string name="alarm_action_snooze">Schlummern</string>
+    <string name="alarm_action_stop">Aus</string>
+    <string name="alarm_channel_ringing">Radiowecker</string>
+    <string name="alarm_channel_snoozed">Radiowecker schlummert</string>
+    <string name="pref_alarm_snooze_title">Schlummern</string>
+    <string name="pref_alarm_snooze_value">%1$d Minuten</string>
+    <string name="pref_alarm_notification_hint">Erlaube Benachrichtigungen, damit beim Wecken „Aus“ und „Schlummern“ auf dem Sperrbildschirm erscheinen.</string>
 </resources>

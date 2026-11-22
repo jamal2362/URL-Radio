@@ -63,6 +63,7 @@ import androidx.media3.session.SessionResult
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
+import com.jamal2367.urlradio.alarm.AlarmNotification
 import com.jamal2367.urlradio.alarm.AlarmSettings
 import com.jamal2367.urlradio.alarm.RadioAlarm
 import com.jamal2367.urlradio.core.Collection
@@ -195,7 +196,15 @@ class PlayerService : MediaLibraryService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             Keys.ACTION_RADIO_ALARM -> {
-                startAlarmPlayback()
+                startAlarmPlayback(snoozed = intent.getBooleanExtra(Keys.EXTRA_ALARM_SNOOZED, false))
+                return START_NOT_STICKY
+            }
+            Keys.ACTION_ALARM_STOP -> {
+                stopAlarm()
+                return START_NOT_STICKY
+            }
+            Keys.ACTION_ALARM_SNOOZE -> {
+                snoozeAlarm()
                 return START_NOT_STICKY
             }
             Keys.ACTION_TOGGLE_PLAYBACK -> {
@@ -227,8 +236,10 @@ class PlayerService : MediaLibraryService() {
      * media volume turned down - and grows louder over half a minute. If it has not started
      * after ALARM_FALLBACK_DELAY (no network, station gone), a built-in tone takes over.
      */
-    private fun startAlarmPlayback() {
-        RadioAlarm.onFired(this)
+    private fun startAlarmPlayback(snoozed: Boolean = false) {
+        // A snooze is a one-time extra: the regular schedule only moves on for the real alarm.
+        if (!snoozed) RadioAlarm.onFired(this)
+        RadioAlarm.cancelSnooze(this)
         val settings: AlarmSettings = PreferencesHelper.loadAlarmSettings()
         alarmActive = true
         player.setAudioAttributes(ALARM_AUDIO_ATTRIBUTES, true)
@@ -242,6 +253,8 @@ class PlayerService : MediaLibraryService() {
             settings.stationUuid.ifEmpty { PreferencesHelper.loadLastPlayedStationUuid() }
         )
         alarmStationUuid = station.uuid
+        // "Off" and "Snooze" on the lock screen, without opening the app
+        AlarmNotification.showRinging(this, CollectionHelper.nameWithoutTags(station.name))
         player.setMediaItem(CollectionHelper.buildMediaItem(this, station))
         player.prepare()
         player.play()
@@ -261,6 +274,10 @@ class PlayerService : MediaLibraryService() {
     /* The built-in alarm tone, repeated until the user stops it */
     private fun playAlarmFallback() {
         Log.w(tag, "Radio alarm: station did not start - playing the fallback tone.")
+        if (alarmStationUuid.isEmpty()) {
+            // no station at all - the notification still needs to offer "Off"
+            AlarmNotification.showRinging(this, getString(R.string.alarm_fallback_title))
+        }
         alarmFadeJob?.cancel()
         player.volume = 1f
         val item: MediaItem = MediaItem.Builder()
@@ -291,9 +308,30 @@ class PlayerService : MediaLibraryService() {
     }
 
 
+    /* "Off": the radio stops, and a pending snooze is called off too */
+    private fun stopAlarm() {
+        RadioAlarm.cancelSnooze(this)
+        player.pause()
+        endAlarmSession()
+        AlarmNotification.cancel(this)
+    }
+
+
+    /* "Snooze": the radio stops and the alarm goes off again in a few minutes */
+    private fun snoozeAlarm() {
+        if (!alarmActive) return
+        val until: Long? = RadioAlarm.scheduleSnooze(this)
+        player.pause()
+        endAlarmSession()
+        if (until != null) AlarmNotification.showSnoozed(this, until)
+    }
+
+
     /* Back to normal playback: media volume and audio attributes, no repeat */
     private fun endAlarmSession() {
         if (!alarmActive) return
+        // the alarm notification goes with it - snoozeAlarm puts up its own afterwards
+        AlarmNotification.cancel(this)
         alarmActive = false
         alarmStationUuid = String()
         alarmFadeJob?.cancel()
@@ -734,6 +772,7 @@ class PlayerService : MediaLibraryService() {
             builder.add(SessionCommand(Keys.CMD_STOP_RECORDING, Bundle.EMPTY))
             builder.add(SessionCommand(Keys.CMD_REQUEST_RECORDING_STATE, Bundle.EMPTY))
             builder.add(SessionCommand(Keys.CMD_RECORDING_UPDATED, Bundle.EMPTY))
+            builder.add(SessionCommand(Keys.CMD_ALARM_SNOOZE, Bundle.EMPTY))
             // A radio has no queue: Android Auto and the system (whose commands the media
             // notification controller sets) get no GET_TIMELINE, so no queue button. The app's
             // own screen keeps it, since it needs the current station to show and pause it.
@@ -802,6 +841,10 @@ class PlayerService : MediaLibraryService() {
                 }
                 Keys.CMD_CANCEL_SLEEP_TIMER -> {
                     manuallyCancelSleepTimer()
+                }
+                Keys.CMD_ALARM_SNOOZE -> {
+                    snoozeAlarm()
+                    return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
                 }
                 Keys.CMD_START_RECORDING -> {
                     startRecording(args.getLong(Keys.EXTRA_RECORDING_DURATION, 0L))
@@ -898,6 +941,17 @@ class PlayerService : MediaLibraryService() {
                 playCommandButton,
                 seekToNextCommandButton
             )
+            // while the alarm plays: snooze right next to the stop button
+            if (alarmActive) {
+                commandButtons.add(
+                    CommandButton.Builder(CommandButton.ICON_UNDEFINED).apply {
+                        setSessionCommand(SessionCommand(Keys.CMD_ALARM_SNOOZE, Bundle.EMPTY))
+                        setCustomIconResId(R.drawable.ic_alarm_24dp)
+                        setDisplayName(getString(R.string.alarm_action_snooze))
+                        setEnabled(true)
+                    }.build()
+                )
+            }
             return ImmutableList.copyOf(commandButtons)
         }
     }

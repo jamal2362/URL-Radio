@@ -14,6 +14,8 @@
         android:name="android.permission.SCHEDULE_EXACT_ALARM"
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- the alarm notification with "Off" and "Snooze" (the media notification needs none) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:name=".URLRadio"
@@ -188,6 +190,7 @@
                 <action android:name="android.intent.action.TIMEZONE_CHANGED" />
                 <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
             </intent-filter>
+            <!-- "Off" in the snooze notification - sent explicitly, so no intent filter -->
         </receiver>
 
         <!-- handles completed downloads -->

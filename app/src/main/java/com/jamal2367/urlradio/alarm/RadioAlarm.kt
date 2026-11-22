@@ -36,10 +36,14 @@ data class AlarmSettings(
     val days: Int = WEEKDAYS,
     /** Empty: the station played last. */
     val stationUuid: String = String(),
+    /** How long "Snooze" waits before the alarm goes off again. */
+    val snoozeMinutes: Int = DEFAULT_SNOOZE_MINUTES,
 ) {
     companion object {
         const val WEEKDAYS: Int = 0b0011111
         const val EVERY_DAY: Int = 0b1111111
+        const val DEFAULT_SNOOZE_MINUTES: Int = 9
+        val SNOOZE_OPTIONS: List<Int> = listOf(5, 9, 10, 15, 20, 30)
     }
 }
 
@@ -51,6 +55,7 @@ object RadioAlarm {
 
     private const val REQUEST_CODE_FIRE = 4711
     private const val REQUEST_CODE_SHOW = 4712
+    private const val REQUEST_CODE_SNOOZE = 4713
 
 
     /* When the alarm next goes off, in milliseconds - null when it is off. */
@@ -98,15 +103,52 @@ object RadioAlarm {
             Log.w(tag, "Not allowed to schedule exact alarms - radio alarm not set.")
             return
         }
-        // tapping the alarm symbol in the status bar opens the app
-        val show: PendingIntent = PendingIntent.getActivity(
-            context,
-            REQUEST_CODE_SHOW,
-            Intent(context, MainActivity::class.java),
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
-        alarmManager.setAlarmClock(AlarmManager.AlarmClockInfo(trigger, show), fire)
+        alarmManager.setAlarmClock(AlarmManager.AlarmClockInfo(trigger, showPendingIntent(context)), fire)
         Log.i(tag, "Radio alarm set for $trigger")
+    }
+
+
+    /*
+     * Snooze: the alarm goes off again in snoozeMinutes. This is a one-time alarm of its own,
+     * so the regular schedule - tomorrow at the same time - stays as it is.
+     * Returns when it goes off, or null if alarms may not be set.
+     */
+    fun scheduleSnooze(context: Context): Long? {
+        if (!canSchedule(context)) return null
+        val minutes: Int = PreferencesHelper.loadAlarmSettings().snoozeMinutes
+        val trigger: Long = System.currentTimeMillis() + minutes * 60_000L
+        context.getSystemService(AlarmManager::class.java)
+            .setAlarmClock(AlarmManager.AlarmClockInfo(trigger, showPendingIntent(context)), snoozePendingIntent(context))
+        Log.i(tag, "Radio alarm snoozed until $trigger")
+        return trigger
+    }
+
+
+    /* Ends a snooze before it goes off */
+    fun cancelSnooze(context: Context) {
+        context.getSystemService(AlarmManager::class.java).cancel(snoozePendingIntent(context))
+    }
+
+
+    /* Tapping the alarm symbol in the status bar opens the app */
+    private fun showPendingIntent(context: Context): PendingIntent = PendingIntent.getActivity(
+        context,
+        REQUEST_CODE_SHOW,
+        Intent(context, MainActivity::class.java),
+        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+    )
+
+
+    private fun snoozePendingIntent(context: Context): PendingIntent {
+        val intent = Intent(context, PlayerService::class.java)
+            .setAction(Keys.ACTION_RADIO_ALARM)
+            .putExtra(Keys.EXTRA_ALARM_SNOOZED, true)
+        val flags: Int = PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            PendingIntent.getForegroundService(context, REQUEST_CODE_SNOOZE, intent, flags)
+        } else {
+            PendingIntent.getService(context, REQUEST_CODE_SNOOZE, intent, flags)
+        }
     }
 
 
@@ -145,6 +187,11 @@ class RadioAlarmRescheduleReceiver : BroadcastReceiver() {
             Intent.ACTION_TIME_CHANGED,
             Intent.ACTION_TIMEZONE_CHANGED,
             AlarmManager.ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED -> RadioAlarm.schedule(context)
+            // "Off" in the snooze notification: no second wake-up
+            Keys.ACTION_ALARM_SNOOZE_CANCEL -> {
+                RadioAlarm.cancelSnooze(context)
+                AlarmNotification.cancel(context)
+            }
         }
     }
 }
