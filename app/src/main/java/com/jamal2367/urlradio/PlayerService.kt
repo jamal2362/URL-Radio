@@ -101,6 +101,7 @@ class PlayerService : MediaLibraryService() {
     private var bufferSizeMultiplier: Int = PreferencesHelper.loadBufferSizeMultiplier()
     private var playbackRestartCounter: Int = 0
     private var playLastStation: Boolean = false
+    private var chip: String? = null // the tag tab (or voice tag) the station was played from
     private var manuallyCancelledSleepTimer = false
 
 
@@ -187,34 +188,32 @@ class PlayerService : MediaLibraryService() {
                 return C.TIME_UNSET // this will hide progress bar for HLS stations in the notification
             }
 
-            /* Headphone "next" means the next station: it is queued up and started. */
+            /* Headphone "next" means the next station: it replaces the current one and starts. */
             override fun seekToNext() {
-                addMediaItem(
+                setMediaItem(
                     CollectionHelper.getNextMediaItem(
                         this@PlayerService,
-                        collection,
+                        collection.copy(stations = CollectionHelper.getStations(collection, chip).toMutableList()),
                         currentMediaItem?.mediaId ?: String()
                     )
                 )
-                // super, not the overrides below: a station queued up here is already at the
+                // super, not the overrides below: a fresh station is already at the
                 // live edge, so it neither needs the resumption special case nor the seek.
                 super.prepare()
                 super.play()
-                super.seekToNext()
             }
 
             /* Headphone "previous", likewise. */
             override fun seekToPrevious() {
-                addMediaItem(
+                setMediaItem(
                     CollectionHelper.getPreviousMediaItem(
                         this@PlayerService,
-                        collection,
+                        collection.copy(stations = CollectionHelper.getStations(collection, chip).toMutableList()),
                         currentMediaItem?.mediaId ?: String()
                     )
                 )
                 super.prepare()
                 super.play()
-                super.seekToPrevious()
             }
 
             override fun prepare() {
@@ -394,10 +393,31 @@ class PlayerService : MediaLibraryService() {
         ): ListenableFuture<List<MediaItem>> {
             val updatedMediaItems: List<MediaItem> =
                 mediaItems.map { mediaItem ->
-                    CollectionHelper.getItem(this@PlayerService, collection, mediaItem.mediaId)
-//                    if (mediaItem.requestMetadata.searchQuery != null)
-//                        getMediaItemFromSearchQuery(mediaItem.requestMetadata.searchQuery!!)
-//                    else MediaItemTree.getItem(mediaItem.mediaId) ?: mediaItem
+                    val query: String? = mediaItem.requestMetadata.searchQuery
+                    if (query == null) {
+                        chip = mediaItem.mediaId.substringBefore("/", "").ifEmpty { null }
+                        CollectionHelper.getItem(this@PlayerService, collection, mediaItem.mediaId)
+                    } else {
+                        // Voice request: "play jazz" plays the first #jazz station, "play Lush"
+                        // the station whose name matches, "WFPK Louisville" the station sharing
+                        // the most words (a word one letter off counts, "Lsh" -> "Lush"),
+                        // otherwise the last played one.
+                        // Either way next/previous then runs through all stations.
+                        Log.v(tag, "Voice search: $query")
+                        chip = null
+                        val wordsOf = { s: String -> s.lowercase().split(Regex("[^\\p{L}\\d]+")).filter(String::isNotEmpty) }
+                        val said: List<String> = wordsOf(query)
+                        val words: List<String> = said - setOf("radio", "fm", "am", "the", "station") // too common to pick a station
+                        val shared = { s: Station -> wordsOf(s.name).count { w -> words.any { it == w || it.length >= 3 && CollectionHelper.distance(it, w) <= it.length / 6 + 1 } } }
+                        val voiceTag: String? = collection.stations.flatMap { CollectionHelper.getTags(it.name) }.firstOrNull { it.drop(1) in said }
+                        val q: String = query.filter(Char::isLetterOrDigit)
+                        (voiceTag?.let { CollectionHelper.getStations(collection, it).firstOrNull() } ?: collection.stations.firstOrNull {
+                            val name: String = it.name.filter(Char::isLetterOrDigit)
+                            q.isNotEmpty() && name.isNotEmpty() && (q.contains(name, true) || name.contains(q, true))
+                        } ?: collection.stations.maxByOrNull(shared)?.takeIf { shared(it) > 0 })
+                            ?.let { CollectionHelper.buildMediaItem(this@PlayerService, it) }
+                            ?: CollectionHelper.getRecent(this@PlayerService, collection)
+                    }
                 }
             return Futures.immediateFuture(updatedMediaItems)
 
@@ -424,7 +444,13 @@ class PlayerService : MediaLibraryService() {
             builder.add(SessionCommand(Keys.CMD_REQUEST_METADATA_HISTORY, Bundle.EMPTY))
             builder.add(SessionCommand(Keys.CMD_METADATA_UPDATED, Bundle.EMPTY))
             builder.add(SessionCommand(Keys.CMD_PLAY_STREAM, Bundle.EMPTY))
-            return MediaSession.ConnectionResult.accept(builder.build(), connectionResult.availablePlayerCommands)
+            // A radio has no queue: Android Auto and the system (whose commands the media
+            // notification controller sets) get no GET_TIMELINE, so no queue button. The app's
+            // own screen keeps it, since it needs the current station to show and pause it.
+            val ownScreen: Boolean = controller.packageName == packageName && !session.isMediaNotificationController(controller)
+            val playerCommands: Player.Commands = if (ownScreen) connectionResult.availablePlayerCommands
+                else connectionResult.availablePlayerCommands.buildUpon().remove(Player.COMMAND_GET_TIMELINE).build()
+            return MediaSession.ConnectionResult.accept(builder.build(), playerCommands)
         }
 
         override fun onSubscribe(
@@ -433,7 +459,7 @@ class PlayerService : MediaLibraryService() {
             parentId: String,
             params: LibraryParams?
         ): ListenableFuture<LibraryResult<Void>> {
-            val children: List<MediaItem> = CollectionHelper.getChildren(this@PlayerService, collection)
+            val children: List<MediaItem> = CollectionHelper.getChildren(this@PlayerService, collection, parentId)
             session.notifyChildrenChanged(browser, parentId, children.size, params)
             return Futures.immediateFuture(LibraryResult.ofVoid())
         }
@@ -446,7 +472,7 @@ class PlayerService : MediaLibraryService() {
             pageSize: Int,
             params: LibraryParams?
         ): ListenableFuture<LibraryResult<ImmutableList<MediaItem>>> {
-            val children: List<MediaItem> = CollectionHelper.getChildren(this@PlayerService, collection)
+            val children: List<MediaItem> = CollectionHelper.getChildren(this@PlayerService, collection, parentId)
             return Futures.immediateFuture(LibraryResult.ofItemList(children, params))
         }
 
