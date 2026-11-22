@@ -138,9 +138,6 @@
     <string name="descr_expanded_player_recording_stop_button">Stop recording</string>
     <string name="snackbar_recording_saved">Recording saved to %1$s: %2$s</string>
     <string name="snackbar_recording_failed">Recording failed.</string>
-    <string name="pref_recording_split_title">Split Recordings by Title</string>
-    <string name="pref_recording_split_summary_enabled">A new file is started whenever the station announces a new title.</string>
-    <string name="pref_recording_split_summary_disabled">Each recording is saved as a single file.</string>
     <string name="descr_expanded_player_recording_timer_button">Start recording with timer</string>
     <string name="pref_recording_title">Recording</string>
     <string name="pref_recording_format_title">Format</string>

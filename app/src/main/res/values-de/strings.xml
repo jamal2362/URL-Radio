@@ -128,9 +128,6 @@
     <string name="descr_expanded_player_recording_stop_button">Aufnahme beenden</string>
     <string name="snackbar_recording_saved">Aufnahme gespeichert in %1$s: %2$s</string>
     <string name="snackbar_recording_failed">Aufnahme fehlgeschlagen.</string>
-    <string name="pref_recording_split_title">Aufnahmen nach Titel aufteilen</string>
-    <string name="pref_recording_split_summary_enabled">Bei jedem neuen Titel, den der Sender meldet, beginnt eine neue Datei.</string>
-    <string name="pref_recording_split_summary_disabled">Jede Aufnahme wird als eine Datei gespeichert.</string>
     <string name="descr_expanded_player_recording_timer_button">Aufnahme mit Timer starten</string>
     <string name="pref_recording_title">Aufnahme</string>
     <string name="pref_recording_format_title">Format</string>

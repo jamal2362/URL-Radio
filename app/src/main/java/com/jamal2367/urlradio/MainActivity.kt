@@ -204,7 +204,6 @@ class MainActivity : ComponentActivity() {
 
         var themeSelection by remember { mutableStateOf(PreferencesHelper.loadThemeSelection()) }
         var largeBuffer by remember { mutableStateOf(PreferencesHelper.loadLargeBufferSize()) }
-        var recordingSplitByTitle by remember { mutableStateOf(PreferencesHelper.loadRecordingSplitByTitle()) }
         var recordingFormat by remember { mutableStateOf(PreferencesHelper.loadRecordingFormat()) }
         var recordingBitrate by remember { mutableIntStateOf(PreferencesHelper.loadRecordingBitrate()) }
         var showFindDialog by remember { mutableStateOf(false) }
@@ -325,7 +324,6 @@ class MainActivity : ComponentActivity() {
                     themeSelection = themeSelection,
                     themeLabel = AppThemeHelper.getCurrentTheme(this),
                     largeBuffer = largeBuffer,
-                    recordingSplitByTitle = recordingSplitByTitle,
                     recordingFormat = recordingFormat,
                     recordingBitrate = recordingBitrate,
                 ),
@@ -429,10 +427,6 @@ class MainActivity : ComponentActivity() {
                         onLargeBufferChanged = {
                             largeBuffer = it
                             PreferencesHelper.saveLargeBufferSize(it)
-                        },
-                        onRecordingSplitByTitleChanged = {
-                            recordingSplitByTitle = it
-                            PreferencesHelper.saveRecordingSplitByTitle(it)
                         },
                         onRecordingFormatChanged = {
                             recordingFormat = it

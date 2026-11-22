@@ -113,7 +113,6 @@ data class AppState(
     val themeSelection: String,
     val themeLabel: String,
     val largeBuffer: Boolean,
-    val recordingSplitByTitle: Boolean,
     val recordingFormat: RecordingFormat,
     val recordingBitrate: Int,
 )
@@ -221,7 +220,6 @@ fun UrlRadioApp(
                 themeSelection = state.themeSelection,
                 themeLabel = state.themeLabel,
                 largeBuffer = state.largeBuffer,
-                recordingSplitByTitle = state.recordingSplitByTitle,
                 recordingFormat = state.recordingFormat,
                 recordingBitrate = state.recordingBitrate,
                 editStations = state.editStationsEnabled,

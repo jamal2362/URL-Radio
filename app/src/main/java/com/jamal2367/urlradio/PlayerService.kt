@@ -339,11 +339,8 @@ class PlayerService : MediaLibraryService() {
     private fun startRecording(durationMillis: Long = 0L) {
         if (recorder.isRecording || !player.playWhenReady) return
         val stationName: String = player.currentMediaItem?.mediaMetadata?.artist?.toString().orEmpty()
-        val title: String = metadataHistory.lastOrNull().orEmpty()
         recorder.start(
             stationName = stationName,
-            title = title,
-            splitByTitle = PreferencesHelper.loadRecordingSplitByTitle(),
             format = PreferencesHelper.loadRecordingFormat(),
             bitrateKbps = PreferencesHelper.loadRecordingBitrate(),
         )
@@ -833,11 +830,7 @@ class PlayerService : MediaLibraryService() {
 
         override fun onMetadata(metadata: Metadata) {
             super.onMetadata(metadata)
-            val metadataString: String = AudioHelper.getMetadataString(metadata)
-            updateMetadata(metadataString)
-            // only titles the stream actually sent - updateMetadata falls back to the station
-            // name, which would split a recording on every rebuffer
-            recorder.onTitleChanged(metadataString.trim())
+            updateMetadata(AudioHelper.getMetadataString(metadata))
         }
 
     }

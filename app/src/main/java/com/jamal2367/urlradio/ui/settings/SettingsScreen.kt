@@ -69,7 +69,6 @@ data class SettingsCallbacks(
     val onBackup: () -> Unit,
     val onRestore: () -> Unit,
     val onLargeBufferChanged: (Boolean) -> Unit,
-    val onRecordingSplitByTitleChanged: (Boolean) -> Unit,
     val onRecordingFormatChanged: (RecordingFormat) -> Unit,
     val onRecordingBitrateChanged: (Int) -> Unit,
     val onEditStationsChanged: (Boolean) -> Unit,
@@ -84,7 +83,6 @@ fun SettingsScreen(
     themeSelection: String,
     themeLabel: String,
     largeBuffer: Boolean,
-    recordingSplitByTitle: Boolean,
     recordingFormat: RecordingFormat,
     recordingBitrate: Int,
     editStations: Boolean,
@@ -200,16 +198,6 @@ fun SettingsScreen(
                     icon = R.drawable.ic_network_check_24dp,
                     enabled = recordingFormat.hasBitrate,
                     onClick = { showRecordingBitrateDialog = true },
-                )
-                SettingsSwitchRow(
-                    title = stringResource(R.string.pref_recording_split_title),
-                    summary = stringResource(
-                        if (recordingSplitByTitle) R.string.pref_recording_split_summary_enabled
-                        else R.string.pref_recording_split_summary_disabled
-                    ),
-                    icon = R.drawable.ic_record_24dp,
-                    checked = recordingSplitByTitle,
-                    onCheckedChange = callbacks.onRecordingSplitByTitleChanged,
                 )
             }
         }

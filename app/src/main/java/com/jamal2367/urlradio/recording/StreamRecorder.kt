@@ -83,8 +83,6 @@ class StreamRecorder(
     private var channelCount: Int = 0
     private var encoding: Int = C.ENCODING_INVALID
     private var stationName: String = String()
-    private var title: String = String()
-    private var splitByTitle: Boolean = false
     private var format: RecordingFormat = RecordingFormat.AAC
     private var bitrateKbps: Int = RecordingFormat.AAC.defaultBitrateKbps
     private var part: Part? = null
@@ -97,14 +95,12 @@ class StreamRecorder(
 
 
     /* Starts recording. Main thread. */
-    fun start(stationName: String, title: String, splitByTitle: Boolean, format: RecordingFormat, bitrateKbps: Int) {
+    fun start(stationName: String, format: RecordingFormat, bitrateKbps: Int) {
         if (isRecording) return
         isRecording = true
         startedAt = SystemClock.elapsedRealtime()
         handler.post {
             this.stationName = stationName
-            this.title = title
-            this.splitByTitle = splitByTitle
             this.format = format
             this.bitrateKbps = format.coerceBitrate(bitrateKbps)
             active = true
@@ -119,18 +115,6 @@ class StreamRecorder(
         handler.post {
             active = false
             closePart()
-        }
-    }
-
-
-    /* Tells the recorder that the stream announced a new title. Main thread. */
-    fun onTitleChanged(newTitle: String) {
-        if (!isRecording || newTitle.isBlank()) return
-        handler.post {
-            if (!active || newTitle == title) return@post
-            title = newTitle
-            // the next audio buffer opens the part for the new title
-            if (splitByTitle) closePart()
         }
     }
 
@@ -186,16 +170,11 @@ class StreamRecorder(
     }
 
 
-    /* Recorder thread: begins a new part with the current format, station and title. */
+    /* Recorder thread: begins a new part with the current format and station. */
     private fun openPart(): Part {
         tempFolder.mkdirs()
         val date: String = SimpleDateFormat(DATE_PATTERN, Locale.US).format(Date())
-        val nameParts: List<String> = if (splitByTitle && title.isNotBlank() && title != stationName) {
-            listOf(stationName, title, date)
-        } else {
-            listOf(stationName, date)
-        }
-        val displayName: String = nameParts.filter { it.isNotBlank() }
+        val displayName: String = listOf(stationName, date).filter { it.isNotBlank() }
             .joinToString(" - ") { sanitize(it) } + format.extension
         val file = File(tempFolder, "${System.nanoTime()}${format.extension}")
         return when (format) {
@@ -505,7 +484,7 @@ class StreamRecorder(
         const val MAX_INPUT_SIZE = 64 * 1024
         const val TIMEOUT_US = 10_000L
         const val MAX_ATTEMPTS = 100
-        const val MIN_DURATION_US = 1_000_000L // shorter leftovers of a title change are dropped
+        const val MIN_DURATION_US = 1_000_000L // shorter parts are not worth a file
         val OPUS_SAMPLE_RATES = setOf(8_000, 12_000, 16_000, 24_000, 48_000)
         const val OPUS_DEFAULT_SAMPLE_RATE = 48_000
         const val WAV_HEADER_SIZE = 44
