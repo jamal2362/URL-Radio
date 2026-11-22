@@ -16,6 +16,20 @@ android {
         versionName = "13.2"
     }
 
+    // Release signing is configured from environment variables (used by the CI release
+    // workflow). Without them, the release build stays unsigned, exactly as before.
+    val releaseKeystore = providers.environmentVariable("URLRADIO_KEYSTORE_FILE").orNull
+    signingConfigs {
+        if (releaseKeystore != null) {
+            create("release") {
+                storeFile = file(releaseKeystore)
+                storePassword = providers.environmentVariable("URLRADIO_KEYSTORE_PASSWORD").orNull
+                keyAlias = providers.environmentVariable("URLRADIO_KEY_ALIAS").orNull
+                keyPassword = providers.environmentVariable("URLRADIO_KEY_PASSWORD").orNull
+            }
+        }
+    }
+
     buildFeatures {
         buildConfig = true
         compose = true
@@ -35,6 +49,7 @@ android {
             isShrinkResources = true
             isCrunchPngs = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfigs.findByName("release")?.let { signingConfig = it }
         }
     }
 }
