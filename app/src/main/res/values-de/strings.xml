@@ -191,4 +191,7 @@
     <string name="pref_alarm_snooze_title">Schlummern</string>
     <string name="pref_alarm_snooze_value">%1$d Minuten</string>
     <string name="pref_alarm_notification_hint">Erlaube Benachrichtigungen, damit beim Wecken „Aus“ und „Schlummern“ auf dem Sperrbildschirm erscheinen.</string>
+    <string name="pref_station_search_title">Suche in der Senderliste</string>
+    <string name="pref_station_search_summary_enabled">Ein Suchfeld über deinen Sendern filtert sie nach Name und Tag.</string>
+    <string name="pref_station_search_summary_disabled">Kein Suchfeld über deinen Sendern.</string>
 </resources>

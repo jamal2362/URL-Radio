@@ -310,6 +310,20 @@ object PreferencesHelper {
     }
 
 
+    /* Saves value of the option: Search In Station List */
+    fun saveStationSearchEnabled(enabled: Boolean) {
+        sharedPreferences.edit {
+            putBoolean(Keys.PREF_STATION_SEARCH_ENABLED, enabled)
+        }
+    }
+
+
+    /* Loads value of the option: Search In Station List - off unless switched on */
+    fun loadStationSearchEnabled(): Boolean {
+        return sharedPreferences.getBoolean(Keys.PREF_STATION_SEARCH_ENABLED, false)
+    }
+
+
     /* Saves the radio alarm */
     fun saveAlarmSettings(settings: AlarmSettings) {
         sharedPreferences.edit {

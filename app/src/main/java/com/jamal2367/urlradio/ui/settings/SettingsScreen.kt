@@ -91,6 +91,7 @@ data class SettingsCallbacks(
     val onAlarmChanged: (AlarmSettings) -> Unit,
     val onRequestAlarmPermission: () -> Unit,
     val onRequestNotificationPermission: () -> Unit,
+    val onStationSearchChanged: (Boolean) -> Unit,
     val onEditStationsChanged: (Boolean) -> Unit,
     val onEditStreamUrisChanged: (Boolean) -> Unit,
     val onOpenUrl: (String) -> Unit,
@@ -108,6 +109,7 @@ fun SettingsScreen(
     alarm: AlarmSettings,
     /** Whether the app may post notifications - needed for the alarm's "Off" and "Snooze". */
     notificationsAllowed: Boolean,
+    stationSearchEnabled: Boolean,
     /** UUID and name of every station, for picking the one to wake up with. */
     stations: List<Pair<String, String>>,
     editStations: Boolean,
@@ -157,6 +159,16 @@ fun SettingsScreen(
                     summary = "${stringResource(R.string.pref_theme_selection_summary)} $themeLabel",
                     icon = R.drawable.ic_brush_24dp,
                     onClick = { showThemeDialog = true },
+                )
+                SettingsSwitchRow(
+                    title = stringResource(R.string.pref_station_search_title),
+                    summary = stringResource(
+                        if (stationSearchEnabled) R.string.pref_station_search_summary_enabled
+                        else R.string.pref_station_search_summary_disabled
+                    ),
+                    icon = R.drawable.ic_search_24dp,
+                    checked = stationSearchEnabled,
+                    onCheckedChange = callbacks.onStationSearchChanged,
                 )
             }
         }

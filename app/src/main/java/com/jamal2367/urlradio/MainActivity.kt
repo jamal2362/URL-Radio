@@ -117,6 +117,7 @@ class MainActivity : ComponentActivity() {
     // held here rather than in the composition: onResume re-reads it, since a one-time
     // alarm turns itself off after it went off
     private var alarmSettings by mutableStateOf(AlarmSettings())
+    private var stationSearchEnabled by mutableStateOf(PreferencesHelper.loadStationSearchEnabled())
     private val notificationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             notificationsAllowed = granted
@@ -366,6 +367,7 @@ class MainActivity : ComponentActivity() {
                     recordingBitrate = recordingBitrate,
                     alarm = alarmSettings,
                     notificationsAllowed = notificationsAllowed,
+                    stationSearchEnabled = stationSearchEnabled,
                 ),
                 actions = AppActions(
                     onTogglePlayback = { playback.togglePlayPause(it) },
@@ -484,6 +486,10 @@ class MainActivity : ComponentActivity() {
                             RadioAlarm.schedule(this)
                         },
                         onRequestNotificationPermission = { requestNotificationPermission() },
+                        onStationSearchChanged = {
+                            stationSearchEnabled = it
+                            PreferencesHelper.saveStationSearchEnabled(it)
+                        },
                         onRequestAlarmPermission = {
                             // only offered on Android 12, see RadioAlarm.canSchedule
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

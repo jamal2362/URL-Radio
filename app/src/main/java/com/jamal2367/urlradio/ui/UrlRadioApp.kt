@@ -125,6 +125,7 @@ data class AppState(
     val recordingBitrate: Int,
     val alarm: AlarmSettings,
     val notificationsAllowed: Boolean,
+    val stationSearchEnabled: Boolean,
 )
 
 data class AppActions(
@@ -237,6 +238,7 @@ fun UrlRadioApp(
                 recordingBitrate = state.recordingBitrate,
                 alarm = state.alarm,
                 notificationsAllowed = state.notificationsAllowed,
+                stationSearchEnabled = state.stationSearchEnabled,
                 stations = state.stations.map { it.uuid to it.name },
                 editStations = state.editStationsEnabled,
                 editStreamUris = state.editStreamUrisEnabled,
@@ -460,7 +462,8 @@ private fun StationsPane(
     val tabStations = if (selectedTab == 1) state.stations.filter { it.starred } else state.stations
     // The search matches the name, which also holds the #tags, ignoring case and accents.
     // A search does not keep that prefix property, so reordering is off while it is active.
-    val searchTerm = query.trim()
+    // Switched off in the settings: no field, and a term still typed in it filters nothing.
+    val searchTerm = if (state.stationSearchEnabled) query.trim() else ""
     val visibleStations = if (searchTerm.isEmpty()) tabStations
         else tabStations.filter { matchesSearch(it.name, searchTerm) }
 
@@ -491,7 +494,7 @@ private fun StationsPane(
                 ),
             )
             // Only worth showing once there is something to search through.
-            if (!state.showOnboarding && state.stations.size > 1) {
+            if (state.stationSearchEnabled && !state.showOnboarding && state.stations.size > 1) {
                 StationSearchField(
                     query = query,
                     onQueryChange = onQueryChange,

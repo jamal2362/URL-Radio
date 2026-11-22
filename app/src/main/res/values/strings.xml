@@ -201,4 +201,7 @@
     <string name="pref_alarm_snooze_title">Snooze</string>
     <string name="pref_alarm_snooze_value">%1$d minutes</string>
     <string name="pref_alarm_notification_hint">Allow notifications so that “Off” and “Snooze” show on the lock screen when the alarm goes off.</string>
+    <string name="pref_station_search_title">Search In Station List</string>
+    <string name="pref_station_search_summary_enabled">A search field above your stations filters them by name and tag.</string>
+    <string name="pref_station_search_summary_disabled">No search field above your stations.</string>
 </resources>
