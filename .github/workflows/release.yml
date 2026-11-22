@@ -1,0 +1,142 @@
+name: Release
+
+# Builds a signed release APK and publishes it as a GitHub release.
+#
+# Start it manually under Actions -> Release -> "Run workflow". The version is taken
+# from versionName in app/build.gradle.kts, and the release is tagged with it (e.g. "13.2").
+#
+# Required repository secrets (Settings -> Secrets and variables -> Actions):
+#   KEYSTORE_BASE64     the release keystore, base64 encoded (base64 -w0 release.jks)
+#   KEYSTORE_PASSWORD   the keystore password
+#   KEY_ALIAS           the key alias
+#   KEY_PASSWORD        the key password
+
+on:
+  workflow_dispatch:
+    inputs:
+      draft:
+        description: "Create the release as a draft (review it before publishing)"
+        type: boolean
+        default: true
+      prerelease:
+        description: "Mark the release as a pre-release"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read version
+        id: version
+        run: |
+          name=$(sed -nE 's/^\s*versionName\s*=\s*"([^"]+)".*/\1/p' app/build.gradle.kts | head -n1)
+          code=$(sed -nE 's/^\s*versionCode\s*=\s*([0-9]+).*/\1/p' app/build.gradle.kts | head -n1)
+          codename=$(sed -nE 's/.*name="app_version_name"[^>]*>\\?"?([^"\\<]+)\\?"?<.*/\1/p' app/src/main/res/values/strings.xml | head -n1)
+          if [ -z "$name" ] || [ -z "$code" ]; then
+            echo "::error::Could not read versionName/versionCode from app/build.gradle.kts"
+            exit 1
+          fi
+          if git rev-parse -q --verify "refs/tags/$name" >/dev/null; then
+            echo "::error::Tag $name already exists. Bump versionName/versionCode first."
+            exit 1
+          fi
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          echo "codename=$codename" >> "$GITHUB_OUTPUT"
+          echo "Building URL Radio $name ($code) \"$codename\""
+
+      - name: Check signing secrets
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          missing=""
+          for s in KEYSTORE_BASE64 KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
+            [ -z "${!s}" ] && missing="$missing $s"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repository secrets:$missing"
+            exit 1
+          fi
+
+      - name: Decode keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/release.jks"
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: jetbrains
+          java-version: "25"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build release APK
+        env:
+          URLRADIO_KEYSTORE_FILE: ${{ runner.temp }}/release.jks
+          URLRADIO_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          URLRADIO_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          URLRADIO_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: ./gradlew --no-configuration-cache :app:assembleRelease
+
+      - name: Collect APK
+        id: apk
+        run: |
+          apk=$(find app/build/outputs/apk/release -name '*.apk' | head -n1)
+          if [ -z "$apk" ]; then
+            echo "::error::No release APK was produced"
+            exit 1
+          fi
+          case "$apk" in
+            *unsigned*) echo "::error::The APK is unsigned: $apk"; exit 1 ;;
+          esac
+          out="URL-Radio-${{ steps.version.outputs.name }}.apk"
+          cp "$apk" "$out"
+          sha256sum "$out" > "$out.sha256"
+          echo "file=$out" >> "$GITHUB_OUTPUT"
+
+      - name: Write changelog
+        run: |
+          repo="${{ github.server_url }}/${{ github.repository }}"
+          prev=$(git describe --tags --abbrev=0 2>/dev/null || true)
+          range=${prev:+$prev..}HEAD
+          {
+            echo "# Changelog"
+            git log --no-merges --pretty=format:"- [%s]($repo/commit/%H)" $range
+            echo
+          } > changelog.md
+          cat changelog.md
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.name }}
+          target_commitish: ${{ github.sha }}
+          name: URL Radio ${{ steps.version.outputs.name }}${{ steps.version.outputs.codename && format(' - ("{0}")', steps.version.outputs.codename) || '' }}
+          body_path: changelog.md
+          draft: ${{ inputs.draft }}
+          prerelease: ${{ inputs.prerelease }}
+          files: |
+            ${{ steps.apk.outputs.file }}
+            ${{ steps.apk.outputs.file }}.sha256
+
+      - name: Remove keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/release.jks"
