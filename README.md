@@ -4,8 +4,8 @@
 ### ℹ️ About URL Radio
 **URL Radio is a fork from Transistor.** <br>
 **URL Radio is an application with a minimalist approach to listening to radio over the Internet.** <br>
-**URL Radio only offers a very basic search option, and it imports audio streaming links when you tap them in a web browser.** <br>
-**Pull request are welcome at any time.**<br>
+**Find stations in the [radio-browser.info](https://www.radio-browser.info/) database, add them from M3U / PLS playlists, or simply tap a stream link in your web browser.** <br>
+**Pull requests are welcome at any time.**<br>
 
 **URL Radio is free software. It is released under the [MIT open source license](https://opensource.org/licenses/MIT).**
 </div>
@@ -17,6 +17,34 @@
 <br>
 <a href="https://github.com/jamal2362/URL-Radio/releases/latest"><img src="https://user-images.githubusercontent.com/15986930/229208526-e5a63be5-0d0b-48ab-a222-9f2f2faf0ee4.png" height="80px"></a>
 <a href="https://apt.izzysoft.de/fdroid/index/apk/com.jamal2367.urlradio"><img src="https://user-images.githubusercontent.com/15986930/229206676-6dcb5180-68d6-4339-aa0c-b9a0a4eed71c.png" height="80px"></a>
+</details>
+
+----------------------------------------
+
+<details>
+<summary>✨ Features</summary>
+<br>
+
+**Listening**
+- Plays MP3, AAC, Ogg (Vorbis / Opus), FLAC and HLS streams
+- Shows the current song – for Icecast / Shoutcast, HLS and Ogg streams
+- Sleep timer
+- Home screen widget with station, current song and play / stop
+- Quick settings tile to switch the radio on and off
+- Android Auto and voice commands ("Play … on URL Radio")
+
+**Recording**
+- Record what is playing with one tap, or long-press for a recording with a timer
+- AAC (.m4a), Opus (.ogg, Android 10+) or lossless WAV, bit rate selectable in the settings
+- Recordings are saved to `Music/URL Radio` (Android 10+) or the app's own music folder
+
+**Finding and organising stations**
+- Search radio-browser.info: the most listened-to stations first, with logo and listener count
+- Add stations from M3U / M3U8 / PLS playlists – station logos (`tvg-logo`) included
+- Add a raw stream address – name and bit rate are taken from the stream
+- Set a station logo from the gallery or from a web address
+- Favourites, tags (`#jazz` in the station name) and an optional search in your station list
+- Export your stations as M3U / PLS, back them up and restore them
 </details>
 
 ----------------------------------------
@@ -37,35 +65,31 @@ URL Radio should be available in Android Auto the next time you launch it.
 ----------------------------------------
 
 <details>
-<summary>🔠 Help to Translate</summary>
-<br>
-
-To help us translate URL Radio, press the image below.  
-We would be very happy if you help us with the translation.
-
-[<img src="https://user-images.githubusercontent.com/15986930/117266967-12c12380-ae56-11eb-8ae0-d7914c402e74.png" alt="Crowdin" height="60">](https://crowdin.com/project/url-radio)
-
-[![Crowdin](https://badges.crowdin.net/url-radio/localized.svg)](https://crowdin.com/project/url-radio)
-</details>
-
-----------------------------------------
-
-<details>
 <summary>💡 Frequent Questions</summary>
 
-Q: How can I add a radio station  
-A: There are three ways to add a radio station to URL Radio: Use Search, add playlist file address (M3U, PLS), enter a raw stream address. The last way will not support the update feature.
+Q: How can I add a radio station?  
+A: Tap the + button. There you can search radio-browser.info, enter the address of a playlist (M3U, M3U8, PLS) or enter a raw stream address. You can also import a playlist file under Settings, or tap a stream link in your web browser. Stations added via a raw stream address do not support the update feature.
 
 -------------------------------------------------------------------------
 
 Q: How does the update feature work?  
-A: The update feature will try to fetch the current stream address of a station as well as the updated name and station image. The feature will not work for stations added via a raw stream address, or for stations imported from URL Radio v3.
+A: The update feature will try to fetch the current stream address of a station as well as the updated name and station image. The feature will not work for stations added via a raw stream address.
+
+-------------------------------------------------------------------------
+
+Q: How does a station get a logo?  
+A: Stations from radio-browser.info bring their logo along, and so do playlists that name one (`tvg-logo="…"` or an `#EXTIMG:` line). To set one yourself, turn on Settings > Advanced > Edit Stations, long-press a station, tap its cover and choose a picture from the gallery or a logo from a web address.
+
+-------------------------------------------------------------------------
+
+Q: Where are my recordings?  
+A: On Android 10 and newer in `Music/URL Radio`, where every music player and file manager finds them. On older versions in the app's own music folder (`Android/data/com.jamal2367.urlradio/files/Music`). Format and bit rate can be chosen under Settings > Recording.
 
 -------------------------------------------------------------------------
 
 Q: Where do the radio station search results come from?  
-A: URL Radio searches the [radio-browser.info](http://www.radio-browser.info/) online database.  
-You can help out the radio-browser.info community by [adding the missing station](http://www.radio-browser.info/gui/#!/add) to their database.
+A: URL Radio searches the [radio-browser.info](https://www.radio-browser.info/) online database. The most listened-to stations come first, stations radio-browser.info found unreachable are left out.  
+You can help out the radio-browser.info community by [adding the missing station](https://www.radio-browser.info/add) to their database.
 </details>
 
 ----------------------------------------
@@ -85,39 +109,6 @@ You can help out the radio-browser.info community by [adding the missing station
 | OGG (Vorbis)       | ✅ |
 | OPUS               | ✅ |
 | PLS                | ✅ |
-</details>
-
-----------------------------------------
-
-<details>
-<summary>📱 Screenshots</summary>
-  <br>
-<img src="https://user-images.githubusercontent.com/15986930/225977291-a47b1126-b9d5-44c2-acff-582def3605c4.png" alt="Screenshot" height="600"> 
-  <br> 
-  <br>
-<img src="https://user-images.githubusercontent.com/15986930/225977296-2d15495e-6bdc-486c-ab63-560aec77db28.png" alt="Screenshot 1" height="600">  
-  <br>
-  <br>
-<img src="https://user-images.githubusercontent.com/15986930/225977299-06c88ff6-bc2a-45ce-9401-7f2d4af6f103.png" alt="Screenshot 2" height="600">  
-  <br>
-  <br>
-<img src="https://user-images.githubusercontent.com/15986930/225977303-c9020998-7945-4897-9d29-3a639770a953.png" alt="Screenshot 3" height="600">  
-  <br>
-  <br>
-<img src="https://user-images.githubusercontent.com/15986930/225977307-569475a4-0d99-47b7-b88d-f837c7247f3b.png" alt="Screenshot 4" height="600">  
-  <br>
-  <br>
-<img src="https://user-images.githubusercontent.com/15986930/225977309-9bf131ff-9e53-4492-856f-26ba013e691d.png" alt="Screenshot 5" height="600">  
-  <br>
-  <br>
-<img src="https://user-images.githubusercontent.com/15986930/225977316-5132c64a-692f-4293-91cc-d006cafe1ceb.png" alt="Screenshot 6" height="600">  
-  <br>
-  <br>
-<img src="https://user-images.githubusercontent.com/15986930/225977312-29c164a1-de21-4269-886d-846712b7f598.png" alt="Screenshot 7" height="600">   
-  <br>
-  <br>
-<img src="https://user-images.githubusercontent.com/15986930/225977319-f3bde476-0c55-4d1e-a380-11d3b2d8a5d8.png" alt="Screenshot 8" height="600">  
-  
 </details>
 
 ----------------------------------------
