@@ -70,6 +70,7 @@ import com.jamal2367.urlradio.helpers.FileHelper
 import com.jamal2367.urlradio.helpers.PreferencesHelper
 import com.jamal2367.urlradio.recording.StreamRecorder
 import com.jamal2367.urlradio.widget.requestTileUpdate
+import com.jamal2367.urlradio.widget.RadioTileState
 import com.jamal2367.urlradio.widget.RadioWidget
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -134,6 +135,11 @@ class PlayerService : MediaLibraryService() {
         // initialize player and session
         initializePlayer()
         initializeSession()
+        // Media3 only shows the media notification for a session that has been added to the
+        // service, and on its own adds it only once a controller connects - the app's screen,
+        // the system's media controls. Started from the widget or the quick settings tile there
+        // is none yet, so playback ran without notification until the app was opened.
+        addSession(mediaLibrarySession)
         val notificationProvider: DefaultMediaNotificationProvider = CustomNotificationProvider()
         notificationProvider.setSmallIcon(R.drawable.ic_notification_app_icon_white_24dp)
         setMediaNotificationProvider(notificationProvider)
@@ -197,8 +203,16 @@ class PlayerService : MediaLibraryService() {
         val mediaId: String = player.currentMediaItem?.mediaId ?: PreferencesHelper.loadLastPlayedStationUuid()
         val station: Station? = collection.stations.firstOrNull { it.uuid == mediaId }
             ?: collection.stations.takeIf { it.isNotEmpty() }?.let { CollectionHelper.getStation(collection, mediaId) }
-        val isPlaying: Boolean = player.isPlaying || (player.playWhenReady && player.playbackState == Player.STATE_BUFFERING)
-        RadioWidget.update(this, station, isPlaying, metadataHistory.lastOrNull().orEmpty())
+        // "On" from the moment playback is asked for, buffering included - the same the play
+        // button in the app shows. Waiting for actual sound left widget and tile lagging behind.
+        val isActive: Boolean = player.playWhenReady &&
+            player.playbackState != Player.STATE_IDLE && player.playbackState != Player.STATE_ENDED
+        RadioWidget.update(this, station, isActive, metadataHistory.lastOrNull().orEmpty())
+        RadioTileState.update(
+            isActive,
+            station?.let { CollectionHelper.nameWithoutTags(it.name) },
+            metadataHistory.lastOrNull().orEmpty()
+        )
         requestTileUpdate(this)
     }
 
@@ -863,6 +877,8 @@ class PlayerService : MediaLibraryService() {
 
         override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
             super.onPlayWhenReadyChanged(playWhenReady, reason)
+            // widget and tile follow the request right away, not only once sound comes
+            updateWidgets()
             if (!playWhenReady) {
                 // paused by the user, the system or the end of the stream: the recording ends
                 // here. A mere rebuffer does not change playWhenReady and keeps it running.
@@ -886,6 +902,7 @@ class PlayerService : MediaLibraryService() {
 
         override fun onPlaybackStateChanged(playbackState: Int) {
             super.onPlaybackStateChanged(playbackState)
+            updateWidgets()
             // stopped (also by the sleep timer), failed or ended
             if (playbackState == Player.STATE_IDLE || playbackState == Player.STATE_ENDED) {
                 stopRecording()

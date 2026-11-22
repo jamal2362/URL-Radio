@@ -33,6 +33,27 @@ import com.jamal2367.urlradio.helpers.FileHelper
 import com.jamal2367.urlradio.helpers.PreferencesHelper
 
 
+/*
+ * What the tile shows, as PlayerService last reported it - kept in memory, so a refresh needs
+ * no file read. Empty (null) only when the app process was just started; the tile then falls
+ * back to the saved player state.
+ */
+object RadioTileState {
+    @Volatile var active: Boolean? = null
+        private set
+    @Volatile var stationName: String? = null
+        private set
+    @Volatile var title: String = String()
+        private set
+
+    fun update(active: Boolean, stationName: String?, title: String) {
+        this.active = active
+        this.stationName = stationName
+        this.title = title
+    }
+}
+
+
 /* Asks Android to refresh the tile - it calls onStartListening when the tile is shown */
 fun requestTileUpdate(context: Context) {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) return
@@ -57,15 +78,17 @@ class RadioTileService : TileService() {
 
     override fun onClick() {
         super.onClick()
-        val collection = FileHelper.readCollection(this)
-        if (collection.stations.isEmpty()) {
+        if (RadioTileState.stationName == null && FileHelper.readCollection(this).stations.isEmpty()) {
             // nothing to play yet - the app is where stations are added
             openApp()
             return
         }
+        val active: Boolean = RadioTileState.active ?: PreferencesHelper.loadIsPlaying()
+        // switch right away - the service confirms (or corrects) a moment later
+        showState(!active)
         val intent = Intent(this, PlayerService::class.java).setAction(Keys.ACTION_TOGGLE_PLAYBACK)
         try {
-            if (PreferencesHelper.loadIsPlaying()) {
+            if (active) {
                 // the service runs in the foreground while playing: a plain start command stops it
                 startService(intent)
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -76,23 +99,34 @@ class RadioTileService : TileService() {
         } catch (e: IllegalStateException) {
             // Android refused to start playback from here - the app can always do it
             Log.w(tag, "Unable to start playback from the tile: $e")
+            showState(active)
             openApp()
         }
     }
 
 
+    private fun showState(active: Boolean) {
+        val tile: Tile = qsTile ?: return
+        tile.state = if (active) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
+        tile.updateTile()
+    }
+
+
     private fun updateTile() {
         val tile: Tile = qsTile ?: return
-        val isPlaying: Boolean = PreferencesHelper.loadIsPlaying()
-        val collection = FileHelper.readCollection(this)
-        val stationName: String = collection.stations.takeIf { it.isNotEmpty() }
-            ?.let { CollectionHelper.nameWithoutTags(CollectionHelper.getStation(collection, PreferencesHelper.loadLastPlayedStationUuid()).name) }
-            .orEmpty()
+        val isPlaying: Boolean = RadioTileState.active ?: PreferencesHelper.loadIsPlaying()
+        val stationName: String = RadioTileState.stationName ?: run {
+            val collection = FileHelper.readCollection(this)
+            collection.stations.takeIf { it.isNotEmpty() }
+                ?.let { CollectionHelper.nameWithoutTags(CollectionHelper.getStation(collection, PreferencesHelper.loadLastPlayedStationUuid()).name) }
+                .orEmpty()
+        }
         tile.state = if (isPlaying) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
         tile.icon = Icon.createWithResource(this, R.drawable.ic_notification_app_icon_white_24dp)
         tile.label = stationName.ifEmpty { getString(R.string.app_name) }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val title: String = PreferencesHelper.loadMetadataHistory().lastOrNull().orEmpty().trim()
+            val title: String = (if (RadioTileState.active != null) RadioTileState.title
+                else PreferencesHelper.loadMetadataHistory().lastOrNull().orEmpty()).trim()
             tile.subtitle = when {
                 !isPlaying -> getString(R.string.widget_nothing_playing)
                 title.isNotEmpty() && title != "null" && title != stationName -> title
