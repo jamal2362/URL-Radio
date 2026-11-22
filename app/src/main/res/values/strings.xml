@@ -178,4 +178,16 @@
     <string name="pref_station_search_title">Search In Station List</string>
     <string name="pref_station_search_summary_enabled">A search field above your stations filters them by name and tag.</string>
     <string name="pref_station_search_summary_disabled">No search field above your stations.</string>
+    <plurals name="stations_added">
+        <item quantity="one">%1$d station added</item>
+        <item quantity="other">%1$d stations added</item>
+    </plurals>
+    <plurals name="stations_skipped_duplicates">
+        <item quantity="one">%1$d already in your list</item>
+        <item quantity="other">%1$d already in your list</item>
+    </plurals>
+    <plurals name="stations_skipped_invalid">
+        <item quantity="one">%1$d not playable</item>
+        <item quantity="other">%1$d not playable</item>
+    </plurals>
 </resources>

@@ -153,6 +153,45 @@ object CollectionHelper {
 
 
     /* Adds new radio station to collection */
+    /* What adding several stations at once did */
+    data class AddResult(val collection: Collection, val added: Int, val duplicates: Int, val invalid: Int)
+
+
+    /*
+     * Adds several stations in one go - the import of a playlist, or a multi-selection in the
+     * search. Stations already in the collection (same stream address) and repeats within the
+     * list are skipped, as are invalid ones; everything else is added and saved once.
+     *
+     * Adding them one by one used to save, and announce a change, for every single station,
+     * and a failing logo download in between ended the whole import.
+     */
+    fun addStations(context: Context, collection: Collection, newStations: List<Station>): AddResult {
+        val knownAddresses: MutableSet<String> = collection.stations.map { it.getStreamUri() }.toMutableSet()
+        val toAdd: MutableList<Station> = mutableListOf()
+        var duplicates = 0
+        var invalid = 0
+        newStations.forEach { station ->
+            when {
+                !station.isValid() -> invalid++
+                !knownAddresses.add(station.getStreamUri()) -> duplicates++
+                else -> toAdd.add(station)
+            }
+        }
+        if (toAdd.isEmpty()) return AddResult(collection, 0, duplicates, invalid)
+        // a new object, so that observers see the change
+        val updatedCollection: Collection = sortCollection(
+            collection.copy(stations = (collection.stations + toAdd).toMutableList())
+        )
+        saveCollection(context, updatedCollection, false)
+        // station images last: a logo that cannot be downloaded costs that logo, nothing else
+        toAdd.forEach { station ->
+            runCatching { DownloadHelper.updateStationImage(context, station) }
+                .onFailure { Log.w(tag, "Unable to download the image of ${station.name}: $it") }
+        }
+        return AddResult(updatedCollection, toAdd.size, duplicates, invalid)
+    }
+
+
     fun addStation(context: Context, collection: Collection, newStation: Station): Collection {
         // check validity
         if (!newStation.isValid()) {

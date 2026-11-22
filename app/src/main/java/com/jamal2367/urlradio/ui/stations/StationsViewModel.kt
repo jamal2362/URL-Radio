@@ -224,6 +224,14 @@ class StationsViewModel(application: Application) : AndroidViewModel(application
         _collection.value = CollectionHelper.addStation(getApplication(), _collection.value, station)
     }
 
+    /* Adds several stations at once - duplicates are skipped, see CollectionHelper.addStations */
+    fun addStations(stations: List<Station>): CollectionHelper.AddResult {
+        val result = CollectionHelper.addStations(getApplication(), _collection.value, stations)
+        _collection.value = result.collection
+        modificationDate = result.collection.modificationDate
+        return result
+    }
+
     fun setStationImage(imageUri: Uri, stationUuid: String) {
         _collection.value = CollectionHelper.setStationImageWithStationUuid(
             getApplication(),

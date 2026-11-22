@@ -178,6 +178,9 @@ object DownloadHelper {
     }
 
 
+    private const val MAX_FILE_NAME_LENGTH = 100
+
+
     /* Enqueues an Array of files in DownloadManager */
     private fun enqueueDownload(
         context: Context,
@@ -196,14 +199,25 @@ object DownloadHelper {
             val scheme: String = uri.scheme ?: String()
             val pathSegments: List<String> = uri.pathSegments
             if (scheme.startsWith("http") && isNotInDownloadQueue(uri.toString()) && pathSegments.isNotEmpty()) {
+                // The last part of the address becomes the file name. Android refuses names with
+                // characters such as ":" - logo addresses like ".../urn:ard:image:52fd" have them -
+                // and that refusal used to end whatever was adding stations at the time.
                 val fileName: String = pathSegments.last()
-                val request: DownloadManager.Request = DownloadManager.Request(uri)
-                    .setAllowedNetworkTypes(allowedNetworkTypes)
-                    .setTitle(fileName)
-                    .setDestinationInExternalFilesDir(context, Keys.FOLDER_TEMP, fileName)
-                    .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
-                newIds[i] = downloadManager.enqueue(request)
-                activeDownloads.add(newIds[i])
+                    .replace(Regex("[\\\\/:*?\"<>|\\p{Cntrl}]"), "_")
+                    .take(MAX_FILE_NAME_LENGTH)
+                    .ifBlank { "download" }
+                try {
+                    val request: DownloadManager.Request = DownloadManager.Request(uri)
+                        .setAllowedNetworkTypes(allowedNetworkTypes)
+                        .setTitle(fileName)
+                        .setDestinationInExternalFilesDir(context, Keys.FOLDER_TEMP, fileName)
+                        .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
+                    newIds[i] = downloadManager.enqueue(request)
+                    activeDownloads.add(newIds[i])
+                } catch (e: Exception) {
+                    // one download that cannot be queued costs that file, not the others
+                    Log.w(tag, "Unable to queue download of $uri: $e")
+                }
             }
         }
         setActiveDownloads(activeDownloads)

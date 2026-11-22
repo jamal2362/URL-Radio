@@ -562,6 +562,8 @@ class MainActivity : ComponentActivity() {
     private fun addStationsChecked(viewModel: StationsViewModel, stations: List<Station>) {
         if (stations.isEmpty()) return
         lifecycleScope.launch {
+            // first find out what each one serves (search results do not say), then add them
+            // all at once - duplicates and invalid ones are skipped instead of ending the import
             stations.forEach { station ->
                 if (station.streamContent.isEmpty() ||
                     station.streamContent == Keys.MIME_TYPE_UNSUPPORTED
@@ -571,7 +573,10 @@ class MainActivity : ComponentActivity() {
                     }
                     station.streamContent = contentType.type
                 }
-                viewModel.addStation(station)
+            }
+            val result = viewModel.addStations(stations)
+            if (result.duplicates > 0 || result.invalid > 0) {
+                UserMessages.notify(addResultMessage(result))
             }
         }
     }
@@ -717,6 +722,14 @@ class MainActivity : ComponentActivity() {
     private fun openUrl(url: String) {
         runCatching { startActivity(Intent(Intent.ACTION_VIEW, url.toUri())) }
     }
+
+    /* "3 stations added, 1 already in your list" - or just the one part that applies */
+    private fun addResultMessage(result: CollectionHelper.AddResult): String = listOfNotNull(
+        resources.getQuantityString(R.plurals.stations_added, result.added, result.added),
+        result.duplicates.takeIf { it > 0 }?.let { resources.getQuantityString(R.plurals.stations_skipped_duplicates, it, it) },
+        result.invalid.takeIf { it > 0 }?.let { resources.getQuantityString(R.plurals.stations_skipped_invalid, it, it) },
+    ).joinToString(", ")
+
 
     private fun showMessage(messageRes: Int) {
         UserMessages.notify(getString(messageRes))

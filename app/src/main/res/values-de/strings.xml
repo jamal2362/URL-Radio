@@ -168,4 +168,16 @@
     <string name="pref_station_search_title">Suche in der Senderliste</string>
     <string name="pref_station_search_summary_enabled">Ein Suchfeld über deinen Sendern filtert sie nach Name und Tag.</string>
     <string name="pref_station_search_summary_disabled">Kein Suchfeld über deinen Sendern.</string>
+    <plurals name="stations_added">
+        <item quantity="one">%1$d Sender hinzugefügt</item>
+        <item quantity="other">%1$d Sender hinzugefügt</item>
+    </plurals>
+    <plurals name="stations_skipped_duplicates">
+        <item quantity="one">%1$d bereits vorhanden</item>
+        <item quantity="other">%1$d bereits vorhanden</item>
+    </plurals>
+    <plurals name="stations_skipped_invalid">
+        <item quantity="one">%1$d nicht abspielbar</item>
+        <item quantity="other">%1$d nicht abspielbar</item>
+    </plurals>
 </resources>
