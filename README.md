@@ -1,5 +1,5 @@
 <div align="center">
-<img src="https://github.com/user-attachments/assets/53a30dd6-43eb-40d9-9faf-16d3e3c39fdd" alt="URL Radio Banner">
+<img src="/fastlane/metadata/android/en-US/images/featureGraphic.png" alt="URL Radio Banner">
 
 ### ℹ️ About URL Radio
 **URL Radio is a fork from Transistor.** <br>
@@ -45,6 +45,28 @@
 - Set a station logo from the gallery or from a web address
 - Favourites, tags (`#jazz` in the station name) and an optional search in your station list
 - Export your stations as M3U / PLS, back them up and restore them
+</details>
+
+----------------------------------------
+
+<details>
+<summary>📸 Screenshots</summary>
+<br>
+
+**Phone**
+<p align="center">
+<img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="19%" alt="Screenshot 1">
+<img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="19%" alt="Screenshot 2">
+<img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" width="19%" alt="Screenshot 3">
+<img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" width="19%" alt="Screenshot 4">
+<img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/5.png" width="19%" alt="Screenshot 5">
+</p>
+
+**Tablet**
+<p align="center">
+<img src="/fastlane/metadata/android/en-US/images/tenInchScreenshots/1.png" width="49%" alt="Tablet screenshot 1">
+<img src="/fastlane/metadata/android/en-US/images/tenInchScreenshots/2.png" width="49%" alt="Tablet screenshot 2">
+</p>
 </details>
 
 ----------------------------------------
@@ -118,9 +140,3 @@ You can help out the radio-browser.info community by [adding the missing station
 
 Base app [Transistor ❤️](https://codeberg.org/y20k/transistor)
 </details>
-
-<div align="right">
-<table><td>
-<a href="#start-of-content">↥ Scroll to top</a>
-</td></table>
-</div>

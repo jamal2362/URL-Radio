@@ -1,0 +1,8 @@
+• Laufenden Stream aufnehmen: AAC, Opus oder WAV, Bitrate wählbar, optional mit Timer (lange drücken)
+• Sendersuche: meistgehörte Sender zuerst, nicht erreichbare ausgeblendet, klarere Fehlermeldungen
+• Senderlogos aus M3U-Playlists oder von einer Web-Adresse
+• Songtitel bei HLS-Streams
+• Optionale Suche in der Senderliste
+• Import überspringt Duplikate
+• Widget und Schnelleinstellungs-Kachel hinzugefügt
+• In 30 Sprachen übersetzt
