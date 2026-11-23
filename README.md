@@ -1,5 +1,5 @@
 <div align="center">
-<img src="https://github.com/user-attachments/assets/53a30dd6-43eb-40d9-9faf-16d3e3c39fdd" alt="URL Radio Banner">
+<img src="https://raw.githubusercontent.com/jamal2362/URL-Radio/refs/heads/ccr-7acceb05-87delp/fastlane/metadata/android/en-US/images/featureGraphic.png" alt="URL Radio Banner">
 
 ### ℹ️ About URL Radio
 **URL Radio is a fork from Transistor.** <br>
@@ -118,9 +118,3 @@ You can help out the radio-browser.info community by [adding the missing station
 
 Base app [Transistor ❤️](https://codeberg.org/y20k/transistor)
 </details>
-
-<div align="right">
-<table><td>
-<a href="#start-of-content">↥ Scroll to top</a>
-</td></table>
-</div>

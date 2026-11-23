@@ -12,8 +12,8 @@ android {
         applicationId = "com.jamal2367.urlradio"
         minSdk = 23
         targetSdk = 37
-        versionCode = 140
-        versionName = "14.0"
+        versionCode = 141
+        versionName = "14.1"
     }
 
     // Release signing is configured from environment variables (used by the CI release
