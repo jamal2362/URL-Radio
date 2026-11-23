@@ -4,6 +4,5 @@
 • Song titles for HLS streams
 • Optional search in your station list
 • Importing skips duplicates
-• Widget and quick settings tile react faster
-• The radio alarm was removed
+• Widget and quick settings tile added
 • Translated into 30 languages
