@@ -1,0 +1,2 @@
+• Store-Beschreibung wird auf F-Droid und IzzyOnDroid jetzt korrekt angezeigt
+• Kleinere Verbesserungen

@@ -1,0 +1,2 @@
+• Store description now displays correctly on F-Droid and IzzyOnDroid
+• Minor improvements
