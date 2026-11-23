@@ -50,6 +50,28 @@
 ----------------------------------------
 
 <details>
+<summary>📸 Screenshots</summary>
+<br>
+
+**Phone**
+<p align="center">
+<img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="19%" alt="Screenshot 1">
+<img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="19%" alt="Screenshot 2">
+<img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" width="19%" alt="Screenshot 3">
+<img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" width="19%" alt="Screenshot 4">
+<img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/5.png" width="19%" alt="Screenshot 5">
+</p>
+
+**Tablet**
+<p align="center">
+<img src="/fastlane/metadata/android/en-US/images/tenInchScreenshots/1.png" width="49%" alt="Tablet screenshot 1">
+<img src="/fastlane/metadata/android/en-US/images/tenInchScreenshots/2.png" width="49%" alt="Tablet screenshot 2">
+</p>
+</details>
+
+----------------------------------------
+
+<details>
 <summary>🚗 Enable URL Radio in Android Auto</summary>
 <br>
 It is possible to use URL Radio on Android Auto if you have enabled unknown sources in Android Auto developer settings.
