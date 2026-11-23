@@ -4,6 +4,5 @@
 • Songtitel bei HLS-Streams
 • Optionale Suche in der Senderliste
 • Import überspringt Duplikate
-• Widget und Schnelleinstellungs-Kachel reagieren schneller
-• Der Radiowecker wurde entfernt
+• Widget und Schnelleinstellungs-Kachel hinzugefügt
 • In 30 Sprachen übersetzt
