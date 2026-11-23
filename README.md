@@ -1,5 +1,5 @@
 <div align="center">
-<img src="https://raw.githubusercontent.com/jamal2362/URL-Radio/refs/heads/ccr-7acceb05-87delp/fastlane/metadata/android/en-US/images/featureGraphic.png" alt="URL Radio Banner">
+<img src="/fastlane/metadata/android/en-US/images/featureGraphic.png" alt="URL Radio Banner">
 
 ### ℹ️ About URL Radio
 **URL Radio is a fork from Transistor.** <br>
