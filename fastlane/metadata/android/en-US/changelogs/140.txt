@@ -1,0 +1,9 @@
+• Record the playing stream: AAC, Opus or WAV, selectable bit rate, optional timer (long-press)
+• Station search: most listened-to stations first, unreachable ones hidden, clearer error messages
+• Station logos from M3U playlists or from a web address
+• Song titles for HLS streams
+• Optional search in your station list
+• Importing skips duplicates
+• Widget and quick settings tile react faster
+• The radio alarm was removed
+• Translated into 30 languages
